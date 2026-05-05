@@ -1,7 +1,7 @@
 # Post-Installation Guide
 
-This guide covers the recommended steps after running `setup.sh` (or after manually
-running the Ansible playbook and Chezmoi apply).
+This guide covers the recommended steps after `nixos-rebuild switch` completes
+or after `nixos-install` and first reboot.
 
 ## 1. Reboot
 
@@ -20,205 +20,111 @@ systemctl status bluetooth
 systemctl --user status pipewire wireplumber
 
 # NVIDIA (if installed)
-systemctl status nvidia-persistenced
 nvidia-smi
+systemctl status nvidia-persistenced
 
 # Power management
 systemctl status power-profiles-daemon   # desktop
 systemctl status tlp                     # laptop
 
-# Docker / libvirt (if enabled)
-systemctl status docker
+# Virtualisation (if enabled)
+systemctl status podman.socket
 systemctl status libvirtd
 ```
 
-## 3. Configure Git & SSH
+## 3. SSH Key Setup
+
+Home Manager enables SSH agent via GPG agent (`IdentityAgent /run/user/1000/gnupg/S.gpg-agent.ssh`).
+Generate a key if needed:
 
 ```bash
-git config --global user.name "Your Name"
-git config --global user.email "your.email@example.com"
-
 ssh-keygen -t ed25519 -C "your.email@example.com"
-eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
-cat ~/.ssh/id_ed25519.pub    # add to GitHub / GitLab
+cat ~/.ssh/id_ed25519.pub   # add to GitHub / GitLab
 ```
 
 ## 4. Shell First Launch
 
-If Chezmoi applied the dotfiles, Zsh is already your default shell. On first launch:
+Zsh is configured by Home Manager. On first Zsh launch:
 
 ```bash
-# Powerlevel10k will auto-run its configuration wizard
-p10k configure
+# Verify zoxide database initialises
+zoxide query --list
 
-# Verify plugins loaded (managed by Antidote)
-antidote list
-```
+# Verify starship prompt renders with Gruvbox colours
+echo $STARSHIP_SHELL
 
-If you skipped Chezmoi, apply dotfiles manually:
-
-```bash
-chezmoi init --source ./user --apply
+# Verify NixOS aliases work
+nixup   # should run nixos-rebuild switch
 ```
 
 ## 5. Neovim First Launch
-
-Open Neovim — lazy.nvim will auto-install all plugins on first run:
 
 ```bash
 nvim
 ```
 
-Then inside Neovim:
-
+Lazy.nvim bootstraps on first run. Inside Neovim:
 - `:Lazy` — verify all plugins installed
-- `:Mason` — verify LSP servers (pyright, rust-analyzer, tsserver, bashls, lua_ls)
 - `:checkhealth` — diagnose any issues
 
 ## 6. Window Manager
 
-### Hyprland
+SDDM starts automatically. Log in to the session configured for your host
+(`hyprland` for home-desktop, `sway` for work-laptop).
 
-```bash
-Hyprland
-```
+Key bindings (see `docs/SHORTCUTS.md` for the full reference):
+- `Super+Return` — Terminal (kitty)
+- `Super+D` — App launcher (fuzzel)
+- `Super+Q` — Close window
+- `Super+1–9` — Switch workspace
 
-Key bindings (Super = Mod key):
-- `Super + Return` — Terminal (kitty)
-- `Super + D` — App launcher (fuzzel)
-- `Super + Q` — Close window
-- `Super + 1-9` — Switch workspace
+Monitor configuration is set in `hosts/<name>/default.nix`. After updating,
+run `nixup` to apply changes.
 
-### Sway
-
-```bash
-sway
-```
-
-Same key bindings apply (i3-style).
-
-### Monitor Configuration
-
-If you have a multi-monitor setup, edit your Chezmoi template variables:
-
-```bash
-chezmoi edit-config
-```
-
-Update the `[data.monitors]` section:
-
-```toml
-[data.monitors]
-  primary = "DP-1, preferred, 0x0, 1"
-  secondary = "HDMI-A-1, preferred, 2560x0, 1"
-```
-
-Then re-apply:
-
-```bash
-chezmoi apply
-```
-
-## 7. Application Setup
-
-### Browsers
-- Firefox is the default — sign in to sync bookmarks/extensions
-- If `enable_secondary_browsers` was enabled: Brave and Zen are also installed
-
-### Communication
-- Thunderbird — configure email accounts
-- Element — sign in to Matrix
-
-### Gaming (if enabled)
-- Steam — sign in, enable Proton (Settings > Compatibility)
-- Heroic — link Epic Games / GOG accounts
-- Test controller with `evtest`
-
-### Creative (if enabled)
-
-- GIMP, Krita, Inkscape are ready to use
-
-## 8. Test Hardware
+## 7. Test Hardware
 
 ```bash
 # Audio
 speaker-test -t wav -c 2
 
 # GPU
-glxinfo | grep "OpenGL renderer"
-vulkaninfo | head -20
+vulkaninfo | head -30
+nvidia-smi               # NVIDIA only
 
 # Network
-ping -c 4 archlinux.org
+ping -c 4 nixos.org
 ```
 
-## 9. System Backup
+## 8. Snapshots
 
-Create a baseline Btrfs snapshot (if using the bootstrap config):
+Create a baseline Btrfs snapshot (home-desktop uses BTRFS with snapper):
 
 ```bash
-sudo btrfs subvolume snapshot / /.snapshots/post-install-$(date +%Y%m%d)
+sudo snapper -c root create --description "post-install baseline"
+sudo snapper -c root list
 ```
 
-Or with Timeshift:
+## 9. Rebuilding / Updating
 
 ```bash
-sudo timeshift --create --comments "Post-installation baseline"
+# Apply any config changes
+nixup                           # alias for nixos-rebuild switch
+
+# Update all flake inputs (nixpkgs, home-manager, etc.)
+flkupd                          # alias for nix flake update
+
+# Full update + rebuild
+flkupd && nixup
+
+# Garbage collect old generations
+gcclean                         # alias for nix-collect-garbage -d
 ```
 
-## 10. Re-Running the Setup
+## 10. Adding Packages
 
-You can safely re-run any layer at any time:
+1. Find the nixpkgs name: `nixsrch <name>` (alias for `nix search nixpkgs`)
+2. Add to the relevant module in `system/roles/` → `modules/nixos/<role>.nix`
+3. Run `nixup`
 
-```bash
-# Re-run full system playbook
-ansible-playbook system/playbooks/site.yml -i system/inventory/hosts.yml \
-  -l home_desktop --ask-become-pass
-
-# Re-run a single role
-ansible-playbook system/playbooks/development.yml -i system/inventory/hosts.yml \
-  --ask-become-pass
-
-# Re-apply dotfiles
-chezmoi apply
-
-# Check what changed
-chezmoi diff
-```
-
-## 11. Customisation
-
-### Adding Packages
-
-Edit the relevant role's `vars/main.yml`:
-
-```
-system/roles/<role>/vars/main.yml
-```
-
-### Toggling Features
-
-Edit `system/inventory/group_vars/all.yml` or your profile's group vars:
-
-```yaml
-enable_docker: true
-enable_cuda_stack: true
-```
-
-### Adding Dotfiles
-
-Add files to the `user/` Chezmoi source directory, then apply:
-
-```bash
-chezmoi add ~/.config/some-app/config.toml
-chezmoi apply
-```
-
-## Useful Resources
-
-- [Arch Wiki](https://wiki.archlinux.org/)
-- [Ansible Documentation](https://docs.ansible.com/)
-- [Chezmoi Documentation](https://www.chezmoi.io/)
-- [Hyprland Wiki](https://wiki.hyprland.org/)
-- [Repository Issues](https://github.com/maxabbot/linux-setup-scripts/issues)
+See `CLAUDE.md` for the full guide.

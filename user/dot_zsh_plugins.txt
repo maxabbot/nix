@@ -1,5 +1,0 @@
-# Standalone plugins — no ohmyzsh dependency
-zsh-users/zsh-history-substring-search
-zsh-users/zsh-autosuggestions
-# syntax-highlighting must be last
-zsh-users/zsh-syntax-highlighting

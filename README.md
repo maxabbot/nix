@@ -1,168 +1,154 @@
-# linux-setup-scripts
+# nix — NixOS Configuration
 
-Infrastructure-as-Code automation for rebuilding Arch Linux workstations — from bare metal to a fully configured desktop in three layers.
+Infrastructure-as-Code for NixOS workstations using **Nix Flakes** and **Home Manager**.
 
 ## Architecture
 
 ```text
-+---------------------------------------------------+
-|  Layer 1 — Bootstrap (archinstall)                |
-|  Partition disks, install base system, reboot     |
-+---------------------------------------------------+
-|  Layer 2 — System Configuration (Ansible)         |
-|  Packages, services, drivers, system tweaks       |
-+---------------------------------------------------+
-|  Layer 3 — User Environment (Chezmoi)             |
-|  Dotfiles, shell config, editor, WM themes        |
-+---------------------------------------------------+
-```
-
-| Layer | Tool | Directory | Purpose |
-|-------|------|-----------|---------|
-| Bootstrap | archinstall | `bootstrap/` | Automated Arch installation from ISO |
-| System | Ansible | `system/` | Package management, services, drivers |
-| User | Chezmoi | `user/` | Dotfiles and user-space configuration |
-
-## Repository layout
-
-```text
-setup.sh              # Single entry point — runs everything
-bootstrap/            # archinstall JSON configs (Layer 1)
-system/               # Ansible playbooks, roles, and inventory (Layer 2)
-  ├─ playbooks/      #   site.yml + per-role playbooks
-  ├─ roles/          #   aur, base, development, productivity, nvidia, gaming
-  ├─ inventory/      #   hosts.yml (localhost)
-  └─ group_vars/     #   Profile variables (home_desktop, work_laptop)
-user/                 # Chezmoi source directory (Layer 3)
-  ├─ dot_zshrc       #   Shell configs
-  ├─ dot_config/     #   nvim, hyprland, sway, waybar
-  └─ run_onchange_*  #   Auto-install scripts for shell deps
-docs/                 # Guides and reference material
+flake.nix                    # Entry point — inputs, nixosConfigurations
+hosts/
+  home-desktop/              # Gaming workstation (RTX 40-series, Hyprland)
+  work-laptop/               # Dev laptop (Sway, TLP)
+  minimal/                   # Headless / base only
+modules/
+  nixos/                     # System-level NixOS modules
+    base.nix                 #   Core packages, networking, fonts
+    development.nix          #   Languages, containers, cloud CLIs
+    productivity.nix         #   DE, audio, browsers, apps
+    nvidia.nix               #   Drivers, CUDA, kernel params
+    gaming.nix               #   Steam, Wine, Proton, controllers
+  home/                      # Home Manager modules
+    shell.nix                #   Zsh, Starship, aliases, tmux
+    editor.nix               #   Helix, Neovim, Zed
+    apps.nix                 #   Kitty, btop, mpv, Zathura, Yazi
+    theme.nix                #   Gruvbox Material — GTK, Qt, cursors
+    wm/
+      hyprland.nix           #   Hyprland config
+      sway.nix               #   Sway config
+home/
+  max/default.nix            # Home Manager user config
+overlays/default.nix         # Custom package overrides
+pkgs/default.nix             # Local derivations
 ```
 
 ## Quick start
 
-### Full setup (post-install)
-
-After a fresh Arch install (via archinstall or manually):
+### Rebuild an existing NixOS system
 
 ```bash
-git clone https://github.com/maxabbot/linux-setup-scripts.git
-cd linux-setup-scripts
-chmod +x setup.sh
+git clone https://github.com/maxabbot/nix.git /etc/nixos
+cd /etc/nixos
+sudo nixos-rebuild switch --flake .#home-desktop   # or work-laptop / minimal
+```
+
+Or use the wrapper script (auto-detects hostname):
+
+```bash
 ./setup.sh
 ```
 
-The script will:
-1. Install prerequisites (git, ansible, chezmoi)
-2. Install Ansible Galaxy collections
-3. Let you pick a profile (Home Desktop, Work Laptop, Minimal, Custom)
-4. Run the system playbook with `--ask-become-pass`
-5. Optionally apply Chezmoi dotfiles
+### First-time NixOS installation
 
-### From the Arch ISO (Layer 1)
+1. Boot the NixOS ISO
+2. Partition and mount disks (see [docs/post-installation.md](docs/post-installation.md))
+3. Generate hardware config:
+   ```bash
+   sudo nixos-generate-config --root /mnt
+   cp /mnt/etc/nixos/hardware-configuration.nix hosts/<hostname>/hardware-configuration.nix
+   ```
+4. Install:
+   ```bash
+   sudo nixos-install --flake github:maxabbot/nix#home-desktop
+   ```
 
-```bash
-archinstall --config bootstrap/archinstall/user-configuration.json \
-            --creds bootstrap/archinstall/user-credentials.json
+## Hosts
+
+| Host | Profile | Compositor | Features |
+|------|---------|------------|----------|
+| `home-desktop` | Gaming workstation | Hyprland | base + dev + productivity + nvidia + gaming |
+| `work-laptop`  | Dev laptop          | Sway      | base + dev + productivity + TLP |
+| `minimal`      | Headless / server   | —         | base only |
+
+## Modules
+
+### NixOS system modules
+
+| Module | Key options |
+|--------|-------------|
+| `custom.base` | `username`, `timezone`, `btrfsSnapshots`, `powerManagement`, `firewall` |
+| `custom.development` | `containers.podman`, `containers.libvirt`, `database.*`, `cloudTools` |
+| `custom.productivity` | `compositor`, `creativeApps`, `streamingTools`, `communicationApps` |
+| `custom.nvidia` | `open`, `cuda` |
+| `custom.gaming` | `wineExtras`, `streaming`, `apollo` |
+
+### Home Manager modules
+
+- **shell.nix** — Zsh with autosuggestions, syntax highlighting, history search; Starship (Gruvbox Material), fzf, zoxide, tmux, NixOS-native aliases replacing pacman/yay
+- **editor.nix** — Helix (primary, with LSPs), Neovim (lazy.nvim), Zed
+- **apps.nix** — Kitty, btop, mpv, Zathura, Yazi (all Gruvbox Material themed)
+- **theme.nix** — GTK (Gruvbox-Material-Dark), Kvantum, Papirus icons, Bibata cursor
+- **wm/hyprland.nix** — Full Hyprland config, gaming optimizations, multi-monitor via `custom.hm.monitors`
+- **wm/sway.nix** — Full Sway config
+
+## Customising
+
+### Update git identity
+
+Edit `home-manager.extraSpecialArgs.git` in the relevant `hosts/<name>/default.nix`.
+
+### Change monitor configuration
+
+Edit `monitors.primary` / `monitors.secondary` in the host's `extraSpecialArgs`:
+
+```nix
+monitors = {
+  primary   = "DP-1,2560x1440@144,0x0,1";
+  secondary = "HDMI-A-1,1920x1080@60,2560x0,1";
+};
 ```
 
-See [bootstrap/README.md](bootstrap/README.md) for customisation details.
+### Add packages
 
-### Running Ansible directly (Layer 2)
+- **System packages** → `modules/nixos/<role>.nix` → `environment.systemPackages`
+- **User packages** → `home/max/default.nix` → `home.packages`
+- **Shell tools** → `modules/home/shell.nix`
 
-```bash
-cd system
+### Enable optional features
 
-# Full home desktop
-ansible-playbook playbooks/site.yml -i inventory/hosts.yml -l home_desktop --ask-become-pass
-
-# Work laptop
-ansible-playbook playbooks/site.yml -i inventory/hosts.yml -l work_laptop --ask-become-pass
-
-# Single role
-ansible-playbook playbooks/development.yml -i inventory/hosts.yml --ask-become-pass
-
-# Specific tags
-ansible-playbook playbooks/site.yml -i inventory/hosts.yml --tags "base,development" --ask-become-pass
+```nix
+custom.productivity.creativeApps.enable    = true;  # GIMP, Inkscape, Krita
+custom.gaming.streaming.enable             = true;  # OBS, Moonlight
+custom.development.database.servers.enable = true;  # PostgreSQL, Redis, MariaDB
+custom.nvidia.cuda.enable                  = true;  # CUDA / cuDNN
 ```
 
-### Applying dotfiles directly (Layer 3)
+## Useful commands
 
 ```bash
-chezmoi init --source ./user --apply
+# Rebuild (fast, same generation)
+sudo nixos-rebuild switch --flake .#home-desktop
+
+# Test without switching the boot default
+sudo nixos-rebuild test --flake .#home-desktop
+
+# Update all flake inputs
+nix flake update
+
+# Search packages
+nix search nixpkgs <name>
+
+# Garbage collect old generations
+sudo nix-collect-garbage -d
+sudo nix store optimise
+
+# Show system generations
+sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 ```
 
-See [user/README.md](user/README.md) for template variables and customisation.
+## Theme
 
-## Profiles
-
-| Profile | Roles | Use case |
-|---------|-------|----------|
-| `home_desktop` | base, development, productivity, nvidia, gaming | RTX 40-series desktop with full stack |
-| `work_laptop` | base, development, productivity | Dev-focused laptop (no GPU/gaming) |
-| Minimal | base | Bare essentials only |
-| Custom | pick and choose | Interactive role selection |
-
-## Feature toggles
-
-Override defaults in `system/inventory/group_vars/all.yml` or per-profile in `system/inventory/group_vars/home_desktop.yml` / `work_laptop.yml`:
-
-| Variable | Default | home_desktop | work_laptop | Effect |
-|----------|---------|:---:|:---:|--------|
-| `enable_docker` | `false` | | ✓ | Enable Docker daemon and add user to docker group |
-| `enable_libvirt` | `false` | | | Enable libvirtd/KVM virtualisation |
-| `enable_database_servers` | `false` | ✓ | ✓ | Install PostgreSQL, MariaDB, Redis, SQLite |
-| `enable_gui_db_clients` | `false` | ✓ | ✓ | Install DBeaver, pgAdmin, litecli |
-| `enable_data_platforms` | `false` | | | Install Airflow, Spark, DuckDB |
-| `enable_cuda_stack` | `false` | ✓ | | Install CUDA/cuDNN alongside NVIDIA drivers |
-| `enable_creative_suite` | `false` | ✓ | | Install GIMP, Krita, Inkscape |
-| `enable_streaming_tools` | `false` | | | Install streaming/remote desktop tools |
-| `enable_secondary_browsers` | `false` | | | Install Brave, Zen alongside Firefox |
-| `enable_sync_clients` | `false` | | | Install Syncthing, Nextcloud, Dropbox |
-| `enable_gufw` | `false` | | | Install the GUFW firewall UI |
-| `install_apollo` | `false` | | | Install Apollo streaming client |
-| `power_management` | `power-profiles-daemon` | | `tlp` | Choose `tlp` or `power-profiles-daemon` |
-| `reflector_countries` | `'New Zealand,Australia'` | | | Countries for pacman mirror selection |
-
-## Ansible roles
-
-| Role | Tag | Description |
-|------|-----|-------------|
-| `aur` | `aur` | Bootstrap yay/paru AUR helper (always runs first) |
-| `base` | `base` | Core packages, networking, filesystems, fonts, services |
-| `development` | `development` | Languages, editors, containers, cloud CLIs, databases |
-| `productivity` | `productivity` | Desktop apps, browsers, office, media, communication |
-| `nvidia` | `nvidia` | Proprietary drivers, CUDA, Coolbits, mkinitcpio hooks |
-| `gaming` | `gaming` | Steam, Wine, Proton, controllers, performance tools |
-
-## User environment
-
-Dotfiles are managed with [Chezmoi](https://www.chezmoi.io/) and include:
-
-- **Shell** — Zsh (Antidote + Powerlevel10k) with Bash fallback
-- **Editor** — Neovim (lazy.nvim, LSP, Mason, Treesitter, Telescope)
-- **WMs** — Hyprland + Sway (with templated monitor configs)
-- **Theme** — Catppuccin Mocha everywhere
-- **Bar** — Waybar with unified styling
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [bootstrap/README.md](bootstrap/README.md) | Layer 1 — archinstall configuration |
-| [system/README.md](system/README.md) | Layer 2 — Ansible roles and playbooks |
-| [user/README.md](user/README.md) | Layer 3 — Chezmoi dotfiles |
-| [docs/post-installation.md](docs/post-installation.md) | Post-install checklist |
-| [docs/SHORTCUTS.md](docs/SHORTCUTS.md) | Keyboard shortcuts and shell aliases reference |
-
-## Contributing
-
-1. Fork and create a feature branch
-2. Keep changes modular — extend roles or add new ones
-3. Test with `ansible-playbook --check` (dry run)
-4. Lint shell scripts with `shellcheck`
-5. Open a PR against `main`
+**Gruvbox Material Dark** throughout — kitty, tmux, Starship, btop, Helix, Zathura, GTK, Qt/Kvantum.  
+Palette: `#282828` bg · `#d4be98` fg · `#7daea3` blue · `#d8a657` yellow · `#ea6962` red · `#a9b665` green · `#d3869b` purple
 
 ## License
 

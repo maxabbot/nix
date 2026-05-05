@@ -6,6 +6,31 @@ on:
   pull_request:
 
 jobs:
+  nix-flake-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Run flake checks
+        run: nix flake check --no-build
+
+  nixfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Check Nix formatting (nixfmt-rfc-style)
+        run: |
+          nix run nixpkgs#nixfmt-rfc-style -- --check \
+            flake.nix \
+            $(find modules hosts home overlays pkgs -name '*.nix' 2>/dev/null | tr '\n' ' ')
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:
@@ -17,34 +42,3 @@ jobs:
       - name: Shellcheck scripts
         run: git ls-files '*.sh' | xargs -r shellcheck
 
-  ansible-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Ansible + ansible-lint
-        run: pip install ansible ansible-lint
-
-      - name: Install Galaxy collections
-        run: ansible-galaxy collection install -r system/requirements.yml
-
-      - name: Lint playbooks
-        run: |
-          cd system
-          ansible-lint --profile=basic --exclude roles/aur playbooks/site.yml
-
-  bats:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install bats
-        run: sudo apt-get install -y bats
-
-      - name: Run bats tests
-        run: |
-          if compgen -G "tests/*.bats" > /dev/null; then
-            bats tests/
-          else
-            echo "No bats tests found — skipping."
-          fi

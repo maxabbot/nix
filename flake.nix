@@ -1,0 +1,103 @@
+{
+  description = "NixOS system configuration — home-desktop / work-laptop / minimal";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+  };
+
+  outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }@inputs:
+  let
+    system = "x86_64-linux";
+    lib    = nixpkgs.lib;
+
+    mkPkgs = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+      overlays = [ (import ./overlays) ];
+    };
+
+    # Builds a NixosSystem with Home Manager wired in.
+    # hmArgs are passed as extraSpecialArgs to the HM user config.
+    mkHost = { hostName, machineType, modules, hmArgs ? {} }:
+      lib.nixosSystem {
+        inherit system;
+        pkgs = mkPkgs;
+        specialArgs = { inherit inputs nixos-hardware hostName machineType; };
+        modules = modules ++ [
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs   = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = hmArgs // { inherit inputs; };
+            home-manager.users.max = import ./home/max;
+          }
+        ];
+      };
+  in {
+    nixosConfigurations = {
+      # RTX 40-series desktop — full stack
+      home-desktop = mkHost {
+        hostName    = "home-desktop";
+        machineType = "desktop";
+        modules     = [ ./hosts/home-desktop ];
+        hmArgs = {
+          machineType = "desktop";
+          compositor  = "hyprland";
+          # Set monitor strings to match xrandr/wayland output names, e.g.:
+          #   primary   = "DP-1,2560x1440@144,0x0,1"
+          #   secondary = "HDMI-A-1,1920x1080@60,2560x0,1"
+          monitors = { primary = ""; secondary = ""; };
+          location = { lat = -36.8485; lon = 174.7633; };
+          git = {
+            name       = "Max Abbot";
+            email      = "abbot.max.nz@gmail.com";
+            signingkey = "";
+          };
+        };
+      };
+
+      # Development laptop — no GPU/gaming
+      work-laptop = mkHost {
+        hostName    = "work-laptop";
+        machineType = "laptop";
+        modules     = [ ./hosts/work-laptop ];
+        hmArgs = {
+          machineType = "laptop";
+          compositor  = "sway";
+          monitors = { primary = ""; secondary = ""; };
+          location = { lat = -36.8485; lon = 174.7633; };
+          git = {
+            name       = "Max Abbot";
+            email      = "abbot.max.nz@gmail.com";
+            signingkey = "";
+          };
+        };
+      };
+
+      # Minimal — base packages only
+      minimal = mkHost {
+        hostName    = "minimal";
+        machineType = "desktop";
+        modules     = [ ./hosts/minimal ];
+        hmArgs = {
+          machineType = "desktop";
+          compositor  = "hyprland";
+          monitors = { primary = ""; secondary = ""; };
+          location = { lat = -36.8485; lon = 174.7633; };
+          git = {
+            name       = "Max Abbot";
+            email      = "abbot.max.nz@gmail.com";
+            signingkey = "";
+          };
+        };
+      };
+    };
+  };
+}
