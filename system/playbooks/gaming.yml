@@ -1,0 +1,8 @@
+---
+# Run only the gaming role
+- name: Gaming packages
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: aur
+    - role: gaming

@@ -1,0 +1,30 @@
+sourceDir = "{{ .chezmoi.sourceDir }}"
+
+[data]
+  # Machine-specific settings — chezmoi init will prompt for these
+  [data.machine]
+    # "desktop" or "laptop"
+    type = "desktop"
+    hostname = "archlinux"
+    timezone = "America/New_York"
+
+  [data.monitors]
+    # Primary monitor (leave empty for auto-detect)
+    primary = ""
+    # Secondary monitor (leave empty if none)
+    secondary = ""
+
+  [data.wm]
+    # "hyprland" or "sway"
+    compositor = "hyprland"
+
+  [data.git]
+    name       = "Max Abbot"
+    email      = "abbot.max.nz@gmail.com"
+    # GPG key fingerprint — leave empty to disable commit signing
+    signingkey = ""
+
+  [data.location]
+    # Used by gammastep for color temperature adjustment
+    lat = "-36.8485"  # Auckland, NZ — update for your actual location
+    lon = "174.7633"

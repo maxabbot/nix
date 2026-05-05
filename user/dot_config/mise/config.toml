@@ -1,0 +1,13 @@
+# ============================================================================
+# mise — global tool versions
+# Per-project overrides go in .mise.toml at the project root.
+# ============================================================================
+
+[tools]
+node = "lts"
+
+[settings]
+# Always use the latest available patch for a given minor version
+auto_install = true
+# Keep shims up to date automatically
+experimental = false

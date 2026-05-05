@@ -1,0 +1,132 @@
+---
+# =============================================================================
+# Development Role — Tasks
+# =============================================================================
+
+- name: Install language runtimes
+  community.general.pacman:
+    name: "{{ dev_language_packages }}"
+    state: present
+  become: true
+
+- name: Install development utilities
+  community.general.pacman:
+    name: "{{ dev_utility_packages }}"
+    state: present
+  become: true
+
+- name: Install container tools
+  community.general.pacman:
+    name: "{{ dev_container_packages }}"
+    state: present
+  become: true
+
+- name: Install libvirt / QEMU
+  community.general.pacman:
+    name: "{{ dev_libvirt_packages }}"
+    state: present
+  become: true
+  when: enable_libvirt | bool
+
+- name: Enable libvirt services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ dev_libvirt_services }}"
+  become: true
+  when: enable_libvirt | bool
+
+- name: Add user to libvirt group
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: libvirt
+    append: true
+  become: true
+  when: enable_libvirt | bool
+
+- name: Install database servers
+  community.general.pacman:
+    name: "{{ dev_database_packages }}"
+    state: present
+  become: true
+  when: enable_database_servers | bool
+
+- name: Install database CLI clients
+  community.general.pacman:
+    name: "{{ dev_db_cli_packages }}"
+    state: present
+  become: true
+  when: enable_gui_db_clients | bool
+
+- name: Install cloud / infrastructure tools
+  community.general.pacman:
+    name: "{{ dev_cloud_packages }}"
+    state: present
+  become: true
+
+- name: Install API tools
+  community.general.pacman:
+    name: "{{ dev_api_packages }}"
+    state: present
+  become: true
+
+- name: Install Python data science packages
+  community.general.pacman:
+    name: "{{ dev_python_packages }}"
+    state: present
+  become: true
+
+- name: Initialise Rust toolchain via rustup
+  ansible.builtin.command: rustup default stable
+  args:
+    creates: "{{ ansible_facts['env']['HOME'] }}/.rustup/toolchains/stable-x86_64-unknown-linux-gnu"
+  become: false
+
+# --- AUR packages (requires aur role to have installed helper) ---
+
+- name: Install core AUR dev packages
+  kewlfft.aur.aur:
+    name: "{{ dev_aur_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+
+- name: Install AUR cloud / infrastructure packages
+  kewlfft.aur.aur:
+    name: "{{ dev_aur_cloud_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+
+- name: Install AUR database packages
+  kewlfft.aur.aur:
+    name: "{{ dev_aur_database_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: enable_database_servers | bool
+
+- name: Install AUR GUI database clients
+  kewlfft.aur.aur:
+    name: "{{ dev_aur_db_client_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: enable_gui_db_clients | bool
+
+- name: Install AUR data platform packages
+  kewlfft.aur.aur:
+    name: "{{ dev_aur_data_platform_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: enable_data_platforms | default(false) | bool
+
+- name: Enable SSH service
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ dev_services }}"
+  become: true

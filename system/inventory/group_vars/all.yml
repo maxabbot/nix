@@ -1,0 +1,41 @@
+---
+# =============================================================================
+# Default variables for all hosts
+# Override per-profile in home_desktop.yml / work_laptop.yml
+# =============================================================================
+
+# --- Power Management ---
+# Options: power-profiles-daemon | tlp
+power_management: power-profiles-daemon
+
+# --- Feature Toggles ---
+enable_gufw: false
+enable_libvirt: false
+enable_data_platforms: false
+enable_database_servers: false
+enable_gui_db_clients: false
+enable_creative_suite: false
+enable_streaming_tools: false
+enable_secondary_browsers: false
+enable_cuda_stack: false
+install_apollo: false
+enable_extra_gpu_vendors: false
+enable_wine_extras: false
+enable_btrfs_snapshots: false
+
+# --- Mirrors ---
+reflector_countries: 'New Zealand,Australia'
+
+# --- AUR Helper ---
+aur_helper: yay
+
+# --- Dotfiles ---
+dotfiles_method: chezmoi          # chezmoi | bare | none
+dotfiles_repo: ""                 # set to your dotfiles repo URL
+
+# --- Local user (the non-root user running ansible-playbook) ---
+# ansible_user is unset for local connections; USER is the controller process owner
+local_user: "{{ lookup('env', 'USER') }}"
+
+# --- Security ---
+run_security_audit: false

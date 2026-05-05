@@ -1,0 +1,86 @@
+---
+# =============================================================================
+# Gaming Role — Tasks
+# =============================================================================
+
+- name: Check if multilib is already enabled
+  ansible.builtin.command: grep -E '^\[multilib\]' /etc/pacman.conf
+  register: multilib_check
+  changed_when: false
+  failed_when: false
+
+- name: Enable multilib repository
+  ansible.builtin.blockinfile:
+    path: /etc/pacman.conf
+    marker: "# {mark} ANSIBLE MANAGED — multilib"
+    block: |
+      [multilib]
+      Include = /etc/pacman.d/mirrorlist
+    insertafter: EOF
+  become: true
+  notify: Update pacman database
+  when: multilib_check.rc != 0
+
+- name: Install Steam & Wine
+  community.general.pacman:
+    name: "{{ gaming_core_packages }}"
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install controller packages
+  community.general.pacman:
+    name: "{{ gaming_controller_packages }}"
+    state: present
+  become: true
+
+- name: Install performance packages
+  community.general.pacman:
+    name: "{{ gaming_performance_packages }}"
+    state: present
+  become: true
+
+- name: Install Vulkan / GPU tools
+  community.general.pacman:
+    name: "{{ gaming_vulkan_packages }}"
+    state: present
+  become: true
+
+- name: Install extra GPU vendor Vulkan ICDs
+  community.general.pacman:
+    name: "{{ gaming_extra_gpu_packages }}"
+    state: present
+  become: true
+  when: enable_extra_gpu_vendors | default(false) | bool
+
+- name: Install streaming / recording packages
+  community.general.pacman:
+    name: "{{ gaming_media_packages }}"
+    state: present
+  become: true
+
+# --- AUR packages (batched) ---
+
+- name: Install AUR gaming packages
+  kewlfft.aur.aur:
+    name: "{{ gaming_aur_packages + gaming_aur_controller_packages + gaming_aur_media_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: (gaming_aur_packages + gaming_aur_controller_packages + gaming_aur_media_packages) | length > 0
+
+- name: Install Wine translation layer packages
+  kewlfft.aur.aur:
+    name: "{{ gaming_aur_wine_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: enable_wine_extras | default(false) | bool
+
+- name: Install Apollo
+  kewlfft.aur.aur:
+    name: "{{ gaming_aur_apollo_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: install_apollo | default(false) | bool

@@ -1,0 +1,9 @@
+---
+# =============================================================================
+# Gaming Role — Handlers
+# =============================================================================
+
+- name: Update pacman database
+  community.general.pacman:
+    update_cache: true
+  become: true

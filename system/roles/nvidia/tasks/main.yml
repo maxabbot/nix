@@ -1,0 +1,82 @@
+---
+# =============================================================================
+# NVIDIA Role — Tasks
+# =============================================================================
+
+- name: Blacklist nouveau driver
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/blacklist-nouveau.conf
+    content: |
+      blacklist nouveau
+      options nouveau modeset=0
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Regenerate initramfs
+
+- name: Install NVIDIA driver packages
+  community.general.pacman:
+    name: "{{ nvidia_driver_packages }}"
+    state: present
+  become: true
+
+- name: Install CUDA stack
+  community.general.pacman:
+    name: "{{ nvidia_cuda_packages }}"
+    state: present
+  become: true
+  when: enable_cuda_stack | default(false) | bool
+
+- name: Install NVIDIA AUR packages
+  kewlfft.aur.aur:
+    name: "{{ nvidia_aur_packages }}"
+    use: "{{ aur_helper }}"
+    state: present
+  become: false
+  when: nvidia_aur_packages | length > 0
+
+- name: Install nvidia-prime-run helper script
+  ansible.builtin.copy:
+    src: nvidia-prime-run.sh
+    dest: /usr/local/bin/nvidia-prime-run
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Deploy NVIDIA coolbits Xorg config
+  ansible.builtin.template:
+    src: nvidia-coolbits.conf.j2
+    dest: /etc/X11/xorg.conf.d/99-nvidia-coolbits.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Add NVIDIA modules to mkinitcpio
+  ansible.builtin.lineinfile:
+    path: /etc/mkinitcpio.conf
+    regexp: '^MODULES=\(.*\)'
+    line: "MODULES=({{ nvidia_mkinitcpio_modules | join(' ') }})"
+    backrefs: true
+  become: true
+  notify: Regenerate initramfs
+
+- name: Ensure nvidia-drm.modeset=1 kernel param in GRUB
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT="(?!.*nvidia-drm\.modeset=1).*)"'
+    line: '\1 {{ nvidia_kernel_param }}"'
+    backrefs: true
+  become: true
+  notify: Regenerate GRUB config
+  when: ansible_facts['cmdline'] is not defined or 'nvidia-drm.modeset=1' not in (ansible_facts['cmdline'] | default(''))
+
+- name: Enable NVIDIA services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ nvidia_services }}"
+  become: true

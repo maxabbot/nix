@@ -1,0 +1,25 @@
+# yt-dlp configuration
+
+# Best video up to 1080p + best audio, merged into mkv
+-f bestvideo[height<=?1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=?1080]+bestaudio/best
+--merge-output-format mkv
+
+# Output: ~/Videos/<uploader>/<title>.<ext>
+-o ~/Videos/%(uploader)s/%(title)s.%(ext)s
+
+# Embed metadata, thumbnail, and subtitles
+--embed-thumbnail
+--embed-metadata
+--write-sub
+--sub-langs en.*
+--embed-subs
+
+# Skip sponsored segments via SponsorBlock
+--sponsorblock-remove sponsor,selfpromo,interaction
+
+# Retry settings
+--retries 10
+--fragment-retries 10
+
+# Rate limit (polite)
+--rate-limit 5M

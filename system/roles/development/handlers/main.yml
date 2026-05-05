@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# Development Role — Handlers
+# =============================================================================
+
+- name: Restart libvirtd
+  ansible.builtin.systemd:
+    name: libvirtd.service
+    state: restarted
+  become: true
+  when: enable_libvirt | bool

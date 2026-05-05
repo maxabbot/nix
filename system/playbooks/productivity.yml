@@ -1,0 +1,8 @@
+---
+# Run only the productivity role
+- name: Productivity apps
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: aur
+    - role: productivity

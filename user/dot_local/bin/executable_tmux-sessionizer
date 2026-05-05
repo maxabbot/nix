@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# tmux-sessionizer — fuzzy-jump to a project directory in a named tmux session.
+# Bind to <prefix>f in tmux, or CTRL-f in zsh.
+# Pass a path as $1 to skip the fuzzy picker.
+
+SEARCH_DIRS=(
+  "$HOME/Projects"
+  "$HOME/Work"
+  "$HOME/Code"
+  "$HOME/repos"
+  "$HOME"
+)
+
+if [[ $# -eq 1 ]]; then
+  selected=$1
+else
+  selected=$(
+    find "${SEARCH_DIRS[@]}" \
+      -mindepth 1 -maxdepth 2 \
+      -type d \
+      \( -name '.git' -prune \) -o -type d -print \
+      2>/dev/null \
+    | fzf --prompt="  " \
+          --preview='eza -la --color=always --icons {} 2>/dev/null | head -20' \
+          --preview-window=right:40%:wrap
+  )
+fi
+
+[[ -z "$selected" ]] && exit 0
+
+selected_name=$(basename "$selected" | tr '.' '_' | tr ' ' '_')
+tmux_running=$(pgrep -x tmux)
+
+# Not inside tmux and tmux isn't running — start a fresh session
+if [[ -z "${TMUX:-}" ]] && [[ -z "$tmux_running" ]]; then
+  tmux new-session -s "$selected_name" -c "$selected"
+  exit 0
+fi
+
+# Session doesn't exist yet — create it detached
+if ! tmux has-session -t "=$selected_name" 2>/dev/null; then
+  tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+# Switch to it (works from inside or outside tmux)
+if [[ -n "${TMUX:-}" ]]; then
+  tmux switch-client -t "$selected_name"
+else
+  tmux attach-session -t "$selected_name"
+fi

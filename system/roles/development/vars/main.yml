@@ -1,0 +1,104 @@
+---
+# =============================================================================
+# Development Role — Variables
+# =============================================================================
+
+# Language runtimes & compilers
+dev_language_packages:
+  - python
+  - python-pip
+  - python-virtualenv
+  - go
+  - rustup
+  - jdk-openjdk
+  - gcc
+  - clang
+  - cmake
+  - make
+
+# Development utilities
+dev_utility_packages:
+  - kitty
+  - direnv
+  - starship
+  - helix
+  - zed
+  - sqlite
+  - shellcheck
+  - tig
+  - imagemagick
+
+# Database servers (gated by enable_database_servers)
+dev_database_packages: []
+
+# Database CLI clients (gated by enable_gui_db_clients)
+dev_db_cli_packages:
+  - pgcli
+
+# Container tools
+dev_container_packages:
+  - podman
+  - podman-compose
+
+# Virtualisation (gated by enable_libvirt)
+dev_libvirt_packages:
+  - libvirt
+  - qemu-full
+  - virt-manager
+  - dnsmasq
+
+# Cloud / infrastructure (official repos only)
+dev_cloud_packages:
+  - kubectl
+  - kubectx
+  - helm
+  - opentofu
+  - ansible
+
+# API tools
+dev_api_packages:
+  - curlie
+
+# Data science packages (pacman python-* packages, not pip)
+dev_python_packages:
+  - python-matplotlib
+  - python-numpy
+  - python-pandas
+  - python-scipy
+  - python-scikit-learn
+
+# AUR packages — always installed
+dev_aur_packages:
+  - visual-studio-code-bin
+  - mise-bin
+  - bruno-bin
+  - python-marimo
+
+# AUR — cloud / infrastructure tools
+dev_aur_cloud_packages:
+  - aws-cli-v2
+  - azure-cli
+  - google-cloud-sdk
+  - doctl
+
+# AUR — database tools (gated by enable_database_servers)
+dev_aur_database_packages:
+  - mongodb-bin
+
+# AUR — GUI database clients (gated by enable_gui_db_clients)
+dev_aur_db_client_packages:
+  - dbeaver
+  - beekeeper-studio-appimage
+  - mycli
+  - litecli
+
+# AUR — data platform tools (gated by enable_data_platforms)
+dev_aur_data_platform_packages:
+  - duckdb-bin
+
+# Services to enable
+dev_services:
+  - sshd.service
+
+dev_libvirt_services:
+  - libvirtd.service

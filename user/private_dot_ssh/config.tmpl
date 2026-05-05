@@ -1,0 +1,32 @@
+Host *
+    # Keep connections alive
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+    # Reuse existing connections
+    ControlMaster auto
+    ControlPath   ~/.ssh/ctrl_%C
+    ControlPersist 10m
+
+    # Prefer ed25519, fall back gracefully
+    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/id_rsa
+
+    # Add keys to agent on first use
+    AddKeysToAgent yes
+
+    # Harden defaults
+    HashKnownHosts yes
+
+# ─── Personal hosts ─────────────────────────────────────────────────────────
+# Uncomment and edit as needed.
+#
+# Host myserver
+#     HostName server.example.com
+#     User {{ .git.name | lower | replace " " "" }}
+#     Port 22
+#
+# Host github
+#     HostName github.com
+#     User git
+#     IdentityFile ~/.ssh/id_ed25519

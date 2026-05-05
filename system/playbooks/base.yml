@@ -1,0 +1,8 @@
+---
+# Run only the base role
+- name: Base system packages
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: aur
+    - role: base

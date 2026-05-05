@@ -1,0 +1,314 @@
+# ============================================================================
+# ZSH Configuration
+# ============================================================================
+
+# ============================================================================
+# History
+# ============================================================================
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt SHARE_HISTORY
+
+# ============================================================================
+# Completion
+# ============================================================================
+autoload -Uz compinit && compinit
+
+# ============================================================================
+# Antidote
+# ============================================================================
+source "${ZDOTDIR:-$HOME}/.antidote/antidote.zsh"
+antidote load
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
+zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+
+# ============================================================================
+# Key Bindings (after plugin load so widgets exist)
+# ============================================================================
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[[3~' delete-char
+
+# ESC-ESC to prepend/remove sudo
+sudo-command-line() {
+  [[ -z $BUFFER ]] && zle up-history
+  if [[ $BUFFER == sudo\ * ]]; then
+    LBUFFER="${LBUFFER#sudo }"
+  else
+    LBUFFER="sudo $LBUFFER"
+  fi
+}
+zle -N sudo-command-line
+bindkey '\e\e' sudo-command-line
+
+# ============================================================================
+# Environment Variables
+# ============================================================================
+export EDITOR='hx'
+export VISUAL='hx'
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export ARCHFLAGS="-arch x86_64"
+
+# colored man pages
+export MANPAGER="less -R --use-color -Dd+r -Du+b"
+
+# bat — syntax highlighting pager
+export BAT_THEME="gruvbox-dark"
+export BAT_PAGER="less -RF"
+alias cat='bat --paging=never'
+alias less='bat --paging=always'
+
+# fzf — Gruvbox Material Dark colors
+export FZF_DEFAULT_OPTS=" \
+  --color=bg+:#3c3836,bg:#282828,spinner:#d8a657,hl:#ea6962 \
+  --color=fg:#d4be98,header:#ea6962,info:#d3869b,pointer:#d8a657 \
+  --color=marker:#7daea3,fg+:#d4be98,prompt:#d3869b,hl+:#ea6962 \
+  --color=selected-bg:#504945 \
+  --multi --height 40% --border rounded"
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+# ============================================================================
+# Language-Specific Configurations
+# ============================================================================
+
+# Rust
+export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
+[[ -f "$CARGO_HOME/env" ]] && source "$CARGO_HOME/env"
+
+# mise (universal version manager — node, python, etc.)
+if command -v mise &>/dev/null; then
+  eval "$(mise activate zsh)"
+fi
+
+# Go
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"
+
+# ============================================================================
+# Path
+# ============================================================================
+export PATH="$HOME/.local/bin:$HOME/bin:$CARGO_HOME/bin:$PATH"
+
+# ============================================================================
+# Aliases — General
+# ============================================================================
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias grep='grep --color=auto'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+
+# eza (modern ls replacement)
+alias ls='eza --color=always --group-directories-first --icons'
+alias ll='eza -la --color=always --group-directories-first --icons --git'
+alias la='eza -a --color=always --group-directories-first --icons'
+alias l='eza -la --color=always --group-directories-first --icons --git'
+alias lt='eza -aT --color=always --group-directories-first --icons --level=2'
+alias l.='eza -a --color=always --group-directories-first --icons | grep "^\."'
+
+# Editor
+alias v='hx'
+alias vi='hx'
+alias vim='hx'
+
+# Safety nets
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Package management (Arch)
+alias pacup='sudo pacman -Syu'
+alias pacin='sudo pacman -S'
+alias pacrem='sudo pacman -Rns'
+alias pacsearch='pacman -Ss'
+alias pacinfo='pacman -Qi'
+alias pacclean='sudo pacman -Sc'
+alias yayup='yay -Syu'
+alias yayin='yay -S'
+
+# System management
+alias srestart='sudo systemctl restart'
+alias sstatus='sudo systemctl status'
+alias senable='sudo systemctl enable'
+alias sdisable='sudo systemctl disable'
+alias jctl='journalctl -xe'
+
+# ============================================================================
+# Aliases — Development
+# ============================================================================
+
+# Git
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit -v'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gd='git diff'
+alias gl='git log --oneline --graph --decorate'
+alias gco='git checkout'
+alias gb='git branch'
+alias gba='git branch -a'
+
+# Podman
+alias d='podman'
+alias p='podman'
+alias dc='podman-compose'
+alias dps='podman ps'
+alias dpsa='podman ps -a'
+alias dim='podman images'
+alias dex='podman exec -it'
+alias dlog='podman logs -f'
+alias dstop='podman stop $(podman ps -q)'
+alias drm='podman rm $(podman ps -aq)'
+alias drmi='podman rmi $(podman images -q)'
+alias pps='podman ps'
+alias pim='podman images'
+
+# Python
+alias py='python'
+alias py3='python3'
+alias pip='pip3'
+alias venv='python -m venv'
+alias activate='source venv/bin/activate'
+
+# Rust
+alias c='cargo'
+alias cb='cargo build'
+alias cr='cargo run'
+alias ct='cargo test'
+alias cc='cargo check'
+alias cu='cargo update'
+
+# Node/NPM (via nvm)
+alias nr='npm run'
+alias ni='npm install'
+alias nid='npm install --save-dev'
+alias nig='npm install -g'
+alias nt='npm test'
+alias nb='npm run build'
+alias ns='npm start'
+
+# ============================================================================
+# Aliases — Flatpak Applications
+# ============================================================================
+alias stremio='flatpak run com.stremio.Stremio'
+alias smarttube='flatpak run io.smarttube.app'
+alias flatseal='flatpak run com.github.tchx84.Flatseal'
+
+# ============================================================================
+# Functions
+# ============================================================================
+
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+extract() {
+  if [ -f "$1" ]; then
+    case "$1" in
+      *.tar.bz2)  tar xjf "$1"    ;;
+      *.tar.gz)   tar xzf "$1"    ;;
+      *.bz2)      bunzip2 "$1"    ;;
+      *.rar)      unrar x "$1"    ;;
+      *.gz)       gunzip "$1"     ;;
+      *.tar)      tar xf "$1"     ;;
+      *.tbz2)     tar xjf "$1"    ;;
+      *.tgz)      tar xzf "$1"    ;;
+      *.zip)      unzip "$1"      ;;
+      *.Z)        uncompress "$1" ;;
+      *.7z)       7z x "$1"       ;;
+      *)          echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+qfind() { find . -iname "*$1*"; }
+
+psgrep() { ps aux | grep -v grep | grep -i -e VSZ -e "$1"; }
+
+gcl() { git clone "$1" && cd "$(basename "$1" .git)"; }
+
+mkvenv() { python -m venv "${1:-.venv}" && source "${1:-.venv}/bin/activate"; }
+
+serve() { python -m http.server "${1:-8000}"; }
+
+sysup() {
+  sudo pacman -Syu
+  command -v yay &>/dev/null && yay -Syu --aur
+  command -v rustup &>/dev/null && rustup update
+}
+
+dclean() { podman system prune -af --volumes; }
+
+copypath() { print -n "${1:-$PWD}" | wl-copy && echo "Copied: ${1:-$PWD}"; }
+copyfile() { wl-copy < "$1" && echo "Copied: $1"; }
+
+if command -v fzf &>/dev/null; then
+  fcd() {
+    local dir
+    dir=$(find ${1:-.} -type d 2>/dev/null | fzf +m) && cd "$dir"
+  }
+fi
+
+# ============================================================================
+# Tool Integrations
+# ============================================================================
+
+# tmux-sessionizer — CTRL-f from anywhere in the shell
+bindkey -s '^f' 'tmux-sessionizer\n'
+
+# zoxide (better cd)
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh)"
+  alias cd='z'
+fi
+
+# direnv
+command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
+
+# fzf
+[[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
+[[ -f /usr/share/fzf/completion.zsh ]]   && source /usr/share/fzf/completion.zsh
+
+# kubectl completions
+command -v kubectl &>/dev/null && source <(kubectl completion zsh)
+
+# pip completions
+command -v pip &>/dev/null && eval "$(pip completion --zsh)" 2>/dev/null
+
+# command-not-found — suggests packages via pkgfile (requires pkgfile + pkgfile -u)
+[[ -f /usr/share/doc/pkgfile/command-not-found.zsh ]] && source /usr/share/doc/pkgfile/command-not-found.zsh
+
+# Starship prompt — config: ~/.config/starship.toml (Catppuccin Mocha)
+command -v starship &>/dev/null && eval "$(starship init zsh)"
+
+# ============================================================================
+# Local Overrides
+# ============================================================================
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

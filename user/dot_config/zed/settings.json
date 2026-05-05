@@ -1,0 +1,168 @@
+// Zed Settings — Gruvbox Material Dark
+//
+// Extensions to install (:extensions in command palette):
+//   gruvbox-material   – theme
+//   dockerfile         – Containerfile / Dockerfile syntax + LSP
+//   ansible            – Ansible YAML syntax
+//   html               – HTML / Jinja2
+//   ruff               – Python linter + formatter (faster than pylsp)
+//   toml               – TOML (if not already bundled)
+{
+  // ── Appearance ─────────────────────────────────────────────────────────────
+  "theme": {
+    "mode": "dark",
+    "light": "Gruvbox Material Light",
+    "dark": "Gruvbox Material Dark"
+  },
+  "ui_font_family": "FiraCode Nerd Font",
+  "ui_font_size": 16,
+  "buffer_font_family": "FiraCode Nerd Font",
+  "buffer_font_size": 13,
+  "buffer_line_height": { "custom": 1.6 },
+
+  // ── Editor ─────────────────────────────────────────────────────────────────
+  "vim_mode": true,
+  "relative_line_numbers": true,
+  "soft_wrap": "editor_width",
+  "tab_size": 2,
+  "hard_tabs": false,
+  "autosave": "on_focus_change",
+  "format_on_save": "on",
+  "show_whitespaces": "boundary",
+  "cursor_blink": false,
+  "scrollbar": { "show": "never" },
+
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware"
+  },
+
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+
+  // ── Git ────────────────────────────────────────────────────────────────────
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+      "delay_ms": 600
+    }
+  },
+
+  // ── Terminal ───────────────────────────────────────────────────────────────
+  "terminal": {
+    "font_family": "FiraCode Nerd Font",
+    "font_size": 13,
+    "line_height": { "custom": 1.4 },
+    "shell": { "program": "zsh" },
+    "working_directory": "current_project_directory",
+    "env": {
+      "TERM": "xterm-256color"
+    }
+  },
+
+  // ── LSP ────────────────────────────────────────────────────────────────────
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "check": { "command": "clippy" },
+        "cargo": { "allFeatures": true },
+        "inlayHints": {
+          "maxLength": 40,
+          "lifetimeElisionHints": { "enable": "skip_trivial" }
+        },
+        "procMacro": { "enable": true }
+      }
+    },
+    "pyright": {
+      "settings": {
+        "python.analysis": {
+          "typeCheckingMode": "basic",
+          "autoSearchPaths": true,
+          "useLibraryCodeForTypes": true,
+          "diagnosticMode": "openFilesOnly"
+        }
+      }
+    },
+    "gopls": {
+      "initialization_options": {
+        "usePlaceholders": true,
+        "analyses": {
+          "shadow": true,
+          "unusedwrite": true,
+          "useany": true
+        },
+        "staticcheck": true,
+        "hints": {
+          "assignVariableTypes": true,
+          "compositeLiteralFields": true,
+          "constantValues": true,
+          "functionTypeParameters": true,
+          "parameterNames": true,
+          "rangeVariableTypes": true
+        }
+      }
+    },
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "includeInlayParameterNameHints": "all",
+          "includeInlayPropertyDeclarationTypeHints": true,
+          "includeInlayVariableTypeHints": true
+        }
+      }
+    }
+  },
+
+  // ── Per-language settings ───────────────────────────────────────────────────
+  "languages": {
+    "Python": {
+      "tab_size": 4,
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "ruff" } },
+      "language_servers": ["pyright", "ruff"]
+    },
+    "Go": {
+      "hard_tabs": true,
+      "tab_size": 4,
+      "format_on_save": "on"
+    },
+    "Rust": {
+      "format_on_save": "on"
+    },
+    "TypeScript": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "typescript-language-server" } }
+    },
+    "JavaScript": {
+      "format_on_save": "on",
+      "formatter": { "language_server": { "name": "typescript-language-server" } }
+    },
+    "JSON": {
+      "tab_size": 2,
+      "format_on_save": "on"
+    },
+    "YAML": {
+      "tab_size": 2,
+      "format_on_save": "off"
+    },
+    "TOML": {
+      "tab_size": 2,
+      "format_on_save": "on"
+    },
+    "Markdown": {
+      "soft_wrap": "editor_width",
+      "format_on_save": "off",
+      "tab_size": 2
+    },
+    "Shell Script": {
+      "format_on_save": "off"
+    },
+    "Dockerfile": {
+      "format_on_save": "off"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+---
+# =============================================================================
+# Gaming Role — Variables
+# =============================================================================
+
+# Steam & Wine
+gaming_core_packages:
+  - steam
+  - steam-devices
+  - wine-staging
+  - wine-gecko
+  - wine-mono
+  - winetricks
+
+# Controllers
+gaming_controller_packages:
+  - joyutils
+
+# Performance / compositors
+gaming_performance_packages:
+  - gamemode
+  - lib32-gamemode
+  - gamescope
+  - mangohud
+  - lib32-mangohud
+
+# Vulkan / GPU tools (NVIDIA-safe subset)
+gaming_vulkan_packages:
+  - vulkan-icd-loader
+  - vulkan-tools
+  - vulkan-validation-layers
+  - lib32-vulkan-icd-loader
+  - mesa-utils
+  - lib32-mesa
+  - glmark2
+  - vkmark
+
+# Vulkan ICDs for non-NVIDIA GPUs (gated by enable_extra_gpu_vendors)
+gaming_extra_gpu_packages:
+  - lib32-vulkan-intel
+  - lib32-vulkan-radeon
+
+# Streaming / recording
+gaming_media_packages:
+  - obs-studio
+  - moonlight-qt
+
+# AUR — core gaming
+gaming_aur_packages:
+  - protonup-qt
+  - protontricks
+  - heroic-games-launcher-bin
+  - itch-bin
+  - goverlay
+  - vkbasalt
+
+# AUR — Wine translation layers (gated by enable_wine_extras)
+# Proton bundles its own versions; only needed for Lutris/Heroic native-Wine prefixes
+gaming_aur_wine_packages:
+  - vkd3d-proton
+  - dxvk-bin
+
+# AUR — controllers
+gaming_aur_controller_packages:
+  - xpadneo-dkms
+
+# AUR — overlay / streaming
+gaming_aur_media_packages:
+  - latencyflex-bin
+
+# AUR — Apollo (gated by install_apollo)
+gaming_aur_apollo_packages:
+  - apollo-bin

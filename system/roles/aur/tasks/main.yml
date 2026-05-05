@@ -1,0 +1,64 @@
+---
+# =============================================================================
+# AUR Role — Tasks
+# Installs the chosen AUR helper (yay or paru)
+# =============================================================================
+
+- name: Check if AUR helper is already installed
+  ansible.builtin.command: "which {{ aur_helper }}"
+  register: aur_check
+  changed_when: false
+  failed_when: false
+
+- name: Install AUR helper prerequisites
+  community.general.pacman:
+    name:
+      - base-devel
+      - git
+      - go
+    state: present
+  become: true
+  when: aur_check.rc != 0
+
+- name: Clone AUR helper repository
+  ansible.builtin.git:
+    repo: "{{ aur_helper_url }}"
+    dest: "/tmp/{{ aur_helper }}"
+    version: master
+    depth: 1
+  become: false
+  when: aur_check.rc != 0
+
+- name: Build AUR helper
+  ansible.builtin.command:
+    cmd: makepkg -s --noconfirm
+    chdir: "/tmp/{{ aur_helper }}"
+  become: false
+  when: aur_check.rc != 0
+
+- name: Install AUR helper package
+  ansible.builtin.shell:
+    cmd: "cd /tmp/{{ aur_helper }} && pacman -U --noconfirm $(ls *.pkg.tar.zst | grep -v 'debug')"
+  become: true
+  when: aur_check.rc != 0
+
+- name: Clean up AUR helper build directory
+  ansible.builtin.file:
+    path: "/tmp/{{ aur_helper }}"
+    state: absent
+  when: aur_check.rc != 0
+
+- name: Get current user for sudoers configuration
+  ansible.builtin.command: whoami
+  register: current_user
+  changed_when: false
+  become: false
+
+- name: Configure sudoers for AUR helper (allow pacman without password)
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/aur_helper
+    line: "{{ current_user.stdout }} ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+    create: true
+    mode: "0440"
+    validate: /usr/bin/visudo -cf %s
+  become: true

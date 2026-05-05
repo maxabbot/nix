@@ -1,0 +1,15 @@
+---
+# =============================================================================
+# Work Laptop Profile — development focus, no gaming/nvidia
+# =============================================================================
+
+power_management: tlp
+
+enable_database_servers: true
+enable_gui_db_clients: true
+
+# Roles applied for this profile
+profile_roles:
+  - base
+  - development
+  - productivity

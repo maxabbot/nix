@@ -1,0 +1,139 @@
+---
+# =============================================================================
+# Productivity Role — Variables
+# =============================================================================
+
+# Desktop / Wayland compositors
+prod_desktop_packages:
+  - sddm
+  - hyprland
+  - waybar
+  - xdg-desktop-portal-hyprland
+  - swaync
+  - gammastep
+  - grim
+  - slurp
+  - hyprlock
+  - fuzzel
+  - swayidle
+  - nwg-look
+
+# Audio (PipeWire stack)
+prod_audio_packages:
+  - pipewire
+  - pipewire-alsa
+  - pipewire-pulse
+  - pipewire-jack
+  - wireplumber
+
+# Office / documents
+prod_office_packages:
+  - libreoffice-fresh
+  - xournalpp
+  - zathura
+  - zathura-pdf-mupdf
+  - calibre
+  - pdfarranger
+
+# Communication
+prod_communication_packages:
+  - thunderbird
+  - element-desktop
+
+# File managers
+prod_filemanager_packages:
+  - thunar
+  - thunar-archive-plugin
+  - file-roller
+
+# Cloud / sync
+prod_sync_packages:
+  - syncthing
+  - rclone
+
+# Creative suite (gated)
+prod_creative_packages:
+  - gimp
+  - inkscape
+  - krita
+
+# Password managers
+prod_notes_packages:
+  - bitwarden
+
+# Media players
+prod_media_packages:
+  - vlc
+  - mpv
+  - imv
+
+# Monitoring
+prod_monitoring_packages:
+  - nvtop
+  - openrgb
+  - glances
+  - pacman-contrib
+
+# Security / backup
+prod_security_packages:
+  - veracrypt
+  - timeshift
+
+# Desktop helpers
+prod_helper_packages:
+  - kvantum
+  - papirus-icon-theme
+  - pavucontrol
+  - foot
+
+# AUR — always installed
+prod_aur_packages:
+  - swww
+  - cliphist
+  - grimblast-git
+  - mpvpaper
+  - wlogout
+  - yazi
+  - gruvbox-material-gtk
+
+# AUR — office
+prod_aur_office_packages:
+  - masterpdfeditor-free
+  - onlyoffice-bin
+
+# AUR — browsers
+prod_aur_browser_packages:
+  - google-chrome
+
+# AUR — secondary browsers (gated)
+prod_aur_secondary_browser_packages:
+  - zen-browser-bin
+
+# AUR — communication
+prod_aur_comm_packages:
+  - slack-desktop
+  - discord
+  - zoom
+
+# AUR — streaming / recording / editing (gated)
+prod_aur_streaming_packages:
+  - shotcut
+  - losslesscut-bin
+  - rustdesk-bin
+  - gpu-screen-recorder
+
+# AUR — notes
+prod_aur_notes_packages:
+  - obsidian
+
+# AUR — misc
+prod_aur_misc_packages:
+  - syncthingtray
+
+# Flatpak apps
+prod_flatpak_apps:
+  - com.microsoft.Teams
+
+# Services
+prod_services:
+  - syncthing@{{ local_user }}.service

@@ -1,0 +1,24 @@
+# Minimal keymap overrides — defaults are already vim-style.
+# Full default keymap: https://github.com/sxyazi/yazi/blob/main/yazi-config/preset/keymap.toml
+
+[manager]
+prepend_keymap = [
+  # Open with helix explicitly
+  { on = ["e"], run = 'open --interactive', desc = "Open with..." },
+
+  # fzf-style fuzzy jump
+  { on = ["f"], run = "filter --smart", desc = "Filter files" },
+
+  # Show/hide dotfiles toggle on .
+  { on = ["."], run = "hidden toggle", desc = "Toggle hidden files" },
+
+  # Tab management
+  { on = ["t"],        run = "tab_create --current",        desc = "New tab (current dir)" },
+  { on = ["<Tab>"],    run = "tab_switch 1 --relative",     desc = "Next tab" },
+  { on = ["<S-Tab>"],  run = "tab_switch -1 --relative",    desc = "Prev tab" },
+]
+
+[tasks]
+prepend_keymap = [
+  { on = ["<Esc>"], run = "close", desc = "Close task list" },
+]
