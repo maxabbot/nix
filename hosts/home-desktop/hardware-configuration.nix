@@ -1,7 +1,13 @@
 # hosts/home-desktop/hardware-configuration.nix — Placeholder for home-desktop.
 # Replace with the output of: sudo nixos-generate-config --root /mnt
 # Then copy the generated /mnt/etc/nixos/hardware-configuration.nix here.
-{ config, lib, pkgs, modulesPath, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}:
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
@@ -10,28 +16,47 @@
   #   sudo nixos-generate-config --root /mnt
   # Then copy /mnt/etc/nixos/hardware-configuration.nix into this file.
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules          = [];
-  boot.kernelModules                 = [ "kvm-intel" ];
-  boot.extraModulePackages           = [];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "nvme"
+    "usb_storage"
+    "usbhid"
+    "sd_mod"
+  ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-intel" ];
+  boot.extraModulePackages = [ ];
 
   # ── Example BTRFS layout — update device paths before use ────────────────────
   fileSystems."/" = {
-    device  = "/dev/disk/by-label/nixos";
-    fsType  = "btrfs";
-    options = [ "subvol=@" "compress=zstd" "noatime" ];
+    device = "/dev/disk/by-label/nixos";
+    fsType = "btrfs";
+    options = [
+      "subvol=@"
+      "compress=zstd"
+      "noatime"
+    ];
   };
 
   fileSystems."/home" = {
-    device  = "/dev/disk/by-label/nixos";
-    fsType  = "btrfs";
-    options = [ "subvol=@home" "compress=zstd" "noatime" ];
+    device = "/dev/disk/by-label/nixos";
+    fsType = "btrfs";
+    options = [
+      "subvol=@home"
+      "compress=zstd"
+      "noatime"
+    ];
   };
 
   fileSystems."/nix" = {
-    device  = "/dev/disk/by-label/nixos";
-    fsType  = "btrfs";
-    options = [ "subvol=@nix" "compress=zstd" "noatime" ];
+    device = "/dev/disk/by-label/nixos";
+    fsType = "btrfs";
+    options = [
+      "subvol=@nix"
+      "compress=zstd"
+      "noatime"
+    ];
   };
 
   fileSystems."/boot" = {
@@ -39,7 +64,7 @@
     fsType = "vfat";
   };
 
-  swapDevices = [];
+  swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

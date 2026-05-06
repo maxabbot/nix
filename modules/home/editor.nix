@@ -4,21 +4,21 @@
 {
   # ── Helix ──────────────────────────────────────────────────────────────────────
   programs.helix = {
-    enable   = true;
+    enable = true;
     defaultEditor = true;
 
     settings = {
       theme = "gruvbox";
 
       editor = {
-        line-number              = "relative";
-        mouse                    = true;
-        auto-save                = true;
-        completion-trigger-len   = 1;
-        idle-timeout             = 200;
-        color-modes              = true;
-        bufferline               = "multiple";
-        rulers                   = [ 100 ];
+        line-number = "relative";
+        mouse = true;
+        auto-save = true;
+        completion-trigger-len = 1;
+        idle-timeout = 200;
+        color-modes = true;
+        bufferline = "multiple";
+        rulers = [ 100 ];
 
         cursor-shape = {
           insert = "bar";
@@ -29,14 +29,26 @@
         file-picker.hidden = false;
 
         indent-guides = {
-          render    = true;
+          render = true;
           character = "╎";
         };
 
         statusline = {
-          left      = [ "mode" "spinner" "file-name" "file-modification-indicator" ];
-          center    = [];
-          right     = [ "diagnostics" "selections" "position" "file-encoding" "file-line-ending" "file-type" ];
+          left = [
+            "mode"
+            "spinner"
+            "file-name"
+            "file-modification-indicator"
+          ];
+          center = [ ];
+          right = [
+            "diagnostics"
+            "selections"
+            "position"
+            "file-encoding"
+            "file-line-ending"
+            "file-type"
+          ];
           separator = "│";
         };
 
@@ -44,35 +56,38 @@
       };
 
       keys.normal = {
-        "C-s"  = ":write";
-        space  = {
-          f  = "file_picker";
-          b  = "buffer_picker";
+        "C-s" = ":write";
+        space = {
+          f = "file_picker";
+          b = "buffer_picker";
           "/" = "global_search";
-          w  = ":write";
-          q  = ":quit";
+          w = ":write";
+          q = ":quit";
         };
       };
 
       keys.insert = {
-        "C-s" = [ "normal_mode" ":write" ];
+        "C-s" = [
+          "normal_mode"
+          ":write"
+        ];
       };
     };
 
     # Language servers installed via nixpkgs (add more as needed)
     extraPackages = with pkgs; [
       # LSPs
-      nil                         # Nix
-      nixd                        # Nix (alternative)
+      nil # Nix
+      nixd # Nix (alternative)
       rust-analyzer
       gopls
       pyright
       nodePackages.typescript-language-server
-      nodePackages.vscode-langservers-extracted  # html/css/json/eslint
+      nodePackages.vscode-langservers-extracted # html/css/json/eslint
       bash-language-server
       yaml-language-server
-      taplo                       # TOML
-      marksman                    # Markdown
+      taplo # TOML
+      marksman # Markdown
 
       # Formatters
       nixpkgs-fmt
@@ -85,12 +100,12 @@
 
   # ── Neovim ─────────────────────────────────────────────────────────────────────
   programs.neovim = {
-    enable        = true;
+    enable = true;
     defaultEditor = false;
-    viAlias       = false;
-    vimAlias      = false;
-    withPython3   = true;
-    withNodeJs    = true;
+    viAlias = false;
+    vimAlias = false;
+    withPython3 = true;
+    withNodeJs = true;
 
     # Lazy.nvim manages plugins; we only provide system-level deps here.
     extraPackages = with pkgs; [
@@ -98,12 +113,16 @@
       gcc
 
       # LSPs (shared with Helix)
-      nil rust-analyzer gopls pyright
+      nil
+      rust-analyzer
+      gopls
+      pyright
       nodePackages.typescript-language-server
       bash-language-server
 
       # Tools used by telescope / mason
-      ripgrep fd
+      ripgrep
+      fd
     ];
   };
 

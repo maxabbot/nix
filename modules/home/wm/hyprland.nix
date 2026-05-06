@@ -4,23 +4,28 @@
 { lib, config, ... }:
 let
   cfg = config.custom.hm;
-in {
+in
+{
   options.custom.hm = {
     compositor = lib.mkOption {
-      type        = lib.types.enum [ "hyprland" "sway" "none" ];
-      default     = "none";
+      type = lib.types.enum [
+        "hyprland"
+        "sway"
+        "none"
+      ];
+      default = "none";
       description = "Which Wayland compositor to configure for this user.";
     };
 
     monitors = {
       primary = lib.mkOption {
-        type        = lib.types.nullOr lib.types.str;
-        default     = null;
+        type = lib.types.nullOr lib.types.str;
+        default = null;
         description = "Primary monitor string, e.g. DP-1,2560x1440@144,0x0,1";
       };
       secondary = lib.mkOption {
-        type        = lib.types.nullOr lib.types.str;
-        default     = null;
+        type = lib.types.nullOr lib.types.str;
+        default = null;
         description = "Secondary monitor string, e.g. HDMI-A-1,1920x1080@60,2560x0,1";
       };
     };
@@ -28,14 +33,15 @@ in {
 
   config = lib.mkIf (cfg.compositor == "hyprland") {
     wayland.windowManager.hyprland = {
-      enable      = true;
+      enable = true;
       xwayland.enable = true;
 
       settings = {
         # ── Monitors ─────────────────────────────────────────────────────────
-        monitor = lib.optional (cfg.monitors.primary   != null) cfg.monitors.primary
-               ++ lib.optional (cfg.monitors.secondary != null) cfg.monitors.secondary
-               ++ lib.optional (cfg.monitors.primary   == null) ",preferred,auto,1";
+        monitor =
+          lib.optional (cfg.monitors.primary != null) cfg.monitors.primary
+          ++ lib.optional (cfg.monitors.secondary != null) cfg.monitors.secondary
+          ++ lib.optional (cfg.monitors.primary == null) ",preferred,auto,1";
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
@@ -68,25 +74,25 @@ in {
 
         # ── Input ─────────────────────────────────────────────────────────────
         input = {
-          kb_layout    = "us";
+          kb_layout = "us";
           follow_mouse = 1;
-          sensitivity  = 0;
+          sensitivity = 0;
           accel_profile = "flat";
           touchpad = {
-            natural_scroll       = true;
+            natural_scroll = true;
             disable_while_typing = true;
-            "tap-to-click"       = true;
+            "tap-to-click" = true;
           };
         };
 
         # ── General ───────────────────────────────────────────────────────────
         general = {
-          gaps_in  = 5;
+          gaps_in = 5;
           gaps_out = 10;
           border_size = 2;
-          "col.active_border"   = "rgba(7daea3ee) rgba(d3869bee) 45deg";
+          "col.active_border" = "rgba(7daea3ee) rgba(d3869bee) 45deg";
           "col.inactive_border" = "rgba(3c3836aa)";
-          layout        = "dwindle";
+          layout = "dwindle";
           allow_tearing = true;
         };
 
@@ -94,21 +100,21 @@ in {
         decoration = {
           rounding = 10;
           blur = {
-            enabled           = true;
-            size              = 3;
-            passes            = 1;
+            enabled = true;
+            size = 3;
+            passes = 1;
             new_optimizations = true;
           };
-          drop_shadow        = true;
-          shadow_range       = 4;
+          drop_shadow = true;
+          shadow_range = 4;
           shadow_render_power = 3;
-          "col.shadow"       = "rgba(1a1a1aee)";
+          "col.shadow" = "rgba(1a1a1aee)";
         };
 
         # ── Animations ────────────────────────────────────────────────────────
         animations = {
           enabled = true;
-          bezier   = "myBezier, 0.05, 0.9, 0.1, 1.05";
+          bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
           animation = [
             "windows,    1, 7, myBezier"
             "windowsOut, 1, 7, default, popin 80%"
@@ -121,23 +127,23 @@ in {
 
         # ── Layout ────────────────────────────────────────────────────────────
         dwindle = {
-          pseudotile     = true;
+          pseudotile = true;
           preserve_split = true;
         };
         master.new_is_master = true;
 
         # ── Gestures ──────────────────────────────────────────────────────────
         gestures = {
-          workspace_swipe         = true;
+          workspace_swipe = true;
           workspace_swipe_fingers = 3;
         };
 
         # ── Misc ──────────────────────────────────────────────────────────────
         misc = {
-          disable_hyprland_logo    = true;
+          disable_hyprland_logo = true;
           disable_splash_rendering = true;
-          mouse_move_enables_dpms  = true;
-          key_press_enables_dpms   = true;
+          mouse_move_enables_dpms = true;
+          key_press_enables_dpms = true;
           vrr = 2;
         };
 

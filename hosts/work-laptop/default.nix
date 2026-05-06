@@ -1,6 +1,12 @@
 # hosts/work-laptop/default.nix — Work laptop (Sway, TLP, no gaming/nvidia).
 # Equivalent to the work_laptop Ansible profile.
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 {
   imports = [
     ./hardware-configuration.nix
@@ -11,20 +17,20 @@
 
   # ── Base ─────────────────────────────────────────────────────────────────────
   custom.base = {
-    enable          = true;
-    username        = "max";
-    timezone        = "Europe/London";
+    enable = true;
+    username = "max";
+    timezone = "Europe/London";
     powerManagement = true;
-    btrfsSnapshots  = false;
-    firewall        = true;
+    btrfsSnapshots = false;
+    firewall = true;
   };
 
   # ── Development ──────────────────────────────────────────────────────────────
   custom.development = {
     enable = true;
-    containers.podman.enable   = true;
-    containers.libvirt.enable  = false;
-    database.servers.enable    = true;
+    containers.podman.enable = true;
+    containers.libvirt.enable = false;
+    database.servers.enable = true;
     database.guiClients.enable = true;
     database.dataPlatforms.enable = false;
     cloudTools.enable = true;
@@ -32,26 +38,26 @@
 
   # ── Productivity (Sway — laptop compositor) ───────────────────────────────────
   custom.productivity = {
-    enable     = true;
+    enable = true;
     compositor = "sway";
     communicationApps.enable = true;
   };
 
   # ── TLP battery management ────────────────────────────────────────────────────
   services.tlp = {
-    enable   = true;
+    enable = true;
     settings = {
-      CPU_SCALING_GOVERNOR_ON_AC  = "performance";
+      CPU_SCALING_GOVERNOR_ON_AC = "performance";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      CPU_ENERGY_PERF_POLICY_ON_AC  = "performance";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
       WIFI_PWR_ON_BAT = 5;
-      NMI_WATCHDOG    = 0;
+      NMI_WATCHDOG = 0;
     };
   };
 
   # ── Bootloader ────────────────────────────────────────────────────────────────
-  boot.loader.systemd-boot.enable    = true;
+  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # ── Networking ───────────────────────────────────────────────────────────────
@@ -61,17 +67,17 @@
   home-manager.users.max = import ../../home/max/default.nix;
   home-manager.extraSpecialArgs = {
     machineType = "laptop";
-    compositor  = "sway";
+    compositor = "sway";
     monitors = {
-      primary   = null;
+      primary = null;
       secondary = null;
     };
     git = {
-      name  = "Max Abbot";
+      name = "Max Abbot";
       email = "abbot.max.nz@gmail.com";
     };
     location = {
-      latitude  = 51.5;
+      latitude = 51.5;
       longitude = -0.1;
     };
     inherit inputs;

@@ -1,6 +1,12 @@
 # hosts/minimal/default.nix — Minimal headless / server profile.
 # Equivalent to the minimal Ansible profile (base only).
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 {
   imports = [
     ./hardware-configuration.nix
@@ -8,15 +14,15 @@
   ];
 
   custom.base = {
-    enable          = true;
-    username        = "max";
-    timezone        = "UTC";
+    enable = true;
+    username = "max";
+    timezone = "UTC";
     powerManagement = false;
-    btrfsSnapshots  = false;
-    firewall        = true;
+    btrfsSnapshots = false;
+    firewall = true;
   };
 
-  boot.loader.systemd-boot.enable    = true;
+  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "minimal";
@@ -25,13 +31,19 @@
   home-manager.users.max = import ../../home/max/default.nix;
   home-manager.extraSpecialArgs = {
     machineType = "server";
-    compositor  = "sway";
-    monitors    = { primary = null; secondary = null; };
+    compositor = "sway";
+    monitors = {
+      primary = null;
+      secondary = null;
+    };
     git = {
-      name  = "Max Abbot";
+      name = "Max Abbot";
       email = "abbot.max.nz@gmail.com";
     };
-    location = { latitude = 0.0; longitude = 0.0; };
+    location = {
+      latitude = 0.0;
+      longitude = 0.0;
+    };
     inherit inputs;
   };
 
