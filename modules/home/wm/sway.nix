@@ -30,9 +30,6 @@ in
         };
 
         # ── Borders ──────────────────────────────────────────────────────────
-        defaultBorderSize = 2;
-        defaultFloatingBorder = 2;
-
         # ── Colors — Gruvbox Material Dark ────────────────────────────────────
         colors = {
           focused = {
@@ -279,9 +276,8 @@ in
       };
 
       extraConfig = ''
-        
-                max_render_time 1
-                include /etc/sway/config.d/*
+        max_render_time 1
+        include /etc/sway/config.d/*
       '';
     };
   };

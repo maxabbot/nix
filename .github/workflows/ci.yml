@@ -5,6 +5,9 @@ on:
     branches: ["main"]
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   nix-flake-check:
     runs-on: ubuntu-latest
@@ -27,9 +30,10 @@ jobs:
 
       - name: Check Nix formatting (nixfmt-rfc-style)
         run: |
-          nix run nixpkgs#nixfmt-rfc-style -- --check \
+          nix run nixpkgs#nixfmt-rfc-style -- \
             flake.nix \
             $(find modules hosts home overlays pkgs -name '*.nix' 2>/dev/null | tr '\n' ' ')
+          git diff --exit-code
 
   shellcheck:
     runs-on: ubuntu-latest

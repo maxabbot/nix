@@ -117,7 +117,6 @@ in
     # ── libvirt / KVM ──────────────────────────────────────────────────────────
     virtualisation.libvirtd = lib.mkIf cfg.containers.libvirt.enable {
       enable = true;
-      qemu.ovmf.enable = true;
       qemu.runAsRoot = false;
     };
 

@@ -46,18 +46,16 @@
 
   # Kvantum theme config
   xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
-    
-        [General]
-        theme=GruvboxMaterial
+    [General]
+    theme=GruvboxMaterial
   '';
 
   # ── Cursor (for non-GTK apps and X11) ─────────────────────────────────────────
   home.file.".icons/default/index.theme".text = ''
-    
-        [Icon Theme]
-        Name=Default
-        Comment=Default Cursor Theme
-        Inherits=Bibata-Modern-Classic
+    [Icon Theme]
+    Name=Default
+    Comment=Default Cursor Theme
+    Inherits=Bibata-Modern-Classic
   '';
 
   # ── Session variables ─────────────────────────────────────────────────────────

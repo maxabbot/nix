@@ -143,8 +143,7 @@
     serverAliveInterval = 60;
     serverAliveCountMax = 3;
     extraConfig = ''
-      
-            IdentityAgent /run/user/1000/gnupg/S.gpg-agent.ssh
+      IdentityAgent /run/user/1000/gnupg/S.gpg-agent.ssh
     '';
   };
 

@@ -81,8 +81,6 @@ in
       ]
     );
 
-    nixpkgs.config.cudaSupport = lib.mkIf cfg.cuda.enable true;
-
     # ── nvidia-persistenced (keeps GPU awake between compute workloads) ────────
     hardware.nvidia.nvidiaPersistenced = true;
   };
