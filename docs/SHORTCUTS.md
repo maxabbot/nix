@@ -209,14 +209,14 @@ less →  bat --paging=always
 v / vi / vim  →  hx (Helix)
 ```
 
-### Pacman / AUR
+### NixOS
 ```
-pacup     →  sudo pacman -Syu
-pacin     →  sudo pacman -S
-pacrem    →  sudo pacman -Rns
-pacsearch →  pacman -Ss
-yayup     →  yay -Syu
-yayin     →  yay -S
+nixup    →  sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)
+nixsrch  →  nix search nixpkgs
+nixshell →  nix shell nixpkgs#<pkg>
+nixtmp   →  nix-shell -p <pkg>
+gcclean  →  sudo nix-collect-garbage -d && sudo nix store optimise
+flkupd   →  nix flake update
 ```
 
 ### Systemd
@@ -269,7 +269,7 @@ rm / cp / mv  →  interactive (-i flag)
 | `gcl <url>` | Git clone and cd |
 | `mkvenv [name]` | Create and activate Python venv |
 | `serve [port]` | Start HTTP server (default 8000) |
-| `sysup` | Update pacman + yay + rustup |
+| `sysup` | Full system update: `nixup` + `rustup update` |
 | `fcd` | Fuzzy cd with fzf |
 | `qfind <pattern>` | Quick find by filename |
 | `psgrep <name>` | Search processes |
