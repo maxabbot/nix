@@ -177,7 +177,7 @@ in
             "${m}+r" = "mode resize";
 
             # System
-            "${m}+l" = "exec swaylock -f";
+            "${m}+Ctrl+l" = "exec swaylock -f";
             "${m}+Shift+e" = "exec wlogout -p layer-shell";
 
             # Screenshot

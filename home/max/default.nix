@@ -92,7 +92,7 @@
         pager = "delta";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       };
-      interactive.diffFilter = "delta --color-only";
+      # interactive.diffFilter is set automatically by programs.delta
     };
 
     aliases = {
