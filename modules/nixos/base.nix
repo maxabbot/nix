@@ -53,7 +53,7 @@ in
     i18n.defaultLocale = "en_US.UTF-8";
 
     # ── Kernel ─────────────────────────────────────────────────────────────────
-    boot.kernelPackages = pkgs.linuxPackages_lts;
+    boot.kernelPackages = pkgs.linuxPackages_latest;
 
     # ── Networking ─────────────────────────────────────────────────────────────
     networking.networkmanager.enable = true;

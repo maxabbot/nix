@@ -15,6 +15,7 @@
   # Run on the target machine:
   #   sudo nixos-generate-config --root /mnt
   # Then copy /mnt/etc/nixos/hardware-configuration.nix into this file.
+  # NOTE: Do NOT define fileSystems here — disko manages them via disk-config.nix.
 
   boot.initrd.availableKernelModules = [
     "xhci_pci"
@@ -25,44 +26,8 @@
     "sd_mod"
   ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-
-  # ── Example BTRFS layout — update device paths before use ────────────────────
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [
-      "subvol=@"
-      "compress=zstd"
-      "noatime"
-    ];
-  };
-
-  fileSystems."/home" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [
-      "subvol=@home"
-      "compress=zstd"
-      "noatime"
-    ];
-  };
-
-  fileSystems."/nix" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [
-      "subvol=@nix"
-      "compress=zstd"
-      "noatime"
-    ];
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/boot";
-    fsType = "vfat";
-  };
 
   swapDevices = [ ];
 
