@@ -3,6 +3,7 @@
 {
   pkgs,
   lib,
+  config,
   machineType,
   compositor,
   monitors,
@@ -58,27 +59,9 @@
   # ── Git ───────────────────────────────────────────────────────────────────────
   programs.git = {
     enable = true;
-    userName = git.name;
-    userEmail = git.email;
-
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        light = false;
-        side-by-side = true;
-        line-numbers = true;
-        syntax-theme = "gruvbox-dark";
-        features = "gruvbox-material";
-        # Plus/minus line colours
-        "plus-style" = ''syntax "#1e4920"'';
-        "minus-style" = ''syntax "#4a1020"'';
-        "file-style" = ''bold "#89b4fa"'';
-        "hunk-header-style" = "file line-number syntax";
-      };
-    };
-
-    extraConfig = {
+    settings = {
+      user.name = git.name;
+      user.email = git.email;
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
@@ -95,18 +78,33 @@
         pager = "delta";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       };
-      # interactive.diffFilter is set automatically by programs.delta
+      alias = {
+        st = "status -sb";
+        co = "checkout";
+        br = "branch -vv";
+        lg = "log --oneline --graph --decorate --all";
+        last = "log -1 HEAD --stat";
+        undo = "reset HEAD~1 --mixed";
+        unstage = "reset HEAD --";
+        wip = "!git add -A && git commit -m 'wip'";
+      };
     };
+  };
 
-    aliases = {
-      st = "status -sb";
-      co = "checkout";
-      br = "branch -vv";
-      lg = "log --oneline --graph --decorate --all";
-      last = "log -1 HEAD --stat";
-      undo = "reset HEAD~1 --mixed";
-      unstage = "reset HEAD --";
-      wip = "!git add -A && git commit -m 'wip'";
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      light = false;
+      side-by-side = true;
+      line-numbers = true;
+      syntax-theme = "gruvbox-dark";
+      features = "gruvbox-material";
+      "plus-style" = ''syntax "#1e4920"'';
+      "minus-style" = ''syntax "#4a1020"'';
+      "file-style" = ''bold "#89b4fa"'';
+      "hunk-header-style" = "file line-number syntax";
     };
   };
 
@@ -142,12 +140,13 @@
   # ── SSH ────────────────────────────────────────────────────────────────────────
   programs.ssh = {
     enable = true;
-    addKeysToAgent = "yes";
-    serverAliveInterval = 60;
-    serverAliveCountMax = 3;
-    extraConfig = ''
-      IdentityAgent /run/user/1000/gnupg/S.gpg-agent.ssh
-    '';
+    enableDefaultConfig = false;
+    matchBlocks."*" = {
+      addKeysToAgent = "yes";
+      serverAliveInterval = 60;
+      serverAliveCountMax = 3;
+      extraOptions.IdentityAgent = "/run/user/1000/gnupg/S.gpg-agent.ssh";
+    };
   };
 
   # Ensure gnome-keyring is running for SSH keys
@@ -194,7 +193,10 @@
   };
 
   # ── Allow HM to manage the login shell ────────────────────────────────────────
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    dotDir = config.home.homeDirectory;
+  };
   home.sessionPath = [
     "$HOME/.local/bin"
     "$HOME/bin"

@@ -42,7 +42,7 @@ in
     };
 
     # Disable PulseAudio — PipeWire replaces it
-    hardware.pulseaudio.enable = false;
+    services.pulseaudio.enable = false;
 
     # ── XDG portals ────────────────────────────────────────────────────────────
     xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];

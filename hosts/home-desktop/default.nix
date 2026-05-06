@@ -42,7 +42,6 @@
   # ── Productivity (Hyprland desktop) ──────────────────────────────────────────
   custom.productivity = {
     enable = true;
-    compositor = "hyprland";
     creativeApps.enable = true;
     streamingTools.enable = true;
     communicationApps.enable = true;

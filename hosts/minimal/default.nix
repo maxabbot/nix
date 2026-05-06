@@ -30,7 +30,7 @@
   home-manager.users.max = import ../../home/max/default.nix;
   home-manager.extraSpecialArgs = {
     machineType = "server";
-    compositor = "sway";
+    compositor = "none";
     monitors = {
       primary = null;
       secondary = null;
