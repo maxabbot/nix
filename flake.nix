@@ -10,9 +10,14 @@
     };
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-hardware, disko, ... }@inputs:
   let
     system = "x86_64-linux";
     lib    = nixpkgs.lib;
@@ -46,15 +51,12 @@
       home-desktop = mkHost {
         hostName    = "home-desktop";
         machineType = "desktop";
-        modules     = [ ./hosts/home-desktop ];
+        modules     = [ ./hosts/home-desktop disko.nixosModules.disko ];
         hmArgs = {
           machineType = "desktop";
           compositor  = "hyprland";
-          # Set monitor strings to match xrandr/wayland output names, e.g.:
-          #   primary   = "DP-1,2560x1440@144,0x0,1"
-          #   secondary = "HDMI-A-1,1920x1080@60,2560x0,1"
           monitors = { primary = ""; secondary = ""; };
-          location = { lat = -36.8485; lon = 174.7633; };
+          location = { latitude = -43.53; longitude = 172.64; };
           git = {
             name       = "Max Abbot";
             email      = "abbot.max.nz@gmail.com";
@@ -72,7 +74,7 @@
           machineType = "laptop";
           compositor  = "sway";
           monitors = { primary = ""; secondary = ""; };
-          location = { lat = -36.8485; lon = 174.7633; };
+          location = { latitude = -43.53; longitude = 172.64; };
           git = {
             name       = "Max Abbot";
             email      = "abbot.max.nz@gmail.com";
@@ -90,7 +92,7 @@
           machineType = "desktop";
           compositor  = "hyprland";
           monitors = { primary = ""; secondary = ""; };
-          location = { lat = -36.8485; lon = 174.7633; };
+          location = { latitude = -43.53; longitude = 172.64; };
           git = {
             name       = "Max Abbot";
             email      = "abbot.max.nz@gmail.com";

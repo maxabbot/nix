@@ -61,17 +61,40 @@ Check these at first build:
 
 ---
 
-## 7. First-time install commands
+## 7. Install with nixos-anywhere (automated)
+
+Boot the NixOS ISO, connect ethernet, then:
 
 ```bash
-# Clone into /etc/nixos
-sudo git clone https://github.com/maxabbot/nix.git /etc/nixos
-cd /etc/nixos
+# On the live system — set a password and note the IP
+passwd nixos
+ip addr
+```
 
-# After completing steps 1-5 above:
-sudo nixos-install --flake .#home-desktop   # from ISO
-# — or on a running NixOS system —
-sudo nixos-rebuild switch --flake /etc/nixos#home-desktop
+Then from any machine with Nix installed (WSL, another Linux box, etc.):
+
+```bash
+# One command installs everything — partitions, formats, and installs NixOS
+nix run github:nix-community/nixos-anywhere -- \
+  --flake github:maxabbot/nix#home-desktop \
+  nixos@<ip>
+```
+
+nixos-anywhere will:
+1. SSH into the live ISO
+2. Partition and format the disk using `hosts/home-desktop/disk-config.nix`
+3. Run `nixos-install` with your flake
+4. Reboot into the finished system
+
+> **Note:** Default disk is `/dev/nvme0n1`. If yours is different (check with `lsblk`),
+> update `device` in `hosts/home-desktop/disk-config.nix` first.
+
+**Manual alternative** (if nixos-anywhere isn't available):
+
+```bash
+# SSH in, then run the install guide steps manually
+ssh nixos@<ip>
+# Follow docs/guides/arch-install.md
 ```
 
 ---

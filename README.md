@@ -49,17 +49,19 @@ Or use the wrapper script (auto-detects hostname):
 
 ### First-time NixOS installation
 
-1. Boot the NixOS ISO
-2. Partition and mount disks (see [docs/post-installation.md](docs/post-installation.md))
-3. Generate hardware config:
+**Recommended — automated with nixos-anywhere:**
+1. Boot the NixOS ISO, connect ethernet
+2. On the live system: `passwd nixos && ip addr`
+3. From any machine with Nix (including WSL):
    ```bash
-   sudo nixos-generate-config --root /mnt
-   cp /mnt/etc/nixos/hardware-configuration.nix hosts/<hostname>/hardware-configuration.nix
+   nix run github:nix-community/nixos-anywhere -- \
+     --flake github:maxabbot/nix#home-desktop \
+     nixos@<ip>
    ```
-4. Install:
-   ```bash
-   sudo nixos-install --flake github:maxabbot/nix#home-desktop
-   ```
+
+**Manual — if nixos-anywhere isn't available:**
+
+See [docs/guides/nix-install.md](docs/guides/nix-install.md).
 
 ## Hosts
 

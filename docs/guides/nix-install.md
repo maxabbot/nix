@@ -4,7 +4,39 @@ End-to-end walkthrough for a fresh NixOS installation using this flake.
 
 ---
 
-## Prerequisites
+## Recommended: Automated install with nixos-anywhere
+
+nixos-anywhere + disko handle partitioning, formatting, and installation in one command
+from any machine with Nix installed (including WSL on Windows).
+
+### Steps
+
+**1. Boot the NixOS ISO**, connect ethernet, then in the live shell:
+```bash
+passwd nixos   # set a temporary password
+ip addr        # note the IP address
+```
+
+**2. From your local machine** (or WSL):
+```bash
+nix run github:nix-community/nixos-anywhere -- \
+  --flake github:maxabbot/nix#home-desktop \
+  nixos@<ip>
+```
+
+That's it. nixos-anywhere SSHs in, runs disko to partition/format the disk
+(as defined in `hosts/home-desktop/disk-config.nix`), then installs NixOS.
+
+> **Check disk name first:** default is `/dev/nvme0n1`. Run `lsblk` on the live system
+> and update `hosts/home-desktop/disk-config.nix` if your disk is different before running.
+
+---
+
+## Manual install (fallback)
+
+Use this if nixos-anywhere isn't available or you need custom partitioning.
+
+### Prerequisites
 
 - NixOS minimal ISO burned to USB (`dd` or Ventoy)
 - Target disk identified (`lsblk` after booting live media)
