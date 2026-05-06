@@ -41,12 +41,13 @@ in
 
     # ── MangoHUD + Gamescope ───────────────────────────────────────────────────
     programs.gamescope.enable = true;
-    environment.systemPackages = [ pkgs.mangohud ];
 
     # ── System packages ────────────────────────────────────────────────────────
     environment.systemPackages =
       with pkgs;
       [
+        mangohud
+
         # Wine (base + compat layers)
         wineWowPackages.staging
         wine-mono

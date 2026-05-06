@@ -17,7 +17,6 @@
     enable = true;
     username = "max";
     timezone = "UTC";
-    powerManagement = false;
     btrfsSnapshots = false;
     firewall = true;
   };

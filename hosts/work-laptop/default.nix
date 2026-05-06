@@ -20,7 +20,7 @@
     enable = true;
     username = "max";
     timezone = "Europe/London";
-    powerManagement = true;
+    powerManagement = "tlp";
     btrfsSnapshots = false;
     firewall = true;
   };
