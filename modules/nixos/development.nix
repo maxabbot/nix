@@ -1,5 +1,4 @@
-# modules/nixos/development.nix — Languages, editors, containers, and cloud tooling.
-# Mirrors system/roles/development from the Arch Ansible layer.
+# modules/nixos/development.nix — Languages, containers, cloud tooling, and dev utilities.
 {
   config,
   lib,
@@ -53,15 +52,10 @@ in
         # Dev utilities
         kitty
         direnv
-        helix
         shellcheck
         tig
         imagemagick
         sqlite
-
-        # Editors / IDEs
-        vscode
-        zed-editor
 
         # Version / runtime manager
         mise
@@ -88,7 +82,6 @@ in
         kubectx
         kubernetes-helm
         opentofu
-        ansible
         awscli2
         azure-cli
         google-cloud-sdk

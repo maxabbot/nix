@@ -10,7 +10,6 @@ in
     compositor = lib.mkOption {
       type = lib.types.enum [
         "hyprland"
-        "sway"
         "none"
       ];
       default = "none";

@@ -1,5 +1,4 @@
-# hosts/work-laptop/default.nix — Work laptop (Sway, TLP, no gaming/nvidia).
-# Equivalent to the work_laptop Ansible profile.
+# hosts/work-laptop/default.nix — Work laptop (Hyprland, TLP, no gaming/nvidia).
 {
   config,
   pkgs,
@@ -36,10 +35,9 @@
     cloudTools.enable = true;
   };
 
-  # ── Productivity (Sway — laptop compositor) ───────────────────────────────────
+  # ── Productivity (Hyprland) ───────────────────────────────────────────────────
   custom.productivity = {
     enable = true;
-    compositor = "sway";
     communicationApps.enable = true;
   };
 
@@ -67,7 +65,7 @@
   home-manager.users.max = import ../../home/max/default.nix;
   home-manager.extraSpecialArgs = {
     machineType = "laptop";
-    compositor = "sway";
+    compositor = "hyprland";
     monitors = {
       primary = null;
       secondary = null;

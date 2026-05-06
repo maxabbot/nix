@@ -1,5 +1,4 @@
 # modules/nixos/base.nix — Core system packages, networking, fonts, and services.
-# Mirrors system/roles/base from the Arch Ansible layer.
 {
   config,
   lib,
@@ -189,7 +188,6 @@ in
       fzf
       ripgrep
       jq
-      nano
       zsh
       tmux
       fastfetch

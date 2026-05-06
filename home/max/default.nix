@@ -91,7 +91,7 @@
       branch.sort = "-committerdate";
       core = {
         autocrlf = "input";
-        editor = "hx";
+        editor = "zed --wait";
         pager = "delta";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       };

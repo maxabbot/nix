@@ -7,7 +7,6 @@
     ./apps.nix
     ./theme.nix
     ./wm/hyprland.nix
-    ./wm/sway.nix
     ./wm/waybar.nix
   ];
 }

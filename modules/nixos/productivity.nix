@@ -1,5 +1,4 @@
-# modules/nixos/productivity.nix — Desktop environment, audio, apps, and browsers.
-# Mirrors system/roles/productivity from the Arch Ansible layer.
+# modules/nixos/productivity.nix — Desktop environment, audio, and productivity apps.
 {
   config,
   lib,
@@ -13,32 +12,17 @@ in
   options.custom.productivity = {
     enable = lib.mkEnableOption "productivity desktop stack";
 
-    compositor = lib.mkOption {
-      type = lib.types.enum [
-        "hyprland"
-        "sway"
-      ];
-      default = "hyprland";
-      description = "Wayland compositor to configure at the system level.";
-    };
-
     creativeApps.enable = lib.mkEnableOption "creative suite (GIMP, Inkscape, Krita)";
     streamingTools.enable = lib.mkEnableOption "streaming / remote desktop tools (OBS, Shotcut, RustDesk)";
-    secondaryBrowsers.enable = lib.mkEnableOption "secondary browsers (Zen)";
+    secondaryBrowsers.enable = lib.mkEnableOption "secondary browsers (Chrome)";
     communicationApps.enable = lib.mkEnableOption "extra communication apps (Slack, Discord, Zoom)";
   };
 
   config = lib.mkIf cfg.enable {
     # ── Hyprland ───────────────────────────────────────────────────────────────
-    programs.hyprland = lib.mkIf (cfg.compositor == "hyprland") {
+    programs.hyprland = {
       enable = true;
       xwayland.enable = true;
-    };
-
-    # ── Sway ───────────────────────────────────────────────────────────────────
-    programs.sway = lib.mkIf (cfg.compositor == "sway") {
-      enable = true;
-      wrapperFeatures.gtk = true;
     };
 
     # ── Display manager (SDDM) ─────────────────────────────────────────────────
@@ -61,13 +45,7 @@ in
     hardware.pulseaudio.enable = false;
 
     # ── XDG portals ────────────────────────────────────────────────────────────
-    xdg.portal.extraPortals =
-      lib.optionals (cfg.compositor == "hyprland") [
-        pkgs.xdg-desktop-portal-hyprland
-      ]
-      ++ lib.optionals (cfg.compositor == "sway") [
-        pkgs.xdg-desktop-portal-wlr
-      ];
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
 
     # ── Wayland session variables ──────────────────────────────────────────────
     environment.sessionVariables = {
@@ -133,7 +111,7 @@ in
         element-desktop
 
         # Browsers
-        google-chrome
+        zen-browser
 
         # Notes / passwords
         obsidian
@@ -178,7 +156,7 @@ in
         losslesscut-bin
       ]
       ++ lib.optionals cfg.secondaryBrowsers.enable [
-        zen-browser
+        google-chrome
       ]
       ++ lib.optionals cfg.communicationApps.enable [
         slack
