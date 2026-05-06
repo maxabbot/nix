@@ -138,7 +138,7 @@
       copypath = "wl-copy";
     };
 
-    initExtra = ''
+    initContent = ''
       # ── Key bindings ────────────────────────────────────────────────────────
       bindkey '^[[A'  history-substring-search-up
       bindkey '^[[B'  history-substring-search-down

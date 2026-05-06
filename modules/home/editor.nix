@@ -82,8 +82,8 @@
       rust-analyzer
       gopls
       pyright
-      nodePackages.typescript-language-server
-      nodePackages.vscode-langservers-extracted # html/css/json/eslint
+      typescript-language-server
+      vscode-langservers-extracted # html/css/json/eslint
       bash-language-server
       yaml-language-server
       taplo # TOML
@@ -106,6 +106,7 @@
     vimAlias = false;
     withPython3 = true;
     withNodeJs = true;
+    withRuby = true;
 
     # Lazy.nvim manages plugins; we only provide system-level deps here.
     extraPackages = with pkgs; [
@@ -117,7 +118,7 @@
       rust-analyzer
       gopls
       pyright
-      nodePackages.typescript-language-server
+      typescript-language-server
       bash-language-server
 
       # Tools used by telescope / mason

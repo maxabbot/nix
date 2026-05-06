@@ -20,6 +20,9 @@
   custom.hm.compositor = compositor;
   custom.hm.monitors = monitors;
 
+  # Silence stateVersion < 26.05 default-change warnings
+  xdg.userDirs.setSessionVariables = true;
+
   # ── Basic HM settings ────────────────────────────────────────────────────────
   home = {
     username = "max";

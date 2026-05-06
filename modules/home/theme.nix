@@ -32,8 +32,14 @@
       gtk-decoration-layout = "close,minimize,maximize:";
     };
 
-    gtk4.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
+    gtk4 = {
+      extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+      };
+      theme = {
+        name = "Gruvbox-Material-Dark";
+        package = pkgs.gruvbox-material-gtk-theme or pkgs.gruvbox-dark-gtk;
+      };
     };
   };
 
