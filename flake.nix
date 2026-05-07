@@ -15,6 +15,11 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -24,6 +29,7 @@
       home-manager,
       nixos-hardware,
       disko,
+      zen-browser,
       ...
     }@inputs:
     let
@@ -52,6 +58,7 @@
             inherit
               inputs
               nixos-hardware
+              zen-browser
               hostName
               machineType
               ;

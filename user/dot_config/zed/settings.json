@@ -69,8 +69,7 @@
 
   // ── Agent ───────────────────────────────────────────────────────────────────
   "agent_servers": {
-    "github-copilot-cli": { "type": "registry" },
-    "claude-acp":         { "type": "registry" }
+    "claude-acp": { "type": "registry" }
   },
   "agent": {
     "play_sound_when_agent_done": "when_hidden",

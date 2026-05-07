@@ -19,16 +19,21 @@ ip addr        # note the IP address
 
 **2. From your local machine** (or WSL):
 ```bash
-nix run github:nix-community/nixos-anywhere -- \
-  --flake github:maxabbot/nix#home-desktop \
+sudo nix --extra-experimental-features 'nix-command flakes' run github:nix-community/nixos-anywhere -- \
+  --flake .#home-desktop \
+  --build-on remote \
   nixos@<ip>
 ```
+
+> **WSL users:** `--build-on remote` shifts compilation to the target machine, avoiding OOM kills locally (e.g. building boost).
+> If running from WSL without flakes enabled globally, the `--extra-experimental-features` flag is required.
+> If WSL disconnects mid-copy, just re-run — disko will re-format and the copy will restart.
 
 That's it. nixos-anywhere SSHs in, runs disko to partition/format the disk
 (as defined in `hosts/home-desktop/disk-config.nix`), then installs NixOS.
 
-> **Check disk name first:** default is `/dev/nvme0n1`. Run `lsblk` on the live system
-> and update `hosts/home-desktop/disk-config.nix` if your disk is different before running.
+> **Check disk name first:** on home-desktop, `nvme0n1` is the Windows drive — NixOS goes on `nvme1n1`.
+> Run `lsblk` on the live system and verify `hosts/home-desktop/disk-config.nix` targets the correct disk.
 
 ---
 

@@ -49,12 +49,11 @@ in
         mangohud
 
         # Wine (base + compat layers)
-        wineWowPackages.staging
-        wine-mono
+        wineWow64Packages.staging
         winetricks
 
         # Controller support
-        joyutils
+        linuxConsoleTools
 
         # Gaming utilities
         protonup-qt

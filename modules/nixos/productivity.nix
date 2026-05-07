@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  zen-browser,
   ...
 }:
 let
@@ -45,7 +46,11 @@ in
     services.pulseaudio.enable = false;
 
     # ── XDG portals ────────────────────────────────────────────────────────────
-    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
+    xdg.portal = {
+      enable = true;
+      extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
+      configPackages = [ pkgs.xdg-desktop-portal-hyprland ];
+    };
 
     # ── Wayland session variables ──────────────────────────────────────────────
     environment.sessionVariables = {
@@ -72,11 +77,10 @@ in
         # Wayland tools
         grim
         slurp
-        swww
+        awww
         swayidle
         swaynotificationcenter
         wl-clipboard
-        wl-paste
         cliphist
         fuzzel
         gammastep
@@ -92,26 +96,25 @@ in
         pavucontrol
 
         # File manager
-        xfce.thunar
-        xfce.thunar-archive-plugin
+        thunar
+        thunar-archive-plugin
         file-roller
 
         # Office / documents
         libreoffice-fresh
         xournalpp
         zathura
-        zathura-pdf-mupdf
         calibre
         pdfarranger
         masterpdfeditor
-        onlyoffice-bin
+        onlyoffice-desktopeditors
 
         # Communication
         thunderbird
         element-desktop
 
         # Browsers
-        zen-browser
+        zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
         # Notes / passwords
         obsidian
@@ -127,7 +130,7 @@ in
         rclone
 
         # Monitoring / hardware
-        nvtop
+        nvtopPackages.full
         openrgb-with-all-plugins
         glances
 
@@ -135,7 +138,7 @@ in
         veracrypt
 
         # Desktop helpers
-        kvantum
+        kdePackages.qtstyleplugin-kvantum
         papirus-icon-theme
         foot
         syncthingtray

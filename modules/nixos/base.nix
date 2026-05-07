@@ -209,7 +209,7 @@ in
       packages = with pkgs; [
         nerd-fonts.fira-code
         nerd-fonts.jetbrains-mono
-        noto-fonts-emoji
+        noto-fonts-color-emoji
       ];
     };
 
@@ -217,6 +217,7 @@ in
     xdg.portal = {
       enable = true;
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+      configPackages = [ pkgs.xdg-desktop-portal-gtk ];
     };
 
     # ── upower ─────────────────────────────────────────────────────────────────
@@ -229,6 +230,7 @@ in
         "flakes"
       ];
       auto-optimise-store = true;
+      download-buffer-size = 268435456; # 256 MiB
     };
 
     nix.gc = {
