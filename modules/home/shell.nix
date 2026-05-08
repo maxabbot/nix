@@ -27,8 +27,8 @@
     historySubstringSearch.enable = true;
 
     sessionVariables = {
-      EDITOR = "hx";
-      VISUAL = "hx";
+      EDITOR = "zed --wait";
+      VISUAL = "zed --wait";
       LANG = "en_US.UTF-8";
       LC_ALL = "en_US.UTF-8";
       ARCHFLAGS = "-arch x86_64";
@@ -61,11 +61,6 @@
       df = "df -h";
       du = "du -h";
       free = "free -h";
-
-      # Editor
-      v = "hx";
-      vi = "hx";
-      vim = "hx";
 
       # Safety nets
       rm = "rm -i";

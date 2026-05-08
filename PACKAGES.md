@@ -22,7 +22,7 @@ Core utilities, networking, filesystem tools, fonts, and system services.
 | `zsh`, `tmux`, `fastfetch`, `btop`, `delta`, `libnotify` | Shell / terminal tools |
 | `lm_sensors`, `clamav` | Hardware monitoring / security |
 | `man-db`, `man-pages`, `bash-completion` | Documentation |
-| `nerd-fonts.fira-code`, `nerd-fonts.jetbrains-mono`, `noto-fonts-emoji` | Fonts |
+| `nerd-fonts.jetbrains-mono`, `noto-fonts-emoji` | Fonts |
 
 ---
 

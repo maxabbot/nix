@@ -87,7 +87,7 @@
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
-      "text/plain" = [ "helix.desktop" ];
+      "text/plain" = [ "dev.zed.Zed.desktop" ];
       "text/html" = [ "google-chrome.desktop" ];
       "application/pdf" = [ "org.pwmt.zathura.desktop" ];
       "image/png" = [ "imv.desktop" ];

@@ -207,7 +207,6 @@ in
       enableDefaultPackages = true;
       fontDir.enable = true;
       packages = with pkgs; [
-        nerd-fonts.fira-code
         nerd-fonts.jetbrains-mono
         noto-fonts-color-emoji
       ];

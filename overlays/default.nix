@@ -5,5 +5,5 @@ final: prev: {
   # my-package = prev.callPackage ../pkgs/my-package { };
 
   # Example: override/patch an upstream package:
-  # helix = prev.helix.overrideAttrs (_old: { doCheck = false; });
+  # my-package = prev.my-package.overrideAttrs (_old: { doCheck = false; });
 }

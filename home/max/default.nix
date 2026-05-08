@@ -50,6 +50,9 @@
       nix-tree
       nix-diff
       nixpkgs-review
+
+      # Nix LSP
+      nil
     ];
   };
 
