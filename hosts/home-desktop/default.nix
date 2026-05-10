@@ -23,6 +23,8 @@
     enable = true;
     username = "max";
     timezone = "Pacific/Auckland";
+    initialPassword = "123"; # change after first login
+    sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     btrfsSnapshots = true;
     powerManagement = "power-profiles-daemon";
     firewall = true;
@@ -33,7 +35,6 @@
     enable = true;
     containers.podman.enable = true;
     containers.libvirt.enable = true;
-    database.servers.enable = true;
     database.guiClients.enable = true;
     database.dataPlatforms.enable = true;
     cloudTools.enable = true;

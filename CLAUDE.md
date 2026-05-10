@@ -26,7 +26,7 @@ modules/
   home/                      # Home Manager modules (replaces Chezmoi)
     default.nix              #   Imports all HM sub-modules
     shell.nix                #   Zsh, Starship, aliases, tmux
-    editor.nix               #   Helix (primary), Neovim, Zed
+    editor.nix               #   Zed (primary), VSCode
     apps.nix                 #   Kitty, btop, mpv, Zathura, Yazi
     theme.nix                #   Gruvbox Material — GTK, Qt/Kvantum, cursor
     wm/

@@ -32,7 +32,7 @@ sudo nix --extra-experimental-features 'nix-command flakes' run github:nix-commu
 That's it. nixos-anywhere SSHs in, runs disko to partition/format the disk
 (as defined in `hosts/home-desktop/disk-config.nix`), then installs NixOS.
 
-> **Check disk name first:** on home-desktop, `nvme0n1` is the Windows drive — NixOS goes on `nvme1n1`.
+> **Check disk name first:** on home-desktop, `nvme1n1` is the Windows drive — NixOS goes on `nvme0n1`.
 > Run `lsblk` on the live system and verify `hosts/home-desktop/disk-config.nix` targets the correct disk.
 
 ---
@@ -174,3 +174,79 @@ nvidia-smi   # desktop only
 ```
 
 See `docs/post-installation.md` for the full post-install checklist.
+
+---
+
+## Troubleshooting
+
+### `error: experimental Nix feature 'nix-command' is disabled`
+
+Your Nix install doesn't have `nix-command` and `flakes` enabled globally.
+Fix it for the current command by prefixing the flag:
+
+```bash
+nix --extra-experimental-features 'nix-command flakes' run github:nix-community/nixos-anywhere -- \
+  --flake github:maxabbot/nix#home-desktop \
+  --build-on remote \
+  nixos@<ip>
+```
+
+Or enable permanently so you never need the flag again:
+
+```bash
+mkdir -p ~/.config/nix
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+```
+
+On a multi-user Nix install (e.g. the Determinate Systems installer), edit `/etc/nix/nix.conf` instead and restart the daemon:
+
+```bash
+sudo sh -c 'echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf'
+sudo systemctl restart nix-daemon
+```
+
+---
+
+### No boot option after install (dual-drive / dual-boot)
+
+nixos-anywhere completes successfully but the machine has no NixOS entry in the
+firmware boot menu. On a two-NVMe system (e.g. Windows on `nvme1n1`, NixOS on
+`nvme0n1`) the firmware often defaults to the Windows drive and ignores the EFI
+entry systemd-boot wrote to `nvme0n1p1`.
+
+**Step 1 — check the one-time boot menu first (no ISO needed)**
+
+On POST hit the one-time boot key (`F8`, `F11`, or `F12` depending on board).
+Look for `Linux Boot Manager` or an entry referencing `nvme0n1`. If it boots,
+go into BIOS and move it to the top of the boot order permanently.
+
+**Step 2 — re-register the EFI entry from the NixOS ISO**
+
+Boot the NixOS ISO, then:
+
+```bash
+# Confirm partition layout
+lsblk
+
+# Register systemd-boot with the firmware
+efibootmgr -c -d /dev/nvme0n1 -p 1 
+  -L "Linux Boot Manager" \
+  -l '\EFI\systemd\systemd-bootx64.efi'
+
+# Verify the new entry appears and reboot
+efibootmgr -v
+reboot
+```
+
+**Step 3 — fallback EFI path (boards that ignore EFI variables)**
+
+Some ASUS / MSI boards do not persist EFI variables written by the OS.
+Copying to the universal fallback path forces the firmware to find it:
+
+```bash
+mount /dev/nvme0n1p1 /mnt
+mkdir -p /mnt/EFI/BOOT
+cp /mnt/EFI/systemd/systemd-bootx64.efi /mnt/EFI/BOOT/BOOTX64.EFI
+umount /mnt
+reboot
+```

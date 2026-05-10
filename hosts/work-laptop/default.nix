@@ -29,7 +29,6 @@
     enable = true;
     containers.podman.enable = true;
     containers.libvirt.enable = false;
-    database.servers.enable = true;
     database.guiClients.enable = true;
     database.dataPlatforms.enable = false;
     cloudTools.enable = true;

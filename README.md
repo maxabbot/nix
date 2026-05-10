@@ -19,7 +19,7 @@ modules/
     gaming.nix               #   Steam, Wine, Proton, controllers
   home/                      # Home Manager modules
     shell.nix                #   Zsh, Starship, aliases, tmux
-    editor.nix               #   Helix, Neovim, Zed
+    editor.nix               #   Zed, VSCode
     apps.nix                 #   Kitty, btop, mpv, Zathura, Yazi
     theme.nix                #   Gruvbox Material — GTK, Qt, cursors
     wm/
@@ -54,10 +54,11 @@ Or use the wrapper script (auto-detects hostname):
 2. On the live system: `passwd nixos && ip addr`
 3. From any machine with Nix (including WSL):
    ```bash
-   nix run github:nix-community/nixos-anywhere -- \
-     --flake github:maxabbot/nix#home-desktop \
-     nixos@<ip>
+   ./deploy.sh <ip>          # home-desktop (default)
+   ./deploy.sh <ip> work-laptop
    ```
+   The script reads the target disk from `disk-config.nix`, shows `lsblk` from
+   the live system, and requires typing `yes` before wiping anything.
 
 **Manual — if nixos-anywhere isn't available:**
 
@@ -86,7 +87,7 @@ See [docs/guides/nix-install.md](docs/guides/nix-install.md).
 ### Home Manager modules
 
 - **shell.nix** — Zsh with autosuggestions, syntax highlighting, history search; Starship (Gruvbox Material), fzf, zoxide, tmux, NixOS-native aliases replacing pacman/yay
-- **editor.nix** — Helix (primary, with LSPs), Neovim (lazy.nvim), Zed
+- **editor.nix** — Zed (primary), VSCode (backup), nil LSP for Nix
 - **apps.nix** — Kitty, btop, mpv, Zathura, Yazi (all Gruvbox Material themed)
 - **theme.nix** — GTK (Gruvbox-Material-Dark), Kvantum, Papirus icons, Bibata cursor
 - **wm/hyprland.nix** — Full Hyprland config, gaming optimizations, multi-monitor via `custom.hm.monitors`
@@ -120,7 +121,6 @@ monitors = {
 ```nix
 custom.productivity.creativeApps.enable    = true;  # GIMP, Inkscape, Krita
 custom.gaming.streaming.enable             = true;  # OBS, Moonlight
-custom.development.database.servers.enable = true;  # PostgreSQL, Redis, MariaDB
 custom.nvidia.cuda.enable                  = true;  # CUDA / cuDNN
 ```
 
@@ -149,7 +149,7 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 
 ## Theme
 
-**Gruvbox Material Dark** throughout — kitty, tmux, Starship, btop, Helix, Zathura, GTK, Qt/Kvantum.  
+**Gruvbox Material Dark** throughout — kitty, tmux, Starship, btop, Zed, Zathura, GTK, Qt/Kvantum.
 Palette: `#282828` bg · `#d4be98` fg · `#7daea3` blue · `#d8a657` yellow · `#ea6962` red · `#a9b665` green · `#d3869b` purple
 
 ## License

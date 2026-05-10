@@ -57,90 +57,6 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 
 ---
 
-## Neovim (leader: `Space`)
-
-### Navigation
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+H/J/K/L` | Navigate windows |
-| `Ctrl+arrows` | Resize windows |
-| `Shift+L` / `Shift+H` | Next / previous buffer |
-| `<leader>bd` | Delete buffer |
-
-### Files & Search
-
-| Key | Action |
-|-----|--------|
-| `<leader>e` | Toggle file explorer |
-| `<leader>ff` | Find files |
-| `<leader>fg` | Live grep |
-| `<leader>fb` | Buffers |
-| `<leader>fh` | Help tags |
-| `<leader>fr` | Recent files |
-
-### Splits & Tabs
-
-| Key | Action |
-|-----|--------|
-| `<leader>sv` / `sh` | Vertical / horizontal split |
-| `<leader>se` | Equalize splits |
-| `<leader>sx` | Close split |
-| `<leader>to` | New tab |
-| `<leader>tx` | Close tab |
-| `<leader>tn` / `tp` | Next / previous tab |
-
-### LSP
-
-| Key | Action |
-|-----|--------|
-| `gd` | Go to definition |
-| `gr` | References |
-| `gi` | Implementation |
-| `gt` | Type definition |
-| `K` | Hover docs |
-| `<leader>ca` | Code actions |
-| `<leader>rn` | Rename |
-| `<leader>d` | Show diagnostics |
-| `[d` / `]d` | Prev / next diagnostic |
-| `<leader>fm` | Format |
-| `<leader>rs` | Restart LSP |
-
-### Git & Terminal
-
-| Key | Action |
-|-----|--------|
-| `<leader>gg` | LazyGit |
-| `<leader>gb` | Toggle line blame |
-| `<leader>tt` | Open terminal |
-| `Esc` (terminal) | Exit terminal mode |
-
-### Completion
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+K/J` | Prev / next item |
-| `Ctrl+B/F` | Scroll docs |
-| `Ctrl+Space` | Trigger completion |
-| `Ctrl+E` | Abort |
-| `Enter` | Confirm |
-| `Tab` / `Shift+Tab` | Navigate / expand snippet |
-
----
-
-## Helix (leader: `Space`)
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+S` | Save file |
-| `Space+f` | File picker |
-| `Space+b` | Buffer picker |
-| `Space+/` | Global search |
-| `Space+w` | Write |
-| `Space+q` | Quit |
-
----
-
 ## Zsh
 
 | Key | Action |
@@ -202,11 +118,6 @@ ll   →  eza -la (git status, icons)
 lt   →  eza -aT --level=2 (tree)
 cat  →  bat --paging=never
 less →  bat --paging=always
-```
-
-### Editor
-```
-v / vi / vim  →  hx (Helix)
 ```
 
 ### NixOS

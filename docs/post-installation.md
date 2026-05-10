@@ -58,15 +58,17 @@ echo $STARSHIP_SHELL
 nixup   # should run nixos-rebuild switch
 ```
 
-## 5. Neovim First Launch
+## 5. Zed First Launch
 
 ```bash
-nvim
+zed .
 ```
 
-Lazy.nvim bootstraps on first run. Inside Neovim:
-- `:Lazy` — verify all plugins installed
-- `:checkhealth` — diagnose any issues
+On first launch Zed auto-installs the extensions defined in `auto_install_extensions`
+(gruvbox-material, nix, ruff, etc.) and downloads LSP servers for open file types.
+Verify:
+- Extensions panel — all listed extensions show as installed
+- Open a `.nix` file — `nil` LSP should activate (bottom status bar)
 
 ## 6. Window Manager
 
@@ -124,7 +126,7 @@ gcclean                         # alias for nix-collect-garbage -d
 ## 10. Adding Packages
 
 1. Find the nixpkgs name: `nixsrch <name>` (alias for `nix search nixpkgs`)
-2. Add to the relevant module in `system/roles/` → `modules/nixos/<role>.nix`
+2. Add to the relevant module in `modules/nixos/<role>.nix`
 3. Run `nixup`
 
 See `CLAUDE.md` for the full guide.

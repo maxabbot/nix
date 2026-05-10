@@ -44,6 +44,24 @@ in
       default = true;
       description = "Enable the kernel firewall.";
     };
+
+    hashedPassword = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Hashed password for the primary user (generate with mkpasswd -m yescrypt).";
+    };
+
+    initialPassword = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Plaintext initial password — change after first login. Use hashedPassword for anything permanent.";
+    };
+
+    sshKeys = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "SSH authorized public keys for the primary user.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -130,6 +148,9 @@ in
       ++ lib.optionals config.virtualisation.podman.enable [ "podman" ]
       ++ lib.optionals config.programs.steam.enable [ "gamemode" ];
       shell = pkgs.zsh;
+      hashedPassword = cfg.hashedPassword;
+      initialPassword = cfg.initialPassword;
+      openssh.authorizedKeys.keys = cfg.sshKeys;
     };
 
     # ── System packages ────────────────────────────────────────────────────────

@@ -18,7 +18,6 @@ in
     };
 
     database = {
-      servers.enable = lib.mkEnableOption "database server daemons (MongoDB)";
       guiClients.enable = lib.mkEnableOption "GUI database clients (DBeaver, Beekeeper, mycli, litecli)";
       dataPlatforms.enable = lib.mkEnableOption "data platform tools (DuckDB)";
     };
@@ -87,9 +86,7 @@ in
         google-cloud-sdk
         doctl
       ]
-      ++ lib.optionals cfg.database.servers.enable [
-        mongodb
-      ]
+
       ++ lib.optionals cfg.database.guiClients.enable [
         dbeaver-bin
         beekeeper-studio
@@ -120,7 +117,7 @@ in
     services.openssh = {
       enable = true;
       settings = {
-        PasswordAuthentication = false;
+        PasswordAuthentication = true;
         PermitRootLogin = "no";
       };
     };
