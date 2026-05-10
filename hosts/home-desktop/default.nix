@@ -76,10 +76,10 @@
     compositor = "hyprland";
     monitors = {
       # DP-3: primary 1440p gaming monitor (right)
-      primary = "DP-3,2560x1440@144,0x0,1";
-      # DP-2: 4K portrait monitor (left) — transform,1 = 90° clockwise
+      primary = "DP-3,2560x1440@165,0x0,1";
+      # DP-2: 4K portrait monitor (left) — transform,3 = 90° counter-clockwise
       # logical width after rotation = 2160, so position is -2160x0
-      secondary = "DP-2,3840x2160@60,-2160x0,1,transform,1";
+      secondary = "DP-2,3840x2160@60,-2160x0,1,transform,3";
     };
     git = {
       name = "Max Abbot";
