@@ -63,6 +63,13 @@ in
     boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
 
     # ── Wayland-specific NVIDIA env vars ───────────────────────────────────────
+    # environment.variables = system-wide (SDDM greeter sees these before login)
+    # environment.sessionVariables = per-session (user apps)
+    environment.variables = {
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      GBM_BACKEND = "nvidia-drm";
+      LIBVA_DRIVER_NAME = "nvidia";
+    };
     environment.sessionVariables = {
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       GBM_BACKEND = "nvidia-drm";

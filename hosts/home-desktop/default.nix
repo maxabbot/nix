@@ -75,8 +75,11 @@
     machineType = "desktop";
     compositor = "hyprland";
     monitors = {
-      primary = "DP-1,2560x1440@144,0x0,1";
-      secondary = null;
+      # DP-3: primary 1440p gaming monitor (right)
+      primary = "DP-3,2560x1440@144,0x0,1";
+      # DP-2: 4K portrait monitor (left) — transform,1 = 90° clockwise
+      # logical width after rotation = 2160, so position is -2160x0
+      secondary = "DP-2,3840x2160@60,-2160x0,1,transform,1";
     };
     git = {
       name = "Max Abbot";
