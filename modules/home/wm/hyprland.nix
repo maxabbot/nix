@@ -20,12 +20,17 @@ in
       primary = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Primary monitor string, e.g. DP-1,2560x1440@144,0x0,1";
+        description = "Primary monitor string, e.g. DP-3,2560x1440@165,2160x0,1";
+      };
+      primaryName = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = "Connector name of the primary monitor, e.g. DP-3. Used to pin workspaces.";
       };
       secondary = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Secondary monitor string, e.g. HDMI-A-1,1920x1080@60,2560x0,1";
+        description = "Secondary monitor string, e.g. DP-2,3840x2160@60,0x0,1,transform,3";
       };
     };
   };
@@ -38,9 +43,24 @@ in
       settings = {
         # ── Monitors ─────────────────────────────────────────────────────────
         monitor =
-          lib.optional (cfg.monitors.primary != null) cfg.monitors.primary
-          ++ lib.optional (cfg.monitors.secondary != null) cfg.monitors.secondary
+          lib.optional (cfg.monitors.secondary != null) cfg.monitors.secondary
+          ++ lib.optional (cfg.monitors.primary != null) cfg.monitors.primary
           ++ lib.optional (cfg.monitors.primary == null) ",preferred,auto,1";
+
+        # Pin workspaces 1-9 to the primary monitor so they don't land on the
+        # portrait monitor. Only active when primaryName is set.
+        workspace = lib.optionals (cfg.monitors.primaryName != "") [
+          "1,  monitor:${cfg.monitors.primaryName}, default:true"
+          "2,  monitor:${cfg.monitors.primaryName}"
+          "3,  monitor:${cfg.monitors.primaryName}"
+          "4,  monitor:${cfg.monitors.primaryName}"
+          "5,  monitor:${cfg.monitors.primaryName}"
+          "6,  monitor:${cfg.monitors.primaryName}"
+          "7,  monitor:${cfg.monitors.primaryName}"
+          "8,  monitor:${cfg.monitors.primaryName}"
+          "9,  monitor:${cfg.monitors.primaryName}"
+          "10, monitor:${cfg.monitors.primaryName}"
+        ];
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
