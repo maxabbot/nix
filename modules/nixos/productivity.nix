@@ -45,13 +45,6 @@ in
     # Disable PulseAudio — PipeWire replaces it
     services.pulseaudio.enable = false;
 
-    # ── XDG portals ────────────────────────────────────────────────────────────
-    xdg.portal = {
-      enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
-      configPackages = [ pkgs.xdg-desktop-portal-hyprland ];
-    };
-
     # ── Wayland session variables ──────────────────────────────────────────────
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";

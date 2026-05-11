@@ -20,6 +20,11 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    hyprland = {
+      url = "github:hyprwm/Hyprland/v0.55.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -64,10 +69,12 @@
               ;
           };
           modules = modules ++ [
+            inputs.hyprland.nixosModules.default
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
+              home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ];
               home-manager.extraSpecialArgs = hmArgs // {
                 inherit inputs;
               };

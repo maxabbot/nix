@@ -122,12 +122,13 @@ in
             enabled = true;
             size = 3;
             passes = 1;
-            new_optimizations = true;
           };
-          drop_shadow = true;
-          shadow_range = 4;
-          shadow_render_power = 3;
-          "col.shadow" = "rgba(1a1a1aee)";
+          shadow = {
+            enabled = true;
+            range = 4;
+            render_power = 3;
+            color = "rgba(1a1a1aee)";
+          };
         };
 
         # ── Animations ────────────────────────────────────────────────────────
@@ -149,12 +150,11 @@ in
           pseudotile = true;
           preserve_split = true;
         };
-        master.new_is_master = true;
+        master.new_status = "master";
 
-        # ── Gestures ──────────────────────────────────────────────────────────
+        # ── Gestures ──────────────────────────────────────────────────────────────
         gestures = {
-          workspace_swipe = true;
-          workspace_swipe_fingers = 3;
+          workspace_swipe_distance = 300;
         };
 
         # ── Misc ──────────────────────────────────────────────────────────────
@@ -166,37 +166,37 @@ in
           vrr = 2;
         };
 
-        # ── Window rules ──────────────────────────────────────────────────────
-        windowrulev2 = [
+        # ── Window rules ──────────────────────────────────────────────────────────
+        windowrule = [
           # Gaming — immediate/tearing
-          "immediate, class:^(steam_app_)(.*)$"
-          "immediate, class:^(cs2)$"
-          "immediate, class:^(dota2)$"
-          "immediate, class:^(Minecraft)(.*)$"
+          "immediate true, match:class ^(steam_app_)(.*)$"
+          "immediate true, match:class ^(cs2)$"
+          "immediate true, match:class ^(dota2)$"
+          "immediate true, match:class ^(Minecraft)(.*)$"
 
           # Launchers
-          "fullscreen, class:^(steam)$,title:^(Steam Big Picture)$"
-          "workspace 10, class:^(lutris)$"
-          "workspace 10, class:^(steam)$"
+          "fullscreen true, match:class ^(steam)$, match:title ^(Steam Big Picture)$"
+          "workspace 10, match:class ^(lutris)$"
+          "workspace 10, match:class ^(steam)$"
 
           # Float
-          "float, class:^(pavucontrol)$"
-          "float, class:^(nm-connection-editor)$"
-          "float, class:^(blueman-manager)$"
-          "float, title:^(Picture-in-Picture)$"
+          "float true, match:class ^(pavucontrol)$"
+          "float true, match:class ^(nm-connection-editor)$"
+          "float true, match:class ^(blueman-manager)$"
+          "float true, match:title ^(Picture-in-Picture)$"
 
           # Opacity
-          "opacity 0.90 0.90, class:^(kitty)$"
-          "opacity 1.0 override 1.0 override, class:^(firefox)$"
-          "opacity 1.0 override 1.0 override, class:^(chromium)$"
-          "opacity 1.0 override 1.0 override, class:^(google-chrome)$"
+          "opacity 0.90 0.90, match:class ^(kitty)$"
+          "opacity 1.0 override 1.0 override, match:class ^(firefox)$"
+          "opacity 1.0 override 1.0 override, match:class ^(chromium)$"
+          "opacity 1.0 override 1.0 override, match:class ^(google-chrome)$"
 
           # Workspace assignments
-          "workspace 1, class:^(firefox)$"
-          "workspace 2, class:^(Code)$"
-          "workspace 3, class:^(kitty)$"
-          "workspace 4, class:^(discord)$"
-          "workspace 5, class:^(Spotify)$"
+          "workspace 1, match:class ^(firefox)$"
+          "workspace 2, match:class ^(Code)$"
+          "workspace 3, match:class ^(kitty)$"
+          "workspace 4, match:class ^(discord)$"
+          "workspace 5, match:class ^(Spotify)$"
         ];
 
         # ── Keybindings ───────────────────────────────────────────────────────
