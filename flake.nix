@@ -116,7 +116,10 @@
         work-laptop = mkHost {
           hostName = "work-laptop";
           machineType = "laptop";
-          modules = [ ./hosts/work-laptop ];
+          modules = [
+            ./hosts/work-laptop
+            disko.nixosModules.disko
+          ];
           hmArgs = {
             machineType = "laptop";
             compositor = "sway";

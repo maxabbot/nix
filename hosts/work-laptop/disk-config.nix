@@ -1,16 +1,16 @@
-# hosts/home-desktop/disk-config.nix — Declarative disk layout via disko.
+# hosts/work-laptop/disk-config.nix — Declarative disk layout via disko.
 #
 # Used by nixos-anywhere for automated installation:
-#   nix run github:nix-community/nixos-anywhere -- --flake .#home-desktop nixos@<ip>
+#   nix run github:nix-community/nixos-anywhere -- --flake .#work-laptop nixos@<ip>
 #
 # Verify your disk name with `lsblk` on the live ISO before running.
-# Default assumes a single NVMe drive — change `device` if different (e.g. /dev/sda).
+# Default assumes /dev/sda — change `device` if different (e.g. /dev/nvme0n1).
 { ... }:
 {
   disko.devices = {
     disk.main = {
       type = "disk";
-      device = "/dev/nvme0n1";
+      device = "/dev/sda";
       content = {
         type = "gpt";
         partitions = {
@@ -56,13 +56,6 @@
                 };
                 "@log" = {
                   mountpoint = "/var/log";
-                  mountOptions = [
-                    "compress=zstd"
-                    "noatime"
-                  ];
-                };
-                "@snapshots" = {
-                  mountpoint = "/.snapshots";
                   mountOptions = [
                     "compress=zstd"
                     "noatime"
