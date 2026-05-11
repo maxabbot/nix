@@ -147,7 +147,6 @@ in
 
         # ── Layout ────────────────────────────────────────────────────────────
         dwindle = {
-          pseudotile = true;
           preserve_split = true;
         };
         master.new_status = "master";
@@ -214,7 +213,7 @@ in
           "$mainMod SHIFT, Q, exit,"
           "$mainMod, V, togglefloating,"
           "$mainMod, P, pseudo,"
-          "$mainMod, J, togglesplit,"
+          "$mainMod, J, layoutmsg, togglesplit"
           "$mainMod, F, fullscreen, 0"
           "$mainMod SHIFT, F, fullscreen, 1"
 
