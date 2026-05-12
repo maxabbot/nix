@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" log --oneline -20)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" ls-files)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" ls-files logs)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" ls-files \"nixos-configuration*\")",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" status -uno)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" diff --stat)"
     ]
   }
 }
