@@ -1,5 +1,4 @@
-# modules/home/shell.nix — Zsh, Starship, aliases, and shell tool integrations.
-# Mirrors user/dot_zshrc and related configs.
+# modules/home/shell.nix — Zsh, Starship, fzf, zoxide, tmux, and shell aliases/functions.
 {
   config,
   lib,
@@ -68,7 +67,7 @@
       mv = "mv -i";
 
       # NixOS package management (replaces pacman/yay)
-      nixup = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+      nixup = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname -s)";
       nixsrch = "nix search nixpkgs";
       nixshell = "nix shell nixpkgs#";
       nixtmp = "nix-shell -p";
@@ -205,7 +204,7 @@
       dclean() { podman system prune -af --volumes; }
 
       sysup() {
-        sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)
+        sudo nixos-rebuild switch --flake /etc/nixos#$(hostname -s)
         command -v rustup &>/dev/null && rustup update
       }
 

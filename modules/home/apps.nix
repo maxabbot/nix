@@ -244,15 +244,18 @@
   };
 
   # ── Swaync notification daemon config ─────────────────────────────────────────
-  xdg.configFile."swaync/config.json".source = ../../user/dot_config/swaync/config.json;
-  xdg.configFile."swaync/style.css".source = ../../user/dot_config/swaync/style.css;
+  xdg.configFile."swaync/config.json".source = ../../config/swaync/config.json;
+  xdg.configFile."swaync/style.css".source = ../../config/swaync/style.css;
 
   # ── Wlogout logout screen ─────────────────────────────────────────────────────
-  xdg.configFile."wlogout/layout".source = ../../user/dot_config/wlogout/layout;
-  xdg.configFile."wlogout/style.css".source = ../../user/dot_config/wlogout/style.css;
+  xdg.configFile."wlogout/layout".source = ../../config/wlogout/layout;
+  xdg.configFile."wlogout/style.css".source = ../../config/wlogout/style.css;
 
   # ── Fastfetch system info ─────────────────────────────────────────────────────
-  xdg.configFile."fastfetch/config.jsonc".source = ../../user/dot_config/fastfetch/config.jsonc;
+  xdg.configFile."fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
+
+  # ── Hyprlock lockscreen config ────────────────────────────────────────────────
+  xdg.configFile."hypr/hyprlock.conf".source = ../../config/hypr/hyprlock.conf;
 
   # ── Misc packages ─────────────────────────────────────────────────────────────
   home.packages = [
@@ -263,8 +266,10 @@
       cat ~/.config/cava/config_base ~/.config/cava/colors > ~/.config/cava/config 2>/dev/null
       exec ${pkgs.cava}/bin/cava "$@"
     ''))
+    # fzf+tmux project picker bound to <prefix>f / CTRL-f
+    (pkgs.writeShellScriptBin "tmux-sessionizer" (builtins.readFile ../../config/scripts/tmux-sessionizer))
   ];
 
   # ── Mise version manager ──────────────────────────────────────────────────────
-  xdg.configFile."mise/config.toml".source = ../../user/dot_config/mise/config.toml;
+  xdg.configFile."mise/config.toml".source = ../../config/mise/config.toml;
 }

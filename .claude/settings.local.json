@@ -8,7 +8,17 @@
       "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" ls-files logs)",
       "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" ls-files \"nixos-configuration*\")",
       "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" status -uno)",
-      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" diff --stat)"
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" diff --stat)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" status)",
+      "WebFetch(domain:hypr.land)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" ls-files user/)",
+      "Bash(mkdir -p \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix/config/swaync\" \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix/config/wlogout\" \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix/config/fastfetch\" \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix/config/mise\" \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix/config/hypr\" \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix/config/scripts\" && echo \"dirs ready\")",
+      "Bash(git mv *)",
+      "Bash(git rm *)",
+      "Bash(command -v nix)",
+      "Bash(wsl -e bash -c \"command -v nix\")",
+      "Bash(nix --extra-experimental-features 'nix-command flakes' flake lock)",
+      "Bash(which nix *)"
     ]
   }
 }

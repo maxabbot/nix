@@ -1,24 +1,13 @@
-*.iso
-github_pat
-
-# Chezmoi state (local machine only)
-.chezmoistate.boltdb
-
-# Ansible
-*.retry
-system/roles/*/files/*.bak
-
-# Credentials — never commit real passwords
-bootstrap/archinstall/user-credentials.json
-
-# Nix build results
+# Nix build outputs
 result
 result-*
-
-# direnv
-.direnv
 
 # Nix flake lock backup
 flake.lock.bak
 
-nixos-configuration/*
+# direnv
+.direnv
+
+# Local secrets / credentials — never commit
+github_pat
+*.iso

@@ -46,6 +46,7 @@
     creativeApps.enable = true;
     streamingTools.enable = true;
     communicationApps.enable = true;
+    secondaryBrowsers.enable = true; # google-chrome — wired into mime defaults
   };
 
   # ── NVIDIA RTX 40-series ──────────────────────────────────────────────────────

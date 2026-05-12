@@ -74,12 +74,11 @@ in
         swaynotificationcenter
         wl-clipboard
         cliphist
-        fuzzel
-        gammastep
         wlogout
         nwg-look
         hyprlock
-        waybar
+        # fuzzel + waybar: provided by HM (programs.fuzzel / programs.waybar)
+        # gammastep: provided by HM (services.gammastep)
         playerctl
         brightnessctl
         grimblast

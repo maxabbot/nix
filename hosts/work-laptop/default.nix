@@ -39,6 +39,7 @@
   custom.productivity = {
     enable = true;
     communicationApps.enable = true;
+    secondaryBrowsers.enable = true; # google-chrome — wired into mime defaults
   };
 
   # ── TLP battery management ────────────────────────────────────────────────────

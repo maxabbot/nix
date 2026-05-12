@@ -373,7 +373,7 @@ in
           ", Caps_Lock, exec, sleep 0.1 && swayosd-client --caps-lock"
 
           # Gaming toggle
-          "$mainMod SHIFT, G, exec, ~/.config/hypr/gaming-toggle.sh"
+          "$mainMod SHIFT, G, exec, ~/.config/hypr/scripts/gaming-toggle.sh"
         ];
 
         bindm = [

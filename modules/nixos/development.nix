@@ -49,17 +49,12 @@ in
         python3Packages.scikit-learn
 
         # Dev utilities
-        kitty
-        direnv
         shellcheck
         tig
-        imagemagick
         sqlite
-        jq
         yq
 
-        # Version / runtime manager
-        mise
+        # Version / runtime manager (note: mise is also in HM home.packages)
         uv
         quickemu
 
@@ -69,7 +64,6 @@ in
         # API tools
         curlie
         bruno
-        gh
 
         # DB CLI clients (lightweight, always included)
         pgcli

@@ -3,7 +3,6 @@
 {
   pkgs,
   lib,
-  config,
   machineType,
   compositor,
   monitors,
@@ -28,10 +27,6 @@
     stateVersion = "24.11";
 
     packages = with pkgs; [
-      # Communication (always present for this user)
-      thunderbird
-      element-desktop
-
       # Dev tools
       jq
       yq-go
@@ -200,7 +195,7 @@
   # ── Allow HM to manage the login shell ────────────────────────────────────────
   programs.zsh = {
     enable = true;
-    dotDir = "${config.xdg.configHome}/zsh";
+    dotDir = ".config/zsh";
   };
   home.sessionPath = [
     "$HOME/.local/bin"

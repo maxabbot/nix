@@ -1,5 +1,4 @@
 # modules/home/wm/waybar.nix — Waybar status bar, Gruvbox Material Dark.
-# Config adapts workspace/window module names to the active compositor.
 {
   lib,
   config,
@@ -8,15 +7,11 @@
 }:
 let
   cfg = config.custom.hm;
-  isHypr = cfg.compositor == "hyprland";
-  isSway = cfg.compositor == "sway";
-  isWayland = isHypr || isSway;
-
-  wsModule = if isHypr then "hyprland/workspaces" else "sway/workspaces";
-  winModule = if isHypr then "hyprland/window" else "sway/window";
+  wsModule = "hyprland/workspaces";
+  winModule = "hyprland/window";
 in
 {
-  config = lib.mkIf isWayland {
+  config = lib.mkIf (cfg.compositor == "hyprland") {
     programs.waybar = {
       enable = true;
       package = pkgs.waybar;

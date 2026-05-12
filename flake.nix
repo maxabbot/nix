@@ -69,12 +69,10 @@
               ;
           };
           modules = modules ++ [
-            inputs.hyprland.nixosModules.default
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ];
               home-manager.extraSpecialArgs = hmArgs // {
                 inherit inputs;
               };
@@ -92,6 +90,8 @@
           modules = [
             ./hosts/home-desktop
             disko.nixosModules.disko
+            inputs.hyprland.nixosModules.default
+            { home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ]; }
           ];
           hmArgs = {
             machineType = "desktop";
@@ -122,6 +122,8 @@
           modules = [
             ./hosts/work-laptop
             disko.nixosModules.disko
+            inputs.hyprland.nixosModules.default
+            { home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ]; }
           ];
           hmArgs = {
             machineType = "laptop";
@@ -142,21 +144,21 @@
           };
         };
 
-        # Minimal — base packages only
+        # Minimal — base packages only, headless (no compositor)
         minimal = mkHost {
           hostName = "minimal";
-          machineType = "desktop";
+          machineType = "server";
           modules = [ ./hosts/minimal ];
           hmArgs = {
-            machineType = "desktop";
-            compositor = "hyprland";
+            machineType = "server";
+            compositor = "none";
             monitors = {
-              primary = "";
-              secondary = "";
+              primary = null;
+              secondary = null;
             };
             location = {
-              latitude = -43.53;
-              longitude = 172.64;
+              latitude = 0.0;
+              longitude = 0.0;
             };
             git = {
               name = "Max Abbot";
