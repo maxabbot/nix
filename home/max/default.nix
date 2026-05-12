@@ -70,6 +70,7 @@
       diff.colorMoved = "default";
       rebase.autoStash = true;
       rerere.enabled = true;
+      safe.directory = "/etc/nixos";
       column.ui = "auto";
       branch.sort = "-committerdate";
       core = {
