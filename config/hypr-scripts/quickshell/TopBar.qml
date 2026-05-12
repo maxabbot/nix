@@ -1064,9 +1064,14 @@ Variants {
                     
                     property real pureCenter: (parent.width - width) / 2
                     property real minCenterDefaultX: mediaBox.defaultX + mediaBox.width + (mediaBox.width > 0 ? barWindow.s(4) : 0)
-                    property real settingsX: barWindow.width - rightContent.width - width - barWindow.s(4)
+                    property real _rawSettingsX: barWindow.width - rightContent.width - width - barWindow.s(4)
+                    property real settingsX: _rawSettingsX
+                    Behavior on settingsX {
+                        enabled: barWindow.startupCascadeFinished
+                        NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                    }
                     property real defaultX: Math.max(minCenterDefaultX, pureCenter)
-                    
+
                     x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
                     
                     property bool showLayout: false
