@@ -70,7 +70,7 @@ in
         # Wayland tools
         grim
         slurp
-        swww
+        awww
         swaynotificationcenter
         wl-clipboard
         cliphist

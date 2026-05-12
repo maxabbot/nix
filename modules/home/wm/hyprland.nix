@@ -105,8 +105,8 @@ in
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
-          "swww-daemon"
-          "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
+          "awww-daemon"
+          "awww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
           "playerctld"
           "quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml"
           "swayosd-server"
