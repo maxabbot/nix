@@ -272,7 +272,7 @@ in
           "$mainMod SHIFT, Q, exit,"
           "$mainMod, V, togglefloating,"
           "$mainMod, P, pseudo,"
-          "$mainMod, J, layoutmsg, togglesplit"
+          "$mainMod, T, layoutmsg, togglesplit"
           "$mainMod, F, fullscreen, 0"
           "$mainMod SHIFT, F, fullscreen, 1"
 

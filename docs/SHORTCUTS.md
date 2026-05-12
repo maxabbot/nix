@@ -4,35 +4,39 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 
 ---
 
-## Window Manager (Sway / Hyprland)
+## Window Manager (Hyprland)
 
 | Key | Action |
 |-----|--------|
 | `Super+Return` | Terminal (kitty) |
-| `Super+D` | Launcher (fuzzel) |
+| `Super+D` | App launcher (Quickshell) |
 | `Super+B` | Browser |
 | `Super+E` | File manager (thunar) |
 | `Super+Q` | Kill window |
+| `Super+Shift+Q` | Exit Hyprland |
 | `Super+F` | Fullscreen |
+| `Super+Shift+F` | Maximize (keep decorations) |
 | `Super+V` | Toggle floating |
-| `Super+Space` | Focus tiling/floating |
-| `Super+T` / `Super+Shift+T` | Split horizontal / vertical |
+| `Super+P` | Toggle pseudo-tile |
+| `Super+T` | Toggle split direction (dwindle) |
 | `Super+H/J/K/L` | Focus window |
 | `Super+Shift+H/J/K/L` | Move window |
-| `Super+Ctrl+H/J/K/L` | Resize window (Hyprland) |
-| `Super+R` | Resize mode (Sway) |
+| `Super+Ctrl+H/J/K/L` | Resize window |
 | `Super+1–0` | Switch workspace |
 | `Super+Shift+1–0` | Move window to workspace |
 | `Super+S` | Toggle scratchpad |
 | `Super+Shift+S` | Move to scratchpad |
 | `Super+L` | Lock screen |
+| `Super+Shift+L` | Suspend |
 | `Super+Shift+E` | Power menu |
-| `Super+C` | Clipboard history |
+| `Super+C` | Clipboard history (Quickshell) |
+| `Super+M` | Monitor controls (Quickshell) |
+| `Super+N` | Network panel (Quickshell) |
+| `Super+W` | Wallpaper picker (Quickshell) |
 | `Print` | Screenshot to clipboard (selection) |
 | `Shift+Print` | Screenshot to clipboard (fullscreen) |
 | `Super+Print` | Screenshot to file |
-| `Super+Shift+G` | Toggle gaming mode (Hyprland) |
-| `Super+Shift+R` | Reload config (Sway) |
+| `Super+Shift+G` | Toggle gaming mode |
 | `XF86Audio*` | Volume / media controls |
 | `XF86MonBrightness*` | Brightness |
 
@@ -93,14 +97,14 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 
 ---
 
-## Foot Terminal
+## Kitty Terminal
 
 | Key | Action |
 |-----|--------|
 | `Ctrl+Shift+C` | Copy |
 | `Ctrl+Shift+V` | Paste |
-| `Ctrl+Shift+R` | Search |
-| `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Font size up / down / reset |
+| `Ctrl+Shift+F` | Search |
+| `Ctrl+Shift+=` / `Ctrl+Shift+-` / `Ctrl+Shift+Backspace` | Font size up / down / reset |
 
 ---
 
