@@ -67,14 +67,11 @@
     streaming.enable = true;
   };
 
-  # ── SDDM: show greeter on DP-3 (1440p primary), not DP-2 (4K portrait) ───────
-  # pkgs.writeText puts the JSON in the Nix store; the activation script copies
-  # it into the sddm user's config dir — no heredoc, no indentation issues.
   # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────
-  # ExecStartPre (+) runs as root before SDDM on every boot, writes the KWin 6
-  # output config and locks it 444 so KWin (running as sddm) cannot overwrite it
-  # during the greeter session. UUIDs/EDID values are stable for this hardware.
-  systemd.services.sddm.serviceConfig.ExecStartPre =
+  # Activation runs on every boot before SDDM starts. chmod 444 prevents KWin
+  # (running as sddm) from overwriting the config during the greeter session.
+  # UUIDs/EDID values are stable hardware identifiers for this machine.
+  system.activationScripts.sddmMonitorConfig =
     let
       kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON [
         {
@@ -167,15 +164,16 @@
           ];
         }
       ]);
-      script = pkgs.writeShellScript "sddm-monitor-setup" ''
+    in
+    {
+      deps = [ "users" ];
+      text = ''
         mkdir -p /var/lib/sddm/.config
         cp ${kwinCfg} /var/lib/sddm/.config/kwinoutputconfig.json
         chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json
         chmod 444 /var/lib/sddm/.config/kwinoutputconfig.json
       '';
-    in
-    # '+' prefix = runs as root even though sddm.service uses User=sddm
-    "+${script}";
+    };
 
   # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ───────────────────────
   # Mainline it87 doesn't support this chip; the out-of-tree driver does.
