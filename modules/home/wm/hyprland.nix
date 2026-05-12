@@ -221,10 +221,10 @@ in
         # ── Window rules ──────────────────────────────────────────────────────────
         windowrule = [
           # Gaming — immediate/tearing
-          "immediate, match:class ^(steam_app_)(.*)$"
-          "immediate, match:class ^(cs2)$"
-          "immediate, match:class ^(dota2)$"
-          "immediate, match:class ^(Minecraft)(.*)$"
+          "immediate true, match:class ^(steam_app_)(.*)$"
+          "immediate true, match:class ^(cs2)$"
+          "immediate true, match:class ^(dota2)$"
+          "immediate true, match:class ^(Minecraft)(.*)$"
 
           # Launchers
           "fullscreen true, match:class ^(steam)$, match:title ^(Steam Big Picture)$"
