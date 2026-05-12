@@ -75,7 +75,7 @@
       kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON {
         outputs = [
           {
-            connector = "DP-3";
+            connectorName = "DP-3";
             enabled = true;
             mode = {
               width = 2560;
@@ -88,14 +88,14 @@
             };
             scale = 1.0;
             priority = 1;
-            rotation = "None";
+            rotation = "Normal";
             vrrPolicy = "Automatic";
             rgbRange = "Automatic";
             overscan = 0;
             replicationSource = "";
           }
           {
-            connector = "DP-2";
+            connectorName = "DP-2";
             enabled = false;
           }
         ];
