@@ -30,6 +30,9 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
+      wayland.compositor = "kwin";
+      theme = "sugar-dark";
+      extraPackages = [ pkgs.sddm-sugar-dark ];
     };
 
     # ── PipeWire audio stack ───────────────────────────────────────────────────
