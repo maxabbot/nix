@@ -70,12 +70,12 @@
   # ── SDDM: show greeter on DP-3 (1440p primary), not DP-2 (4K portrait) ───────
   # pkgs.writeText puts the JSON in the Nix store; the activation script copies
   # it into the sddm user's config dir — no heredoc, no indentation issues.
-  system.activationScripts.sddmMonitorConfig =
+  # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────
+  # ExecStartPre (+) runs as root before SDDM on every boot, writes the KWin 6
+  # output config and locks it 444 so KWin (running as sddm) cannot overwrite it
+  # during the greeter session. UUIDs/EDID values are stable for this hardware.
+  systemd.services.sddm.serviceConfig.ExecStartPre =
     let
-      # KWin 6 format: two top-level objects — "outputs" (per-monitor properties)
-      # and "setups" (layout: which outputs are enabled and where).
-      # outputIndex in setups maps to position in the outputs data array.
-      # UUIDs and EDID values are stable hardware identifiers from this machine.
       kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON [
         {
           name = "outputs";
@@ -167,16 +167,15 @@
           ];
         }
       ]);
-    in
-    {
-      deps = [ "users" ];
-      text = ''
+      script = pkgs.writeShellScript "sddm-monitor-setup" ''
         mkdir -p /var/lib/sddm/.config
-        cp ${kwinCfg} /var/lib/sddm/.config/kwinoutputconfig.json || true
-        chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json 2>/dev/null || true
-        chmod 600 /var/lib/sddm/.config/kwinoutputconfig.json 2>/dev/null || true
+        cp ${kwinCfg} /var/lib/sddm/.config/kwinoutputconfig.json
+        chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json
+        chmod 444 /var/lib/sddm/.config/kwinoutputconfig.json
       '';
-    };
+    in
+    # '+' prefix = runs as root even though sddm.service uses User=sddm
+    "+${script}";
 
   # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ───────────────────────
   # Mainline it87 doesn't support this chip; the out-of-tree driver does.
