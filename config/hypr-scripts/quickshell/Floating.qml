@@ -69,7 +69,7 @@ Variants {
             // --- IPC CONTROLS
             // =========================================================
             IpcHandler {
-                target: "floating"
+                target: (floatingWidget.screen === Quickshell.screens[0]) ? "floating" : ("_floating_" + floatingWidget.screen.name)
 
                 function setIndex(idx: string) {
                     let newIdx = parseInt(idx);

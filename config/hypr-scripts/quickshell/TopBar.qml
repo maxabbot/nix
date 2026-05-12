@@ -24,9 +24,9 @@ Variants {
 	    }	     	
         
             IpcHandler {
-                target: "topbar"
+                target: (barWindow.screen === Quickshell.screens[0]) ? "topbar" : ("_topbar_" + barWindow.screen.name)
                 function forceReload() {
-                    Quickshell.reload(true) 
+                    Quickshell.reload(true)
                 }
                 function queueReload() {
                     if (!barWindow.isSettingsOpen) {
