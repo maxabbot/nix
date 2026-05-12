@@ -781,7 +781,8 @@ Variants {
                     clip: true
                     
                     width: workspacesModel.count > 0 ? wsLayout.implicitWidth + barWindow.s(20) : 0
-                    
+                    Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
+
                     property real defaultX: leftContent.x + leftContent.width + barWindow.s(4)
                     property real settingsX: mediaBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
                                         
