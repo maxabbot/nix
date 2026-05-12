@@ -39,16 +39,6 @@ in
     home.file.".config/hypr/scripts".source =
       config.lib.file.mkOutOfStoreSymlink "/etc/nixos/config/hypr-scripts";
 
-    # The repo is edited from Windows (OneDrive), so the +x bit isn't preserved
-    # in git. Ensure every .sh under hypr-scripts is executable so QML click
-    # handlers in TopBar can exec qs_manager.sh and friends directly.
-    home.activation.chmodHyprScripts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if [ -d /etc/nixos/config/hypr-scripts ]; then
-        find /etc/nixos/config/hypr-scripts -type f -name '*.sh' \
-          -exec chmod +x {} +
-      fi
-    '';
-
     # Create a default colors.conf so Hyprland's source directive doesn't glob-error
     # on first boot before matugen has run. Matugen will overwrite this file.
     home.activation.initHyprColors = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
