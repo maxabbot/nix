@@ -20,3 +20,5 @@ result-*
 
 # Nix flake lock backup
 flake.lock.bak
+
+nixos-configuration/*

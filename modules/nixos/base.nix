@@ -56,9 +56,42 @@ in
       default = [ ];
       description = "SSH authorized public keys for the primary user.";
     };
+
+    plymouth.enable = lib.mkEnableOption "custom Plymouth boot splash animation";
   };
 
   config = lib.mkIf cfg.enable {
+    # ── Plymouth boot animation ────────────────────────────────────────────────
+    boot.plymouth = lib.mkIf cfg.plymouth.enable {
+      enable = true;
+      theme = "simple";
+      themePackages = [
+        (pkgs.stdenv.mkDerivation {
+          pname = "plymouth-theme-simple";
+          version = "1.0";
+          src = ../../config/plymouth/simple;
+          installPhase = ''
+            mkdir -p $out/share/plymouth/themes/simple
+            cp -r * $out/share/plymouth/themes/simple/
+            substituteInPlace $out/share/plymouth/themes/simple/simple.plymouth \
+              --replace "@out@" "$out"
+          '';
+        })
+      ];
+    };
+
+    boot.consoleLogLevel = lib.mkIf cfg.plymouth.enable 0;
+    boot.initrd.verbose = lib.mkIf cfg.plymouth.enable false;
+    boot.kernelParams = lib.mkIf cfg.plymouth.enable [
+      "quiet"
+      "splash"
+      "boot.shell_on_fail"
+      "loglevel=3"
+      "rd.systemd.show_status=false"
+      "rd.udev.log_level=3"
+      "udev.log_priority=3"
+    ];
+
     # ── Locale & timezone ──────────────────────────────────────────────────────
     time.timeZone = cfg.timezone;
     i18n.defaultLocale = "en_US.UTF-8";

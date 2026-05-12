@@ -27,6 +27,7 @@
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "power-profiles-daemon";
     firewall = true;
+    plymouth.enable = true;
   };
 
   # ── Development ──────────────────────────────────────────────────────────────

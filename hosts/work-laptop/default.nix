@@ -22,6 +22,7 @@
     timezone = "Europe/London";
     powerManagement = "tlp";
     firewall = true;
+    plymouth.enable = true;
   };
 
   # ── Development ──────────────────────────────────────────────────────────────

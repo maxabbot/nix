@@ -70,8 +70,7 @@ in
         # Wayland tools
         grim
         slurp
-        awww
-        swayidle
+        swww
         swaynotificationcenter
         wl-clipboard
         cliphist
@@ -85,8 +84,35 @@ in
         brightnessctl
         grimblast
 
-        # Audio
+        # Dynamic color theming
+        matugen
+
+        # Quickshell top bar + required Qt6 modules
+        quickshell
+        qt6.qtmultimedia
+        qt6.qt5compat
+        qt6.qtwebsockets
+        qt6.qtwebengine
+
+        # Audio tools
         pavucontrol
+        pamixer
+
+        # Volume/brightness OSD
+        swayosd
+
+        # Audio visualizer
+        cava
+
+        # Idle management
+        hypridle
+
+        # Shell utilities used by quickshell scripts
+        socat
+        acpi
+        iw
+        bluez
+        bc
 
         # File manager
         thunar

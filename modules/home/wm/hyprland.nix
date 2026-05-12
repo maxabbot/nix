@@ -1,6 +1,4 @@
 # modules/home/wm/hyprland.nix — Hyprland window manager configuration.
-# Translated from user/dot_config/hyprland/hyprland.conf.tmpl.
-# Only activates when custom.hm.compositor == "hyprland".
 { lib, config, ... }:
 let
   cfg = config.custom.hm;
@@ -36,9 +34,54 @@ in
   };
 
   config = lib.mkIf (cfg.compositor == "hyprland") {
+
+    # ── Quickshell scripts — symlinked live from the repo so scripts stay mutable
+    home.file.".config/hypr/scripts".source =
+      config.lib.file.mkOutOfStoreSymlink "/etc/nixos/config/hypr-scripts";
+
+    # ── Hypridle — replaces swayidle ───────────────────────────────────────────
+    services.hypridle = {
+      enable = true;
+      settings = {
+        general = {
+          lock_cmd = "hyprlock";
+          before_sleep_cmd = "loginctl lock-session";
+          after_sleep_cmd = "hyprctl dispatch dpms on";
+        };
+        listener = [
+          {
+            timeout = 300;
+            on-timeout = "loginctl lock-session";
+          }
+          {
+            timeout = 600;
+            on-timeout = "hyprctl dispatch dpms off";
+            on-resume = "hyprctl dispatch dpms on";
+          }
+          {
+            timeout = 900;
+            on-timeout = "systemctl suspend";
+          }
+        ];
+      };
+    };
+
     wayland.windowManager.hyprland = {
       enable = true;
       xwayland.enable = true;
+
+      # Declare Gruvbox fallback colors, then source matugen-generated overrides.
+      # Re-declare general borders so $active_border/$inactive_border take effect.
+      extraConfig = ''
+        $active_border = rgba(7daea3ee) rgba(d3869bee) 45deg
+        $inactive_border = rgba(3c3836aa)
+        source = ~/.config/hypr/colors.conf
+
+        general {
+          col.active_border = $active_border
+          col.inactive_border = $inactive_border
+        }
+      '';
 
       settings = {
         # ── Monitors ─────────────────────────────────────────────────────────
@@ -47,8 +90,6 @@ in
           ++ lib.optional (cfg.monitors.primary != null) cfg.monitors.primary
           ++ lib.optional (cfg.monitors.primary == null) ",preferred,auto,1";
 
-        # Pin workspaces 1-9 to the primary monitor so they don't land on the
-        # portrait monitor. Only active when primaryName is set.
         workspace = lib.optionals (cfg.monitors.primaryName != "") [
           "1,  monitor:${cfg.monitors.primaryName}, default:true"
           "2,  monitor:${cfg.monitors.primaryName}"
@@ -66,16 +107,20 @@ in
         "exec-once" = [
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
-          "waybar"
+          "playerctld"
+          "quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml"
+          "swayosd-server"
           "swaync"
           "/run/current-system/sw/libexec/polkit-gnome-authentication-agent-1"
-          "swayidle -w timeout 300 'hyprlock' timeout 600 'hyprctl dispatch dpms off' resume 'hyprctl dispatch dpms on' before-sleep 'hyprlock'"
           "wl-paste --type text --watch cliphist store"
           "wl-paste --type image --watch cliphist store"
           "sleep 0.5 && copyq --start-server &"
           "sleep 1 && nm-applet --indicator &"
           "sleep 1.5 && syncthingtray &"
           "gammastep"
+          "~/.config/hypr/scripts/settings_watcher.sh &"
+          "~/.config/hypr/scripts/volume_listener.sh"
+          "python3 ~/.config/hypr/scripts/quickshell/focustime/focus_daemon.py &"
         ];
 
         # ── Environment ───────────────────────────────────────────────────────
@@ -109,8 +154,6 @@ in
           gaps_in = 5;
           gaps_out = 10;
           border_size = 2;
-          "col.active_border" = "rgba(7daea3ee) rgba(d3869bee) 45deg";
-          "col.inactive_border" = "rgba(3c3836aa)";
           layout = "dwindle";
           allow_tearing = true;
         };
@@ -205,8 +248,14 @@ in
           # Apps
           "$mainMod, Return, exec, kitty"
           "$mainMod, E, exec, thunar"
-          "$mainMod, D, exec, fuzzel"
           "$mainMod, B, exec, google-chrome-stable"
+
+          # Quickshell panel toggles
+          "$mainMod, D, exec, ~/.config/hypr/scripts/qs_manager.sh toggle applauncher"
+          "$mainMod, C, exec, ~/.config/hypr/scripts/qs_manager.sh toggle clipboard"
+          "$mainMod, M, exec, ~/.config/hypr/scripts/qs_manager.sh toggle monitors"
+          "$mainMod, N, exec, ~/.config/hypr/scripts/qs_manager.sh toggle network"
+          "$mainMod, W, exec, ~/.config/hypr/scripts/qs_manager.sh toggle wallpaper"
 
           # Window management
           "$mainMod, Q, killactive,"
@@ -296,20 +345,22 @@ in
           "$mainMod, Print, exec, grim -g \"$(slurp)\" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png"
 
           # Media
-          ", XF86AudioRaiseVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-          ", XF86AudioLowerVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-          ", XF86AudioMute,         exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-          ", XF86AudioMicMute,      exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-          ", XF86AudioPlay,         exec, playerctl play-pause"
-          ", XF86AudioNext,         exec, playerctl next"
-          ", XF86AudioPrev,         exec, playerctl previous"
+          ", XF86AudioPlay,  exec, playerctl play-pause"
+          ", XF86AudioNext,  exec, playerctl next"
+          ", XF86AudioPrev,  exec, playerctl previous"
 
-          # Brightness
-          ", XF86MonBrightnessUp,   exec, brightnessctl set 5%+"
-          ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
+          # Volume via swayosd
+          ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
+          ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
+          ", XF86AudioMute,        exec, swayosd-client --output-volume mute-toggle"
+          ", XF86AudioMicMute,     exec, swayosd-client --input-volume mute-toggle"
 
-          # Clipboard
-          "$mainMod, C, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
+          # Brightness via swayosd
+          ", XF86MonBrightnessUp,   exec, swayosd-client --brightness raise"
+          ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
+
+          # Caps lock indicator via swayosd
+          ", Caps_Lock, exec, sleep 0.1 && swayosd-client --caps-lock"
 
           # Gaming toggle
           "$mainMod SHIFT, G, exec, ~/.config/hypr/gaming-toggle.sh"

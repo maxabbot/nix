@@ -1,5 +1,5 @@
-# modules/home/theme.nix — Gruvbox Material Dark theming across GTK, Qt, and cursors.
-{ pkgs, ... }:
+# modules/home/theme.nix — Gruvbox Material Dark + Matugen dynamic theming.
+{ pkgs, config, ... }:
 {
   # ── GTK ───────────────────────────────────────────────────────────────────────
   gtk = {
@@ -27,9 +27,13 @@
       package = pkgs.inter;
     };
 
-    gtk3.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
-      gtk-decoration-layout = "close,minimize,maximize:";
+    gtk3 = {
+      extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+        gtk-decoration-layout = "close,minimize,maximize:";
+      };
+      # Inject matugen-generated colors; falls back gracefully if file doesn't exist yet
+      extraCss = ''@import url("file://${config.home.homeDirectory}/.cache/matugen/colors-gtk.css");'';
     };
 
     gtk4 = {
@@ -40,21 +44,21 @@
         name = "Gruvbox-Material-Dark";
         package = pkgs.gruvbox-material-gtk-theme or pkgs.gruvbox-dark-gtk;
       };
+      extraCss = ''@import url("file://${config.home.homeDirectory}/.cache/matugen/colors-gtk.css");'';
     };
   };
 
-  # ── Qt ────────────────────────────────────────────────────────────────────────
+  # ── Qt (qt6ct with matugen-generated color scheme) ────────────────────────────
   qt = {
     enable = true;
-    platformTheme.name = "kvantum";
-    style.name = "kvantum";
+    platformTheme.name = "qt6ct";
   };
 
-  # Kvantum theme config
-  xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
-    [General]
-    theme=GruvboxMaterial
-  '';
+  # ── Matugen config and templates ──────────────────────────────────────────────
+  xdg.configFile."matugen" = {
+    source = ../../config/matugen;
+    recursive = true;
+  };
 
   # ── Cursor (for non-GTK apps and X11) ─────────────────────────────────────────
   home.file.".icons/default/index.theme".text = ''
@@ -69,8 +73,7 @@
     GTK_THEME = "Gruvbox-Material-Dark";
     XCURSOR_THEME = "Bibata-Modern-Classic";
     XCURSOR_SIZE = "24";
-    QT_QPA_PLATFORMTHEME = "kvantum";
-    QT_STYLE_OVERRIDE = "kvantum";
+    QT_QPA_PLATFORMTHEME = "qt6ct";
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
     QT_QPA_PLATFORM = "wayland;xcb";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
