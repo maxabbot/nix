@@ -111,6 +111,12 @@
       '';
     };
 
+  # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ───────────────────────
+  # Mainline it87 doesn't support this chip; the out-of-tree driver does.
+  # Required for pwmconfig / fancontrol to see PWM controls.
+  boot.extraModulePackages = [ config.boot.kernelPackages.it87 ];
+  boot.kernelModules = [ "it87" ];
+
   # ── Bootloader ────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
