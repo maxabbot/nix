@@ -62,6 +62,35 @@
     streaming.enable = true;
   };
 
+  # ── SDDM: show greeter on DP-3 (1440p primary), not DP-2 (4K portrait) ───────
+  # KWin 6 reads ~/.config/kwinoutputconfig.json for the sddm user at startup.
+  system.activationScripts.sddmMonitorConfig = {
+    deps = [ "users" ];
+    text = ''
+      install -d -m 0700 -o sddm -g sddm /var/lib/sddm/.config
+      cat > /var/lib/sddm/.config/kwinoutputconfig.json << 'EOF'
+      {
+          "outputs": [
+              {
+                  "connector": "DP-3",
+                  "enabled": true,
+                  "mode": { "width": 2560, "height": 1440, "refreshRate": 165000 },
+                  "pos": { "x": 0, "y": 0 },
+                  "priority": 1,
+                  "scale": 1.0,
+                  "transform": 0
+              },
+              {
+                  "connector": "DP-2",
+                  "enabled": false
+              }
+          ]
+      }
+      EOF
+      chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json
+    '';
+  };
+
   # ── Bootloader ────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
