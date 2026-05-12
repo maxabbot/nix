@@ -1,6 +1,7 @@
 # home/max/default.nix — Home Manager configuration for user "max".
 # Receives specialArgs from the host: machineType, compositor, monitors, git, location.
 {
+  config,
   pkgs,
   lib,
   machineType,
