@@ -91,9 +91,6 @@ in
       "udev.log_priority=3"
     ];
 
-    # Systemd-based initrd gives proper dependency ordering for BTRFS subvolumes,
-    # preventing the @nix mount race that drops to emergency shell on first boot.
-    boot.initrd.systemd.enable = true;
 
     # ── Locale & timezone ──────────────────────────────────────────────────────
     time.timeZone = cfg.timezone;
