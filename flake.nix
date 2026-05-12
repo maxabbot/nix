@@ -97,8 +97,11 @@
             machineType = "desktop";
             compositor = "hyprland";
             monitors = {
-              primary = "";
-              secondary = "";
+              # DP-2: 4K portrait monitor (left); logical size after 90° rotation = 2160x3840
+              secondary = "DP-2,3840x2160@60,0x0,1,transform,1";
+              # DP-3: primary 1440p gaming monitor (right)
+              primary = "DP-3,2560x1440@165,2160x0,1";
+              primaryName = "DP-3";
             };
             location = {
               latitude = -43.53;
@@ -122,14 +125,14 @@
           ];
           hmArgs = {
             machineType = "laptop";
-            compositor = "sway";
+            compositor = "hyprland";
             monitors = {
-              primary = "";
-              secondary = "";
+              primary = null;
+              secondary = null;
             };
             location = {
-              latitude = -43.53;
-              longitude = 172.64;
+              latitude = 51.5;
+              longitude = -0.1;
             };
             git = {
               name = "Max Abbot";

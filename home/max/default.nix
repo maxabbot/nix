@@ -194,10 +194,7 @@
   };
 
   # ── Allow HM to manage the login shell ────────────────────────────────────────
-  programs.zsh = {
-    enable = true;
-    dotDir = config.home.homeDirectory;
-  };
+  programs.zsh.enable = true;
   home.sessionPath = [
     "$HOME/.local/bin"
     "$HOME/bin"

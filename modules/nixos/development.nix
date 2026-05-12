@@ -61,7 +61,6 @@ in
         # Version / runtime manager
         mise
         uv
-        qemu
         quickemu
 
         # JS runtime

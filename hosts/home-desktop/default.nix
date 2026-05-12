@@ -25,7 +25,6 @@
     timezone = "Pacific/Auckland";
     initialPassword = "123"; # change after first login
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
-    btrfsSnapshots = true;
     powerManagement = "power-profiles-daemon";
     firewall = true;
   };
@@ -68,30 +67,6 @@
 
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";
-
-  # ── Home Manager ─────────────────────────────────────────────────────────────
-  home-manager.users.max = import ../../home/max/default.nix;
-  home-manager.extraSpecialArgs = {
-    machineType = "desktop";
-    compositor = "hyprland";
-    monitors = {
-      # DP-2: 4K portrait monitor (left) — placed at origin so all coords are positive
-      # transform,3 = 90° CCW; logical size after rotation = 2160x3840
-      secondary = "DP-2,3840x2160@60,0x0,1,transform,1";
-      # DP-3: primary 1440p gaming monitor (right) — starts after portrait monitor's logical width
-      primary = "DP-3,2560x1440@165,2160x0,1";
-      primaryName = "DP-3";
-    };
-    git = {
-      name = "Max Abbot";
-      email = "abbot.max.nz@gmail.com";
-    };
-    location = {
-      latitude = -43.53; # Christchurch, NZ
-      longitude = 172.64;
-    };
-    inherit inputs;
-  };
 
   system.stateVersion = "24.11";
 }

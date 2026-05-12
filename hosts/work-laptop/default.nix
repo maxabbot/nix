@@ -21,7 +21,6 @@
     username = "max";
     timezone = "Europe/London";
     powerManagement = "tlp";
-    btrfsSnapshots = false;
     firewall = true;
   };
 
@@ -60,26 +59,6 @@
 
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "work-laptop";
-
-  # ── Home Manager ─────────────────────────────────────────────────────────────
-  home-manager.users.max = import ../../home/max/default.nix;
-  home-manager.extraSpecialArgs = {
-    machineType = "laptop";
-    compositor = "hyprland";
-    monitors = {
-      primary = null;
-      secondary = null;
-    };
-    git = {
-      name = "Max Abbot";
-      email = "abbot.max.nz@gmail.com";
-    };
-    location = {
-      latitude = 51.5;
-      longitude = -0.1;
-    };
-    inherit inputs;
-  };
 
   system.stateVersion = "24.11";
 }

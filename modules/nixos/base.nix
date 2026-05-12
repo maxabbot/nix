@@ -33,12 +33,6 @@ in
       description = "Power management daemon to use.";
     };
 
-    btrfsSnapshots = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable BTRFS timeline snapshots via snapper.";
-    };
-
     firewall = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -94,21 +88,6 @@ in
       enable = true;
       settings = {
         TLP_DEFAULT_MODE = "AC";
-      };
-    };
-
-    # ── BTRFS snapshots ────────────────────────────────────────────────────────
-    services.snapper = lib.mkIf cfg.btrfsSnapshots {
-      configs.root = {
-        SUBVOLUME = "/";
-        ALLOW_GROUPS = [ "wheel" ];
-        TIMELINE_CREATE = true;
-        TIMELINE_CLEANUP = true;
-        TIMELINE_LIMIT_HOURLY = "5";
-        TIMELINE_LIMIT_DAILY = "7";
-        TIMELINE_LIMIT_WEEKLY = "0";
-        TIMELINE_LIMIT_MONTHLY = "0";
-        TIMELINE_LIMIT_YEARLY = "0";
       };
     };
 
