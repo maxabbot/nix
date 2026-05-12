@@ -53,6 +53,9 @@
 
       # Nix LSP
       nil
+
+      # Claude Code CLI
+      claude-code
     ];
   };
 

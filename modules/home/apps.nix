@@ -59,7 +59,7 @@
       # ── Misc ─────────────────────────────────────────────────────────────────
       scrollback_lines = 10000;
       enable_audio_bell = false;
-      visual_bell_duration = "0.1";
+      visual_bell_duration = "0.0";
       window_alert_on_bell = true;
       confirm_os_window_close = 0;
       copy_on_select = "clipboard";
