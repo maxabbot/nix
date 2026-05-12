@@ -55,13 +55,22 @@ in
         tig
         imagemagick
         sqlite
+        jq
+        yq
 
         # Version / runtime manager
         mise
+        uv
+        qemu
+        quickemu
+
+        # JS runtime
+        bun
 
         # API tools
         curlie
         bruno
+        gh
 
         # DB CLI clients (lightweight, always included)
         pgcli
