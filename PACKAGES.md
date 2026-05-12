@@ -69,7 +69,7 @@ Desktop environment, audio, and GUI apps.
 | SDDM (Wayland) | Display manager |
 | Hyprland / Sway | Wayland compositors (per-host) |
 | PipeWire + WirePlumber + ALSA + JACK | Audio stack |
-| `grim`, `slurp`, `awww`, `swayidle`, `swaynotificationcenter` | Wayland screenshot / wallpaper / idle |
+| `grim`, `slurp`, `swww`, `swayidle`, `swaynotificationcenter` | Wayland screenshot / wallpaper / idle |
 | `wl-clipboard`, `cliphist`, `wl-paste` | Clipboard |
 | `fuzzel` | App launcher |
 | `waybar` | Status bar |

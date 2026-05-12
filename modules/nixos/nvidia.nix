@@ -60,7 +60,6 @@ in
       "nvidia_uvm"
       "nvidia_drm"
     ];
-    boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
 
     # ── Wayland-specific NVIDIA env vars ───────────────────────────────────────
     # environment.variables = system-wide (SDDM greeter sees these before login)

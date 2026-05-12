@@ -115,8 +115,8 @@ in
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
-          "awww-daemon"
-          "awww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
+          "swww-daemon"
+          "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
           "playerctld"
           "quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml"
           "swayosd-server"
@@ -221,10 +221,10 @@ in
         # ── Window rules ──────────────────────────────────────────────────────────
         windowrule = [
           # Gaming — immediate/tearing
-          "immediate true, match:class ^(steam_app_)(.*)$"
-          "immediate true, match:class ^(cs2)$"
-          "immediate true, match:class ^(dota2)$"
-          "immediate true, match:class ^(Minecraft)(.*)$"
+          "immediate, match:class ^(steam_app_)(.*)$"
+          "immediate, match:class ^(cs2)$"
+          "immediate, match:class ^(dota2)$"
+          "immediate, match:class ^(Minecraft)(.*)$"
 
           # Launchers
           "fullscreen true, match:class ^(steam)$, match:title ^(Steam Big Picture)$"
