@@ -28,6 +28,10 @@
     powerManagement = "power-profiles-daemon";
     firewall = true;
     plymouth.enable = true;
+    fancontrol = {
+      enable = true;
+      # config = builtins.readFile ./fancontrol; # run: sudo pwmconfig > hosts/home-desktop/fancontrol
+    };
   };
 
   # ── Development ──────────────────────────────────────────────────────────────
@@ -83,7 +87,12 @@
               y = 0;
             };
             scale = 1.0;
-            transform = 0;
+            priority = 1;
+            rotation = "None";
+            vrrPolicy = "Automatic";
+            rgbRange = "Automatic";
+            overscan = 0;
+            replicationSource = "";
           }
           {
             connector = "DP-2";
