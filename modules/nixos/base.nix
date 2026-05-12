@@ -85,12 +85,15 @@ in
     boot.kernelParams = lib.mkIf cfg.plymouth.enable [
       "quiet"
       "splash"
-      "boot.shell_on_fail"
       "loglevel=3"
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
       "udev.log_priority=3"
     ];
+
+    # Systemd-based initrd gives proper dependency ordering for BTRFS subvolumes,
+    # preventing the @nix mount race that drops to emergency shell on first boot.
+    boot.initrd.systemd.enable = true;
 
     # ── Locale & timezone ──────────────────────────────────────────────────────
     time.timeZone = cfg.timezone;
