@@ -155,6 +155,7 @@ sudo nix --extra-experimental-features 'nix-command flakes' \
   run github:nix-community/nixos-anywhere -- \
   --flake "${SCRIPT_DIR}#${HOST}" \
   --build-on remote \
+  --extra-build-flags "--max-jobs 4 --cores 4" \
   "nixos@${TARGET_IP}"
 
 log_success "nixos-anywhere completed. The machine will reboot into NixOS."
