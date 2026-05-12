@@ -1,5 +1,5 @@
 # modules/home/theme.nix — Gruvbox Material Dark + Matugen dynamic theming.
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 {
   # ── GTK ───────────────────────────────────────────────────────────────────────
   gtk = {
@@ -85,6 +85,20 @@
     # Java AWT — prevents blank windows in IntelliJ / AWT apps on Wayland
     _JAVA_AWT_WM_NONREPARENTING = "1";
   };
+
+  # ── Matugen fallback seeds ────────────────────────────────────────────────────
+  # GTK's @import and swayosd's stylePath hard-fail if these files don't exist
+  # before matugen has run.  Create empty-but-valid placeholders on first login.
+  home.activation.initMatugenFallbacks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f "$HOME/.cache/matugen/colors-gtk.css" ]; then
+      mkdir -p "$HOME/.cache/matugen"
+      touch "$HOME/.cache/matugen/colors-gtk.css"
+    fi
+    if [ ! -f "$HOME/.config/swayosd/style.css" ]; then
+      mkdir -p "$HOME/.config/swayosd"
+      touch "$HOME/.config/swayosd/style.css"
+    fi
+  '';
 
   # ── XDG mime defaults ─────────────────────────────────────────────────────────
   xdg.mimeApps = {

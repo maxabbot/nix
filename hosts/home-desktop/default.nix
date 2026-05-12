@@ -63,9 +63,9 @@
   };
 
   # ── SDDM: show greeter on DP-3 (1440p primary), not DP-2 (4K portrait) ───────
-  # systemd-tmpfiles runs before SDDM; C+ force-copies on every boot so the
-  # config always reflects what's declared here.
-  systemd.tmpfiles.rules =
+  # pkgs.writeText puts the JSON in the Nix store; the activation script copies
+  # it into the sddm user's config dir — no heredoc, no indentation issues.
+  system.activationScripts.sddmMonitorConfig =
     let
       kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON {
         outputs = [
@@ -91,10 +91,15 @@
         ];
       });
     in
-    [
-      "d  /var/lib/sddm/.config                              0700 sddm sddm -"
-      "C+ /var/lib/sddm/.config/kwinoutputconfig.json        0600 sddm sddm - ${kwinCfg}"
-    ];
+    {
+      deps = [ "users" ];
+      text = ''
+        mkdir -p /var/lib/sddm/.config
+        cp ${kwinCfg} /var/lib/sddm/.config/kwinoutputconfig.json || true
+        chown sddm:sddm /var/lib/sddm/.config/kwinoutputconfig.json 2>/dev/null || true
+        chmod 600 /var/lib/sddm/.config/kwinoutputconfig.json 2>/dev/null || true
+      '';
+    };
 
   # ── Bootloader ────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
