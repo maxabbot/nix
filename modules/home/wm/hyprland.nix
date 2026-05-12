@@ -39,6 +39,16 @@ in
     home.file.".config/hypr/scripts".source =
       config.lib.file.mkOutOfStoreSymlink "/etc/nixos/config/hypr-scripts";
 
+    # Create a default colors.conf so Hyprland's source directive doesn't glob-error
+    # on first boot before matugen has run. Matugen will overwrite this file.
+    home.activation.initHyprColors = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [ ! -f "$HOME/.config/hypr/colors.conf" ]; then
+        mkdir -p "$HOME/.config/hypr"
+        printf '$active_border = rgba(7daea3ee) rgba(d3869bee) 45deg\n$inactive_border = rgba(3c3836aa)\n' \
+          > "$HOME/.config/hypr/colors.conf"
+      fi
+    '';
+
     # ── Hypridle — replaces swayidle ───────────────────────────────────────────
     services.hypridle = {
       enable = true;
