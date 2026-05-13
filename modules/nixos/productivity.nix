@@ -46,10 +46,6 @@ in
       extraPackages = [ pkgs.sddm-sugar-dark ];
     };
 
-    # extraPackages alone doesn't add theme files to the ThemeDir path
-    # (/run/current-system/sw/share/sddm/themes/); systemPackages does.
-    environment.systemPackages = [ pkgs.sddm-sugar-dark ];
-
     # ── PipeWire audio stack ───────────────────────────────────────────────────
     services.pipewire = {
       enable = true;
@@ -85,6 +81,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        sddm-sugar-dark
         # Wayland tools
         grim
         slurp
