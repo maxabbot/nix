@@ -35,20 +35,6 @@ in
 
   config = lib.mkIf (cfg.compositor == "hyprland") {
 
-    # ── Quickshell scripts — symlinked live from the repo so scripts stay mutable
-    home.file.".config/hypr/scripts".source =
-      config.lib.file.mkOutOfStoreSymlink "/etc/nixos/config/hypr-scripts";
-
-    # Create a default colors.conf so Hyprland's source directive doesn't glob-error
-    # on first boot before matugen has run. Matugen will overwrite this file.
-    home.activation.initHyprColors = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if [ ! -f "$HOME/.config/hypr/colors.conf" ]; then
-        mkdir -p "$HOME/.config/hypr"
-        printf '$active_border = rgba(7daea3ee) rgba(d3869bee) 45deg\n$inactive_border = rgba(3c3836aa)\n' \
-          > "$HOME/.config/hypr/colors.conf"
-      fi
-    '';
-
     # ── Hypridle — replaces swayidle ───────────────────────────────────────────
     services.hypridle = {
       enable = true;
@@ -80,12 +66,9 @@ in
       enable = true;
       xwayland.enable = true;
 
-      # Declare Gruvbox fallback colors, then source matugen-generated overrides.
-      # Re-declare general borders so $active_border/$inactive_border take effect.
       extraConfig = ''
         $active_border = rgba(7daea3ee) rgba(d3869bee) 45deg
         $inactive_border = rgba(3c3836aa)
-        source = ~/.config/hypr/colors.conf
 
         general {
           col.active_border = $active_border
@@ -118,9 +101,6 @@ in
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
           "playerctld"
-          "quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml"
-          "swayosd-server"
-          "swaync"
           "/run/current-system/sw/libexec/polkit-gnome-authentication-agent-1"
           "wl-paste --type text --watch cliphist store"
           "wl-paste --type image --watch cliphist store"
@@ -128,9 +108,6 @@ in
           "sleep 1 && nm-applet --indicator &"
           "sleep 1.5 && syncthingtray &"
           "gammastep"
-          "~/.config/hypr/scripts/settings_watcher.sh &"
-          "~/.config/hypr/scripts/volume_listener.sh"
-          "python3 ~/.config/hypr/scripts/quickshell/focustime/focus_daemon.py &"
         ];
 
         # ── Environment ───────────────────────────────────────────────────────
@@ -260,13 +237,6 @@ in
           "$mainMod, E, exec, thunar"
           "$mainMod, B, exec, google-chrome-stable"
 
-          # Quickshell panel toggles
-          "$mainMod, D, exec, ~/.config/hypr/scripts/qs_manager.sh toggle applauncher"
-          "$mainMod, C, exec, ~/.config/hypr/scripts/qs_manager.sh toggle clipboard"
-          "$mainMod, M, exec, ~/.config/hypr/scripts/qs_manager.sh toggle monitors"
-          "$mainMod, N, exec, ~/.config/hypr/scripts/qs_manager.sh toggle network"
-          "$mainMod, W, exec, ~/.config/hypr/scripts/qs_manager.sh toggle wallpaper"
-
           # Window management
           "$mainMod, Q, killactive,"
           "$mainMod SHIFT, Q, exit,"
@@ -358,19 +328,6 @@ in
           ", XF86AudioPlay,  exec, playerctl play-pause"
           ", XF86AudioNext,  exec, playerctl next"
           ", XF86AudioPrev,  exec, playerctl previous"
-
-          # Volume via swayosd
-          ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
-          ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
-          ", XF86AudioMute,        exec, swayosd-client --output-volume mute-toggle"
-          ", XF86AudioMicMute,     exec, swayosd-client --input-volume mute-toggle"
-
-          # Brightness via swayosd
-          ", XF86MonBrightnessUp,   exec, swayosd-client --brightness raise"
-          ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
-
-          # Caps lock indicator via swayosd
-          ", Caps_Lock, exec, sleep 0.1 && swayosd-client --caps-lock"
 
           # Gaming toggle
           "$mainMod SHIFT, G, exec, ~/.config/hypr/scripts/gaming-toggle.sh"

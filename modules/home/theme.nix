@@ -32,8 +32,6 @@
         gtk-application-prefer-dark-theme = 1;
         gtk-decoration-layout = "close,minimize,maximize:";
       };
-      # Inject matugen-generated colors; falls back gracefully if file doesn't exist yet
-      extraCss = ''@import url("file://${config.home.homeDirectory}/.cache/matugen/colors-gtk.css");'';
     };
 
     gtk4 = {
@@ -44,7 +42,6 @@
         name = "Gruvbox-Material-Dark";
         package = pkgs.gruvbox-material-gtk-theme or pkgs.gruvbox-dark-gtk;
       };
-      extraCss = ''@import url("file://${config.home.homeDirectory}/.cache/matugen/colors-gtk.css");'';
     };
   };
 
@@ -52,12 +49,6 @@
   qt = {
     enable = true;
     platformTheme.name = "qt6ct";
-  };
-
-  # ── Matugen config and templates ──────────────────────────────────────────────
-  xdg.configFile."matugen" = {
-    source = ../../config/matugen;
-    recursive = true;
   };
 
   # ── Cursor (for non-GTK apps and X11) ─────────────────────────────────────────
@@ -85,20 +76,6 @@
     # Java AWT — prevents blank windows in IntelliJ / AWT apps on Wayland
     _JAVA_AWT_WM_NONREPARENTING = "1";
   };
-
-  # ── Matugen fallback seeds ────────────────────────────────────────────────────
-  # GTK's @import and swayosd's stylePath hard-fail if these files don't exist
-  # before matugen has run.  Create empty-but-valid placeholders on first login.
-  home.activation.initMatugenFallbacks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if [ ! -f "$HOME/.cache/matugen/colors-gtk.css" ]; then
-      mkdir -p "$HOME/.cache/matugen"
-      touch "$HOME/.cache/matugen/colors-gtk.css"
-    fi
-    if [ ! -f "$HOME/.config/swayosd/style.css" ]; then
-      mkdir -p "$HOME/.config/swayosd"
-      touch "$HOME/.config/swayosd/style.css"
-    fi
-  '';
 
   # ── XDG mime defaults ─────────────────────────────────────────────────────────
   xdg.mimeApps = {

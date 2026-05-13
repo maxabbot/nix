@@ -26,17 +26,6 @@ in
       xwayland.enable = true;
     };
 
-    # The repo is edited from Windows (OneDrive), so the +x bit isn't preserved
-    # in git. Mark the hypr-scripts shell files executable on every rebuild so
-    # QML click handlers in TopBar can exec qs_manager.sh and friends directly.
-    # Runs as root because /etc/nixos is root-owned after `sudo git pull`.
-    system.activationScripts.chmodHyprScripts.text = ''
-      if [ -d /etc/nixos/config/hypr-scripts ]; then
-        ${pkgs.findutils}/bin/find /etc/nixos/config/hypr-scripts \
-          -type f -name '*.sh' -exec chmod +x {} +
-      fi
-    '';
-
     # ── Display manager (SDDM) ─────────────────────────────────────────────────
     services.displayManager.sddm = {
       enable = true;
@@ -86,7 +75,6 @@ in
         grim
         slurp
         awww
-        swaynotificationcenter
         wl-clipboard
         cliphist
         wlogout
@@ -98,35 +86,12 @@ in
         brightnessctl
         grimblast
 
-        # Dynamic color theming
-        matugen
-
-        # Quickshell top bar + required Qt6 modules
-        quickshell
-        qt6.qtmultimedia
-        qt6.qt5compat
-        qt6.qtwebsockets
-        qt6.qtwebengine
-
         # Audio tools
         pavucontrol
         pamixer
 
-        # Volume/brightness OSD
-        swayosd
-
-        # Audio visualizer
-        cava
-
         # Idle management
         hypridle
-
-        # Shell utilities used by quickshell scripts
-        socat
-        acpi
-        iw
-        bluez
-        bc
 
         # File manager
         thunar
