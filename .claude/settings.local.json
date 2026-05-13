@@ -18,7 +18,8 @@
       "Bash(command -v nix)",
       "Bash(wsl -e bash -c \"command -v nix\")",
       "Bash(nix --extra-experimental-features 'nix-command flakes' flake lock)",
-      "Bash(which nix *)"
+      "Bash(which nix *)",
+      "Bash(git -C \"C:/Users/MaxAbbot/OneDrive - Parallel 42/Desktop/repos/nix\" log --oneline -p -3 -- config/hypr-scripts/quickshell/TopBar.qml)"
     ]
   }
 }
