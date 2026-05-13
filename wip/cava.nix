@@ -1,5 +1,7 @@
 # wip/cava.nix — Cava audio visualizer, removed from active config 2026-05-14.
 # Re-add once ready to wire behind a proper toggle.
+# Static config file lives at wip/config/cava/config — move it back to
+# config/cava/ before restoring the symlink below.
 #
 # ── modules/nixos/productivity.nix ────────────────────────────────────────────
 # Add to environment.systemPackages:

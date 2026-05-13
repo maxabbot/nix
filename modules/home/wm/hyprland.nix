@@ -35,6 +35,9 @@ in
 
   config = lib.mkIf (cfg.compositor == "hyprland") {
 
+    # ── Live-symlinked scripts (gaming-toggle, screenshot, lock, …) ───────────
+    xdg.configFile."hypr/scripts".source = ../../../config/hypr-scripts;
+
     # ── Hypridle — replaces swayidle ───────────────────────────────────────────
     services.hypridle = {
       enable = true;

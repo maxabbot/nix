@@ -15,7 +15,6 @@ in
 
     wineExtras.enable = lib.mkEnableOption "DXVK / VKD3D-Proton Wine translation layers";
     streaming.enable = lib.mkEnableOption "game streaming / overlay tools (OBS, Moonlight, GOverlay)";
-    apollo.enable = lib.mkEnableOption "Apollo game streaming server";
     extraGpuVendors.enable = lib.mkEnableOption "extra Vulkan ICDs for non-NVIDIA GPUs (Intel, AMD)";
   };
 
@@ -79,9 +78,6 @@ in
       ++ lib.optionals cfg.extraGpuVendors.enable [
         mesa
         intel-media-driver
-      ]
-      ++ lib.optionals cfg.apollo.enable [
-        # apollo-bin — add custom derivation to overlays/default.nix when ready
       ];
 
     # ── xpadneo — Xbox controller kernel module ────────────────────────────────

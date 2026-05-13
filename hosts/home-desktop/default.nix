@@ -12,6 +12,7 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ../../modules/nixos/base.nix
+    ../../modules/nixos/plymouth.nix
     ../../modules/nixos/development.nix
     ../../modules/nixos/productivity.nix
     ../../modules/nixos/nvidia.nix
@@ -27,12 +28,13 @@
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "power-profiles-daemon";
     firewall = true;
-    plymouth.enable = true;
     fancontrol = {
       enable = true;
       # config = builtins.readFile ./fancontrol; # run: sudo pwmconfig > hosts/home-desktop/fancontrol
     };
   };
+
+  custom.plymouth.enable = true;
 
   # ── Development ──────────────────────────────────────────────────────────────
   custom.development = {

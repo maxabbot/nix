@@ -57,8 +57,6 @@ in
       description = "SSH authorized public keys for the primary user.";
     };
 
-    plymouth.enable = lib.mkEnableOption "custom Plymouth boot splash animation";
-
     fancontrol = {
       enable = lib.mkEnableOption "fancontrol service";
       config = lib.mkOption {
@@ -70,42 +68,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # ── Plymouth boot animation ────────────────────────────────────────────────
-    boot.plymouth = lib.mkIf cfg.plymouth.enable {
-      enable = true;
-      theme = "simple";
-      themePackages = [
-        (pkgs.stdenv.mkDerivation {
-          pname = "plymouth-theme-simple";
-          version = "1.0";
-          src = ../../config/plymouth/simple;
-          installPhase = ''
-            mkdir -p $out/share/plymouth/themes/simple
-            cp -r * $out/share/plymouth/themes/simple/
-            substituteInPlace $out/share/plymouth/themes/simple/simple.plymouth \
-              --replace "@out@" "$out"
-          '';
-        })
-      ];
-    };
-
     # ── Fancontrol ────────────────────────────────────────────────────────────────
     hardware.fancontrol = lib.mkIf (cfg.fancontrol.enable && cfg.fancontrol.config != "") {
       enable = true;
       config = cfg.fancontrol.config;
     };
-
-    boot.consoleLogLevel = lib.mkIf cfg.plymouth.enable 0;
-    boot.initrd.verbose = lib.mkIf cfg.plymouth.enable false;
-    boot.kernelParams = lib.mkIf cfg.plymouth.enable [
-      "quiet"
-      "splash"
-      "loglevel=3"
-      "rd.systemd.show_status=false"
-      "rd.udev.log_level=3"
-      "udev.log_priority=3"
-    ];
-
 
     # ── Locale & timezone ──────────────────────────────────────────────────────
     time.timeZone = cfg.timezone;
@@ -261,11 +228,15 @@ in
     };
 
     # ── XDG portals (base — compositor modules add their own) ─────────────────
-    xdg.portal = {
-      enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-      configPackages = [ pkgs.xdg-desktop-portal-gtk ];
-    };
+    xdg.portal =
+      let
+        gtkPortal = pkgs.xdg-desktop-portal-gtk;
+      in
+      {
+        enable = true;
+        extraPortals = [ gtkPortal ];
+        configPackages = [ gtkPortal ];
+      };
 
     # ── upower ─────────────────────────────────────────────────────────────────
     services.upower.enable = true;

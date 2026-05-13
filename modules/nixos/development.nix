@@ -54,7 +54,7 @@ in
         sqlite
         yq
 
-        # Version / runtime manager (note: mise is also in HM home.packages)
+        # Runtime managers (mise is user-scope in HM home.packages)
         uv
         quickemu
 

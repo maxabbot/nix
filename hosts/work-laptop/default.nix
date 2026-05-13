@@ -11,6 +11,7 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ../../modules/nixos/base.nix
+    ../../modules/nixos/plymouth.nix
     ../../modules/nixos/development.nix
     ../../modules/nixos/productivity.nix
   ];
@@ -20,10 +21,13 @@
     enable = true;
     username = "max";
     timezone = "Europe/London";
+    initialPassword = "123"; # change after first login
+    sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "tlp";
     firewall = true;
-    plymouth.enable = true;
   };
+
+  custom.plymouth.enable = true;
 
   # ── Development ──────────────────────────────────────────────────────────────
   custom.development = {

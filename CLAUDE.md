@@ -26,7 +26,8 @@ hosts/
     hardware-configuration.nix
 modules/
   nixos/                   # System-level NixOS modules
-    base.nix               #   Core: kernel, networking, fonts, packages, user, GC, plymouth
+    base.nix               #   Core: kernel, networking, locale, packages, user, power mgmt, GC
+    plymouth.nix           #   Boot splash (custom theme) — imported only by graphical hosts
     development.nix        #   Languages, containers, cloud CLIs, DB tools, openssh
     productivity.nix       #   Hyprland, SDDM, PipeWire, Wayland tools, apps, syncthing, flatpak
     nvidia.nix             #   Drivers, CUDA, kernel params, Wayland env, persistenced
@@ -35,28 +36,32 @@ modules/
     default.nix            #   Imports shell, editor, apps, theme, wm/hyprland, wm/waybar
     shell.nix              #   Zsh + history, Starship, fzf, zoxide, tmux, aliases/functions
     editor.nix             #   Zed (primary) + VSCode (backup)
-    apps.nix               #   Kitty, btop, mpv, Zathura, Fuzzel, swayosd, swaync, wlogout, fastfetch, mise, tmux-sessionizer
+    apps.nix               #   Kitty, btop, mpv, Zathura, Fuzzel, wlogout, fastfetch, mise, tmux-sessionizer
     theme.nix              #   Gruvbox Material — GTK, Qt/qt6ct, cursor, mime defaults, matugen
     wm/
-      hyprland.nix         #   Hyprland config (parameterised by monitors)
+      hyprland.nix         #   Hyprland config (parameterised by monitors) + hypr-scripts wiring
       waybar.nix           #   Waybar (Hyprland workspaces module)
 home/
   max/default.nix          # HM user config — git, ssh, bat, eza, rg, gammastep, direnv, zsh wiring
 config/                    # Plain-text dotfiles consumed by HM via xdg.configFile and symlinks
-  cava/                    #   cava base config (merged with matugen colors at launch)
   fastfetch/               #   fastfetch config.jsonc
   hypr/                    #   hyprlock.conf
-  hypr-scripts/            #   Live-symlinked into ~/.config/hypr/scripts/ — quickshell, gaming-toggle, etc.
+  hypr-scripts/            #   Live-symlinked into ~/.config/hypr/scripts/ — gaming-toggle, lock, screenshot, etc.
   matugen/                 #   matugen config + templates (Gruvbox Material dynamic theming)
   mise/                    #   mise config.toml
   plymouth/simple/         #   Plymouth boot splash assets
   scripts/                 #   tmux-sessionizer (wrapped via writeShellScriptBin)
-  swaync/                  #   notification daemon config + style
   wlogout/                 #   logout screen layout + style
 overlays/default.nix       # Custom package overrides (currently empty stub)
 pkgs/default.nix           # Local derivations not in nixpkgs (currently empty stub)
+wip/                       # Re-integration recipes for removed features (cava, swaync, quickshell, swayosd, matugen)
+  config/                  #   Static dotfiles for wip features, colocated with their recipes
 docs/                      # Installation, post-install, shortcuts, diagnostics
+README.md                  # Repo overview
+PACKAGES.md                # Curated package list by role
+TODO.md                    # Pending tasks and notes
 .github/workflows/ci.yml   # nix flake check, nixfmt-rfc-style, shellcheck
+.shellcheckrc              # shellcheck config (external-sources=true)
 ```
 
 ## Key Conventions
@@ -73,13 +78,14 @@ docs/                      # Installation, post-install, shortcuts, diagnostics
 
 ```nix
 custom.base.{enable, username, timezone, powerManagement, firewall,
-             hashedPassword, initialPassword, sshKeys, plymouth.enable}
+             hashedPassword, initialPassword, sshKeys, fancontrol.{enable,config}}
+custom.plymouth.enable                                    # modules/nixos/plymouth.nix
 custom.development.{enable, containers.podman.enable, containers.libvirt.enable,
                     database.guiClients.enable, database.dataPlatforms.enable, cloudTools.enable}
 custom.productivity.{enable, creativeApps.enable, streamingTools.enable,
                      secondaryBrowsers.enable, communicationApps.enable}
 custom.nvidia.{enable, open, cuda.enable}
-custom.gaming.{enable, wineExtras.enable, streaming.enable, apollo.enable, extraGpuVendors.enable}
+custom.gaming.{enable, wineExtras.enable, streaming.enable, extraGpuVendors.enable}
 ```
 
 `custom.productivity` hard-codes Hyprland as the compositor — Sway is not supported.
