@@ -784,8 +784,10 @@ Variants {
                     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
 
                     property real defaultX: leftContent.x + leftContent.width + barWindow.s(4)
-                    property real settingsX: mediaBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
-                                        
+                    property real _frozenWidth: 0
+                    property real _effWidth: barWindow.isSettingsOpen ? _frozenWidth : width
+                    property real settingsX: mediaBox.settingsX - _effWidth - (_effWidth > 0 ? barWindow.s(4) : 0)
+
                     x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
 
                     property bool limitActive: barWindow.isSettingsOpen && barWindow.isMediaActive
@@ -919,7 +921,9 @@ Variants {
                     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
 
                     property real defaultX: workspacesBox.defaultX + workspacesBox.width + (workspacesBox.width > 0 ? barWindow.s(4) : 0)
-                    property real settingsX: centerBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
+                    property real _frozenWidth: 0
+                    property real _effWidth: barWindow.isSettingsOpen ? _frozenWidth : width
+                    property real settingsX: centerBox.settingsX - _effWidth - (_effWidth > 0 ? barWindow.s(4) : 0)
 
                     x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
 
@@ -1065,14 +1069,20 @@ Variants {
                     property real pureCenter: (parent.width - width) / 2
                     property real minCenterDefaultX: mediaBox.defaultX + mediaBox.width + (mediaBox.width > 0 ? barWindow.s(4) : 0)
                     property real _frozenRightWidth: rightContent.width
-                    property real settingsX: barWindow.width - (barWindow.isSettingsOpen ? _frozenRightWidth : rightContent.width) - width - barWindow.s(4)
+                    property real _frozenWidth: 0
+                    property real _effWidth: barWindow.isSettingsOpen ? _frozenWidth : width
+                    property real settingsX: barWindow.width - (barWindow.isSettingsOpen ? _frozenRightWidth : rightContent.width) - _effWidth - barWindow.s(4)
                     property real defaultX: Math.max(minCenterDefaultX, pureCenter)
 
                     Connections {
                         target: barWindow
                         function onIsSettingsOpenChanged() {
-                            if (barWindow.isSettingsOpen)
+                            if (barWindow.isSettingsOpen) {
                                 centerBox._frozenRightWidth = rightContent.width;
+                                centerBox._frozenWidth = centerBox.width;
+                                mediaBox._frozenWidth = mediaBox.width;
+                                workspacesBox._frozenWidth = workspacesBox.width;
+                            }
                         }
                     }
 
