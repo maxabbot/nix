@@ -196,7 +196,7 @@ in
         ];
 
         # ── Window rules ──────────────────────────────────────────────────────────
-        windowrulev2 = [
+        windowrule = [
           # Gaming — allow tearing
           "immediate, class:^(steam_app_)"
           "immediate, class:^(cs2)$"
