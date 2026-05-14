@@ -71,18 +71,17 @@ in
           ++ lib.optional (cfg.monitors.primary != null) cfg.monitors.primary
           ++ lib.optional (cfg.monitors.primary == null) ",preferred,auto,1";
 
-        workspace = lib.optionals (cfg.monitors.primaryName != "") [
-          "1,  monitor:${cfg.monitors.primaryName}, default:true"
-          "2,  monitor:${cfg.monitors.primaryName}"
-          "3,  monitor:${cfg.monitors.primaryName}"
-          "4,  monitor:${cfg.monitors.primaryName}"
-          "5,  monitor:${cfg.monitors.primaryName}"
-          "6,  monitor:${cfg.monitors.primaryName}"
-          "7,  monitor:${cfg.monitors.primaryName}"
-          "8,  monitor:${cfg.monitors.primaryName}"
-          "9,  monitor:${cfg.monitors.primaryName}"
-          "10, monitor:${cfg.monitors.primaryName}"
-        ];
+        workspace =
+          lib.optionals (cfg.monitors.primaryName != "") [
+            "1, monitor:${cfg.monitors.primaryName}, default:true"
+            "2, monitor:${cfg.monitors.primaryName}"
+            "3, monitor:${cfg.monitors.primaryName}"
+          ]
+          ++ lib.optionals (cfg.monitors.secondary != null) [
+            "4, monitor:${lib.head (lib.splitString "," cfg.monitors.secondary)}, default:true"
+            "5, monitor:${lib.head (lib.splitString "," cfg.monitors.secondary)}"
+            "6, monitor:${lib.head (lib.splitString "," cfg.monitors.secondary)}"
+          ];
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
