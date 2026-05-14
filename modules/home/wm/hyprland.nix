@@ -187,12 +187,12 @@ in
 
         # ── Layer rules (layershell surfaces: waybar, swaync) ─────────────────────
         layerrule = [
-          "blur on, match:waybar"
-          "ignore_alpha 0.0, match:waybar"
-          "blur on, match:swaync-control-center"
-          "ignore_alpha 0.0, match:swaync-control-center"
-          "blur on, match:notifications"
-          "ignore_alpha 0.0, match:notifications"
+          "blur on, match:namespace waybar"
+          "ignore_alpha 0.0, match:namespace waybar"
+          "blur on, match:namespace swaync-control-center"
+          "ignore_alpha 0.0, match:namespace swaync-control-center"
+          "blur on, match:namespace notifications"
+          "ignore_alpha 0.0, match:namespace notifications"
         ];
 
         # ── Window rules ──────────────────────────────────────────────────────────
