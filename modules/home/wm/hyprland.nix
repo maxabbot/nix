@@ -185,16 +185,14 @@ in
           vrr = 2;
         };
 
-        debug.disable_logs = false;
-
         # ── Layer rules (layershell surfaces: waybar, swaync) ─────────────────────
         layerrule = [
-          "blur, waybar"
-          "ignorezero, waybar"
-          "blur, swaync-control-center"
-          "ignorezero, swaync-control-center"
-          "blur, notifications"
-          "ignorezero, notifications"
+          "blur on, waybar"
+          "ignore_alpha 0.0, waybar"
+          "blur on, swaync-control-center"
+          "ignore_alpha 0.0, swaync-control-center"
+          "blur on, notifications"
+          "ignore_alpha 0.0, notifications"
         ];
 
         # ── Window rules ──────────────────────────────────────────────────────────

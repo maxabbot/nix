@@ -22,7 +22,7 @@ in
         {
           layer = "top";
           position = "top";
-          height = 32;
+          height = 34;
           spacing = 4;
 
           "modules-left" = [
