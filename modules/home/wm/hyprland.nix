@@ -69,16 +69,6 @@ in
       enable = true;
       xwayland.enable = true;
 
-      extraConfig = ''
-        $active_border = rgba(7daea3ee) rgba(d3869bee) 45deg
-        $inactive_border = rgba(3c3836aa)
-
-        general {
-          col.active_border = $active_border
-          col.inactive_border = $inactive_border
-        }
-      '';
-
       settings = {
         # ── Monitors ─────────────────────────────────────────────────────────
         monitor =
@@ -103,13 +93,11 @@ in
         "exec-once" = [
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
-          "waybar"
           "swaync"
           "playerctld"
           "/run/current-system/sw/libexec/polkit-gnome-authentication-agent-1"
           "wl-paste --type text --watch cliphist store"
           "wl-paste --type image --watch cliphist store"
-          "sleep 0.5 && copyq --start-server &"
           "sleep 1 && nm-applet --indicator &"
           "sleep 1.5 && syncthingtray &"
           "gammastep"
@@ -148,6 +136,8 @@ in
           border_size = 2;
           layout = "dwindle";
           allow_tearing = true;
+          "col.active_border" = "rgba(7daea3ee) rgba(d3869bee) 45deg";
+          "col.inactive_border" = "rgba(3c3836aa)";
         };
 
         # ── Decoration ────────────────────────────────────────────────────────
