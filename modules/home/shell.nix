@@ -128,6 +128,11 @@
       nb = "npm run build";
       ns = "npm start";
 
+      # App shortcuts
+      zed    = "zeditor";
+      zen    = "zen-beta";
+      chrome = "google-chrome-stable";
+
       # Wayland clipboard helpers
       copypath = "wl-copy";
     };
