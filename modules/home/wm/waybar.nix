@@ -3,6 +3,7 @@
   lib,
   config,
   pkgs,
+  machineType,
   ...
 }:
 let
@@ -38,24 +39,13 @@ in
             "cpu"
             "memory"
             "temperature"
-            "battery"
-          ];
+          ] ++ lib.optional (machineType == "laptop") "battery";
 
           "${wsModule}" = {
             disable-scroll = false;
             all-outputs = true;
-            format = "{icon}";
-            format-icons = {
-              "1" = "";
-              "2" = "";
-              "3" = "";
-              "4" = "";
-              "5" = "";
-              urgent = "";
-              active = "";
-              default = "";
-            };
-            persistent_workspaces."*" = 5;
+            format = "{name}";
+            persistent-workspaces."*" = [ 1 2 3 4 5 ];
           };
 
           "${winModule}" = {
@@ -72,8 +62,8 @@ in
           idle_inhibitor = {
             format = "{icon}";
             format-icons = {
-              activated = "";
-              deactivated = "";
+              activated = "AWAKE";
+              deactivated = "IDLE";
             };
           };
 
@@ -86,14 +76,14 @@ in
 
           cpu = {
             interval = 2;
-            format = " {usage}%";
+            format = "CPU {usage}%";
             tooltip = true;
             on-click = "kitty -e btop";
           };
 
           memory = {
             interval = 5;
-            format = " {}%";
+            format = "MEM {}%";
             tooltip-format = "Memory: {used:0.1f}G / {total:0.1f}G";
             on-click = "kitty -e btop";
           };
@@ -101,12 +91,8 @@ in
           temperature = {
             thermal-zone = 2;
             critical-threshold = 80;
-            format = "{icon} {temperatureC}°C";
-            format-icons = [
-              ""
-              ""
-              ""
-            ];
+            format = "TEMP {temperatureC}°C";
+            on-click = "kitty -e btop";
           };
 
           battery = {
@@ -129,34 +115,21 @@ in
           };
 
           network = {
-            format-wifi = " {essid} ({signalStrength}%)";
-            format-ethernet = " {ipaddr}/{cidr}";
-            tooltip-format = " {ifname} via {gwaddr}";
-            format-linked = " {ifname} (No IP)";
-            format-disconnected = "⚠ Disconnected";
+            format-wifi = "WiFi: {essid} ({signalStrength}%)";
+            format-ethernet = "ETH: {ipaddr}/{cidr}";
+            tooltip-format = "{ifname} via {gwaddr}";
+            format-linked = "{ifname} (No IP)";
+            format-disconnected = "Disconnected";
             format-alt = "{ifname}: {ipaddr}/{cidr}";
             on-click-right = "nm-connection-editor";
           };
 
           pulseaudio = {
             scroll-step = 5;
-            format = "{icon} {volume}%";
-            format-bluetooth = "{icon} {volume}%";
-            format-bluetooth-muted = " {icon}";
-            format-muted = "";
-            format-icons = {
-              headphone = "";
-              hands-free = "";
-              headset = "";
-              phone = "";
-              portable = "";
-              car = "";
-              default = [
-                ""
-                ""
-                ""
-              ];
-            };
+            format = "VOL {volume}%";
+            format-bluetooth = "BT {volume}%";
+            format-bluetooth-muted = "BT muted";
+            format-muted = "muted";
             on-click = "pavucontrol";
           };
         }
