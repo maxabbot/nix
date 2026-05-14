@@ -185,13 +185,6 @@ in
           vrr = 2;
         };
 
-        # ── Render ────────────────────────────────────────────────────────────
-        # explicit_sync = 0 avoids "Failed to initialize semaphore for plane fence"
-        # errors from nvidia-drm after suspend/resume (EAGAIN on atomic modeset).
-        render = {
-          explicit_sync = 2;
-        };
-
         # ── Layer rules (layershell surfaces: waybar, swaync) ─────────────────────
         layerrule = [
           "blur on, match:namespace waybar"
