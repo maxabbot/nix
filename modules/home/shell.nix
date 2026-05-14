@@ -133,8 +133,6 @@
       zen    = "zen-beta";
       chrome = "google-chrome-stable";
 
-      # Wayland clipboard helpers
-      copypath = "wl-copy";
     };
 
     initContent = ''
