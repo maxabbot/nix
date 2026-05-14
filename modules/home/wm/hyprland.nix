@@ -198,13 +198,13 @@ in
         # ── Window rules ──────────────────────────────────────────────────────────
         windowrule = [
           # Gaming — allow tearing
-          "immediate, class:^(steam_app_)"
-          "immediate, class:^(cs2)$"
-          "immediate, class:^(dota2)$"
-          "immediate, class:^(Minecraft)"
+          "immediate on, class:^(steam_app_)"
+          "immediate on, class:^(cs2)$"
+          "immediate on, class:^(dota2)$"
+          "immediate on, class:^(Minecraft)"
 
           # Launchers
-          "fullscreen, class:^(steam)$, title:^(Steam Big Picture Mode)$"
+          "fullscreen on, class:^(steam)$, title:^(Steam Big Picture Mode)$"
           "workspace 10 silent, class:^(lutris)$"
           "workspace 10 silent, class:^(steam)$"
 
