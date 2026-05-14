@@ -32,8 +32,14 @@ in
       wayland.enable = true;
       wayland.compositor = "kwin";
       theme = "sugar-dark";
-      extraPackages = [ pkgs.sddm-sugar-dark ];
-      settings.Theme.CursorTheme = "sugar-dark";
+      extraPackages = [
+        pkgs.sddm-sugar-dark
+        pkgs.kdePackages.breeze       # provides breeze_cursors
+        pkgs.kdePackages.qtsvg        # required for sugar-dark QML theme rendering
+        pkgs.kdePackages.qtmultimedia # required for sugar-dark background video
+      ];
+      settings.Theme.CursorTheme = "breeze_cursors";
+      settings.Theme.CursorSize = "24";
     };
 
     # ── PipeWire audio stack ───────────────────────────────────────────────────
