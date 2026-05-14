@@ -33,6 +33,7 @@ in
       wayland.compositor = "kwin";
       theme = "sugar-dark";
       extraPackages = [ pkgs.sddm-sugar-dark ];
+      settings.Theme.CursorTheme = "sugar-dark";
     };
 
     # ── PipeWire audio stack ───────────────────────────────────────────────────

@@ -53,11 +53,6 @@ in
             on-timeout = "loginctl lock-session";
           }
           {
-            timeout = 600;
-            on-timeout = "hyprctl dispatch dpms off";
-            on-resume = "hyprctl dispatch dpms on";
-          }
-          {
             timeout = 900;
             on-timeout = "systemctl suspend";
           }
@@ -189,6 +184,8 @@ in
           key_press_enables_dpms = true;
           vrr = 2;
         };
+
+        debug.disable_logs = false;
 
         # ── Layer rules (layershell surfaces: waybar, swaync) ─────────────────────
         layerrule = [

@@ -240,6 +240,7 @@
 
   # ── Misc packages ─────────────────────────────────────────────────────────────
   home.packages = [
+    pkgs.freetube
     pkgs.mise
     # fzf+tmux project picker bound to <prefix>f / CTRL-f
     (pkgs.writeShellScriptBin "tmux-sessionizer" (builtins.readFile ../../config/scripts/tmux-sessionizer))
