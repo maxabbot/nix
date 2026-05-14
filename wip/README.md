@@ -9,7 +9,7 @@ so they stay colocated with the recipe until re-integration.
 |---|---|---|
 | `cava.nix` | Cava audio visualizer | `config/cava/` |
 | `swaync.nix` | Swaync notification daemon | `config/swaync/` |
-| `quickshell.nix` | Quickshell bar (replaces Waybar) | `config/hypr-scripts/quickshell/` |
+| `quickshell.nix` | Quickshell bar (replaces Waybar) | `wip/config/quickshell/` |
 | `swayosd.nix` | SwayOSD volume/brightness overlay | — |
 | `matugen.nix` | Matugen dynamic theming | `config/matugen/` (still active) |
 

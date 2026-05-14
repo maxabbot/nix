@@ -1,5 +1,7 @@
 # wip/quickshell.nix — Quickshell top bar, removed from active config 2026-05-14.
 # Re-add once ready to wire behind a proper toggle.
+# QML sources live at wip/config/quickshell/ — move back to
+# config/hypr-scripts/quickshell/ before restoring the exec-once below.
 #
 # ── modules/nixos/productivity.nix ────────────────────────────────────────────
 # Add to system.activationScripts (currently present but can be kept for gaming-toggle.sh):
