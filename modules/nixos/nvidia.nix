@@ -29,7 +29,7 @@ in
 
     hardware.nvidia = {
       modesetting.enable = true;
-      powerManagement.enable = false;
+      powerManagement.enable = true;
       powerManagement.finegrained = false;
       open = cfg.open;
       nvidiaSettings = true;
@@ -58,6 +58,8 @@ in
       "nvidia-drm.modeset=1"
       "nvidia-drm.fbdev=1"
     ];
+    # Required for powerManagement.enable to correctly save/restore VRAM on suspend
+    boot.extraModprobeConfig = "options nvidia NVreg_PreserveVideoMemoryAllocations=1";
     boot.initrd.kernelModules = [
       "nvidia"
       "nvidia_modeset"

@@ -10,6 +10,25 @@ let
   cfg = config.custom.hm;
   wsModule = "hyprland/workspaces";
   winModule = "hyprland/window";
+
+  sysinfo-script = pkgs.writeShellScript "waybar-sysinfo" ''
+    set -euo pipefail
+    read -r a1 t1 < <(awk '/^cpu /{print $2+$4, $2+$3+$4+$5+$6+$7+$8}' /proc/stat)
+    sleep 0.5
+    read -r a2 t2 < <(awk '/^cpu /{print $2+$4, $2+$3+$4+$5+$6+$7+$8}' /proc/stat)
+    cpu=$(( (a2-a1)*100/(t2-t1) ))
+    mem=$(awk '/MemTotal/{t=$2}/MemAvailable/{a=$2}END{printf "%d",100*(t-a)/t}' /proc/meminfo)
+    temp_raw=$(cat /sys/class/thermal/thermal_zone2/temp 2>/dev/null || echo 0)
+    temp=$(( temp_raw / 1000 ))
+    echo "CPU ''${cpu}% MEM ''${mem}% ''${temp}°C"
+  '';
+
+  gpu-script = pkgs.writeShellScript "waybar-gpu" ''
+    set -euo pipefail
+    usage=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo "?")
+    temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo "?")
+    echo "GPU ''${usage}% ''${temp}°C"
+  '';
 in
 {
   config = lib.mkIf (cfg.compositor == "hyprland") {
@@ -36,10 +55,11 @@ in
             "idle_inhibitor"
             "pulseaudio"
             "network"
-            "cpu"
-            "memory"
-            "temperature"
-          ] ++ lib.optional (machineType == "laptop") "battery";
+            "disk"
+            "custom/sysinfo"
+          ]
+          ++ lib.optional (machineType == "desktop") "custom/gpu"
+          ++ lib.optional (machineType == "laptop") "battery";
 
           "${wsModule}" = {
             disable-scroll = false;
@@ -74,24 +94,25 @@ in
             format-alt = "{:%Y-%m-%d}";
           };
 
-          cpu = {
+          disk = {
+            interval = 30;
+            format = "DISK {percentage_used}%";
+            path = "/";
+            tooltip-format = "{used} / {total}";
+            on-click = "kitty -e btop";
+          };
+
+          "custom/sysinfo" = {
+            exec = "${sysinfo-script}";
             interval = 2;
-            format = "CPU {usage}%";
-            tooltip = true;
+            tooltip = false;
             on-click = "kitty -e btop";
           };
 
-          memory = {
-            interval = 5;
-            format = "MEM {}%";
-            tooltip-format = "Memory: {used:0.1f}G / {total:0.1f}G";
-            on-click = "kitty -e btop";
-          };
-
-          temperature = {
-            thermal-zone = 2;
-            critical-threshold = 80;
-            format = "TEMP {temperatureC}°C";
+          "custom/gpu" = {
+            exec = "${gpu-script}";
+            interval = 2;
+            tooltip = false;
             on-click = "kitty -e btop";
           };
 
@@ -186,9 +207,9 @@ in
 
         #clock,
         #battery,
-        #cpu,
-        #memory,
-        #temperature,
+        #custom-sysinfo,
+        #custom-gpu,
+        #disk,
         #network,
         #pulseaudio,
         #tray,
@@ -216,18 +237,14 @@ in
           color: #ea6962;
           animation: blink 1s linear infinite;
         }
-        #cpu {
+        #custom-sysinfo {
           color: #d3869b;
         }
-        #memory {
-          color: #7daea3;
-        }
-        #temperature {
+        #custom-gpu {
           color: #e78a4e;
         }
-        #temperature.critical {
-          color: #ea6962;
-          animation: blink 1s linear infinite;
+        #disk {
+          color: #7daea3;
         }
         #network {
           color: #89b482;
