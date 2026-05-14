@@ -44,6 +44,7 @@ in
         nvidia-vaapi-driver
         libva
         libva-utils
+        vulkan-loader
         vulkan-tools
         vulkan-validation-layers
       ];

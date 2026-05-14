@@ -103,6 +103,8 @@ in
         "exec-once" = [
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
+          "waybar"
+          "swaync"
           "playerctld"
           "/run/current-system/sw/libexec/polkit-gnome-authentication-agent-1"
           "wl-paste --type text --watch cliphist store"
@@ -198,37 +200,47 @@ in
           vrr = 2;
         };
 
+        # ── Layer rules (layershell surfaces: waybar, swaync) ─────────────────────
+        layerrule = [
+          "blur, waybar"
+          "ignorezero, waybar"
+          "blur, swaync-control-center"
+          "ignorezero, swaync-control-center"
+          "blur, notifications"
+          "ignorezero, notifications"
+        ];
+
         # ── Window rules ──────────────────────────────────────────────────────────
-        windowrule = [
-          # Gaming — immediate/tearing
-          "immediate true, match:class ^(steam_app_)(.*)$"
-          "immediate true, match:class ^(cs2)$"
-          "immediate true, match:class ^(dota2)$"
-          "immediate true, match:class ^(Minecraft)(.*)$"
+        windowrulev2 = [
+          # Gaming — allow tearing
+          "immediate, class:^(steam_app_)"
+          "immediate, class:^(cs2)$"
+          "immediate, class:^(dota2)$"
+          "immediate, class:^(Minecraft)"
 
           # Launchers
-          "fullscreen true, match:class ^(steam)$, match:title ^(Steam Big Picture)$"
-          "workspace 10, match:class ^(lutris)$"
-          "workspace 10, match:class ^(steam)$"
+          "fullscreen, class:^(steam)$, title:^(Steam Big Picture Mode)$"
+          "workspace 10 silent, class:^(lutris)$"
+          "workspace 10 silent, class:^(steam)$"
 
           # Float
-          "float true, match:class ^(pavucontrol)$"
-          "float true, match:class ^(nm-connection-editor)$"
-          "float true, match:class ^(blueman-manager)$"
-          "float true, match:title ^(Picture-in-Picture)$"
+          "float, class:^(pavucontrol)$"
+          "float, class:^(nm-connection-editor)$"
+          "float, class:^(blueman-manager)$"
+          "float, title:^(Picture-in-Picture)$"
 
           # Opacity
-          "opacity 0.90 0.90, match:class ^(kitty)$"
-          "opacity 1.0 override 1.0 override, match:class ^(firefox)$"
-          "opacity 1.0 override 1.0 override, match:class ^(chromium)$"
-          "opacity 1.0 override 1.0 override, match:class ^(google-chrome)$"
+          "opacity 0.90 0.90, class:^(kitty)$"
+          "opacity 1.0 override 1.0 override, class:^(firefox)$"
+          "opacity 1.0 override 1.0 override, class:^(chromium)$"
+          "opacity 1.0 override 1.0 override, class:^(google-chrome)$"
 
           # Workspace assignments
-          "workspace 1, match:class ^(firefox)$"
-          "workspace 2, match:class ^(Code)$"
-          "workspace 3, match:class ^(kitty)$"
-          "workspace 4, match:class ^(discord)$"
-          "workspace 5, match:class ^(Spotify)$"
+          "workspace 1, class:^(firefox)$"
+          "workspace 2, class:^(Code)$"
+          "workspace 3, class:^(kitty)$"
+          "workspace 4, class:^(discord)$"
+          "workspace 5, class:^(Spotify)$"
         ];
 
         # ── Keybindings ───────────────────────────────────────────────────────
@@ -237,6 +249,7 @@ in
         bind = [
           # Apps
           "$mainMod, Return, exec, kitty"
+          "$mainMod, D, exec, fuzzel"
           "$mainMod, E, exec, thunar"
           "$mainMod, B, exec, google-chrome-stable"
 
@@ -321,11 +334,22 @@ in
           "$mainMod, L, exec, hyprlock"
           "$mainMod SHIFT, L, exec, systemctl suspend"
           "$mainMod SHIFT, E, exec, wlogout -p layer-shell"
+          "$mainMod, N, exec, swaync-client -t -sw"
+          "$mainMod SHIFT, V, exec, cliphist list | fuzzel -d | cliphist decode | wl-copy"
 
           # Screenshots
           ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
           "SHIFT, Print, exec, grim - | wl-copy"
           "$mainMod, Print, exec, grim -g \"$(slurp)\" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png"
+
+          # Volume
+          ", XF86AudioRaiseVolume, exec, pamixer -i 5"
+          ", XF86AudioLowerVolume, exec, pamixer -d 5"
+          ", XF86AudioMute,        exec, pamixer -t"
+
+          # Brightness
+          ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
+          ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
 
           # Media
           ", XF86AudioPlay,  exec, playerctl play-pause"

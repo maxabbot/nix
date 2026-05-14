@@ -140,6 +140,7 @@ in
         papirus-icon-theme
         foot
         syncthingtray
+        swaynotificationcenter
 
         # Terminal file manager / misc
         yazi

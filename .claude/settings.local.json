@@ -15,7 +15,9 @@
       "Bash(nix run *)",
       "Bash(which nixfmt-rfc-style *)",
       "Bash(git cherry-pick *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)"
     ]
   }
 }
