@@ -38,8 +38,11 @@ in
         pkgs.kdePackages.qtsvg        # required for sugar-dark QML theme rendering
         pkgs.kdePackages.qtmultimedia # required for sugar-dark background video
       ];
-      settings.Theme.CursorTheme = "breeze_cursors";
-      settings.Theme.CursorSize = "24";
+      settings.Theme = {
+        CursorTheme = "breeze_cursors";
+        CursorSize = "24";
+        ThemeDir = "${pkgs.sddm-sugar-dark}/share/sddm/themes";
+      };
     };
 
     # ── PipeWire audio stack ───────────────────────────────────────────────────

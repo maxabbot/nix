@@ -145,9 +145,9 @@
               lidClosed = false;
               outputs = [
                 {
-                  enabled = false; # DP-2 disabled at login
+                  enabled = true;
                   outputIndex = 0;
-                  position = { x = 0; y = 0; };
+                  position = { x = 2560; y = 0; };
                   priority = 0;
                   replicationSource = "";
                 }
