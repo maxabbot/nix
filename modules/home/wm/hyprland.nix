@@ -207,10 +207,10 @@ in
           "workspace 10 silent, match:class ^(steam)$"
 
           # Float
-          "float, match:class ^(pavucontrol)$"
-          "float, match:class ^(nm-connection-editor)$"
-          "float, match:class ^(blueman-manager)$"
-          "float, title:^(Picture-in-Picture)$"
+          "float on, match:class ^(pavucontrol)$"
+          "float on, match:class ^(nm-connection-editor)$"
+          "float on, match:class ^(blueman-manager)$"
+          "float on, match:title ^(Picture-in-Picture)$"
 
           # Opacity
           "opacity 0.90 0.90, match:class ^(kitty)$"
