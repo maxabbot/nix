@@ -13,7 +13,9 @@
       "PowerShell(Get-ChildItem *)",
       "PowerShell(Test-Path *)",
       "Bash(nix run *)",
-      "Bash(which nixfmt-rfc-style *)"
+      "Bash(which nixfmt-rfc-style *)",
+      "Bash(git cherry-pick *)",
+      "Bash(git stash *)"
     ]
   }
 }
