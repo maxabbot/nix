@@ -11,7 +11,7 @@
     };
 
     settings = {
-      # ── Gruvbox Material Dark palette (fallback; matugen overrides at runtime) ──
+      # ── Gruvbox Material Dark palette ──────────────────────────────────────────
       foreground = "#d4be98";
       background = "#282828";
       selection_foreground = "#282828";

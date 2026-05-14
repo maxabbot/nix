@@ -94,7 +94,7 @@ nixos-anywhere will:
 ```bash
 # SSH in, then run the install guide steps manually
 ssh nixos@<ip>
-# Follow docs/guides/arch-install.md
+# Follow docs/guides/nix-install.md
 ```
 
 ---

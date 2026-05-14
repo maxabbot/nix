@@ -9,8 +9,8 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 | Key | Action |
 |-----|--------|
 | `Super+Return` | Terminal (kitty) |
-| `Super+D` | App launcher (Quickshell) |
-| `Super+B` | Browser |
+| `Super+D` | App launcher (fuzzel) |
+| `Super+B` | Browser (Chrome) |
 | `Super+E` | File manager (thunar) |
 | `Super+Q` | Kill window |
 | `Super+Shift+Q` | Exit Hyprland |
@@ -28,11 +28,9 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 | `Super+Shift+S` | Move to scratchpad |
 | `Super+L` | Lock screen |
 | `Super+Shift+L` | Suspend |
-| `Super+Shift+E` | Power menu |
-| `Super+C` | Clipboard history (Quickshell) |
-| `Super+M` | Monitor controls (Quickshell) |
-| `Super+N` | Network panel (Quickshell) |
-| `Super+W` | Wallpaper picker (Quickshell) |
+| `Super+Shift+E` | Power menu (wlogout) |
+| `Super+N` | Notifications (swaync) |
+| `Super+Shift+V` | Clipboard history (cliphist) |
 | `Print` | Screenshot to clipboard (selection) |
 | `Shift+Print` | Screenshot to clipboard (fullscreen) |
 | `Super+Print` | Screenshot to file |
@@ -46,7 +44,7 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 
 | Key | Action |
 |-----|--------|
-| `<prefix>+C` | New window |
+| `<prefix>+c` | New window |
 | `<prefix>+\|` | Split horizontal |
 | `<prefix>+-` | Split vertical |
 | `<prefix>+H/J/K/L` | Navigate panes |
@@ -147,7 +145,7 @@ jctl      →  journalctl -xe
 ```
 g   →  git          gs  →  git status
 ga  →  git add      gaa →  git add --all
-gc  →  git commit   gcm →  git commit -m
+gc  →  git commit -v   gcm →  git commit -m
 gp  →  git push     gpl →  git pull
 gd  →  git diff     gl  →  git log --oneline --graph
 gco →  git checkout gb  →  git branch

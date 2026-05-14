@@ -1,4 +1,4 @@
-# modules/home/theme.nix — Gruvbox Material Dark + Matugen dynamic theming.
+# modules/home/theme.nix — Gruvbox Material Dark theming.
 { pkgs, config, lib, ... }:
 {
   # ── GTK ───────────────────────────────────────────────────────────────────────
@@ -45,7 +45,7 @@
     };
   };
 
-  # ── Qt (qt6ct with matugen-generated color scheme) ────────────────────────────
+  # ── Qt (qt6ct) ────────────────────────────────────────────────────────────────
   qt = {
     enable = true;
     platformTheme.name = "qt6ct";

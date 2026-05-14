@@ -71,29 +71,12 @@ sudo systemctl restart sddm
 systemctl --failed
 
 # Logs for a specific unit
-journalctl -b -u swayosd.service | tail -20
 journalctl -b -u xdg-desktop-portal-hyprland.service | tail -20
 journalctl -b -u gammastep.service | tail -20
 
 # User-level failed units (run as max, not root)
 systemctl --user --failed
 journalctl --user -b | grep -i failed | tail -20
-```
-
-## Matugen / theming
-
-```bash
-# Check which seed files exist
-ls ~/.cache/matugen/
-ls ~/.config/swayosd/style.css
-ls ~/.config/hypr/colors.conf
-ls /tmp/kitty-matugen-colors.conf
-
-# Run matugen manually (generates all theme files from wallpaper)
-matugen gen -i ~/Pictures/wallpaper.jpg
-
-# Reload Hyprland config after matugen
-hyprctl reload
 ```
 
 ## NixOS rebuild

@@ -8,7 +8,7 @@ Infrastructure-as-Code for NixOS workstations using **Nix Flakes** and **Home Ma
 flake.nix                    # Entry point — inputs, nixosConfigurations
 hosts/
   home-desktop/              # Gaming workstation (RTX 40-series, Hyprland)
-  work-laptop/               # Dev laptop (Sway, TLP)
+  work-laptop/               # Dev laptop (Hyprland, TLP)
   minimal/                   # Headless / base only
 modules/
   nixos/                     # System-level NixOS modules
@@ -24,7 +24,6 @@ modules/
     theme.nix                #   Gruvbox Material — GTK, Qt, cursors
     wm/
       hyprland.nix           #   Hyprland config
-      sway.nix               #   Sway config
 home/
   max/default.nix            # Home Manager user config
 overlays/default.nix         # Custom package overrides
@@ -69,7 +68,7 @@ See [docs/guides/nix-install.md](docs/guides/nix-install.md).
 | Host | Profile | Compositor | Features |
 |------|---------|------------|----------|
 | `home-desktop` | Gaming workstation | Hyprland | base + dev + productivity + nvidia + gaming |
-| `work-laptop`  | Dev laptop          | Sway      | base + dev + productivity + TLP |
+| `work-laptop`  | Dev laptop          | Hyprland  | base + dev + productivity + TLP |
 | `minimal`      | Headless / server   | —         | base only |
 
 ## Modules
@@ -91,7 +90,6 @@ See [docs/guides/nix-install.md](docs/guides/nix-install.md).
 - **apps.nix** — Kitty, btop, mpv, Zathura, Yazi (all Gruvbox Material themed)
 - **theme.nix** — GTK (Gruvbox-Material-Dark), Kvantum, Papirus icons, Bibata cursor
 - **wm/hyprland.nix** — Full Hyprland config, gaming optimizations, multi-monitor via `custom.hm.monitors`
-- **wm/sway.nix** — Full Sway config
 
 ## Customising
 

@@ -72,8 +72,7 @@ Verify:
 
 ## 6. Window Manager
 
-SDDM starts automatically. Log in to the session configured for your host
-(`hyprland` for home-desktop, `sway` for work-laptop).
+SDDM starts automatically. Log in to the Hyprland session.
 
 Key bindings (see `docs/SHORTCUTS.md` for the full reference):
 - `Super+Return` — Terminal (kitty)
