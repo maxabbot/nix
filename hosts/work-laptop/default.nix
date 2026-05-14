@@ -11,7 +11,6 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ../../modules/nixos/base.nix
-    ../../modules/nixos/plymouth.nix
     ../../modules/nixos/development.nix
     ../../modules/nixos/productivity.nix
   ];
@@ -26,8 +25,6 @@
     powerManagement = "tlp";
     firewall = true;
   };
-
-  custom.plymouth.enable = true;
 
   # ── Development ──────────────────────────────────────────────────────────────
   custom.development = {

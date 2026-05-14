@@ -77,7 +77,7 @@ Desktop environment, audio, and GUI apps.
 | `playerctl`, `brightnessctl`, `pavucontrol` | Media / brightness / audio |
 | `gammastep`, `grimblast` | Night light / screenshot helper |
 | `xfce.thunar`, `xfce.thunar-archive-plugin`, `file-roller` | File manager |
-| `libreoffice-fresh`, `xournalpp`, `zathura`, `calibre`, `pdfarranger`, `onlyoffice-bin` | Office / documents |
+| `libreoffice-fresh`, `rnote`, `zathura`, `calibre`, `pdfarranger`, `onlyoffice-bin` | Office / documents |
 | `masterpdfeditor` | PDF editor |
 | `zen-browser` | Primary browser |
 | `google-chrome` *(opt-in)* | Secondary browser |

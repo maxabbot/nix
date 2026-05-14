@@ -12,7 +12,6 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ../../modules/nixos/base.nix
-    ../../modules/nixos/plymouth.nix
     ../../modules/nixos/development.nix
     ../../modules/nixos/productivity.nix
     ../../modules/nixos/nvidia.nix
@@ -33,8 +32,6 @@
       # config = builtins.readFile ./fancontrol; # run: sudo pwmconfig > hosts/home-desktop/fancontrol
     };
   };
-
-  custom.plymouth.enable = true;
 
   # ── Development ──────────────────────────────────────────────────────────────
   custom.development = {

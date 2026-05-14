@@ -101,7 +101,7 @@ in
 
         # Office / documents
         libreoffice-fresh
-        xournalpp
+        rnote
         zathura
         calibre
         pdfarranger
