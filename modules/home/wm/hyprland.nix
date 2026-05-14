@@ -198,34 +198,32 @@ in
         # ── Window rules ──────────────────────────────────────────────────────────
         windowrule = [
           # Gaming — allow tearing
-          "immediate on, class:^(steam_app_)"
-          "immediate on, class:^(cs2)$"
-          "immediate on, class:^(dota2)$"
-          "immediate on, class:^(Minecraft)"
+          "immediate on, match:class ^(steam_app_)"
+          "immediate on, match:class ^(Minecraft)"
 
           # Launchers
-          "fullscreen on, class:^(steam)$, title:^(Steam Big Picture Mode)$"
-          "workspace 10 silent, class:^(lutris)$"
-          "workspace 10 silent, class:^(steam)$"
+          "fullscreen on, match:class ^(steam)$, match:title ^(Steam Big Picture Mode)$"
+          "workspace 10 silent, match:class ^(lutris)$"
+          "workspace 10 silent, match:class ^(steam)$"
 
           # Float
-          "float, class:^(pavucontrol)$"
-          "float, class:^(nm-connection-editor)$"
-          "float, class:^(blueman-manager)$"
+          "float, match:class ^(pavucontrol)$"
+          "float, match:class ^(nm-connection-editor)$"
+          "float, match:class ^(blueman-manager)$"
           "float, title:^(Picture-in-Picture)$"
 
           # Opacity
-          "opacity 0.90 0.90, class:^(kitty)$"
-          "opacity 1.0 override 1.0 override, class:^(firefox)$"
-          "opacity 1.0 override 1.0 override, class:^(chromium)$"
-          "opacity 1.0 override 1.0 override, class:^(google-chrome)$"
+          "opacity 0.90 0.90, match:class ^(kitty)$"
+          "opacity 1.0 override 1.0 override, match:class ^(firefox)$"
+          "opacity 1.0 override 1.0 override, match:class ^(chromium)$"
+          "opacity 1.0 override 1.0 override, match:class ^(google-chrome)$"
 
           # Workspace assignments
-          "workspace 1, class:^(firefox)$"
-          "workspace 2, class:^(Code)$"
-          "workspace 3, class:^(kitty)$"
-          "workspace 4, class:^(discord)$"
-          "workspace 5, class:^(Spotify)$"
+          "workspace 1, match:class ^(firefox)$"
+          "workspace 2, match:class ^(Code)$"
+          "workspace 3, match:class ^(kitty)$"
+          "workspace 4, match:class ^(discord)$"
+          "workspace 5, match:class ^(Spotify)$"
         ];
 
         # ── Keybindings ───────────────────────────────────────────────────────
