@@ -184,6 +184,11 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # btrfs "first mount" free-space-tree init creates a brief window where the
+  # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
+  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.Restart = "on-failure";
+  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.RestartSec = "2";
+
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";
 
