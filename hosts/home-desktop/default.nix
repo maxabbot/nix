@@ -187,7 +187,9 @@
   # btrfs "first mount" free-space-tree init creates a brief window where the
   # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
   boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.Restart = "on-failure";
-  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.RestartSec = "2";
+  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.RestartSec = "3";
+  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.StartLimitBurst = 10;
+  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.StartLimitIntervalSec = "60";
 
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";
