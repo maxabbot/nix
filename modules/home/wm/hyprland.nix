@@ -108,8 +108,7 @@ in
     wayland.windowManager.hyprland = {
       enable = true;
       xwayland.enable = true;
-      # settings intentionally empty: Hyprland 0.55+ prefers hyprland.lua
-      # over the HM-generated hyprland.conf, so no settings block needed.
+      configType = "hyprlang";
     };
   };
 }
