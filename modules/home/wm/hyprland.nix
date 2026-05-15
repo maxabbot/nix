@@ -85,7 +85,7 @@ in
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
-          "swayosd-server"
+          "GSK_RENDERER=ngl swayosd-server"
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
           "swaync"

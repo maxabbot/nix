@@ -29,11 +29,9 @@
       light = "Gruvbox Material Light";
       dark = "Gruvbox Material Dark";
     };
-    icon_theme = {
-      mode = "system";
-      light = "Zed (Default)";
-      dark = "Colored Zed Icons Theme Dark";
-    };
+    # icon_theme only supports a plain string (no mode/light/dark object).
+    # Use your preferred single theme here; Colored Zed Icons has a dark variant.
+    icon_theme = "Colored Zed Icons Theme Dark";
     ui_font_family = "JetBrainsMono Nerd Font";
     ui_font_size = 16;
     buffer_font_family = "JetBrainsMono Nerd Font";
@@ -74,8 +72,7 @@
       dock = "left";
     };
     git_panel = {
-      show_count_badge = true;
-      tree_view = true;
+      # tree_view and show_count_badge removed; dock is the main supported key
       dock = "left";
     };
     collaboration_panel = {
@@ -83,7 +80,6 @@
     };
 
     # ── MCP context servers ──────────────────────────────────────────────────────
-    # brave_api_key intentionally omitted — configure via Zed UI or a secrets manager
     context_servers = {
       "mcp-server-markitdown" = {
         enabled = true;
@@ -100,21 +96,17 @@
     };
 
     # ── Agent ───────────────────────────────────────────────────────────────────
-    agent_servers = {
-      "claude-acp" = { type = "registry"; };
-    };
+    # agent_servers / claude-acp registry entry is deprecated; claude-acp is
+    # now launched via the agent selector UI or a keymap binding, not settings.
     agent = {
-      play_sound_when_agent_done = "when_hidden";
-      sidebar_side = "right";
       dock = "right";
       default_model = {
         provider = "zed.dev";
         model = "claude-sonnet-4-6";
+        # effort controls reasoning depth ("high" | "medium" | "low").
+        # enable_thinking is no longer a valid key; effort replaces it.
         effort = "high";
-        enable_thinking = true;
       };
-      favorite_models = [ ];
-      model_parameters = [ ];
     };
 
     # ── Git ─────────────────────────────────────────────────────────────────────
@@ -136,7 +128,6 @@
     };
 
     # ── File type associations ───────────────────────────────────────────────────
-    # github-actions extension auto-detects workflow files by content/path
     file_types = {
       "sql" = [ "*.sql" ];
     };
