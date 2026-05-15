@@ -41,7 +41,6 @@ in
       settings.Theme = {
         CursorTheme = "breeze_cursors";
         CursorSize = "24";
-        ThemeDir = "${pkgs.sddm-sugar-dark}/share/sddm/themes";
       };
     };
 
@@ -61,7 +60,6 @@ in
     # ── Wayland session variables ──────────────────────────────────────────────
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
-      WLR_NO_HARDWARE_CURSORS = "1";
       MOZ_ENABLE_WAYLAND = "1";
     };
 
@@ -99,6 +97,7 @@ in
         # Audio tools
         pavucontrol
         pamixer
+        swayosd
 
         # Idle management
         hypridle

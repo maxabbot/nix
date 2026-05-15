@@ -7,7 +7,9 @@
     pkgs.nano
   ];
 
-  xdg.configFile."zed/settings.json".text = builtins.toJSON {
+  xdg.configFile."zed/settings.json" = {
+    force = true;
+    text = builtins.toJSON {
 
     # ── Extensions (auto-installed) ─────────────────────────────────────────────
     auto_install_extensions = {
@@ -245,6 +247,7 @@
         format_on_save = "off";
       };
     };
+  };
   };
 
   # ── VSCode (backup editor) ─────────────────────────────────────────────────────

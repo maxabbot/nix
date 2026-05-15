@@ -57,6 +57,7 @@ in
         # Runtime managers (mise is user-scope in HM home.packages)
         uv
         quickemu
+        quickgui
 
         # JS runtime
         bun

@@ -85,6 +85,7 @@ in
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
+          "swayosd-server"
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
           "swaync"
@@ -98,10 +99,13 @@ in
         ];
 
         # ── Environment ───────────────────────────────────────────────────────
+        cursor = {
+          no_hardware_cursors = true;
+        };
+
         env = [
           "XCURSOR_SIZE,24"
           "XCURSOR_THEME,Bibata-Modern-Classic"
-          "WLR_NO_HARDWARE_CURSORS,1"
           "GTK_THEME,Gruvbox-Material-Dark"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
           "GBM_BACKEND,nvidia-drm"
@@ -325,9 +329,9 @@ in
           "$mainMod, Print, exec, grim -g \"$(slurp)\" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png"
 
           # Volume
-          ", XF86AudioRaiseVolume, exec, pamixer -i 5"
-          ", XF86AudioLowerVolume, exec, pamixer -d 5"
-          ", XF86AudioMute,        exec, pamixer -t"
+          ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
+          ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
+          ", XF86AudioMute,        exec, swayosd-client --output-volume mute-toggle"
 
           # Brightness
           ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
