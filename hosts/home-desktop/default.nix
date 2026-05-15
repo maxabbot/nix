@@ -18,6 +18,8 @@
     ../../modules/nixos/gaming.nix
   ];
 
+  home-manager.backupFileExtension = "backup";
+
   # ── Base ─────────────────────────────────────────────────────────────────────
   custom.base = {
     enable = true;
