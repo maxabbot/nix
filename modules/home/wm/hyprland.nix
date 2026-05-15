@@ -85,6 +85,7 @@ in
 
         # ── Startup ──────────────────────────────────────────────────────────
         "exec-once" = [
+          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland DISPLAY"
           "GSK_RENDERER=ngl swayosd-server"
           "swww-daemon"
           "swww img ~/.config/hyprland/wallpaper.jpg --transition-type wipe --transition-fps 60"
