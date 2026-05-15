@@ -109,6 +109,8 @@ in
       enable = true;
       xwayland.enable = true;
       configType = "hyprlang";
+      # Satisfies HM's lint check — actual config is in xdg.configFile."hypr/hyprland.lua"
+      extraConfig = "# see hyprland.lua";
     };
   };
 }
