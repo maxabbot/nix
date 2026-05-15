@@ -45,6 +45,9 @@
     };
   };
 
+  # ── XDG color scheme (used by Zed, Electron, and other portal-aware apps) ────
+  dconf.settings."org/freedesktop/appearance".color-scheme = 1; # 1 = dark
+
   # ── Qt (qt6ct) ────────────────────────────────────────────────────────────────
   qt = {
     enable = true;
