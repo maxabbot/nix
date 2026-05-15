@@ -145,7 +145,7 @@
               lidClosed = false;
               outputs = [
                 {
-                  enabled = true;
+                  enabled = false;
                   outputIndex = 0;
                   position = { x = 2560; y = 0; };
                   priority = 0;

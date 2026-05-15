@@ -108,11 +108,12 @@ in
           "XCURSOR_THEME,Bibata-Modern-Classic"
           "GTK_THEME,Gruvbox-Material-Dark"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-          "GBM_BACKEND,nvidia-drm"
           "LIBVA_DRIVER_NAME,nvidia"
           "__GL_GSYNC_ALLOWED,1"
           "__GL_VRR_ALLOWED,1"
         ];
+
+        xwayland.force_zero_scaling = true;
 
         # ── Input ─────────────────────────────────────────────────────────────
         input = {
