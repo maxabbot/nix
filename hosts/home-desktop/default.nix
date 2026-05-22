@@ -1,21 +1,26 @@
 # hosts/home-desktop/default.nix — Gaming/desktop workstation (RTX 40-series, Hyprland).
-# Equivalent to the home_desktop Ansible profile.
-{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  ...
-}:
+{ config, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
     ../../modules/nixos/base.nix
-    ../../modules/nixos/development.nix
-    ../../modules/nixos/productivity.nix
-    ../../modules/nixos/nvidia.nix
-    ../../modules/nixos/gaming.nix
+    ../common/optional/development.nix
+    ../common/optional/podman.nix
+    ../common/optional/libvirt.nix
+    ../common/optional/db-gui.nix
+    ../common/optional/duckdb.nix
+    ../common/optional/cloud-tools.nix
+    ../common/optional/productivity.nix
+    ../common/optional/creative-apps.nix
+    ../common/optional/streaming-tools.nix
+    ../common/optional/google-chrome.nix
+    ../common/optional/comms.nix
+    ../common/optional/nvidia.nix
+    ../common/optional/cuda.nix
+    ../common/optional/gaming.nix
+    ../common/optional/wine.nix
+    ../common/optional/gaming-streaming.nix
   ];
 
   home-manager.backupFileExtension = "backup";
@@ -33,39 +38,6 @@
       enable = true;
       # config = builtins.readFile ./fancontrol; # run: sudo pwmconfig > hosts/home-desktop/fancontrol
     };
-  };
-
-  # ── Development ──────────────────────────────────────────────────────────────
-  custom.development = {
-    enable = true;
-    containers.podman.enable = true;
-    containers.libvirt.enable = true;
-    database.guiClients.enable = true;
-    database.dataPlatforms.enable = true;
-    cloudTools.enable = true;
-  };
-
-  # ── Productivity (Hyprland desktop) ──────────────────────────────────────────
-  custom.productivity = {
-    enable = true;
-    creativeApps.enable = true;
-    streamingTools.enable = true;
-    communicationApps.enable = true;
-    secondaryBrowsers.enable = true; # google-chrome — wired into mime defaults
-  };
-
-  # ── NVIDIA RTX 40-series ──────────────────────────────────────────────────────
-  custom.nvidia = {
-    enable = true;
-    open = true;
-    cuda.enable = true;
-  };
-
-  # ── Gaming ────────────────────────────────────────────────────────────────────
-  custom.gaming = {
-    enable = true;
-    wineExtras.enable = true;
-    streaming.enable = true;
   };
 
   # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────

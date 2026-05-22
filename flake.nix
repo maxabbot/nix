@@ -25,6 +25,11 @@
       url = "github:hyprwm/Hyprland/v0.55.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v0.4.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -45,6 +50,15 @@
         inherit system;
         config.allowUnfree = true;
         overlays = [ (import ./overlays) ];
+      };
+
+      # Shared hmArgs applied to every host — override per-host as needed.
+      sharedHmArgs = {
+        git = {
+          name = "Max Abbot";
+          email = "abbot.max.nz@gmail.com";
+          signingkey = "";
+        };
       };
 
       # Builds a NixosSystem with Home Manager wired in.
@@ -73,7 +87,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs = hmArgs // {
+              home-manager.extraSpecialArgs = sharedHmArgs // hmArgs // {
                 inherit inputs;
               };
               home-manager.users.max = import ./home/max;
@@ -90,8 +104,6 @@
           modules = [
             ./hosts/home-desktop
             disko.nixosModules.disko
-            inputs.hyprland.nixosModules.default
-            { home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ]; }
           ];
           hmArgs = {
             machineType = "desktop";
@@ -107,11 +119,6 @@
               latitude = -43.53;
               longitude = 172.64;
             };
-            git = {
-              name = "Max Abbot";
-              email = "abbot.max.nz@gmail.com";
-              signingkey = "";
-            };
           };
         };
 
@@ -122,8 +129,6 @@
           modules = [
             ./hosts/work-laptop
             disko.nixosModules.disko
-            inputs.hyprland.nixosModules.default
-            { home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ]; }
           ];
           hmArgs = {
             machineType = "laptop";
@@ -135,11 +140,6 @@
             location = {
               latitude = 51.5;
               longitude = -0.1;
-            };
-            git = {
-              name = "Max Abbot";
-              email = "abbot.max.nz@gmail.com";
-              signingkey = "";
             };
           };
         };
@@ -159,11 +159,6 @@
             location = {
               latitude = 0.0;
               longitude = 0.0;
-            };
-            git = {
-              name = "Max Abbot";
-              email = "abbot.max.nz@gmail.com";
-              signingkey = "";
             };
           };
         };

@@ -21,7 +21,13 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\" -Recurse -Filter \"*hypr*\" -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Get-ChildItem -Force)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(gh api *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\development.nix\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\productivity.nix\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\nvidia.nix\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\gaming.nix\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\plymouth.nix\")"
     ]
   }
 }

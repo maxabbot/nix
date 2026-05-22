@@ -1,18 +1,17 @@
 # hosts/work-laptop/default.nix — Work laptop (Hyprland, TLP, no gaming/nvidia).
-{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  ...
-}:
+{ ... }:
 {
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
     ../../modules/nixos/base.nix
-    ../../modules/nixos/development.nix
-    ../../modules/nixos/productivity.nix
+    ../common/optional/development.nix
+    ../common/optional/podman.nix
+    ../common/optional/db-gui.nix
+    ../common/optional/cloud-tools.nix
+    ../common/optional/productivity.nix
+    ../common/optional/google-chrome.nix
+    ../common/optional/comms.nix
   ];
 
   # ── Base ─────────────────────────────────────────────────────────────────────
@@ -24,23 +23,6 @@
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "tlp";
     firewall = true;
-  };
-
-  # ── Development ──────────────────────────────────────────────────────────────
-  custom.development = {
-    enable = true;
-    containers.podman.enable = true;
-    containers.libvirt.enable = false;
-    database.guiClients.enable = true;
-    database.dataPlatforms.enable = false;
-    cloudTools.enable = true;
-  };
-
-  # ── Productivity (Hyprland) ───────────────────────────────────────────────────
-  custom.productivity = {
-    enable = true;
-    communicationApps.enable = true;
-    secondaryBrowsers.enable = true; # google-chrome — wired into mime defaults
   };
 
   # ── TLP battery management ────────────────────────────────────────────────────

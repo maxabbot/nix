@@ -6,58 +6,34 @@ Things to do before running `nixos-rebuild switch` for the first time.
 
 ## 1. Generate hardware configurations (required per machine)
 
+- [x] `home-desktop` — real config (Intel i7-13700K, nvme, kvm-intel)
+- [ ] `work-laptop` — still a placeholder, replace on first install
+- [ ] `minimal` — still a placeholder, replace on first install
+
 On each target machine, boot the NixOS ISO, partition, mount at `/mnt`, then run:
 
 ```bash
 sudo nixos-generate-config --root /mnt
+cp /mnt/etc/nixos/hardware-configuration.nix hosts/<name>/hardware-configuration.nix
 ```
-
-Copy the generated file into the right host directory:
-
-```bash
-# Home desktop
-cp /mnt/etc/nixos/hardware-configuration.nix hosts/home-desktop/hardware-configuration.nix
-
-# Work laptop
-cp /mnt/etc/nixos/hardware-configuration.nix hosts/work-laptop/hardware-configuration.nix
-
-# Minimal
-cp /mnt/etc/nixos/hardware-configuration.nix hosts/minimal/hardware-configuration.nix
-```
-
-The placeholder files contain a stub layout — replace them entirely.
 
 ---
 
-## 3. Set your monitor configuration
+## ~~3. Set your monitor configuration~~ DONE
 
-Edit `hosts/home-desktop/default.nix` and update `monitors.primary` (and optionally `secondary`).
-Format: `<output>,<resolution>@<hz>,<x>x<y>,<scale>`
-
-```nix
-monitors = {
-  primary   = "DP-1,2560x1440@144,0x0,1";
-  secondary = "HDMI-A-1,1920x1080@60,2560x0,1";  # or null
-};
-```
-
-Find your output names by running `hyprctl monitors` or `swaymsg -t get_outputs` after first boot
-with a default config, or from the `nixos-generate-config` output.
-
-Also update the `clock.timezone` in `modules/home/wm/waybar.nix` to your timezone.
+- [x] `home-desktop` monitors set (DP-2 portrait 4K + DP-3 1440p@165)
+- [x] Waybar clock timezone set to `Pacific/Auckland`
 
 ---
 
 ## 6. Packages not yet in nixpkgs (may need overlays)
 
-Check these at first build:
-
-- `gruvbox-material-gtk-theme` → check `pkgs.gruvbox-material-gtk-theme` exists in nixos-unstable; `theme.nix` falls back to `pkgs.gruvbox-dark-gtk`
-- `apollo-bin` (streaming server) → needs custom derivation in `pkgs/` if wanted
-- `zen-browser` → check `pkgs.zen-browser` (may need the `rycee/nur-expressions` overlay)
-- `gpu-screen-recorder` → check current nixpkgs name
-- `latencyflex` → not confirmed in nixpkgs; remove from `gaming.nix` if build fails
-- `itch` (`pkgs.itch`) → verify package name (sometimes `itch-app`)
+- [x] `gruvbox-material-gtk-theme` → `theme.nix` has fallback to `pkgs.gruvbox-dark-gtk`; handled
+- [x] `zen-browser` → using flake input directly, no nixpkgs needed
+- [x] `latencyflex` → removed from `gaming.nix`
+- [ ] `gpu-screen-recorder` → in `productivity.nix`; verify package name builds on first switch
+- [ ] `itch` → in `gaming.nix`; verify package name (sometimes `itch-app`) on first build
+- [ ] `apollo-bin` (streaming server) → not added; needs custom derivation in `pkgs/` if wanted
 
 ---
 
@@ -99,6 +75,21 @@ ssh nixos@<ip>
 
 ---
 
+## 9. Secrets management (when deploying for real)
+
+Once you're no longer testing — real machine, real credentials:
+
+- Add `agenix` to flake inputs and the NixOS module
+- Create `secrets/secrets.nix` with the host's public key (`/etc/ssh/ssh_host_ed25519_key.pub`)
+- Encrypt hashed password: `agenix -e secrets/hashed-password.age` (use `mkpasswd` output)
+- Replace `initialPassword = "123"` with `hashedPasswordFile = config.age.secrets.hashedPassword.path`
+- Populate `sshKeys` so `deploy.sh` can connect
+- Add a GPG key and fill in `signingkey` in `flake.nix`
+
+See fufexan/dotfiles `secrets/` for a clean reference.
+
+---
+
 ## 8. Post-install checks
 
 - [ ] Hyprland/Sway starts on login (SDDM should appear)
@@ -115,3 +106,21 @@ ssh nixos@<ip>
 - [ ] Steam launches and Proton is available
 - [ ] Syncthing web UI accessible at `localhost:8384`
 - [ ] Swaync notifications appear (`notify-send test`)
+
+---
+
+## 10. Future improvements
+
+### Low effort, high value
+
+- [ ] **Secrets management** (sops-nix or agenix) — see `docs/config-comparison.md` for setup steps; unblocks real deployment
+- [ ] **`nh`** — nicer rebuild UX: `nh os switch` diffs what will change before applying, auto-detects flake path, cleans old generations; replaces the `nixup` alias
+- [ ] **`nix-index` + `comma`** — run any nixpkgs package without installing it (`, ffprobe`); pair with `nix-index-database` to skip building the index locally
+- [ ] **`statix` + `deadnix` in CI** — Nix linters; catches unused vars, deprecated patterns, dead code; two lines in `.github/workflows/ci.yml`
+
+### Medium value
+
+- [ ] **`nixos-hardware` modules** — flake imports it but no host uses it; `home-desktop` has relevant modules for Intel i7-13700K and RTX 40-series; gives better firmware/driver defaults for free
+- [ ] **GPG commit signing** — fill in `signingkey` in `flake.nix` and configure `programs.gpg` in HM
+- [ ] **Specialisations for `work-laptop`** — adds a `powersave` boot entry alongside default; one file, no ongoing cost
+- [ ] **Dev shell for the config** — `nix develop` gives nixfmt, statix, deadnix without polluting the system; add `devShells.default` to `flake.nix`

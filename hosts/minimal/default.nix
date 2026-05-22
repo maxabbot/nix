@@ -1,7 +1,5 @@
 # hosts/minimal/default.nix — Minimal headless / server profile (base only, no GUI).
-{
-  ...
-}:
+{ ... }:
 {
   imports = [
     ./hardware-configuration.nix

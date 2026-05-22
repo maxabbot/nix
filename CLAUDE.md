@@ -10,28 +10,49 @@ Three hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `work-laptop` (Hy
 
 ### Module system
 
-- Each module exposes options under `custom.<name>.*`, all **off by default**.
-- Hosts in `hosts/<name>/default.nix` import modules and enable what they need.
-- The `hyprland` flake input's `nixosModules.default` is only loaded on desktop hosts — not in `mkHost` — so `minimal` stays GUI-free.
+Two patterns in use:
 
-### Option hierarchy
+1. **Option-flag modules** (`modules/nixos/`) — only `base.nix` remains here. Exposes `custom.base.*` options; hosts set these to configure timezone, username, power management, etc.
+
+2. **Import composition** (`hosts/common/optional/`) — pure config files, no options. Hosts simply import the ones they need. Each file is self-contained: it declares packages, services, and options directly.
+
+The `hyprland` nixos module and HM shared module are loaded inside `hosts/common/optional/productivity.nix`, so `minimal` (which doesn't import it) stays GUI-free.
+
+### Option hierarchy (base module only)
 
 ```
 custom.base.{enable, username, timezone, powerManagement, firewall, hashedPassword, initialPassword, sshKeys, fancontrol.*}
-custom.plymouth.enable
-custom.development.{enable, containers.podman.enable, containers.libvirt.enable, database.*, cloudTools.enable}
-custom.productivity.{enable, creativeApps.enable, streamingTools.enable, secondaryBrowsers.enable, communicationApps.enable}
-custom.nvidia.{enable, open, cuda.enable}
-custom.gaming.{enable, wineExtras.enable, streaming.enable, extraGpuVendors.enable}
 ```
 
-`custom.productivity` hard-codes Hyprland — Sway is not supported.
+### hosts/common/optional/ files
+
+| File | Purpose |
+|---|---|
+| `development.nix` | Language runtimes, dev tools, openssh, direnv |
+| `podman.nix` | Podman + Docker compat |
+| `libvirt.nix` | libvirt / QEMU-KVM |
+| `db-gui.nix` | DBeaver, Beekeeper, mycli, litecli |
+| `duckdb.nix` | DuckDB |
+| `cloud-tools.nix` | kubectl, helm, opentofu, AWS/Azure/GCP CLIs |
+| `productivity.nix` | Hyprland, SDDM, PipeWire, syncthing, core desktop apps |
+| `creative-apps.nix` | GIMP, Inkscape, Krita |
+| `streaming-tools.nix` | OBS, Shotcut, RustDesk, gpu-screen-recorder |
+| `google-chrome.nix` | Google Chrome |
+| `comms.nix` | Slack, Discord, Zoom |
+| `nvidia.nix` | NVIDIA driver (open, RTX 40-series) |
+| `cuda.nix` | CUDA / cuDNN stack |
+| `gaming.nix` | Steam, Gamemode, Gamescope, Mangohud, controllers |
+| `wine.nix` | DXVK |
+| `gaming-streaming.nix` | OBS + Moonlight for game streaming |
+| `lanzaboote.nix` | Secure Boot — import only after `sbctl` key enrollment |
+| `plymouth.nix` | Custom boot splash |
 
 ### Home Manager
 
 - Wired as a NixOS module via `home-manager.nixosModules.home-manager`.
 - `mkHost` passes `hmArgs` to `home-manager.extraSpecialArgs`. **Do not** add `extraSpecialArgs` inside a host's `default.nix` — this conflicts with `mkHost` and is a recurring footgun.
-- `home/max/default.nix` receives: `machineType`, `compositor`, `monitors`, `git`, `location`, `inputs`.
+- Shared args (git name/email) live in `sharedHmArgs` in `flake.nix`; per-host args override via `sharedHmArgs // hmArgs`.
+- `home/max/` is split into feature files: `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `packages.nix`.
 - Setting `compositor = "none"` (`minimal` host) skips Hyprland and Waybar entirely via `mkIf`.
 
 ### Rebuild
@@ -50,19 +71,21 @@ All `*.sh` linted with shellcheck. Use `bash`, `set -euo pipefail`, quote proper
 
 | Want to add… | Where |
 |---|---|
-| System-wide package | `environment.systemPackages` in `modules/nixos/<role>.nix` |
-| User package | `home.packages` in `home/max/default.nix` or `modules/home/<x>.nix` |
-| Optional package gate | New `mkEnableOption` in the module, enable in the host |
+| System-wide package (all desktop hosts) | `environment.systemPackages` in the relevant `hosts/common/optional/*.nix` |
+| System-wide package (one host only) | `environment.systemPackages` in `hosts/<name>/default.nix` |
+| New optional feature | New file in `hosts/common/optional/`, import in the hosts that need it |
+| User package | `home.packages` in `home/max/packages.nix` |
+| New HM feature | New file in `home/max/`, add to imports in `home/max/default.nix` |
 | Plain-text dotfile | `config/<app>/...` + wire via `xdg.configFile` |
 | Live-editable script | `config/hypr-scripts/` (symlinked into `~/.config/hypr/scripts/`) |
 | Package not in nixpkgs | Add derivation to `pkgs/default.nix`, expose via `overlays/default.nix` |
-| New NixOS module | `modules/nixos/<name>.nix` with `options.custom.<name>.*` + `config = lib.mkIf cfg.enable { ... }`, import in host |
 
 ## Security
 
 - Never commit credentials — `github_pat`, `*.iso` are gitignored.
 - `hosts/home-desktop/default.nix` ships `initialPassword = "123"` — change on first login or replace with `hashedPassword` before deploy.
 - `sshKeys = [ ]` is empty by default; populate before using `deploy.sh`.
+- Secure boot: add `../common/optional/lanzaboote.nix` to a host after running `sbctl create-keys` + `sbctl enroll-keys`.
 
 ## Theme
 
