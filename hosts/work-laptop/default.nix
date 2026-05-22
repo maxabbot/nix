@@ -38,6 +38,18 @@
     };
   };
 
+  # ── Specialisations ───────────────────────────────────────────────────────────
+  # Boot menu shows "powersave" entry for aggressive battery conservation.
+  specialisation.powersave.configuration = {
+    system.nixos.tags = [ "powersave" ];
+    services.tlp.settings = {
+      CPU_SCALING_GOVERNOR_ON_AC = "powersave";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "power";
+      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+    };
+  };
+
   # ── Bootloader ────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

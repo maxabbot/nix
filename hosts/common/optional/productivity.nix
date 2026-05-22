@@ -63,7 +63,6 @@
 
   # ── System packages ───────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
-    sddm-sugar-dark
     grim
     slurp
     awww

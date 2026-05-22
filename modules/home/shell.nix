@@ -67,7 +67,7 @@
       mv = "mv -i";
 
       # NixOS package management (replaces pacman/yay)
-      nixup = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname -s)";
+      nixup = "nh os switch /etc/nixos";
       nixsrch = "nix search nixpkgs";
       nixshell = "nix shell nixpkgs#";
       nixtmp = "nix-shell -p";
@@ -207,7 +207,7 @@
       dclean() { podman system prune -af --volumes; }
 
       sysup() {
-        sudo nixos-rebuild switch --flake /etc/nixos#$(hostname -s)
+        nh os switch /etc/nixos
         command -v rustup &>/dev/null && rustup update
       }
 

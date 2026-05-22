@@ -124,7 +124,7 @@ less →  bat --paging=always
 
 ### NixOS
 ```
-nixup    →  sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)
+nixup    →  nh os switch /etc/nixos
 nixsrch  →  nix search nixpkgs
 nixshell →  nix shell nixpkgs#<pkg>
 nixtmp   →  nix-shell -p <pkg>

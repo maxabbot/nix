@@ -82,12 +82,15 @@ journalctl --user -b | grep -i failed | tail -20
 ## NixOS rebuild
 
 ```bash
-# Standard rebuild
+# Standard rebuild — shows diff before applying
+nixup   # alias for: nh os switch /etc/nixos
+
+# Or raw (any host)
 sudo nixos-rebuild switch --flake /etc/nixos#home-desktop
 
 # Dry run (check for eval errors without building)
 sudo nixos-rebuild dry-activate --flake /etc/nixos#home-desktop
 
-# Show what changed since last build
-sudo nixos-rebuild switch --flake /etc/nixos#home-desktop 2>&1 | grep -E "^(activating|setting|reloading|starting|stopping)"
+# Show what will change without applying
+nh os switch /etc/nixos --dry
 ```

@@ -1,5 +1,11 @@
 { pkgs, ... }:
 {
+  programs.nix-index = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+  programs.nix-index-database.comma.enable = true;
+
   home.packages = with pkgs; [
     jq
     yq-go

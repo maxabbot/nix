@@ -46,3 +46,17 @@ jobs:
       - name: Shellcheck scripts
         run: git ls-files '*.sh' | xargs -r shellcheck
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: statix
+        run: nix run nixpkgs#statix -- check .
+
+      - name: deadnix
+        run: nix run nixpkgs#deadnix -- --fail .
+

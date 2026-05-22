@@ -55,7 +55,7 @@ zoxide query --list
 echo $STARSHIP_SHELL
 
 # Verify NixOS aliases work
-nixup   # should run nixos-rebuild switch
+nixup   # should run: nh os switch /etc/nixos
 ```
 
 ## 5. Zed First Launch
@@ -109,23 +109,21 @@ sudo snapper -c root list
 ## 9. Rebuilding / Updating
 
 ```bash
-# Apply any config changes
-nixup                           # alias for nixos-rebuild switch
+# Apply any config changes (shows diff before applying)
+nixup                           # alias for: nh os switch /etc/nixos
 
 # Update all flake inputs (nixpkgs, home-manager, etc.)
-flkupd                          # alias for nix flake update
+flkupd                          # alias for: nix flake update
 
 # Full update + rebuild
 flkupd && nixup
 
 # Garbage collect old generations
-gcclean                         # alias for nix-collect-garbage -d
+gcclean                         # alias for: nix-collect-garbage -d && nix store optimise
 ```
 
 ## 10. Adding Packages
 
 1. Find the nixpkgs name: `nixsrch <name>` (alias for `nix search nixpkgs`)
-2. Add to the relevant module in `modules/nixos/<role>.nix`
+2. See `CLAUDE.md` "Adding things" table for where to put it
 3. Run `nixup`
-
-See `CLAUDE.md` for the full guide.

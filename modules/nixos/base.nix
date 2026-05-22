@@ -209,6 +209,7 @@ in
       btop
       delta
       libnotify
+      nh
 
       # Security / monitoring
       lm_sensors

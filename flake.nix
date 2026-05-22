@@ -30,6 +30,11 @@
       url = "github:nix-community/lanzaboote/v0.4.1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -96,6 +101,16 @@
         };
     in
     {
+      devShells.${system}.default = mkPkgs.mkShell {
+        name = "nixos-config";
+        packages = with mkPkgs; [
+          nixfmt-rfc-style
+          statix
+          deadnix
+          nil
+        ];
+      };
+
       nixosConfigurations = {
         # RTX 40-series desktop — full stack
         home-desktop = mkHost {

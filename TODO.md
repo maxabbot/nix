@@ -114,13 +114,13 @@ See fufexan/dotfiles `secrets/` for a clean reference.
 ### Low effort, high value
 
 - [ ] **Secrets management** (sops-nix or agenix) — see `docs/config-comparison.md` for setup steps; unblocks real deployment
-- [ ] **`nh`** — nicer rebuild UX: `nh os switch` diffs what will change before applying, auto-detects flake path, cleans old generations; replaces the `nixup` alias
-- [ ] **`nix-index` + `comma`** — run any nixpkgs package without installing it (`, ffprobe`); pair with `nix-index-database` to skip building the index locally
-- [ ] **`statix` + `deadnix` in CI** — Nix linters; catches unused vars, deprecated patterns, dead code; two lines in `.github/workflows/ci.yml`
+- [x] **`nh`** — added to system packages; `nixup` alias and `sysup` function updated
+- [x] **`nix-index` + `comma`** — `nix-index-database` flake input added; `, <pkg>` to run anything; `nix locate <file>` to find packages
+- [x] **`statix` + `deadnix` in CI** — `lint` job added to `.github/workflows/ci.yml`
 
 ### Medium value
 
-- [ ] **`nixos-hardware` modules** — flake imports it but no host uses it; `home-desktop` has relevant modules for Intel i7-13700K and RTX 40-series; gives better firmware/driver defaults for free
+- [ ] **`nixos-hardware` modules** — minimal value for `home-desktop` (everything already configured manually); revisit for `work-laptop` once hardware is known
 - [ ] **GPG commit signing** — fill in `signingkey` in `flake.nix` and configure `programs.gpg` in HM
-- [ ] **Specialisations for `work-laptop`** — adds a `powersave` boot entry alongside default; one file, no ongoing cost
-- [ ] **Dev shell for the config** — `nix develop` gives nixfmt, statix, deadnix without polluting the system; add `devShells.default` to `flake.nix`
+- [x] **Specialisations for `work-laptop`** — `powersave` boot entry added; overrides TLP to all-powersave governors
+- [x] **Dev shell for the config** — `nix develop` in repo root gives nixfmt, statix, deadnix, nil

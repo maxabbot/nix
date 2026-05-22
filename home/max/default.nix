@@ -1,6 +1,7 @@
 {
   compositor,
   monitors,
+  inputs,
   ...
 }:
 {
@@ -10,6 +11,7 @@
     ./cli.nix
     ./desktop.nix
     ./packages.nix
+    inputs.nix-index-database.homeModules.nix-index
   ];
 
   custom.hm.compositor = compositor;
