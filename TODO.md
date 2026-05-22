@@ -122,5 +122,6 @@ See fufexan/dotfiles `secrets/` for a clean reference.
 
 - [ ] **`nixos-hardware` modules** — minimal value for `home-desktop` (everything already configured manually); revisit for `work-laptop` once hardware is known
 - [ ] **GPG commit signing** — fill in `signingkey` in `flake.nix` and configure `programs.gpg` in HM
+- [ ] **Backups** — `restic` or `borgbackup` for off-disk backup; BTRFS snapshots don't protect against disk failure
 - [x] **Specialisations for `work-laptop`** — `powersave` boot entry added; overrides TLP to all-powersave governors
 - [x] **Dev shell for the config** — `nix develop` in repo root gives nixfmt, statix, deadnix, nil

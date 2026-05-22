@@ -1,154 +1,70 @@
 # nix — NixOS Configuration
 
-Infrastructure-as-Code for NixOS workstations using **Nix Flakes** and **Home Manager**.
-
-## Architecture
-
-```text
-flake.nix                    # Entry point — inputs, nixosConfigurations
-hosts/
-  home-desktop/              # Gaming workstation (RTX 40-series, Hyprland)
-  work-laptop/               # Dev laptop (Hyprland, TLP)
-  minimal/                   # Headless / base only
-modules/
-  nixos/                     # System-level NixOS modules
-    base.nix                 #   Core packages, networking, fonts
-    development.nix          #   Languages, containers, cloud CLIs
-    productivity.nix         #   DE, audio, browsers, apps
-    nvidia.nix               #   Drivers, CUDA, kernel params
-    gaming.nix               #   Steam, Wine, Proton, controllers
-  home/                      # Home Manager modules
-    shell.nix                #   Zsh, Starship, aliases, tmux
-    editor.nix               #   Zed, VSCode
-    apps.nix                 #   Kitty, btop, mpv, Zathura, Yazi
-    theme.nix                #   Gruvbox Material — GTK, Qt, cursors
-    wm/
-      hyprland.nix           #   Hyprland config
-home/
-  max/default.nix            # Home Manager user config
-overlays/default.nix         # Custom package overrides
-pkgs/default.nix             # Local derivations
-```
-
-## Quick start
-
-### Rebuild an existing NixOS system
-
-```bash
-git clone https://github.com/maxabbot/nix.git /etc/nixos
-cd /etc/nixos
-sudo nixos-rebuild switch --flake .#home-desktop   # or work-laptop / minimal
-```
-
-Or use the wrapper script (auto-detects hostname):
-
-```bash
-./setup.sh
-```
-
-### First-time NixOS installation
-
-**Recommended — automated with nixos-anywhere:**
-1. Boot the NixOS ISO, connect ethernet
-2. On the live system: `passwd nixos && ip addr`
-3. From any machine with Nix (including WSL):
-   ```bash
-   ./deploy.sh <ip>          # home-desktop (default)
-   ./deploy.sh <ip> work-laptop
-   ```
-   The script reads the target disk from `disk-config.nix`, shows `lsblk` from
-   the live system, and requires typing `yes` before wiping anything.
-
-**Manual — if nixos-anywhere isn't available:**
-
-See [docs/guides/nix-install.md](docs/guides/nix-install.md).
+Declarative, reproducible NixOS workstations using **Nix Flakes** and **Home Manager**.
 
 ## Hosts
 
 | Host | Profile | Compositor | Features |
 |------|---------|------------|----------|
-| `home-desktop` | Gaming workstation | Hyprland | base + dev + productivity + nvidia + gaming |
-| `work-laptop`  | Dev laptop          | Hyprland  | base + dev + productivity + TLP |
-| `minimal`      | Headless / server   | —         | base only |
+| `home-desktop` | Gaming workstation (i7-13700K, RTX 40-series) | Hyprland | full stack |
+| `work-laptop`  | Dev laptop | Hyprland | dev + productivity + TLP |
+| `minimal`      | Headless / server | — | base only |
 
-## Modules
+## Structure
 
-### NixOS system modules
-
-| Module | Key options |
-|--------|-------------|
-| `custom.base` | `username`, `timezone`, `btrfsSnapshots`, `powerManagement`, `firewall` |
-| `custom.development` | `containers.podman`, `containers.libvirt`, `database.*`, `cloudTools` |
-| `custom.productivity` | `compositor`, `creativeApps`, `streamingTools`, `communicationApps` |
-| `custom.nvidia` | `open`, `cuda` |
-| `custom.gaming` | `wineExtras`, `streaming`, `apollo` |
-
-### Home Manager modules
-
-- **shell.nix** — Zsh with autosuggestions, syntax highlighting, history search; Starship (Gruvbox Material), fzf, zoxide, tmux, NixOS-native aliases replacing pacman/yay
-- **editor.nix** — Zed (primary), VSCode (backup), nil LSP for Nix
-- **apps.nix** — Kitty, btop, mpv, Zathura, Yazi (all Gruvbox Material themed)
-- **theme.nix** — GTK (Gruvbox-Material-Dark), Kvantum, Papirus icons, Bibata cursor
-- **wm/hyprland.nix** — Full Hyprland config, gaming optimizations, multi-monitor via `custom.hm.monitors`
-
-## Customising
-
-### Update git identity
-
-Edit `home-manager.extraSpecialArgs.git` in the relevant `hosts/<name>/default.nix`.
-
-### Change monitor configuration
-
-Edit `monitors.primary` / `monitors.secondary` in the host's `extraSpecialArgs`:
-
-```nix
-monitors = {
-  primary   = "DP-1,2560x1440@144,0x0,1";
-  secondary = "HDMI-A-1,1920x1080@60,2560x0,1";
-};
+```
+flake.nix                        # inputs, mkHost helper, devShells
+hosts/
+  home-desktop/                  # RTX 40-series gaming workstation
+  work-laptop/                   # Dev laptop (TLP, powersave specialisation)
+  minimal/                       # Headless base
+  common/optional/               # Import-composition feature files
+    productivity.nix             #   Hyprland, SDDM, PipeWire, Syncthing
+    nvidia.nix                   #   NVIDIA open driver (RTX 40-series)
+    gaming.nix                   #   Steam, Gamemode, Gamescope, controllers
+    development.nix              #   Language runtimes, dev tools
+    cloud-tools.nix              #   kubectl, helm, opentofu, cloud CLIs
+    ...                          #   see CLAUDE.md for full table
+modules/
+  nixos/base.nix                 # Core system: packages, networking, fonts
+  home/                          # Home Manager modules
+    shell.nix                    #   Zsh, Starship, fzf, zoxide, tmux
+    editor.nix                   #   Zed, nil LSP
+    apps.nix                     #   Kitty, btop, mpv, Zathura, Yazi, fuzzel
+    theme.nix                    #   Gruvbox Material — GTK, Qt, cursors
+    wm/hyprland.nix              #   Hyprland + Waybar (compositor-gated)
+home/max/                        # User config entry point + feature files
+overlays/                        # Custom package overrides
+pkgs/                            # Local derivations
 ```
 
-### Add packages
-
-- **System packages** → `modules/nixos/<role>.nix` → `environment.systemPackages`
-- **User packages** → `home/max/default.nix` → `home.packages`
-- **Shell tools** → `modules/home/shell.nix`
-
-### Enable optional features
-
-```nix
-custom.productivity.creativeApps.enable    = true;  # GIMP, Inkscape, Krita
-custom.gaming.streaming.enable             = true;  # OBS, Moonlight
-custom.nvidia.cuda.enable                  = true;  # CUDA / cuDNN
-```
-
-## Useful commands
+## Rebuild
 
 ```bash
-# Rebuild (fast, same generation)
-sudo nixos-rebuild switch --flake .#home-desktop
+nixup              # nh os switch /etc/nixos  (auto-detects host by hostname)
 
-# Test without switching the boot default
-sudo nixos-rebuild test --flake .#home-desktop
-
-# Update all flake inputs
-nix flake update
-
-# Search packages
-nix search nixpkgs <name>
-
-# Garbage collect old generations
-sudo nix-collect-garbage -d
-sudo nix store optimise
-
-# Show system generations
-sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+# Or explicitly:
+sudo nixos-rebuild switch --flake /etc/nixos#home-desktop
 ```
+
+## First install
+
+See [docs/guides/nix-install.md](docs/guides/nix-install.md) — uses nixos-anywhere for automated partitioning + install in one command.
+
+## Adding things
+
+See the table in `CLAUDE.md`. Short version:
+
+| Want to add… | Where |
+|---|---|
+| System package (one host) | `environment.systemPackages` in `hosts/<name>/default.nix` |
+| System package (all desktop hosts) | relevant `hosts/common/optional/*.nix` |
+| New optional feature | New file in `hosts/common/optional/`, import in the hosts that need it |
+| User package | `home.packages` in `home/max/packages.nix` |
 
 ## Theme
 
-**Gruvbox Material Dark** throughout — kitty, tmux, Starship, btop, Zed, Zathura, GTK, Qt/Kvantum.
-Palette: `#282828` bg · `#d4be98` fg · `#7daea3` blue · `#d8a657` yellow · `#ea6962` red · `#a9b665` green · `#d3869b` purple
+**Gruvbox Material Dark** throughout — Hyprland, Waybar, Kitty, tmux, Starship, btop, Zed, Zathura, GTK, Qt.
 
 ## License
 

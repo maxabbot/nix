@@ -1,136 +1,117 @@
-# NixOS Module Reference
+# What You Get
 
-This file lists the key packages managed by each NixOS module in `modules/nixos/` and `modules/home/`.
-All packages are from `nixpkgs/nixos-unstable` unless noted.
-
----
-
-## base.nix
-
-Core utilities, networking, filesystem tools, fonts, and system services.
-
-| Package | Purpose |
-|---------|---------|
-| `coreutils`, `findutils`, `gnused`, `gnutar`, `bc` | POSIX base utils |
-| `curl`, `wget`, `rsync`, `openssh`, `gnupg` | Transfer / remote access |
-| `inetutils`, `dnsutils`, `traceroute`, `nethogs`, `iotop` | Networking diagnostics |
-| `wireguard-tools`, `openvpn`, `networkmanagerapplet` | VPN / network management |
-| `btrfs-progs`, `dosfstools`, `exfatprogs`, `p7zip`, `unzip`, `unrar`, `zip` | Filesystems / archives |
-| `gparted`, `parted` | Disk partitioning |
-| `xdg-utils`, `xdg-user-dirs`, `wl-clipboard`, `qt5.qtwayland`, `qt6.qtwayland` | Wayland / XDG |
-| `git`, `git-lfs`, `bat`, `eza`, `fd`, `fzf`, `ripgrep`, `jq` | CLI essentials |
-| `zsh`, `tmux`, `fastfetch`, `btop`, `delta`, `libnotify` | Shell / terminal tools |
-| `lm_sensors`, `clamav` | Hardware monitoring / security |
-| `man-db`, `man-pages`, `bash-completion` | Documentation |
-| `nerd-fonts.jetbrains-mono`, `noto-fonts-emoji` | Fonts |
+A "what did I set up" reference. For keybinds see `docs/SHORTCUTS.md`, for structure see `CLAUDE.md`.
 
 ---
 
-## development.nix
+## Shell
 
-Languages, containers, cloud CLIs, and dev utilities.
+- **Zsh** — autosuggestions, syntax highlighting, history substring search
+- **Starship** — Gruvbox Material powerline prompt with git status, language versions, time
+- **zoxide** — replaces `cd`; learns your directories (`cd` still works)
+- **fzf** — fuzzy finder wired to `Ctrl+T` (files), `Ctrl+R` (history), `Alt+C` (dirs)
+- **tmux** — `Ctrl+A` prefix, vim pane navigation, Gruvbox theme, sessionizer on `Ctrl+F`
+- **bat** — replaces `cat` and `less`; syntax highlighting, Gruvbox theme
+- **eza** — replaces `ls`; icons, git status, tree view via `lt`
+- **delta** — replaces git's diff output; side-by-side, line numbers, Gruvbox
+- **direnv** — auto-loads `.envrc` / `nix develop` shells on `cd`
+- **mise** — runtime version manager (Node, Python, Ruby, etc.) activated in zsh
+- `, <pkg>` — run any nixpkgs package without installing (`comma`); e.g. `, ffprobe`
+- `nix locate <file>` — find which package owns a file (`nix-index`)
 
-| Package | Purpose |
-|---------|---------|
-| `python3`, `python3Packages.{pip,virtualenv,matplotlib,numpy,pandas,scipy,scikit-learn}` | Python + data science |
-| `go`, `rustup`, `jdk`, `gcc`, `clang`, `cmake`, `gnumake` | Language runtimes / build tools |
-| `kitty`, `direnv`, `shellcheck`, `tig`, `imagemagick`, `sqlite` | Dev utilities |
-| `mise` | Runtime version manager |
-| `curlie`, `bruno` | API clients |
-| `pgcli` | DB CLI (always on) |
-| `podman`, `podman-compose` *(opt-in)* | Container runtime |
-| `libvirt`, `qemu`, `virt-manager`, `dnsmasq` *(opt-in)* | Virtualisation |
-| `kubectl`, `kubectx`, `kubernetes-helm`, `opentofu`, `awscli2`, `azure-cli`, `google-cloud-sdk`, `doctl` *(opt-in)* | Cloud / infra CLIs |
-| `dbeaver-bin`, `beekeeper-studio`, `mycli`, `litecli` *(opt-in)* | GUI DB clients |
-| `duckdb` *(opt-in)* | Embedded analytics |
-
----
-
-## editor.nix *(home module)*
-
-Editors managed at the user level.
-
-| Package | Purpose |
-|---------|---------|
-| `zed-editor` | Primary editor |
-| `nano` | Terminal fallback editor |
-| `programs.vscode` | Backup GUI editor (Gruvbox Material theme, vim keybindings) |
-
-VSCode extensions: `jdinhlife.gruvbox`, `vscodevim.vim`, `esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`, `ms-python.python`, `rust-lang.rust-analyzer`, `golang.go`, `jnoortheen.nix-ide`, `redhat.vscode-yaml`, `tamasfe.even-better-toml`, `pkief.material-icon-theme`
+Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `g` (git). See `docs/SHORTCUTS.md`.
 
 ---
 
-## productivity.nix
+## Desktop (Hyprland hosts)
 
-Desktop environment, audio, and GUI apps.
-
-| Package / Service | Purpose |
-|-------------------|---------|
-| SDDM (Wayland) | Display manager |
-| Hyprland / Sway | Wayland compositors (per-host) |
-| PipeWire + WirePlumber + ALSA + JACK | Audio stack |
-| `grim`, `slurp`, `swww`, `swayidle`, `swaynotificationcenter` | Wayland screenshot / wallpaper / idle |
-| `wl-clipboard`, `cliphist`, `wl-paste` | Clipboard |
-| `fuzzel` | App launcher |
-| `waybar` | Status bar |
-| `hyprlock`, `wlogout`, `nwg-look` | Lock / logout / appearance |
-| `playerctl`, `brightnessctl`, `pavucontrol` | Media / brightness / audio |
-| `gammastep`, `grimblast` | Night light / screenshot helper |
-| `xfce.thunar`, `xfce.thunar-archive-plugin`, `file-roller` | File manager |
-| `libreoffice-fresh`, `rnote`, `zathura`, `calibre`, `pdfarranger`, `onlyoffice-bin` | Office / documents |
-| `masterpdfeditor` | PDF editor |
-| `zen-browser` | Primary browser |
-| `google-chrome` *(opt-in)* | Secondary browser |
-| `thunderbird`, `element-desktop` | Comms (always on) |
-| `slack`, `discord`, `zoom-us` *(opt-in)* | Extra comms |
-| `obsidian`, `bitwarden-desktop` | Notes / passwords |
-| `vlc`, `mpv`, `imv`, `mpvpaper` | Media playback |
-| `gimp`, `inkscape`, `krita` *(opt-in)* | Creative apps |
-| `obs-studio`, `shotcut`, `rustdesk`, `gpu-screen-recorder`, `losslesscut-bin` *(opt-in)* | Streaming / recording |
-| `rclone` | Cloud sync |
-| `nvtop`, `openrgb-with-all-plugins`, `glances` | Monitoring / RGB |
-| `veracrypt` | Encryption |
-| `kvantum`, `papirus-icon-theme`, `foot`, `syncthingtray`, `yazi` | Desktop helpers |
-| Syncthing (service) | File sync daemon |
-| Flatpak (service) | App sandboxing |
+- **Hyprland** — tiling Wayland compositor; monitor layout generated from Nix per-host
+- **Waybar** — status bar; workspaces, clock, system tray
+- **SDDM** — display manager; KWin Wayland greeter on DP-3 only (home-desktop)
+- **fuzzel** — app launcher (`Super+D`), Gruvbox theme
+- **Kitty** — terminal; JetBrainsMono Nerd Font 13pt, Gruvbox palette, tab bar
+- **awww** — wallpaper daemon
+- **hyprlock** — lockscreen; triggered on idle (5 min) and suspend
+- **hypridle** — idle daemon; locks at 5 min, suspends at 15 min
+- **Gammastep** — night light; manual lat/long per host, 6500K day → 3500K night
+- **Swaync** — notification centre (`Super+N`)
+- **cliphist** — clipboard history (`Super+Shift+V`)
+- **wlogout** — power menu (`Super+Shift+E`)
+- **Thunar** — file manager (`Super+E`); archive plugin, thumbnail support via tumbler
+- **Yazi** — terminal file manager
+- **Syncthing** — file sync daemon; web UI at `localhost:8384`
 
 ---
 
-## nvidia.nix
+## Applications (always on desktop hosts)
 
-NVIDIA driver stack (RTX 40-series target).
-
-| Option / Package | Purpose |
-|-----------------|---------|
-| `hardware.nvidia.open = true` | Open kernel module (RTX 30+) |
-| `hardware.nvidia.modesetting.enable` | DRM modesetting (required for Wayland) |
-| `hardware.nvidia.nvidiaPersistenced` | Keep GPU awake between compute workloads |
-| `hardware.nvidia.package = nvidiaPackages.stable` | Stable driver branch |
-| `nvidia-vaapi-driver`, `libva`, `libva-utils` | VA-API hardware video decode |
-| `vulkan-tools`, `vulkan-validation-layers` | Vulkan diagnostics |
-| `hardware.graphics.enable32Bit` | 32-bit libs for Steam / Wine |
-| `cuda_nvcc`, `cudnn`, `clinfo` *(opt-in)* | CUDA / cuDNN compute stack |
-| Kernel params: `nvidia-drm.modeset=1` | Wayland DRM modesetting |
-| Env vars: `GBM_BACKEND`, `__GLX_VENDOR_LIBRARY_NAME`, `LIBVA_DRIVER_NAME` | Wayland NVIDIA env |
+| App | Purpose |
+|-----|---------|
+| Zen Browser | Primary browser |
+| Thunderbird | Email |
+| Element | Matrix chat |
+| Obsidian | Notes |
+| Bitwarden | Passwords |
+| LibreOffice | Office suite |
+| OnlyOffice | MS Office-compatible editing |
+| Zathura | PDF viewer (vim keybinds, Gruvbox) |
+| mpv | Video player (vim keybinds, hardware decode) |
+| VLC | Media fallback |
+| Calibre | Ebook manager |
+| Veracrypt | Encrypted volumes |
+| rclone | Cloud storage sync |
+| nvtop | GPU monitor |
+| OpenRGB | RGB lighting control |
+| btop | System monitor (Gruvbox, vim keys) |
+| fastfetch | System info |
 
 ---
 
-## gaming.nix
+## Development (all desktop hosts)
 
-Gaming platform and peripherals.
+- Python 3 + pip, virtualenv, numpy, pandas, scipy, scikit-learn, matplotlib
+- Go, Rust (via rustup), JDK, GCC, Clang, CMake
+- `uv` — fast Python package/project manager
+- `bun` — JS runtime + package manager
+- `shellcheck`, `tig`, `sqlite`, `pgcli`
+- `curlie` (httpie-style curl), `bruno` (API client)
+- `quickemu` / `quickgui` — VM management without libvirt
+- Podman + Docker-compat aliases (`d ps`, `d images`, etc.)
+- kubectl, helm, opentofu, awscli2, azure-cli, google-cloud-sdk, doctl
+- DBeaver, Beekeeper Studio, mycli, litecli, DuckDB
+- `gh` — GitHub CLI
+- `nix-tree`, `nix-diff`, `nixpkgs-review`, `nil` — Nix dev tools
+- `claude-code` — AI assistant CLI
 
-| Package / Option | Purpose |
-|-----------------|---------|
-| `programs.steam` (+ `gamescopeSession`, `proton-ge-bin`) | Steam + Proton GE |
-| `programs.gamemode` (renice 10) | CPU governor for games |
-| `programs.gamescope` | Micro-compositor for games |
-| `mangohud` | In-game overlay |
-| `wineWowPackages.staging`, `wine-mono`, `winetricks` | Wine compatibility |
-| `dxvk` *(opt-in)* | DXVK / DX→Vulkan translation |
-| `protonup-qt`, `protontricks`, `heroic`, `itch`, `goverlay`, `vkbasalt` | Gaming utilities |
-| `vulkan-tools`, `vulkan-validation-layers`, `vulkan-loader`, `glmark2` | Vulkan / GPU tools |
-| `joyutils` | Controller support |
-| `obs-studio`, `moonlight-qt` *(opt-in)* | Game streaming |
-| `boot.extraModulePackages = xpadneo` | Xbox controller kernel module |
-| `hardware.graphics.enable32Bit` | 32-bit library support |
-| `boot.kernel.sysctl vm.max_map_count` | Anti-cheat / large game support |
+---
+
+## Gaming (home-desktop only)
+
+- **Steam** — Proton GE pre-installed, Gamescope session available
+- **Gamemode** — CPU governor boost on game launch (renice 10)
+- **Gamescope** — micro-compositor for resolution scaling / VRR
+- **MangoHud** — in-game performance overlay
+- **Heroic** — GOG / Epic Games launcher
+- **ProtonUp-Qt** — Proton GE version manager
+- **vkbasalt** — Vulkan post-processing (CAS sharpening, FXAA)
+- **xpadneo** — Xbox controller kernel module (Bluetooth)
+- Wine (WoW64 staging) + winetricks + DXVK
+- `vm.max_map_count` raised for anti-cheat / large games
+
+---
+
+## NVIDIA (home-desktop only)
+
+- Open kernel module (`open = true`, RTX 30+ required)
+- DRM modesetting, persistent mode, VA-API hardware decode
+- 32-bit libs for Steam/Wine
+- Wayland env vars set (`GBM_BACKEND`, `__GLX_VENDOR_LIBRARY_NAME`, etc.)
+- CUDA + cuDNN stack via `hosts/common/optional/cuda.nix`
+
+---
+
+## Theme
+
+**Gruvbox Material Dark** everywhere — Hyprland borders, Waybar, Kitty, tmux, Starship, btop, Zed, Zathura, fuzzel, GTK apps, Qt/Kvantum apps.
+
+Palette: `#282828` bg · `#d4be98` fg · `#7daea3` teal · `#d8a657` yellow · `#ea6962` red · `#a9b665` green · `#d3869b` purple

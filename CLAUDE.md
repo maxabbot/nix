@@ -58,7 +58,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 ### Rebuild
 
 ```bash
-./setup.sh        # auto-detects hostname
+nixup   # nh os switch /etc/nixos  (auto-detects host by hostname)
 # or explicitly:
 sudo nixos-rebuild switch --flake /etc/nixos#<host>
 ```
