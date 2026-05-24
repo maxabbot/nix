@@ -1,0 +1,21 @@
+system: "base16"
+name: "Gruvbox Material Dark"
+author: "Max Abbot (derived from sainnhe/gruvbox-material)"
+variant: "dark"
+palette:
+  base00: "282828"  # hard background
+  base01: "3c3836"  # status bar / darker bg
+  base02: "504945"  # selection background
+  base03: "665c54"  # mid background
+  base04: "928374"  # comments / dim fg
+  base05: "d4be98"  # default foreground
+  base06: "ddc7a1"  # lighter foreground
+  base07: "e2cca9"  # lightest foreground
+  base08: "ea6962"  # red
+  base09: "e78a4e"  # orange
+  base0A: "d8a657"  # yellow
+  base0B: "a9b665"  # green
+  base0C: "89b482"  # cyan
+  base0D: "7daea3"  # blue
+  base0E: "d3869b"  # purple
+  base0F: "bd6f3e"  # brown

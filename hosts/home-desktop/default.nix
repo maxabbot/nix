@@ -16,6 +16,7 @@
     ../common/optional/streaming-tools.nix
     ../common/optional/google-chrome.nix
     ../common/optional/comms.nix
+    ../common/optional/stylix.nix
     ../common/optional/nvidia.nix
     ../common/optional/cuda.nix
     ../common/optional/gaming.nix

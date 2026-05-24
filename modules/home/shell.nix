@@ -32,7 +32,6 @@
       LC_ALL = "en_US.UTF-8";
       ARCHFLAGS = "-arch x86_64";
       MANPAGER = "less -R --use-color -Dd+r -Du+b";
-      BAT_THEME = "gruvbox-dark";
       BAT_PAGER = "less -RF";
       CARGO_HOME = "$HOME/.cargo";
       RUSTUP_HOME = "$HOME/.rustup";
@@ -344,10 +343,6 @@
       "--height 40%"
       "--border rounded"
       "--multi"
-      "--color=bg+:#3c3836,bg:#282828,spinner:#d8a657,hl:#ea6962"
-      "--color=fg:#d4be98,header:#ea6962,info:#d3869b,pointer:#d8a657"
-      "--color=marker:#7daea3,fg+:#d4be98,prompt:#d3869b,hl+:#ea6962"
-      "--color=selected-bg:#504945"
     ];
   };
 

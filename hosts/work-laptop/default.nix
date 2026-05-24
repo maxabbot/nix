@@ -9,6 +9,7 @@
     ../common/optional/podman.nix
     ../common/optional/db-gui.nix
     ../common/optional/cloud-tools.nix
+    ../common/optional/stylix.nix
     ../common/optional/productivity.nix
     ../common/optional/google-chrome.nix
     ../common/optional/comms.nix

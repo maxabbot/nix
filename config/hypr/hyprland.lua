@@ -10,9 +10,6 @@ require("monitors")
 ---- ENVIRONMENT ---
 --------------------
 
-hl.env("XCURSOR_SIZE",               "24")
-hl.env("XCURSOR_THEME",              "Bibata-Modern-Classic")
-hl.env("GTK_THEME",                  "Gruvbox-Material-Dark")
 hl.env("__GLX_VENDOR_LIBRARY_NAME",  "nvidia")
 hl.env("LIBVA_DRIVER_NAME",          "nvidia")
 hl.env("__GL_GSYNC_ALLOWED",         "1")

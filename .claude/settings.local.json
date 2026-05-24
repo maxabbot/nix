@@ -27,7 +27,8 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\productivity.nix\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\nvidia.nix\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\gaming.nix\")",
-      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\plymouth.nix\")"
+      "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\plymouth.nix\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\config\\\\stylix\")"
     ]
   }
 }

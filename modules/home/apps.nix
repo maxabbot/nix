@@ -1,50 +1,17 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
-{ pkgs, config, lib, ... }:
+{ pkgs, lib, ... }:
 {
   # ── Kitty terminal ─────────────────────────────────────────────────────────────
+  # Colours and font are managed by Stylix; only behaviour settings live here.
   programs.kitty = {
     enable = true;
 
-    font = {
-      name = "JetBrainsMono Nerd Font";
-      size = 13.0;
-    };
-
     settings = {
-      # ── Gruvbox Material Dark palette ──────────────────────────────────────────
-      foreground = "#d4be98";
-      background = "#282828";
-      selection_foreground = "#282828";
-      selection_background = "#d4be98";
-
-      color0 = "#3c3836";
-      color8 = "#928374";
-      color1 = "#ea6962";
-      color9 = "#ea6962";
-      color2 = "#a9b665";
-      color10 = "#a9b665";
-      color3 = "#d8a657";
-      color11 = "#d8a657";
-      color4 = "#7daea3";
-      color12 = "#7daea3";
-      color5 = "#d3869b";
-      color13 = "#d3869b";
-      color6 = "#89b482";
-      color14 = "#89b482";
-      color7 = "#d4be98";
-      color15 = "#d4be98";
-
-      cursor = "#d4be98";
-      cursor_text_color = "#282828";
-      url_color = "#7daea3";
-
-      # ── Window ──────────────────────────────────────────────────────────────
       window_padding_width = 8;
       hide_window_decorations = "titlebar-only";
       background_opacity = "0.95";
       dynamic_background_opacity = true;
 
-      # ── Tab bar ──────────────────────────────────────────────────────────────
       tab_bar_edge = "bottom";
       tab_bar_style = "powerline";
       tab_powerline_style = "slanted";
@@ -56,7 +23,6 @@
       inactive_tab_font_style = "normal";
       tab_bar_background = "#282828";
 
-      # ── Misc ─────────────────────────────────────────────────────────────────
       scrollback_lines = 10000;
       enable_audio_bell = false;
       visual_bell_duration = "0.0";
@@ -84,6 +50,8 @@
   };
 
   # ── btop ───────────────────────────────────────────────────────────────────────
+  # Uses the built-in gruvbox_material_dark theme — better fidelity than Stylix's
+  # generated theme, so Stylix's btop target is disabled in stylix.nix.
   programs.btop = {
     enable = true;
     settings = {
@@ -103,6 +71,16 @@
       net_download = 100;
       net_upload = 100;
       net_auto = true;
+    };
+  };
+
+  # ── bat ────────────────────────────────────────────────────────────────────────
+  # Theme is set by Stylix; only pager behaviour here.
+  programs.bat = {
+    enable = true;
+    config = {
+      pager = "less -RF";
+      italic-text = "always";
     };
   };
 
@@ -144,36 +122,13 @@
   };
 
   # ── Zathura PDF viewer ─────────────────────────────────────────────────────────
+  # Colours are managed by Stylix; only behaviour settings live here.
   programs.zathura = {
     enable = true;
     options = {
-      # Gruvbox Material Dark colors
-      default-bg = "#282828";
-      default-fg = "#d4be98";
-      statusbar-bg = "#3c3836";
-      statusbar-fg = "#d4be98";
-      inputbar-bg = "#282828";
-      inputbar-fg = "#d4be98";
-      notification-bg = "#282828";
-      notification-fg = "#d4be98";
-      notification-error-bg = "#282828";
-      notification-error-fg = "#ea6962";
-      notification-warning-bg = "#282828";
-      notification-warning-fg = "#d8a657";
-      highlight-color = "#d8a657";
-      highlight-active-color = "#a9b665";
-      completion-bg = "#3c3836";
-      completion-fg = "#d4be98";
-      completion-highlight-bg = "#504945";
-      completion-highlight-fg = "#d4be98";
-      recolor-lightcolor = "#282828";
-      recolor-darkcolor = "#d4be98";
       recolor = true;
-
-      # Behaviour
       sandbox = "none";
       statusbar-home-tilde = true;
-      font = "JetBrainsMono Nerd Font 12";
       zoom-min = 10;
       guioptions = "";
       adjust-open = "best-fit";
@@ -192,11 +147,11 @@
   };
 
   # ── Fuzzel launcher ───────────────────────────────────────────────────────────
+  # Colours are managed by Stylix; only layout/behaviour settings live here.
   programs.fuzzel = {
     enable = true;
     settings = {
       main = {
-        font = "JetBrainsMono Nerd Font:size=12";
         dpi-aware = "auto";
         prompt = "❯ ";
         icons-enabled = true;
@@ -208,15 +163,6 @@
         inner-pad = 4;
         fuzzy = true;
         terminal = "kitty";
-      };
-      colors = {
-        background = "282828f2";
-        text = "d4be98ff";
-        match = "7daea3ff";
-        selection = "3c3836ff";
-        selection-text = "d4be98ff";
-        selection-match = "7daea3ff";
-        border = "7daea34d";
       };
       border = {
         width = 2;
@@ -242,7 +188,6 @@
   home.packages = [
     pkgs.freetube
     pkgs.mise
-    # fzf+tmux project picker bound to <prefix>f / CTRL-f
     (pkgs.writeShellScriptBin "tmux-sessionizer" (builtins.readFile ../../config/scripts/tmux-sessionizer))
   ];
 
