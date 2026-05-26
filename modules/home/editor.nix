@@ -72,8 +72,9 @@
       dock = "left";
     };
     git_panel = {
-      # tree_view and show_count_badge removed; dock is the main supported key
       dock = "left";
+      show_count_badge = true;
+      tree_view = true;
     };
     collaboration_panel = {
       button = false;
@@ -93,19 +94,39 @@
         remote = false;
         settings = { };
       };
+      "mcp-server-github" = {
+        enabled = true;
+        remote = false;
+        settings = { };
+      };
+    };
+
+    # ── Agent servers ────────────────────────────────────────────────────────────
+    agent_servers = {
+      "claude-acp" = {
+        type = "registry";
+        default_config_options = { mode = "auto"; };
+      };
     };
 
     # ── Agent ───────────────────────────────────────────────────────────────────
-    # agent_servers / claude-acp registry entry is deprecated; claude-acp is
-    # now launched via the agent selector UI or a keymap binding, not settings.
     agent = {
       dock = "right";
+      sidebar_side = "right";
+      play_sound_when_agent_done = "when_hidden";
+      commit_message_model = {
+        provider = "zed.dev";
+        model = "gemini-3.5-flash";
+      };
       default_model = {
         provider = "zed.dev";
-        model = "claude-sonnet-4-6";
-        # effort controls reasoning depth ("high" | "medium" | "low").
-        # enable_thinking is no longer a valid key; effort replaces it.
-        effort = "high";
+        model = "claude-haiku-4-5";
+        enable_thinking = false;
+      };
+      tool_permissions = {
+        tools = {
+          terminal = { default = "allow"; };
+        };
       };
     };
 
