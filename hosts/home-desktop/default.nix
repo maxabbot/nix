@@ -57,97 +57,127 @@
   # UUIDs/EDID values are stable hardware identifiers for this machine.
   system.activationScripts.sddmMonitorConfig =
     let
-      kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON [
-        {
-          name = "outputs";
-          data = [
-            {
-              # DP-2 — AOC 4K (3840x2160 @ 60 Hz), index 0
-              allowDdcCi = true;
-              allowSdrSoftwareBrightness = true;
-              autoBrightnessCurve = [ 0 0 0 0 0 0 ];
-              autoRotation = "InTabletMode";
-              automaticBrightness = false;
-              brightness = 1;
-              colorPowerTradeoff = "PreferEfficiency";
-              colorProfileSource = "sRGB";
-              connectorName = "DP-2";
-              detectedDdcCi = false;
-              edidHash = "20a8bbcf2ded99e2c8954fef4ad4d197";
-              edidIdentifier = "AOC 9987 121 9 2026 0";
-              edrPolicy = "always";
-              highDynamicRange = false;
-              iccProfilePath = "";
-              maxBitsPerColor = 0;
-              mode = { height = 2160; refreshRate = 60000; width = 3840; };
-              overscan = 0;
-              rgbRange = "Automatic";
-              scale = 1.7;
-              sdrBrightness = 417;
-              sdrGamutWideness = 0;
-              sharpness = 0;
-              transform = "Normal";
-              uuid = "1c32b0ef-a8c6-4efd-805a-8ab0baaaa435";
-              vrrPolicy = "Never";
-              wideColorGamut = false;
-            }
-            {
-              # DP-3 — AOC 1440p (2560x1440 @ 165 Hz), index 1
-              allowDdcCi = true;
-              allowSdrSoftwareBrightness = true;
-              autoBrightnessCurve = [ 0 0 0 0 0 0 ];
-              autoRotation = "InTabletMode";
-              automaticBrightness = false;
-              brightness = 1;
-              colorPowerTradeoff = "PreferEfficiency";
-              colorProfileSource = "sRGB";
-              connectorName = "DP-3";
-              detectedDdcCi = false;
-              edidHash = "4eb9ea281bef29a9e73ebce35b13ec11";
-              edidIdentifier = "AOC 45829 3301 22 2023 0";
-              edrPolicy = "always";
-              highDynamicRange = false;
-              iccProfilePath = "";
-              maxBitsPerColor = 0;
-              mode = { height = 1440; refreshRate = 165000; width = 2560; };
-              overscan = 0;
-              rgbRange = "Automatic";
-              scale = 1;
-              sdrBrightness = 301;
-              sdrGamutWideness = 0;
-              sharpness = 0;
-              transform = "Normal";
-              uuid = "9537cafe-ef6f-4f25-8c94-eb1ff9bf734b";
-              vrrPolicy = "Never";
-              wideColorGamut = false;
-            }
-          ];
-        }
-        {
-          name = "setups";
-          data = [
-            {
-              lidClosed = false;
-              outputs = [
-                {
-                  enabled = false;
-                  outputIndex = 0;
-                  position = { x = 2560; y = 0; };
-                  priority = 0;
-                  replicationSource = "";
-                }
-                {
-                  enabled = true; # DP-3 primary
-                  outputIndex = 1;
-                  position = { x = 0; y = 0; };
-                  priority = 1;
-                  replicationSource = "";
-                }
-              ];
-            }
-          ];
-        }
-      ]);
+      kwinCfg = pkgs.writeText "kwinoutputconfig.json" (
+        builtins.toJSON [
+          {
+            name = "outputs";
+            data = [
+              {
+                # DP-2 — AOC 4K (3840x2160 @ 60 Hz), index 0
+                allowDdcCi = true;
+                allowSdrSoftwareBrightness = true;
+                autoBrightnessCurve = [
+                  0
+                  0
+                  0
+                  0
+                  0
+                  0
+                ];
+                autoRotation = "InTabletMode";
+                automaticBrightness = false;
+                brightness = 1;
+                colorPowerTradeoff = "PreferEfficiency";
+                colorProfileSource = "sRGB";
+                connectorName = "DP-2";
+                detectedDdcCi = false;
+                edidHash = "20a8bbcf2ded99e2c8954fef4ad4d197";
+                edidIdentifier = "AOC 9987 121 9 2026 0";
+                edrPolicy = "always";
+                highDynamicRange = false;
+                iccProfilePath = "";
+                maxBitsPerColor = 0;
+                mode = {
+                  height = 2160;
+                  refreshRate = 60000;
+                  width = 3840;
+                };
+                overscan = 0;
+                rgbRange = "Automatic";
+                scale = 1.7;
+                sdrBrightness = 417;
+                sdrGamutWideness = 0;
+                sharpness = 0;
+                transform = "Normal";
+                uuid = "1c32b0ef-a8c6-4efd-805a-8ab0baaaa435";
+                vrrPolicy = "Never";
+                wideColorGamut = false;
+              }
+              {
+                # DP-3 — AOC 1440p (2560x1440 @ 165 Hz), index 1
+                allowDdcCi = true;
+                allowSdrSoftwareBrightness = true;
+                autoBrightnessCurve = [
+                  0
+                  0
+                  0
+                  0
+                  0
+                  0
+                ];
+                autoRotation = "InTabletMode";
+                automaticBrightness = false;
+                brightness = 1;
+                colorPowerTradeoff = "PreferEfficiency";
+                colorProfileSource = "sRGB";
+                connectorName = "DP-3";
+                detectedDdcCi = false;
+                edidHash = "4eb9ea281bef29a9e73ebce35b13ec11";
+                edidIdentifier = "AOC 45829 3301 22 2023 0";
+                edrPolicy = "always";
+                highDynamicRange = false;
+                iccProfilePath = "";
+                maxBitsPerColor = 0;
+                mode = {
+                  height = 1440;
+                  refreshRate = 165000;
+                  width = 2560;
+                };
+                overscan = 0;
+                rgbRange = "Automatic";
+                scale = 1;
+                sdrBrightness = 301;
+                sdrGamutWideness = 0;
+                sharpness = 0;
+                transform = "Normal";
+                uuid = "9537cafe-ef6f-4f25-8c94-eb1ff9bf734b";
+                vrrPolicy = "Never";
+                wideColorGamut = false;
+              }
+            ];
+          }
+          {
+            name = "setups";
+            data = [
+              {
+                lidClosed = false;
+                outputs = [
+                  {
+                    enabled = false;
+                    outputIndex = 0;
+                    position = {
+                      x = 2560;
+                      y = 0;
+                    };
+                    priority = 0;
+                    replicationSource = "";
+                  }
+                  {
+                    enabled = true; # DP-3 primary
+                    outputIndex = 1;
+                    position = {
+                      x = 0;
+                      y = 0;
+                    };
+                    priority = 1;
+                    replicationSource = "";
+                  }
+                ];
+              }
+            ];
+          }
+        ]
+      );
     in
     {
       deps = [ "users" ];
