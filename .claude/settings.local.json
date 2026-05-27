@@ -29,7 +29,8 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\gaming.nix\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\plymouth.nix\")",
       "Bash(mkdir -p \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\config\\\\stylix\")",
-      "PowerShell(ls \"$env:APPDATA\\\\Zed\" -ErrorAction SilentlyContinue; ls \"$env:LOCALAPPDATA\\\\Zed\" -ErrorAction SilentlyContinue; ls \"$env:USERPROFILE\\\\.config\\\\zed\" -ErrorAction SilentlyContinue)"
+      "PowerShell(ls \"$env:APPDATA\\\\Zed\" -ErrorAction SilentlyContinue; ls \"$env:LOCALAPPDATA\\\\Zed\" -ErrorAction SilentlyContinue; ls \"$env:USERPROFILE\\\\.config\\\\zed\" -ErrorAction SilentlyContinue)",
+      "Bash(nix search *)"
     ]
   }
 }
