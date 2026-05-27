@@ -17,13 +17,11 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
+      - name: Pre-fetch all flake inputs
+        run: nix flake lock --no-update-lock-file
+
       - name: Run flake checks
-        run: >-
-          nix flake check --no-build
-          --update-input lanzaboote
-          --update-input stylix
-          --update-input nix-index-database
-          --update-input apollo-flake
+        run: nix flake check --no-build
 
   nixfmt:
     runs-on: ubuntu-latest
