@@ -47,6 +47,7 @@
   home-manager.sharedModules = [
     {
       # Keep manual themes for apps with complex non-colour config.
+      stylix.targets.kitty.enable = false;
       stylix.targets.tmux.enable = false;
       stylix.targets.starship.enable = false;
       stylix.targets.btop.enable = false;
