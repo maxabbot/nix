@@ -23,7 +23,10 @@
   boot.initrd.kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
 
   # Intel i7-13700K
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [ "kvm-intel" "it87" ];
+  boot.extraModprobeConfig = ''
+    options it87 ignore_resource_conflict=1 force_id=0x8628
+  '';
   boot.extraModulePackages = [ ]; # nvidia_x11 added by modules/nixos/nvidia.nix
 
   swapDevices = [ ];
