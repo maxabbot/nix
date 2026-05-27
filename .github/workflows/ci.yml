@@ -17,6 +17,9 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
+      - name: Complete flake lock
+        run: nix flake lock
+
       - name: Run flake checks
         run: nix flake check --no-build
 
