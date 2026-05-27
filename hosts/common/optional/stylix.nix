@@ -45,7 +45,6 @@
   };
 
   home-manager.sharedModules = [
-    inputs.stylix.homeManagerModules.stylix
     {
       # Keep manual themes for apps with complex non-colour config.
       stylix.targets.tmux.enable = false;
