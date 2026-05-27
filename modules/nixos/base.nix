@@ -138,8 +138,7 @@ in
       ++ lib.optionals config.virtualisation.podman.enable [ "podman" ]
       ++ lib.optionals config.programs.steam.enable [ "gamemode" ];
       shell = pkgs.zsh;
-      hashedPassword = cfg.hashedPassword;
-      initialPassword = cfg.initialPassword;
+      inherit (cfg) hashedPassword initialPassword;
       openssh.authorizedKeys.keys = cfg.sshKeys;
     };
 
