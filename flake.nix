@@ -23,7 +23,10 @@
 
     hyprland = {
       url = "github:hyprwm/Hyprland/v0.55.0";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        xdph.inputs.nixpkgs.follows = "nixpkgs";
+      };
     };
 
     lanzaboote = {
@@ -115,12 +118,12 @@
         };
     in
     {
-      formatter.${system} = mkPkgs.nixfmt-rfc-style;
+      formatter.${system} = mkPkgs.nixfmt;
 
       devShells.${system}.default = mkPkgs.mkShell {
         name = "nixos-config";
         packages = with mkPkgs; [
-          nixfmt-rfc-style
+          nixfmt
           statix
           deadnix
           nil

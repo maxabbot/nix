@@ -26,7 +26,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v9
 
       - name: Pre-fetch all flake inputs
-        run: nix flake lock --no-update-lock-file
+        run: nix flake archive --json > /dev/null
 
       - name: Run flake checks
         run: nix flake check --no-build
