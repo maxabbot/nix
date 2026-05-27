@@ -1,9 +1,7 @@
 # hosts/minimal/hardware-configuration.nix — Placeholder for minimal host.
 # Replace with the output of: sudo nixos-generate-config --root /mnt
 {
-  config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:

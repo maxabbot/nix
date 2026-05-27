@@ -1,9 +1,7 @@
 # hosts/work-laptop/hardware-configuration.nix — Placeholder for work-laptop.
 # Replace with the output of: sudo nixos-generate-config --root /mnt
 {
-  config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:

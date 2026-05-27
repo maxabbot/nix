@@ -1,6 +1,6 @@
 # Custom package overlays — add local derivations or override upstream packages.
 # Each attribute is available as pkgs.<name> throughout the entire flake.
-final: prev: {
+_final: _prev: {
   # Local packages from pkgs/:
   # my-package = prev.callPackage ../pkgs/my-package { };
 

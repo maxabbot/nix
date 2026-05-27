@@ -1,5 +1,5 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 {
   programs = {
     # ── Kitty terminal ─────────────────────────────────────────────────────────────

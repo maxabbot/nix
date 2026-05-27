@@ -1,7 +1,6 @@
 # hosts/vm/hardware-configuration.nix — QEMU/virtio guest (QuickGUI or similar).
 # Replace with output of `sudo nixos-generate-config --show-hardware-config` after first boot.
 {
-  config,
   lib,
   modulesPath,
   ...
