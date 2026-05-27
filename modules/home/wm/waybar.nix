@@ -65,10 +65,19 @@ in
             disable-scroll = false;
             format = "{name}";
             persistent-workspaces =
-              lib.optionalAttrs (cfg.monitors.primaryName != "" && cfg.monitors.secondary != null) {
-                "${cfg.monitors.primaryName}" = [ 1 2 3 ];
-                "${lib.head (lib.splitString "," cfg.monitors.secondary)}" = [ 4 5 6 ];
-              };
+              lib.optionalAttrs (cfg.monitors.primaryName != "" && cfg.monitors.secondary != null)
+                {
+                  "${cfg.monitors.primaryName}" = [
+                    1
+                    2
+                    3
+                  ];
+                  "${lib.head (lib.splitString "," cfg.monitors.secondary)}" = [
+                    4
+                    5
+                    6
+                  ];
+                };
           };
 
           "${winModule}" = {

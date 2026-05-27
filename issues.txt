@@ -1,0 +1,1056 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+evaluation warning: nixfmt-rfc-style is now the same as pkgs.nixfmt which should be used instead.
+evaluation warning: nixfmt-rfc-style is now the same as pkgs.nixfmt which should be used instead.
+these 27 paths will be fetched (16.5 MiB download, 73.9 MiB unpacked):
+  /nix/store/k1shjmzyzw8bf7vp8gyrqn4dn70xpdxx-brotli-1.2.0-lib
+  /nix/store/3lnvi6r17y9kki4r9klzvavranaz3131-bzip2-1.0.8
+  /nix/store/xm1x557414bq1lgrx18gvb7cbz1qrdy8-curl-8.20.0
+  /nix/store/qhmqdg27kcrlkl8ida6d5hiacw0y8d21-elfutils-0.194
+  /nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib
+  /nix/store/xyikkpwkyxx6syba3kfrr0h67ig5hwmn-gcc-15.2.0-libgcc
+  /nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61
+  /nix/store/y56aqb1m3y5davn6hsv4jfbml78qw4mv-gmp-with-cxx-6.3.0
+  /nix/store/6i31ijsdf1f9rwrismd143qdhj6i96sk-json-c-0.18
+  /nix/store/wn2byajlpr3w4pii81n6r0bjfrp5ca31-keyutils-1.6.3-lib
+  /nix/store/5cbjxz04crbjnawysjx5q717gvbsx7k8-krb5-1.22.1-lib
+  /nix/store/2zs4bbi72plfm8j6zxf1js4f3yc4yzwy-libffi-3.5.2
+  /nix/store/6qa00czc79b3nb6ld0mdyacfp2p1k3jx-libidn2-2.3.8
+  /nix/store/f0gsxi5sc6hvrwmjk4r7dpb71d4vjgn0-libpsl-0.21.5
+  /nix/store/w3br983xcky4vdsz4df4splnbqhvnwp6-libssh2-1.11.1
+  /nix/store/bf6wgamqnl3c91iamlb1branrfcwwy7x-libunistring-1.4.2
+  /nix/store/zshxcsjv43migvylmfn1dh4wsl5wi09v-nghttp2-1.69.0-lib
+  /nix/store/k7ph83pqw7wk69zl9jdniwkg681nzavw-nghttp3-1.15.0
+  /nix/store/7kxphmk7sm9k343hs323z8gd6l1c4xsy-ngtcp2-1.22.1
+  /nix/store/01945jlqwsgq7a9nbw00y0p0x6027yy3-nixfmt-1.2.0
+  /nix/store/wjfhh11sfcdf97mvg7hbxickybxzk850-numactl-2.0.18
+  /nix/store/y18pnbvfarnilsmgayswvi1khaw9wbsc-openssl-3.6.2
+  /nix/store/093bbkmklv9vznvdpg1dmdmirdf3acjg-publicsuffix-list-0-unstable-2026-03-26
+  /nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc
+  /nix/store/waz72vmxc8zk90qqvgg9ikhzdk1kzjy4-xz-5.8.3
+  /nix/store/61a1nwx3w6rqyaisj5rn1sal1981apm7-zlib-1.3.2
+  /nix/store/gd74vdpqzq0qmmikvmrf3r3kghhhnf50-zstd-1.5.7
+copying path '/nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
+copying path '/nix/store/xyikkpwkyxx6syba3kfrr0h67ig5hwmn-gcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
+copying path '/nix/store/bf6wgamqnl3c91iamlb1branrfcwwy7x-libunistring-1.4.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/093bbkmklv9vznvdpg1dmdmirdf3acjg-publicsuffix-list-0-unstable-2026-03-26' from 'https://cache.nixos.org'...
+copying path '/nix/store/6qa00czc79b3nb6ld0mdyacfp2p1k3jx-libidn2-2.3.8' from 'https://cache.nixos.org'...
+copying path '/nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61' from 'https://cache.nixos.org'...
+copying path '/nix/store/k1shjmzyzw8bf7vp8gyrqn4dn70xpdxx-brotli-1.2.0-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/3lnvi6r17y9kki4r9klzvavranaz3131-bzip2-1.0.8' from 'https://cache.nixos.org'...
+copying path '/nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/6i31ijsdf1f9rwrismd143qdhj6i96sk-json-c-0.18' from 'https://cache.nixos.org'...
+copying path '/nix/store/wn2byajlpr3w4pii81n6r0bjfrp5ca31-keyutils-1.6.3-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/2zs4bbi72plfm8j6zxf1js4f3yc4yzwy-libffi-3.5.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/f0gsxi5sc6hvrwmjk4r7dpb71d4vjgn0-libpsl-0.21.5' from 'https://cache.nixos.org'...
+copying path '/nix/store/zshxcsjv43migvylmfn1dh4wsl5wi09v-nghttp2-1.69.0-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/k7ph83pqw7wk69zl9jdniwkg681nzavw-nghttp3-1.15.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/y18pnbvfarnilsmgayswvi1khaw9wbsc-openssl-3.6.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/waz72vmxc8zk90qqvgg9ikhzdk1kzjy4-xz-5.8.3' from 'https://cache.nixos.org'...
+copying path '/nix/store/61a1nwx3w6rqyaisj5rn1sal1981apm7-zlib-1.3.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/y56aqb1m3y5davn6hsv4jfbml78qw4mv-gmp-with-cxx-6.3.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/gd74vdpqzq0qmmikvmrf3r3kghhhnf50-zstd-1.5.7' from 'https://cache.nixos.org'...
+copying path '/nix/store/wjfhh11sfcdf97mvg7hbxickybxzk850-numactl-2.0.18' from 'https://cache.nixos.org'...
+copying path '/nix/store/5cbjxz04crbjnawysjx5q717gvbsx7k8-krb5-1.22.1-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/7kxphmk7sm9k343hs323z8gd6l1c4xsy-ngtcp2-1.22.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/w3br983xcky4vdsz4df4splnbqhvnwp6-libssh2-1.11.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/xm1x557414bq1lgrx18gvb7cbz1qrdy8-curl-8.20.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/qhmqdg27kcrlkl8ida6d5hiacw0y8d21-elfutils-0.194' from 'https://cache.nixos.org'...
+copying path '/nix/store/01945jlqwsgq7a9nbw00y0p0x6027yy3-nixfmt-1.2.0' from 'https://cache.nixos.org'...
+diff --git a/flake.nix b/flake.nix
+index 71e7fa3..e0ddd81 100644
+--- a/flake.nix
++++ b/flake.nix
+@@ -103,9 +103,12 @@
+             {
+               home-manager.useGlobalPkgs = true;
+               home-manager.useUserPackages = true;
+-              home-manager.extraSpecialArgs = sharedHmArgs // hmArgs // {
+-                inherit inputs;
+-              };
++              home-manager.extraSpecialArgs =
++                sharedHmArgs
++                // hmArgs
++                // {
++                  inherit inputs;
++                };
+               home-manager.users.max = import ./home/max;
+             }
+           ];
+diff --git a/home/max/desktop.nix b/home/max/desktop.nix
+index 7ff7951..c4467b2 100644
+--- a/home/max/desktop.nix
++++ b/home/max/desktop.nix
+@@ -1,4 +1,9 @@
+-{ lib, machineType, location, ... }:
++{
++  lib,
++  machineType,
++  location,
++  ...
++}:
+ {
+   services.gammastep = lib.mkIf (machineType != "server") {
+     enable = true;
+diff --git a/hosts/common/optional/lanzaboote.nix b/hosts/common/optional/lanzaboote.nix
+index 03b6c19..259d2a9 100644
+--- a/hosts/common/optional/lanzaboote.nix
++++ b/hosts/common/optional/lanzaboote.nix
+@@ -6,7 +6,12 @@
+ #   3. Enable Secure Boot in UEFI firmware (Setup Mode or Audit Mode)
+ #
+ # After nixos-rebuild switch, verify: sbctl verify && sbctl status
+-{ pkgs, lib, inputs, ... }:
++{
++  pkgs,
++  lib,
++  inputs,
++  ...
++}:
+ {
+   imports = [ inputs.lanzaboote.nixosModules.lanzaboote ];
+
+diff --git a/hosts/home-desktop/default.nix b/hosts/home-desktop/default.nix
+index cdd7b20..36fe0f7 100644
+--- a/hosts/home-desktop/default.nix
++++ b/hosts/home-desktop/default.nix
+@@ -57,97 +57,127 @@
+   # UUIDs/EDID values are stable hardware identifiers for this machine.
+   system.activationScripts.sddmMonitorConfig =
+     let
+-      kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON [
+-        {
+-          name = "outputs";
+-          data = [
+-            {
+-              # DP-2 — AOC 4K (3840x2160 @ 60 Hz), index 0
+-              allowDdcCi = true;
+-              allowSdrSoftwareBrightness = true;
+-              autoBrightnessCurve = [ 0 0 0 0 0 0 ];
+-              autoRotation = "InTabletMode";
+-              automaticBrightness = false;
+-              brightness = 1;
+-              colorPowerTradeoff = "PreferEfficiency";
+-              colorProfileSource = "sRGB";
+-              connectorName = "DP-2";
+-              detectedDdcCi = false;
+-              edidHash = "20a8bbcf2ded99e2c8954fef4ad4d197";
+-              edidIdentifier = "AOC 9987 121 9 2026 0";
+-              edrPolicy = "always";
+-              highDynamicRange = false;
+-              iccProfilePath = "";
+-              maxBitsPerColor = 0;
+-              mode = { height = 2160; refreshRate = 60000; width = 3840; };
+-              overscan = 0;
+-              rgbRange = "Automatic";
+-              scale = 1.7;
+-              sdrBrightness = 417;
+-              sdrGamutWideness = 0;
+-              sharpness = 0;
+-              transform = "Normal";
+-              uuid = "1c32b0ef-a8c6-4efd-805a-8ab0baaaa435";
+-              vrrPolicy = "Never";
+-              wideColorGamut = false;
+-            }
+-            {
+-              # DP-3 — AOC 1440p (2560x1440 @ 165 Hz), index 1
+-              allowDdcCi = true;
+-              allowSdrSoftwareBrightness = true;
+-              autoBrightnessCurve = [ 0 0 0 0 0 0 ];
+-              autoRotation = "InTabletMode";
+-              automaticBrightness = false;
+-              brightness = 1;
+-              colorPowerTradeoff = "PreferEfficiency";
+-              colorProfileSource = "sRGB";
+-              connectorName = "DP-3";
+-              detectedDdcCi = false;
+-              edidHash = "4eb9ea281bef29a9e73ebce35b13ec11";
+-              edidIdentifier = "AOC 45829 3301 22 2023 0";
+-              edrPolicy = "always";
+-              highDynamicRange = false;
+-              iccProfilePath = "";
+-              maxBitsPerColor = 0;
+-              mode = { height = 1440; refreshRate = 165000; width = 2560; };
+-              overscan = 0;
+-              rgbRange = "Automatic";
+-              scale = 1;
+-              sdrBrightness = 301;
+-              sdrGamutWideness = 0;
+-              sharpness = 0;
+-              transform = "Normal";
+-              uuid = "9537cafe-ef6f-4f25-8c94-eb1ff9bf734b";
+-              vrrPolicy = "Never";
+-              wideColorGamut = false;
+-            }
+-          ];
+-        }
+-        {
+-          name = "setups";
+-          data = [
+-            {
+-              lidClosed = false;
+-              outputs = [
+-                {
+-                  enabled = false;
+-                  outputIndex = 0;
+-                  position = { x = 2560; y = 0; };
+-                  priority = 0;
+-                  replicationSource = "";
+-                }
+-                {
+-                  enabled = true; # DP-3 primary
+-                  outputIndex = 1;
+-                  position = { x = 0; y = 0; };
+-                  priority = 1;
+-                  replicationSource = "";
+-                }
+-              ];
+-            }
+-          ];
+-        }
+-      ]);
++      kwinCfg = pkgs.writeText "kwinoutputconfig.json" (
++        builtins.toJSON [
++          {
++            name = "outputs";
++            data = [
++              {
++                # DP-2 — AOC 4K (3840x2160 @ 60 Hz), index 0
++                allowDdcCi = true;
++                allowSdrSoftwareBrightness = true;
++                autoBrightnessCurve = [
++                  0
++                  0
++                  0
++                  0
++                  0
++                  0
++                ];
++                autoRotation = "InTabletMode";
++                automaticBrightness = false;
++                brightness = 1;
++                colorPowerTradeoff = "PreferEfficiency";
++                colorProfileSource = "sRGB";
++                connectorName = "DP-2";
++                detectedDdcCi = false;
++                edidHash = "20a8bbcf2ded99e2c8954fef4ad4d197";
++                edidIdentifier = "AOC 9987 121 9 2026 0";
++                edrPolicy = "always";
++                highDynamicRange = false;
++                iccProfilePath = "";
++                maxBitsPerColor = 0;
++                mode = {
++                  height = 2160;
++                  refreshRate = 60000;
++                  width = 3840;
++                };
++                overscan = 0;
++                rgbRange = "Automatic";
++                scale = 1.7;
++                sdrBrightness = 417;
++                sdrGamutWideness = 0;
++                sharpness = 0;
++                transform = "Normal";
++                uuid = "1c32b0ef-a8c6-4efd-805a-8ab0baaaa435";
++                vrrPolicy = "Never";
++                wideColorGamut = false;
++              }
++              {
++                # DP-3 — AOC 1440p (2560x1440 @ 165 Hz), index 1
++                allowDdcCi = true;
++                allowSdrSoftwareBrightness = true;
++                autoBrightnessCurve = [
++                  0
++                  0
++                  0
++                  0
++                  0
++                  0
++                ];
++                autoRotation = "InTabletMode";
++                automaticBrightness = false;
++                brightness = 1;
++                colorPowerTradeoff = "PreferEfficiency";
++                colorProfileSource = "sRGB";
++                connectorName = "DP-3";
++                detectedDdcCi = false;
++                edidHash = "4eb9ea281bef29a9e73ebce35b13ec11";
++                edidIdentifier = "AOC 45829 3301 22 2023 0";
++                edrPolicy = "always";
++                highDynamicRange = false;
++                iccProfilePath = "";
++                maxBitsPerColor = 0;
++                mode = {
++                  height = 1440;
++                  refreshRate = 165000;
++                  width = 2560;
++                };
++                overscan = 0;
++                rgbRange = "Automatic";
++                scale = 1;
++                sdrBrightness = 301;
++                sdrGamutWideness = 0;
++                sharpness = 0;
++                transform = "Normal";
++                uuid = "9537cafe-ef6f-4f25-8c94-eb1ff9bf734b";
++                vrrPolicy = "Never";
++                wideColorGamut = false;
++              }
++            ];
++          }
++          {
++            name = "setups";
++            data = [
++              {
++                lidClosed = false;
++                outputs = [
++                  {
++                    enabled = false;
++                    outputIndex = 0;
++                    position = {
++                      x = 2560;
++                      y = 0;
++                    };
++                    priority = 0;
++                    replicationSource = "";
++                  }
++                  {
++                    enabled = true; # DP-3 primary
++                    outputIndex = 1;
++                    position = {
++                      x = 0;
++                      y = 0;
++                    };
++                    priority = 1;
++                    replicationSource = "";
++                  }
++                ];
++              }
++            ];
++          }
++        ]
++      );
+     in
+     {
+       deps = [ "users" ];
+diff --git a/hosts/home-desktop/hardware-configuration.nix b/hosts/home-desktop/hardware-configuration.nix
+index b48ce63..7f0bf85 100644
+--- a/hosts/home-desktop/hardware-configuration.nix
++++ b/hosts/home-desktop/hardware-configuration.nix
+@@ -23,7 +23,10 @@
+   boot.initrd.kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
+
+   # Intel i7-13700K
+-  boot.kernelModules = [ "kvm-intel" "it87" ];
++  boot.kernelModules = [
++    "kvm-intel"
++    "it87"
++  ];
+   boot.extraModprobeConfig = ''
+     options it87 ignore_resource_conflict=1 force_id=0x8628
+   '';
+diff --git a/hosts/vm/disk-config.nix b/hosts/vm/disk-config.nix
+index 55dd2cb..f81d0f8 100644
+--- a/hosts/vm/disk-config.nix
++++ b/hosts/vm/disk-config.nix
+@@ -30,19 +30,31 @@
+               subvolumes = {
+                 "@" = {
+                   mountpoint = "/";
+-                  mountOptions = [ "compress=zstd" "noatime" ];
++                  mountOptions = [
++                    "compress=zstd"
++                    "noatime"
++                  ];
+                 };
+                 "@home" = {
+                   mountpoint = "/home";
+-                  mountOptions = [ "compress=zstd" "noatime" ];
++                  mountOptions = [
++                    "compress=zstd"
++                    "noatime"
++                  ];
+                 };
+                 "@nix" = {
+                   mountpoint = "/nix";
+-                  mountOptions = [ "compress=zstd" "noatime" ];
++                  mountOptions = [
++                    "compress=zstd"
++                    "noatime"
++                  ];
+                 };
+                 "@log" = {
+                   mountpoint = "/var/log";
+-                  mountOptions = [ "compress=zstd" "noatime" ];
++                  mountOptions = [
++                    "compress=zstd"
++                    "noatime"
++                  ];
+                 };
+               };
+             };
+diff --git a/modules/home/apps.nix b/modules/home/apps.nix
+index 3b8591e..720b0d6 100644
+--- a/modules/home/apps.nix
++++ b/modules/home/apps.nix
+@@ -188,7 +188,9 @@
+   home.packages = [
+     pkgs.freetube
+     pkgs.mise
+-    (pkgs.writeShellScriptBin "tmux-sessionizer" (builtins.readFile ../../config/scripts/tmux-sessionizer))
++    (pkgs.writeShellScriptBin "tmux-sessionizer" (
++      builtins.readFile ../../config/scripts/tmux-sessionizer
++    ))
+   ];
+
+   # ── Mise version manager ──────────────────────────────────────────────────────
+diff --git a/modules/home/editor.nix b/modules/home/editor.nix
+index c691dcd..6402a3d 100644
+--- a/modules/home/editor.nix
++++ b/modules/home/editor.nix
+@@ -11,256 +11,294 @@
+     force = true;
+     text = builtins.toJSON {
+
+-    # ── Extensions (auto-installed) ─────────────────────────────────────────────
+-    auto_install_extensions = {
+-      "gruvbox-material" = true;
+-      "colored-zed-icons" = true;
+-      "dockerfile" = true;
+-      "github-actions" = true;
+-      "ruff" = true;
+-      "toml" = true;
+-      "html" = true;
+-      "nix" = true;
+-    };
+-
+-    # ── Appearance ──────────────────────────────────────────────────────────────
+-    theme = {
+-      mode = "system";
+-      light = "Gruvbox Material Light";
+-      dark = "Gruvbox Material Dark";
+-    };
+-    # icon_theme only supports a plain string (no mode/light/dark object).
+-    # Use your preferred single theme here; Colored Zed Icons has a dark variant.
+-    icon_theme = "Colored Zed Icons Theme Dark";
+-    ui_font_family = "JetBrainsMono Nerd Font";
+-    ui_font_size = 16;
+-    buffer_font_family = "JetBrainsMono Nerd Font";
+-    buffer_font_size = 15;
+-
+-    # ── Editor ──────────────────────────────────────────────────────────────────
+-    base_keymap = "VSCode";
+-    cli_default_open_behavior = "existing_window";
+-    soft_wrap = "editor_width";
+-    tab_size = 2;
+-    hard_tabs = false;
+-    autosave = "on_focus_change";
+-    format_on_save = "on";
+-    cursor_blink = false;
+-    current_line_highlight = "all";
+-    diff_view_style = "unified";
+-    line_ending = "enforce_lf";
+-    scrollbar = { show = "never"; };
+-    relative_line_numbers = true;
+-
+-    indent_guides = {
+-      enabled = true;
+-      coloring = "indent_aware";
+-    };
+-    inlay_hints = {
+-      enabled = true;
+-      show_type_hints = true;
+-      show_parameter_hints = true;
+-      show_other_hints = true;
+-    };
++      # ── Extensions (auto-installed) ─────────────────────────────────────────────
++      auto_install_extensions = {
++        "gruvbox-material" = true;
++        "colored-zed-icons" = true;
++        "dockerfile" = true;
++        "github-actions" = true;
++        "ruff" = true;
++        "toml" = true;
++        "html" = true;
++        "nix" = true;
++      };
+
+-    # ── Panels ──────────────────────────────────────────────────────────────────
+-    project_panel = {
+-      entry_spacing = "comfortable";
+-      dock = "left";
+-    };
+-    outline_panel = {
+-      dock = "left";
+-    };
+-    git_panel = {
+-      dock = "left";
+-      show_count_badge = true;
+-      tree_view = true;
+-    };
+-    collaboration_panel = {
+-      button = false;
+-    };
++      # ── Appearance ──────────────────────────────────────────────────────────────
++      theme = {
++        mode = "system";
++        light = "Gruvbox Material Light";
++        dark = "Gruvbox Material Dark";
++      };
++      # icon_theme only supports a plain string (no mode/light/dark object).
++      # Use your preferred single theme here; Colored Zed Icons has a dark variant.
++      icon_theme = "Colored Zed Icons Theme Dark";
++      ui_font_family = "JetBrainsMono Nerd Font";
++      ui_font_size = 16;
++      buffer_font_family = "JetBrainsMono Nerd Font";
++      buffer_font_size = 15;
+
+-    # ── MCP context servers ──────────────────────────────────────────────────────
+-    context_servers = {
+-      "mcp-server-markitdown" = {
+-        enabled = true;
+-        remote = false;
+-        settings = {
+-          package_version = "latest";
+-        };
++      # ── Editor ──────────────────────────────────────────────────────────────────
++      base_keymap = "VSCode";
++      cli_default_open_behavior = "existing_window";
++      soft_wrap = "editor_width";
++      tab_size = 2;
++      hard_tabs = false;
++      autosave = "on_focus_change";
++      format_on_save = "on";
++      cursor_blink = false;
++      current_line_highlight = "all";
++      diff_view_style = "unified";
++      line_ending = "enforce_lf";
++      scrollbar = {
++        show = "never";
+       };
+-      "mcp-server-brave-search" = {
++      relative_line_numbers = true;
++
++      indent_guides = {
+         enabled = true;
+-        remote = false;
+-        settings = { };
++        coloring = "indent_aware";
+       };
+-      "mcp-server-github" = {
++      inlay_hints = {
+         enabled = true;
+-        remote = false;
+-        settings = { };
++        show_type_hints = true;
++        show_parameter_hints = true;
++        show_other_hints = true;
+       };
+-    };
+
+-    # ── Agent servers ────────────────────────────────────────────────────────────
+-    agent_servers = {
+-      "claude-acp" = {
+-        type = "registry";
+-        default_config_options = { mode = "auto"; };
++      # ── Panels ──────────────────────────────────────────────────────────────────
++      project_panel = {
++        entry_spacing = "comfortable";
++        dock = "left";
+       };
+-    };
+-
+-    # ── Agent ───────────────────────────────────────────────────────────────────
+-    agent = {
+-      dock = "right";
+-      sidebar_side = "right";
+-      play_sound_when_agent_done = "when_hidden";
+-      commit_message_model = {
+-        provider = "zed.dev";
+-        model = "gemini-3.5-flash";
++      outline_panel = {
++        dock = "left";
++      };
++      git_panel = {
++        dock = "left";
++        show_count_badge = true;
++        tree_view = true;
+       };
+-      default_model = {
+-        provider = "zed.dev";
+-        model = "claude-haiku-4-5";
+-        enable_thinking = false;
++      collaboration_panel = {
++        button = false;
+       };
+-      tool_permissions = {
+-        tools = {
+-          terminal = { default = "allow"; };
++
++      # ── MCP context servers ──────────────────────────────────────────────────────
++      context_servers = {
++        "mcp-server-markitdown" = {
++          enabled = true;
++          remote = false;
++          settings = {
++            package_version = "latest";
++          };
++        };
++        "mcp-server-brave-search" = {
++          enabled = true;
++          remote = false;
++          settings = { };
++        };
++        "mcp-server-github" = {
++          enabled = true;
++          remote = false;
++          settings = { };
+         };
+       };
+-    };
+
+-    # ── Git ─────────────────────────────────────────────────────────────────────
+-    git = {
+-      inline_blame = {
+-        show_commit_summary = true;
++      # ── Agent servers ────────────────────────────────────────────────────────────
++      agent_servers = {
++        "claude-acp" = {
++          type = "registry";
++          default_config_options = {
++            mode = "auto";
++          };
++        };
+       };
+-    };
+
+-    # ── Terminal ────────────────────────────────────────────────────────────────
+-    terminal = {
+-      font_family = "JetBrainsMono Nerd Font";
+-      font_size = 15;
+-      blinking = "terminal_controlled";
+-      cursor_shape = "bar";
+-      shell = { program = "zsh"; };
+-      working_directory = "current_project_directory";
+-      env = { TERM = "xterm-256color"; };
+-    };
++      # ── Agent ───────────────────────────────────────────────────────────────────
++      agent = {
++        dock = "right";
++        sidebar_side = "right";
++        play_sound_when_agent_done = "when_hidden";
++        commit_message_model = {
++          provider = "zed.dev";
++          model = "gemini-3.5-flash";
++        };
++        default_model = {
++          provider = "zed.dev";
++          model = "claude-haiku-4-5";
++          enable_thinking = false;
++        };
++        tool_permissions = {
++          tools = {
++            terminal = {
++              default = "allow";
++            };
++          };
++        };
++      };
+
+-    # ── File type associations ───────────────────────────────────────────────────
+-    file_types = {
+-      "sql" = [ "*.sql" ];
+-    };
++      # ── Git ─────────────────────────────────────────────────────────────────────
++      git = {
++        inline_blame = {
++          show_commit_summary = true;
++        };
++      };
+
+-    # ── LSP ─────────────────────────────────────────────────────────────────────
+-    lsp = {
+-      "rust-analyzer" = {
+-        initialization_options = {
+-          check = { command = "clippy"; };
+-          cargo = { allFeatures = true; };
+-          inlayHints = {
+-            maxLength = 40;
+-            lifetimeElisionHints = { enable = "skip_trivial"; };
+-          };
+-          procMacro = { enable = true; };
++      # ── Terminal ────────────────────────────────────────────────────────────────
++      terminal = {
++        font_family = "JetBrainsMono Nerd Font";
++        font_size = 15;
++        blinking = "terminal_controlled";
++        cursor_shape = "bar";
++        shell = {
++          program = "zsh";
++        };
++        working_directory = "current_project_directory";
++        env = {
++          TERM = "xterm-256color";
+         };
+       };
+-      "pyright" = {
+-        settings = {
+-          "python.analysis" = {
+-            typeCheckingMode = "basic";
+-            autoSearchPaths = true;
+-            useLibraryCodeForTypes = true;
+-            diagnosticMode = "openFilesOnly";
++
++      # ── File type associations ───────────────────────────────────────────────────
++      file_types = {
++        "sql" = [ "*.sql" ];
++      };
++
++      # ── LSP ─────────────────────────────────────────────────────────────────────
++      lsp = {
++        "rust-analyzer" = {
++          initialization_options = {
++            check = {
++              command = "clippy";
++            };
++            cargo = {
++              allFeatures = true;
++            };
++            inlayHints = {
++              maxLength = 40;
++              lifetimeElisionHints = {
++                enable = "skip_trivial";
++              };
++            };
++            procMacro = {
++              enable = true;
++            };
+           };
+         };
+-      };
+-      "gopls" = {
+-        initialization_options = {
+-          usePlaceholders = true;
+-          analyses = {
+-            shadow = true;
+-            unusedwrite = true;
+-            useany = true;
++        "pyright" = {
++          settings = {
++            "python.analysis" = {
++              typeCheckingMode = "basic";
++              autoSearchPaths = true;
++              useLibraryCodeForTypes = true;
++              diagnosticMode = "openFilesOnly";
++            };
+           };
+-          staticcheck = true;
+-          hints = {
+-            assignVariableTypes = true;
+-            compositeLiteralFields = true;
+-            constantValues = true;
+-            functionTypeParameters = true;
+-            parameterNames = true;
+-            rangeVariableTypes = true;
++        };
++        "gopls" = {
++          initialization_options = {
++            usePlaceholders = true;
++            analyses = {
++              shadow = true;
++              unusedwrite = true;
++              useany = true;
++            };
++            staticcheck = true;
++            hints = {
++              assignVariableTypes = true;
++              compositeLiteralFields = true;
++              constantValues = true;
++              functionTypeParameters = true;
++              parameterNames = true;
++              rangeVariableTypes = true;
++            };
+           };
+         };
+-      };
+-      "typescript-language-server" = {
+-        initialization_options = {
+-          preferences = {
+-            includeInlayParameterNameHints = "all";
+-            includeInlayPropertyDeclarationTypeHints = true;
+-            includeInlayVariableTypeHints = true;
++        "typescript-language-server" = {
++          initialization_options = {
++            preferences = {
++              includeInlayParameterNameHints = "all";
++              includeInlayPropertyDeclarationTypeHints = true;
++              includeInlayVariableTypeHints = true;
++            };
+           };
+         };
+-      };
+-      "nil" = {
+-        initialization_options = {
+-          formatting = { command = [ "nixfmt" ]; };
++        "nil" = {
++          initialization_options = {
++            formatting = {
++              command = [ "nixfmt" ];
++            };
++          };
+         };
+       };
+-    };
+
+-    # ── Per-language settings ────────────────────────────────────────────────────
+-    languages = {
+-      "Python" = {
+-        tab_size = 4;
+-        format_on_save = "on";
+-        formatter = { language_server = { name = "ruff"; }; };
+-        language_servers = [
+-          "pyright"
+-          "ruff"
+-        ];
+-      };
+-      "Go" = {
+-        hard_tabs = true;
+-        tab_size = 4;
+-        format_on_save = "on";
+-      };
+-      "Rust" = { format_on_save = "on"; };
+-      "TypeScript" = {
+-        format_on_save = "on";
+-        formatter = { language_server = { name = "typescript-language-server"; }; };
+-      };
+-      "JavaScript" = {
+-        format_on_save = "on";
+-        formatter = { language_server = { name = "typescript-language-server"; }; };
+-      };
+-      "JSON" = {
+-        tab_size = 2;
+-        format_on_save = "on";
+-      };
+-      "YAML" = {
+-        tab_size = 2;
+-        format_on_save = "off";
+-      };
+-      "TOML" = {
+-        tab_size = 2;
+-        format_on_save = "on";
+-      };
+-      "Markdown" = {
+-        soft_wrap = "editor_width";
+-        format_on_save = "off";
+-      };
+-      "Shell Script" = { format_on_save = "off"; };
+-      "Dockerfile" = { format_on_save = "off"; };
+-      "Nix" = {
+-        tab_size = 2;
+-        format_on_save = "off";
++      # ── Per-language settings ────────────────────────────────────────────────────
++      languages = {
++        "Python" = {
++          tab_size = 4;
++          format_on_save = "on";
++          formatter = {
++            language_server = {
++              name = "ruff";
++            };
++          };
++          language_servers = [
++            "pyright"
++            "ruff"
++          ];
++        };
++        "Go" = {
++          hard_tabs = true;
++          tab_size = 4;
++          format_on_save = "on";
++        };
++        "Rust" = {
++          format_on_save = "on";
++        };
++        "TypeScript" = {
++          format_on_save = "on";
++          formatter = {
++            language_server = {
++              name = "typescript-language-server";
++            };
++          };
++        };
++        "JavaScript" = {
++          format_on_save = "on";
++          formatter = {
++            language_server = {
++              name = "typescript-language-server";
++            };
++          };
++        };
++        "JSON" = {
++          tab_size = 2;
++          format_on_save = "on";
++        };
++        "YAML" = {
++          tab_size = 2;
++          format_on_save = "off";
++        };
++        "TOML" = {
++          tab_size = 2;
++          format_on_save = "on";
++        };
++        "Markdown" = {
++          soft_wrap = "editor_width";
++          format_on_save = "off";
++        };
++        "Shell Script" = {
++          format_on_save = "off";
++        };
++        "Dockerfile" = {
++          format_on_save = "off";
++        };
++        "Nix" = {
++          tab_size = 2;
++          format_on_save = "off";
++        };
+       };
+     };
+   };
+-  };
+
+   # ── VSCode (backup editor) ─────────────────────────────────────────────────────
+   programs.vscode = {
+diff --git a/modules/home/shell.nix b/modules/home/shell.nix
+index a5d7b2f..fec8e17 100644
+--- a/modules/home/shell.nix
++++ b/modules/home/shell.nix
+@@ -128,8 +128,8 @@
+       ns = "npm start";
+
+       # App shortcuts
+-      zed    = "zeditor";
+-      zen    = "zen-beta";
++      zed = "zeditor";
++      zen = "zen-beta";
+       chrome = "google-chrome-stable";
+
+     };
+diff --git a/modules/home/wm/hyprland.nix b/modules/home/wm/hyprland.nix
+index e9672c3..9f8f185 100644
+--- a/modules/home/wm/hyprland.nix
++++ b/modules/home/wm/hyprland.nix
+@@ -5,17 +5,18 @@ let
+
+   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
+   # into a Lua hl.monitor({}) call.
+-  monitorToLua = s:
++  monitorToLua =
++    s:
+     let
+       parts = builtins.map lib.strings.trim (lib.splitString "," s);
+-      output    = builtins.elemAt parts 0;
+-      mode      = builtins.elemAt parts 1;
+-      position  = builtins.elemAt parts 2;
+-      scale     = builtins.elemAt parts 3;
++      output = builtins.elemAt parts 0;
++      mode = builtins.elemAt parts 1;
++      position = builtins.elemAt parts 2;
++      scale = builtins.elemAt parts 3;
+       hasTransform = builtins.length parts >= 6;
+       transformVal = if hasTransform then builtins.elemAt parts 5 else "";
+     in
+-      ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale}${lib.optionalString hasTransform ", transform = ${transformVal}"} })'';
++    ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale}${lib.optionalString hasTransform ", transform = ${transformVal}"} })'';
+
+   # Generate hl.workspace_rule() lines for pinning workspaces to monitors
+   workspaceRules =
+@@ -24,25 +25,27 @@ let
+       ''hl.workspace_rule({ workspace = "2", monitor = "${cfg.monitors.primaryName}" })''
+       ''hl.workspace_rule({ workspace = "3", monitor = "${cfg.monitors.primaryName}" })''
+     ])
+-    ++ (lib.optionals (cfg.monitors.secondary != null)
+-      (let secName = lib.head (lib.splitString "," cfg.monitors.secondary);
+-      in [
++    ++ (lib.optionals (cfg.monitors.secondary != null) (
++      let
++        secName = lib.head (lib.splitString "," cfg.monitors.secondary);
++      in
++      [
+         ''hl.workspace_rule({ workspace = "4", monitor = "${secName}", default = true })''
+         ''hl.workspace_rule({ workspace = "5", monitor = "${secName}" })''
+         ''hl.workspace_rule({ workspace = "6", monitor = "${secName}" })''
+-      ]));
++      ]
++    ));
+
+   # The generated monitors.lua content
+   monitorsLua = ''
+     -- Auto-generated by Nix from modules/home/wm/hyprland.nix
+     -- Do not edit manually.
+
+-    ${lib.optionalString (cfg.monitors.secondary != null)
+-        (monitorToLua cfg.monitors.secondary)}
+-    ${lib.optionalString (cfg.monitors.primary != null)
+-        (monitorToLua cfg.monitors.primary)}
+-    ${lib.optionalString (cfg.monitors.primary == null)
+-        ''hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })''}
++    ${lib.optionalString (cfg.monitors.secondary != null) (monitorToLua cfg.monitors.secondary)}
++    ${lib.optionalString (cfg.monitors.primary != null) (monitorToLua cfg.monitors.primary)}
++    ${lib.optionalString (
++      cfg.monitors.primary == null
++    ) ''hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })''}
+
+     ${lib.concatStringsSep "\n" workspaceRules}
+   '';
+@@ -93,13 +96,19 @@ in
+       enable = true;
+       settings = {
+         general = {
+-          lock_cmd         = "hyprlock";
++          lock_cmd = "hyprlock";
+           before_sleep_cmd = "loginctl lock-session";
+-          after_sleep_cmd  = "hyprctl dispatch dpms on; pkill -x hyprlock; hyprlock";
++          after_sleep_cmd = "hyprctl dispatch dpms on; pkill -x hyprlock; hyprlock";
+         };
+         listener = [
+-          { timeout = 300; on-timeout = "loginctl lock-session"; }
+-          { timeout = 900; on-timeout = "systemctl suspend"; }
++          {
++            timeout = 300;
++            on-timeout = "loginctl lock-session";
++          }
++          {
++            timeout = 900;
++            on-timeout = "systemctl suspend";
++          }
+         ];
+       };
+     };
+diff --git a/modules/home/wm/waybar.nix b/modules/home/wm/waybar.nix
+index ba6dafd..fa59b9b 100644
+--- a/modules/home/wm/waybar.nix
++++ b/modules/home/wm/waybar.nix
+@@ -65,10 +65,19 @@ in
+             disable-scroll = false;
+             format = "{name}";
+             persistent-workspaces =
+-              lib.optionalAttrs (cfg.monitors.primaryName != "" && cfg.monitors.secondary != null) {
+-                "${cfg.monitors.primaryName}" = [ 1 2 3 ];
+-                "${lib.head (lib.splitString "," cfg.monitors.secondary)}" = [ 4 5 6 ];
+-              };
++              lib.optionalAttrs (cfg.monitors.primaryName != "" && cfg.monitors.secondary != null)
++                {
++                  "${cfg.monitors.primaryName}" = [
++                    1
++                    2
++                    3
++                  ];
++                  "${lib.head (lib.splitString "," cfg.monitors.secondary)}" = [
++                    4
++                    5
++                    6
++                  ];
++                };
+           };
+
+           "${winModule}" = {
+Error: Process completed with exit code 1.

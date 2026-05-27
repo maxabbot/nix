@@ -1,4 +1,9 @@
-{ lib, machineType, location, ... }:
+{
+  lib,
+  machineType,
+  location,
+  ...
+}:
 {
   services.gammastep = lib.mkIf (machineType != "server") {
     enable = true;

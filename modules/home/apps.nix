@@ -188,7 +188,9 @@
   home.packages = [
     pkgs.freetube
     pkgs.mise
-    (pkgs.writeShellScriptBin "tmux-sessionizer" (builtins.readFile ../../config/scripts/tmux-sessionizer))
+    (pkgs.writeShellScriptBin "tmux-sessionizer" (
+      builtins.readFile ../../config/scripts/tmux-sessionizer
+    ))
   ];
 
   # ── Mise version manager ──────────────────────────────────────────────────────

@@ -6,7 +6,12 @@
 #   3. Enable Secure Boot in UEFI firmware (Setup Mode or Audit Mode)
 #
 # After nixos-rebuild switch, verify: sbctl verify && sbctl status
-{ pkgs, lib, inputs, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 {
   imports = [ inputs.lanzaboote.nixosModules.lanzaboote ];
 

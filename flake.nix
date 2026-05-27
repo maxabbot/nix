@@ -103,9 +103,12 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs = sharedHmArgs // hmArgs // {
-                inherit inputs;
-              };
+              home-manager.extraSpecialArgs =
+                sharedHmArgs
+                // hmArgs
+                // {
+                  inherit inputs;
+                };
               home-manager.users.max = import ./home/max;
             }
           ];
@@ -115,7 +118,7 @@
       devShells.${system}.default = mkPkgs.mkShell {
         name = "nixos-config";
         packages = with mkPkgs; [
-          nixfmt-rfc-style
+          nixfmt
           statix
           deadnix
           nil
