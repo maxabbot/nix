@@ -170,6 +170,29 @@
           };
         };
 
+        # Home-desktop stack in a QEMU VM — no NVIDIA/CUDA/fancontrol
+        vm = mkHost {
+          hostName = "vm";
+          machineType = "desktop";
+          modules = [
+            ./hosts/vm
+            disko.nixosModules.disko
+          ];
+          hmArgs = {
+            machineType = "desktop";
+            compositor = "hyprland";
+            monitors = {
+              primary = "Virtual-1,1920x1080@60,0x0,1";
+              secondary = null;
+              primaryName = "Virtual-1";
+            };
+            location = {
+              latitude = -43.53;
+              longitude = 172.64;
+            };
+          };
+        };
+
         # Minimal — base packages only, headless (no compositor)
         minimal = mkHost {
           hostName = "minimal";
