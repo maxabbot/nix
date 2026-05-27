@@ -1,346 +1,1265 @@
-Run nix run nixpkgs#statix -- check .
-unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
-these 7 paths will be fetched (10.7 MiB download, 49.6 MiB unpacked):
-  /nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib
-  /nix/store/xyikkpwkyxx6syba3kfrr0h67ig5hwmn-gcc-15.2.0-libgcc
-  /nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61
-  /nix/store/6qa00czc79b3nb6ld0mdyacfp2p1k3jx-libidn2-2.3.8
-  /nix/store/bf6wgamqnl3c91iamlb1branrfcwwy7x-libunistring-1.4.2
-  /nix/store/v5wmprihi3ywkh9ksdvwgiixrxj29r66-statix-0-unstable-2026-05-14
-  /nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc
-copying path '/nix/store/xyikkpwkyxx6syba3kfrr0h67ig5hwmn-gcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
-copying path '/nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
-copying path '/nix/store/bf6wgamqnl3c91iamlb1branrfcwwy7x-libunistring-1.4.2' from 'https://cache.nixos.org'...
-copying path '/nix/store/6qa00czc79b3nb6ld0mdyacfp2p1k3jx-libidn2-2.3.8' from 'https://cache.nixos.org'...
-copying path '/nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61' from 'https://cache.nixos.org'...
-copying path '/nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib' from 'https://cache.nixos.org'...
-copying path '/nix/store/v5wmprihi3ywkh9ksdvwgiixrxj29r66-statix-0-unstable-2026-05-14' from 'https://cache.nixos.org'...
-[20] Warning: Avoid repeated keys in attribute sets
-     ╭─[ ./modules/home/shell.nix:17:5 ]
-     │
-  17 │           extended = true;
-     │         ──────┬─────
-     │               ╰─────── The key programs is first assigned here ...
-     │
- 271 │               "Music" = "󰝚 ";
-     │     ────────┬────────
-     │             ╰────────── ... repeated here ...
-     │
- 379 │ ╭─▶       # Intuitive splits (open in current path)
- 380 │ ├─▶       unbind '"'
-     │ │
-     │ ╰────────────────────── ... and here (2 occurrences omitted). Try programs = { zsh=...; starship=...; fzf=...; } instead.
-─────╯
-[04] Warning: Assignment instead of inherit from
-    ╭─[ ./flake.nix:63:9 ]
-    │
- 63 │ ╭─▶       lib = nixpkgs.lib;
- 64 │ ├─▶
-    │ │
-    │ ╰────── This assignment is better written with inherit
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-     ╭─[ ./flake.nix:104:19 ]
-     │
- 104 │                   home-manager.useGlobalPkgs = true;
-     │                       ─────────────┬────────────
-     │                                    ╰────────────── The key home-manager is first assigned here ...
- 105 │                   home-manager.useUserPackages = true;
-     │                       ──────────────┬─────────────
-     │                                     ╰─────────────── ... repeated here ...
- 106 │ ╭─▶               home-manager.extraSpecialArgs =
- 107 │ ├─▶                 sharedHmArgs
-     │ │
-     │ ╰────────────────────────────────── ... and here (1 occurrence omitted). Try home-manager = { useGlobalPkgs=...; useUserPackages=...; extraSpecialArgs=...; } instead.
-─────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/common/optional/gaming.nix:3:3 ]
-    │
-  3 │   programs.steam = {
-    │   ───────┬──────
-    │          ╰──────── The key programs is first assigned here ...
-    │
- 11 │   programs.gamemode = {
-    │   ────────┬────────
-    │           ╰────────── ... repeated here ...
-    │
- 20 │   programs.gamescope.enable = true;
-    │   ────────────┬────────────
-    │               ╰────────────── ... and here. Try programs = { steam=...; gamemode=...; gamescope.enable=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/common/optional/productivity.nix:27:28 ]
-    │
- 27 │ ╭─────▶       pkgs.kdePackages.qtsvg
- 28 │ ├─────▶       pkgs.kdePackages.qtmultimedia
-    │ │
-    │ ╰───────────────────────────────────────────── The key services is first assigned here ...
-    │
- 49 │     ╭─▶     NIXOS_OZONE_WL = "1";
- 50 │     ├─▶     MOZ_ENABLE_WAYLAND = "1";
-    │     │
-    │     ╰─────────────────────────────────── ... repeated here ...
-    │
- 56 │   ╭───▶     user = "max";
- 57 │   ├───▶     dataDir = "/home/max";
-    │   │
-    │   ╰────────────────────────────────── ... and here (5 occurrences omitted). Try services = { displayManager.sddm=...; pipewire=...; pulseaudio.enable=...; } instead.
-────╯
-[10] Warning: Found empty pattern in function argument
-   ╭─[ ./hosts/common/optional/podman.nix:1:1 ]
-   │
- 1 │ { ... }:
-   │ ───┬───
-   │    ╰───── This pattern is empty, use _ instead
-───╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./home/max/cli.nix:25:3 ]
-    │
- 25 │   programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
-    │   ─────────┬─────────
-    │            ╰─────────── The key programs is first assigned here ...
-    │
- 27 │   programs.bat = {
-    │   ──────┬─────
-    │         ╰─────── ... repeated here ...
-    │
- 36 │   programs.eza = {
-    │   ──────┬─────
-    │         ╰─────── ... and here (3 occurrences omitted). Try programs = { zsh.dotDir=...; bat=...; eza=...; } instead.
-────╯
-[10] Warning: Found empty pattern in function argument
-   ╭─[ ./hosts/vm/disk-config.nix:3:3 ]
-   │
- 3 │ { ... }:
-   │   ───┬───
-   │      ╰───── This pattern is empty, use _ instead
-───╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./modules/home/wm/hyprland.nix:86:35 ]
-    │
- 86 │         xdg.configFile."hypr/scripts".source = ../../../config/hypr-scripts;
-    │                                       ──────────────────┬─────────────────
-    │                                                         ╰─────────────────── The key xdg is first assigned here ...
-    │
- 91 │         # ── Per-host monitor + workspace config (generated by Nix) ────────────────
-    │                                           ────────────────────┬────────────────────
-    │                                                               ╰────────────────────── ... repeated here ...
-    │
- 95 │ ╭─▶     services.hypridle = {
-    ┆ ┆
- 97 │ ├─▶       settings = {
-    │ │
-    │ ╰──────────────────────── ... and here. Try xdg = { configFile."hypr/scripts".source=...; configFile."hypr/hyprland.lua".source=...; configFile."hypr/monitors.lua".text=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-     ╭─[ ./modules/nixos/base.nix:74:28 ]
-     │
-  74 │   ╭─▶       config = cfg.fancontrol.config;
-     ┆   ┆
-  76 │   ├─▶
-     │   │
-     │   ╰────── The key hardware is first assigned here ...
-     │
- 105 │               TLP_DEFAULT_MODE = "AC";
-     │            ────────────┬────────────
-     │                        ╰────────────── ... repeated here ...
-     │
- 107 │ ╭───▶     };
-     ┆ ┆
- 109 │ ├───▶     # ── Security / auth ────────────────────────────────────────────────────────
-     │ │
-     │ ╰───────────────────────────────────────────────────────────────────────────────────────── ... and here (2 occurrences omitted). Try hardware = { fancontrol=...; bluetooth.enable=...; bluetooth.powerOnBoot=...; } instead.
-─────╯
-[20] Warning: Avoid repeated keys in attribute sets
-     ╭─[ ./modules/nixos/base.nix:109:37 ]
-     │
- 109 │         # ── Security / auth ────────────────────────────────────────────────────────
-     │                                         ───────────┬───────────
-     │                                                    ╰───────────── The key services is first assigned here ...
-     │
- 115 │ ╭─▶       enable = true;
- 116 │ ├─▶       enableSSHSupport = true;
-     │ │
-     │ ╰──────────────────────────────────── ... repeated here ...
-     │
- 123 │         # ── Shell ──────────────────────────────────────────────────────────────────
-     │                                ────────────┬────────────
-     │                                            ╰────────────── ... and here (4 occurrences omitted). Try services = { blueman.enable=...; printing.enable=...; timesyncd.enable=...; } instead.
-─────╯
-[04] Warning: Assignment instead of inherit from
-     ╭─[ ./modules/nixos/base.nix:227:29 ]
-     │
- 227 │ ╭─▶         noto-fonts-color-emoji
-     ┆ ┆
- 231 │ ├─▶     # ── XDG portals (base — compositor modules add their own) ─────────────────
-     │ │
-     │ ╰────────────────────────────────────────────────────────────────────────────────────── This assignment is better written with inherit
-─────╯
-[04] Warning: Assignment instead of inherit from
-     ╭─[ ./modules/nixos/base.nix:231:24 ]
-     │
- 231 │     # ── XDG portals (base — compositor modules add their own) ─────────────────
-     │                        ───────────────────┬──────────────────
-     │                                           ╰──────────────────── This assignment is better written with inherit
-─────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/common/optional/stylix.nix:50:9 ]
-    │
- 50 │       stylix.targets.bat.enable = false;
-    │         ────────────┬────────────
-    │                     ╰────────────── The key stylix is first assigned here ...
- 51 │       stylix.targets.kitty.enable = false;
-    │         ─────────────┬─────────────
-    │                      ╰─────────────── ... repeated here ...
- 52 │       stylix.targets.tmux.enable = false;
-    │         ─────────────┬────────────
-    │                      ╰────────────── ... and here (4 occurrences omitted). Try stylix = { targets.bat.enable=...; targets.kitty.enable=...; targets.tmux.enable=...; } instead.
-────╯
-[10] Warning: Found empty pattern in function argument
-   ╭─[ ./hosts/home-desktop/disk-config.nix:8:5 ]
-   │
- 8 │ ╭─▶ { ... }:
- 9 │ ├─▶ {
-   │ │
-   │ ╰─────── This pattern is empty, use _ instead
-───╯
-[04] Warning: Assignment instead of inherit from
-    ╭─[ ./home/max/desktop.nix:11:5 ]
-    │
- 11 │     latitude = location.latitude;
-    │     ──────────────┬──────────────
-    │                   ╰──────────────── This assignment is better written with inherit
-────╯
-[04] Warning: Assignment instead of inherit from
-    ╭─[ ./home/max/desktop.nix:12:5 ]
-    │
- 12 │     longitude = location.longitude;
-    │     ───────────────┬───────────────
-    │                    ╰───────────────── This assignment is better written with inherit
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/common/optional/nvidia.nix:29:3 ]
-    │
- 29 │   boot.kernelParams = [
-    │   ────────┬────────
-    │           ╰────────── The key boot is first assigned here ...
-    │
- 33 │   boot.extraModprobeConfig = "options nvidia NVreg_PreserveVideoMemoryAllocations=1";
-    │   ────────────┬───────────
-    │               ╰───────────── ... repeated here ...
- 34 │   boot.initrd.kernelModules = [
-    │   ────────────┬────────────
-    │               ╰────────────── ... and here. Try boot = { kernelParams=...; extraModprobeConfig=...; initrd.kernelModules=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/vm/hardware-configuration.nix:12:5 ]
-    │
- 12 │   boot.initrd.availableKernelModules = [
-    │     ─────────────────┬────────────────
-    │                      ╰────────────────── The key boot is first assigned here ...
-    │
- 20 │   boot.initrd.kernelModules = [ ];
-    │     ────────────┬────────────
-    │                 ╰────────────── ... repeated here ...
- 21 │   boot.kernelModules = [ ];
-    │     ─────────┬────────
-    │              ╰────────── ... and here (1 occurrence omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/home-desktop/hardware-configuration.nix:14:5 ]
-    │
- 14 │   boot.initrd.availableKernelModules = [
-    │     ─────────────────┬────────────────
-    │                      ╰────────────────── The key boot is first assigned here ...
-    │
- 23 │   boot.initrd.kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
-    │     ────────────┬────────────
-    │                 ╰────────────── ... repeated here ...
-    │
- 26 │   boot.kernelModules = [
-    │     ─────────┬────────
-    │              ╰────────── ... and here (2 occurrences omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/work-laptop/hardware-configuration.nix:13:5 ]
-    │
- 13 │   boot.initrd.availableKernelModules = [
-    │     ─────────────────┬────────────────
-    │                      ╰────────────────── The key boot is first assigned here ...
-    │
- 20 │   boot.initrd.kernelModules = [ ];
-    │     ────────────┬────────────
-    │                 ╰────────────── ... repeated here ...
- 21 │   boot.kernelModules = [ "kvm-intel" ];
-    │     ─────────┬────────
-    │              ╰────────── ... and here (1 occurrence omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./modules/home/apps.nix:11:41 ]
-    │
- 11 │ ╭─▶       hide_window_decorations = "titlebar-only";
- 12 │ ├─▶       background_opacity = "0.95";
-    │ │
-    │ ╰──────────────────────────────────────── The key programs is first assigned here ...
-    │
- 65 │           cpu_invert_lower = true;
-    │               ──────┬──────
-    │                     ╰──────── ... repeated here ...
-    │
- 97 │           gpu-context = "wayland";
-    │     ──────┬─────
-    │           ╰─────── ... and here (3 occurrences omitted). Try programs = { kitty=...; btop=...; bat=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/common/optional/plymouth.nix:3:3 ]
-    │
-  3 │   boot.plymouth = {
-    │   ──────┬──────
-    │         ╰──────── The key boot is first assigned here ...
-    │
- 21 │   boot.consoleLogLevel = 0;
-    │   ──────────┬─────────
-    │             ╰─────────── ... repeated here ...
- 22 │   boot.initrd.verbose = false;
-    │   ─────────┬─────────
-    │            ╰─────────── ... and here (1 occurrence omitted). Try boot = { plymouth=...; consoleLogLevel=...; initrd.verbose=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-    ╭─[ ./hosts/minimal/hardware-configuration.nix:13:5 ]
-    │
- 13 │   boot.initrd.availableKernelModules = [
-    │     ─────────────────┬────────────────
-    │                      ╰────────────────── The key boot is first assigned here ...
-    │
- 21 │   boot.initrd.kernelModules = [ ];
-    │     ────────────┬────────────
-    │                 ╰────────────── ... repeated here ...
- 22 │   boot.kernelModules = [ ];
-    │     ─────────┬────────
-    │              ╰────────── ... and here (1 occurrence omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
-────╯
-[20] Warning: Avoid repeated keys in attribute sets
-     ╭─[ ./hosts/home-desktop/default.nix:202:12 ]
-     │
- 202 │   ╭─▶   # btrfs "first mount" free-space-tree init creates a brief window where the
-     │   │              ────────────┬───────────
-     │   │                          ╰───────────── The key boot is first assigned here ...
- 203 │   ├─▶   # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
-     │   │
-     │   ╰────────────────────────────────────────────────────────────────────────────────────── ... repeated here ...
-     │
- 205 │ ╭───▶   boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.RestartSec = "3";
- 206 │ ├───▶   boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.StartLimitBurst = 10;
-     │ │
-     │ ╰──────────────────────────────────────────────────────────────────────────────────────────────────── ... and here (5 occurrences omitted). Try boot = { extraModulePackages=...; kernelModules=...; loader.systemd-boot.enable=...; } instead.
-─────╯
-[10] Warning: Found empty pattern in function argument
-   ╭─[ ./hosts/work-laptop/disk-config.nix:8:5 ]
-   │
- 8 │ ╭─▶ { ... }:
- 9 │ ├─▶ {
-   │ │
-   │ ╰─────── This pattern is empty, use _ instead
-───╯
+index 7005e33..02a5418 100644
+--- a/flake.nix
++++ b/flake.nix
+@@ -102,16 +102,16 @@
+             home-manager.nixosModules.home-manager
+             {
+               home-manager = {
+-              useGlobalPkgs = true;
+-              useUserPackages = true;
+-              extraSpecialArgs =
+-                sharedHmArgs
+-                // hmArgs
+-                // {
+-                  inherit inputs;
+-                };
+-              users.max = import ./home/max;
+-            };
++                useGlobalPkgs = true;
++                useUserPackages = true;
++                extraSpecialArgs =
++                  sharedHmArgs
++                  // hmArgs
++                  // {
++                    inherit inputs;
++                  };
++                users.max = import ./home/max;
++              };
+             }
+           ];
+         };
+diff --git a/hosts/common/optional/podman.nix b/hosts/common/optional/podman.nix
+index 759ccfd..85a7565 100644
+--- a/hosts/common/optional/podman.nix
++++ b/hosts/common/optional/podman.nix
+@@ -1,5 +1,4 @@
+-_:
+-{
++_: {
+   virtualisation.podman = {
+     enable = true;
+     dockerCompat = true;
+diff --git a/hosts/home-desktop/disk-config.nix b/hosts/home-desktop/disk-config.nix
+index 74ed52f..b524e83 100644
+--- a/hosts/home-desktop/disk-config.nix
++++ b/hosts/home-desktop/disk-config.nix
+@@ -5,8 +5,7 @@
+ #
+ # Verify your disk name with `lsblk` on the live ISO before running.
+ # Default assumes a single NVMe drive — change `device` if different (e.g. /dev/sda).
+-_:
+-{
++_: {
+   disko.devices = {
+     disk.main = {
+       type = "disk";
+diff --git a/hosts/vm/disk-config.nix b/hosts/vm/disk-config.nix
+index 1dac937..276028e 100644
+--- a/hosts/vm/disk-config.nix
++++ b/hosts/vm/disk-config.nix
+@@ -1,7 +1,6 @@
+ # hosts/vm/disk-config.nix — QEMU virtio disk layout via disko.
+ # QuickGUI VMs present the disk as /dev/vda. Verify with `lsblk` on the live ISO.
+-_:
+-{
++_: {
+   disko.devices = {
+     disk.main = {
+       type = "disk";
+diff --git a/hosts/work-laptop/disk-config.nix b/hosts/work-laptop/disk-config.nix
+index f22f24d..f7130db 100644
+--- a/hosts/work-laptop/disk-config.nix
++++ b/hosts/work-laptop/disk-config.nix
+@@ -5,8 +5,7 @@
+ #
+ # Verify your disk name with `lsblk` on the live ISO before running.
+ # Default assumes /dev/sda — change `device` if different (e.g. /dev/nvme0n1).
+-_:
+-{
++_: {
+   disko.devices = {
+     disk.main = {
+       type = "disk";
+diff --git a/modules/home/apps.nix b/modules/home/apps.nix
+index 75cf35d..297309c 100644
+--- a/modules/home/apps.nix
++++ b/modules/home/apps.nix
+@@ -2,179 +2,179 @@
+ { pkgs, lib, ... }:
+ {
+   programs = {
+-  # ── Kitty terminal ─────────────────────────────────────────────────────────────
+-  # Colours and font are managed by Stylix; only behaviour settings live here.
+-  kitty = {
+-    enable = true;
++    # ── Kitty terminal ─────────────────────────────────────────────────────────────
++    # Colours and font are managed by Stylix; only behaviour settings live here.
++    kitty = {
++      enable = true;
+
+-    settings = {
+-      window_padding_width = 8;
+-      hide_window_decorations = "titlebar-only";
+-      background_opacity = "0.95";
+-      dynamic_background_opacity = true;
++      settings = {
++        window_padding_width = 8;
++        hide_window_decorations = "titlebar-only";
++        background_opacity = "0.95";
++        dynamic_background_opacity = true;
+
+-      tab_bar_edge = "bottom";
+-      tab_bar_style = "powerline";
+-      tab_powerline_style = "slanted";
+-      active_tab_foreground = "#282828";
+-      active_tab_background = "#d8a657";
+-      active_tab_font_style = "bold";
+-      inactive_tab_foreground = "#d4be98";
+-      inactive_tab_background = "#3c3836";
+-      inactive_tab_font_style = "normal";
+-      tab_bar_background = "#282828";
++        tab_bar_edge = "bottom";
++        tab_bar_style = "powerline";
++        tab_powerline_style = "slanted";
++        active_tab_foreground = "#282828";
++        active_tab_background = "#d8a657";
++        active_tab_font_style = "bold";
++        inactive_tab_foreground = "#d4be98";
++        inactive_tab_background = "#3c3836";
++        inactive_tab_font_style = "normal";
++        tab_bar_background = "#282828";
+
+-      scrollback_lines = 10000;
+-      enable_audio_bell = false;
+-      visual_bell_duration = "0.0";
+-      window_alert_on_bell = true;
+-      confirm_os_window_close = 0;
+-      copy_on_select = "clipboard";
+-      strip_trailing_spaces = "smart";
+-      select_by_word_characters = "@-./_~?&=%+#";
+-      repaint_delay = 10;
+-      input_delay = 3;
+-      sync_to_monitor = true;
+-      close_on_child_death = false;
+-      allow_remote_control = "yes";
+-      listen_on = "unix:/tmp/kitty";
+-    };
+-
+-    keybindings = {
+-      "ctrl+shift+t" = "new_tab_with_cwd";
+-      "ctrl+shift+l" = "next_tab";
+-      "ctrl+shift+h" = "prev_tab";
+-      "ctrl+shift+f5" = "load_config_file";
+-      "ctrl+alt+t" = "new_window_with_cwd";
+-      "ctrl+shift+enter" = "new_window_with_cwd";
+-    };
+-  };
++        scrollback_lines = 10000;
++        enable_audio_bell = false;
++        visual_bell_duration = "0.0";
++        window_alert_on_bell = true;
++        confirm_os_window_close = 0;
++        copy_on_select = "clipboard";
++        strip_trailing_spaces = "smart";
++        select_by_word_characters = "@-./_~?&=%+#";
++        repaint_delay = 10;
++        input_delay = 3;
++        sync_to_monitor = true;
++        close_on_child_death = false;
++        allow_remote_control = "yes";
++        listen_on = "unix:/tmp/kitty";
++      };
+
+-  # ── btop ───────────────────────────────────────────────────────────────────────
+-  # Uses the built-in gruvbox_material_dark theme — better fidelity than Stylix's
+-  # generated theme, so Stylix's btop target is disabled in stylix.nix.
+-  btop = {
+-    enable = true;
+-    settings = {
+-      color_theme = "gruvbox_material_dark";
+-      vim_keys = true;
+-      rounded_corners = true;
+-      graph_symbol = "braille";
+-      update_ms = 2000;
+-      proc_sorting = "cpu lazy";
+-      proc_tree = false;
+-      cpu_invert_lower = true;
+-      cpu_single_graph = false;
+-      mem_graphs = true;
+-      show_swap = true;
+-      swap_disk = true;
+-      show_disks = true;
+-      net_download = 100;
+-      net_upload = 100;
+-      net_auto = true;
++      keybindings = {
++        "ctrl+shift+t" = "new_tab_with_cwd";
++        "ctrl+shift+l" = "next_tab";
++        "ctrl+shift+h" = "prev_tab";
++        "ctrl+shift+f5" = "load_config_file";
++        "ctrl+alt+t" = "new_window_with_cwd";
++        "ctrl+shift+enter" = "new_window_with_cwd";
++      };
+     };
+-  };
+
+-  # ── bat ────────────────────────────────────────────────────────────────────────
+-  # Theme is set by Stylix; only pager behaviour here.
+-  bat = {
+-    enable = true;
+-    config = {
+-      pager = "less -RF";
+-      italic-text = "always";
++    # ── btop ───────────────────────────────────────────────────────────────────────
++    # Uses the built-in gruvbox_material_dark theme — better fidelity than Stylix's
++    # generated theme, so Stylix's btop target is disabled in stylix.nix.
++    btop = {
++      enable = true;
++      settings = {
++        color_theme = "gruvbox_material_dark";
++        vim_keys = true;
++        rounded_corners = true;
++        graph_symbol = "braille";
++        update_ms = 2000;
++        proc_sorting = "cpu lazy";
++        proc_tree = false;
++        cpu_invert_lower = true;
++        cpu_single_graph = false;
++        mem_graphs = true;
++        show_swap = true;
++        swap_disk = true;
++        show_disks = true;
++        net_download = 100;
++        net_upload = 100;
++        net_auto = true;
++      };
+     };
+-  };
+
+-  # ── mpv ────────────────────────────────────────────────────────────────────────
+-  mpv = {
+-    enable = true;
+-    config = {
+-      profile = "gpu-hq";
+-      vo = "gpu";
+-      video-sync = "display-resample";
+-      interpolation = true;
+-      tscale = "oversample";
+-      hwdec = "auto-safe";
+-      gpu-context = "wayland";
+-      force-window = true;
+-      osc = true;
+-      osd-font = "JetBrainsMono Nerd Font";
+-      osd-font-size = 32;
+-      sub-font = "JetBrainsMono Nerd Font";
+-      sub-font-size = 40;
+-      sub-auto = "fuzzy";
+-      slang = "en,eng";
+-      screenshot-format = "png";
+-      screenshot-directory = "~/Pictures/Screenshots/mpv";
+-    };
+-    bindings = {
+-      "l" = "seek 5";
+-      "h" = "seek -5";
+-      "j" = "seek -60";
+-      "k" = "seek 60";
+-      ">" = "multiply speed 1.2";
+-      "<" = "multiply speed 0.8";
+-      "r" = "set speed 1.0";
+-      "m" = "no-osd cycle mute";
+-      "f" = "cycle fullscreen";
+-      "q" = "quit-watch-later";
+-      "Q" = "quit";
++    # ── bat ────────────────────────────────────────────────────────────────────────
++    # Theme is set by Stylix; only pager behaviour here.
++    bat = {
++      enable = true;
++      config = {
++        pager = "less -RF";
++        italic-text = "always";
++      };
+     };
+-  };
+
+-  # ── Zathura PDF viewer ─────────────────────────────────────────────────────────
+-  # Colours are managed by Stylix; only behaviour settings live here.
+-  zathura = {
+-    enable = true;
+-    options = {
+-      recolor = true;
+-      sandbox = "none";
+-      statusbar-home-tilde = true;
+-      zoom-min = 10;
+-      guioptions = "";
+-      adjust-open = "best-fit";
+-    };
+-    mappings = {
+-      "j" = "scroll down";
+-      "k" = "scroll up";
+-      "h" = "scroll left";
+-      "l" = "scroll right";
+-      "d" = "navigate next";
+-      "u" = "navigate previous";
+-      "r" = "reload";
+-      "R" = "rotate";
+-      "i" = "recolor";
++    # ── mpv ────────────────────────────────────────────────────────────────────────
++    mpv = {
++      enable = true;
++      config = {
++        profile = "gpu-hq";
++        vo = "gpu";
++        video-sync = "display-resample";
++        interpolation = true;
++        tscale = "oversample";
++        hwdec = "auto-safe";
++        gpu-context = "wayland";
++        force-window = true;
++        osc = true;
++        osd-font = "JetBrainsMono Nerd Font";
++        osd-font-size = 32;
++        sub-font = "JetBrainsMono Nerd Font";
++        sub-font-size = 40;
++        sub-auto = "fuzzy";
++        slang = "en,eng";
++        screenshot-format = "png";
++        screenshot-directory = "~/Pictures/Screenshots/mpv";
++      };
++      bindings = {
++        "l" = "seek 5";
++        "h" = "seek -5";
++        "j" = "seek -60";
++        "k" = "seek 60";
++        ">" = "multiply speed 1.2";
++        "<" = "multiply speed 0.8";
++        "r" = "set speed 1.0";
++        "m" = "no-osd cycle mute";
++        "f" = "cycle fullscreen";
++        "q" = "quit-watch-later";
++        "Q" = "quit";
++      };
+     };
+-  };
+
+-  # ── Fuzzel launcher ───────────────────────────────────────────────────────────
+-  # Colours are managed by Stylix; only layout/behaviour settings live here.
+-  fuzzel = {
+-    enable = true;
+-    settings = {
+-      main = {
+-        dpi-aware = "auto";
+-        prompt = "❯ ";
+-        icons-enabled = true;
+-        icon-theme = "Papirus-Dark";
+-        lines = 10;
+-        width = 40;
+-        horizontal-pad = 20;
+-        vertical-pad = 8;
+-        inner-pad = 4;
+-        fuzzy = true;
+-        terminal = "kitty";
++    # ── Zathura PDF viewer ─────────────────────────────────────────────────────────
++    # Colours are managed by Stylix; only behaviour settings live here.
++    zathura = {
++      enable = true;
++      options = {
++        recolor = true;
++        sandbox = "none";
++        statusbar-home-tilde = true;
++        zoom-min = 10;
++        guioptions = "";
++        adjust-open = "best-fit";
+       };
+-      border = {
+-        width = 2;
+-        radius = 10;
++      mappings = {
++        "j" = "scroll down";
++        "k" = "scroll up";
++        "h" = "scroll left";
++        "l" = "scroll right";
++        "d" = "navigate next";
++        "u" = "navigate previous";
++        "r" = "reload";
++        "R" = "rotate";
++        "i" = "recolor";
+       };
+-      dmenu = {
+-        exit-immediately-if-empty = true;
++    };
++
++    # ── Fuzzel launcher ───────────────────────────────────────────────────────────
++    # Colours are managed by Stylix; only layout/behaviour settings live here.
++    fuzzel = {
++      enable = true;
++      settings = {
++        main = {
++          dpi-aware = "auto";
++          prompt = "❯ ";
++          icons-enabled = true;
++          icon-theme = "Papirus-Dark";
++          lines = 10;
++          width = 40;
++          horizontal-pad = 20;
++          vertical-pad = 8;
++          inner-pad = 4;
++          fuzzy = true;
++          terminal = "kitty";
++        };
++        border = {
++          width = 2;
++          radius = 10;
++        };
++        dmenu = {
++          exit-immediately-if-empty = true;
++        };
+       };
+     };
+   };
+-  };
+
+   xdg.configFile = {
+     # ── Wlogout logout screen ───────────────────────────────────────────────────
+diff --git a/modules/home/shell.nix b/modules/home/shell.nix
+index 75a993f..c2a3324 100644
+--- a/modules/home/shell.nix
++++ b/modules/home/shell.nix
+@@ -7,428 +7,428 @@
+ }:
+ {
+   programs = {
+-  # ── Zsh ───────────────────────────────────────────────────────────────────────
+-  zsh = {
+-    enable = true;
+-
+-    history = {
+-      size = 50000;
+-      save = 50000;
+-      path = "${config.xdg.dataHome}/zsh/history";
+-      extended = true;
+-      ignoreDups = true;
+-      ignoreSpace = true;
+-      share = true;
+-      expireDuplicatesFirst = true;
+-    };
++    # ── Zsh ───────────────────────────────────────────────────────────────────────
++    zsh = {
++      enable = true;
++
++      history = {
++        size = 50000;
++        save = 50000;
++        path = "${config.xdg.dataHome}/zsh/history";
++        extended = true;
++        ignoreDups = true;
++        ignoreSpace = true;
++        share = true;
++        expireDuplicatesFirst = true;
++      };
+
+-    autosuggestion.enable = true;
+-    syntaxHighlighting.enable = true;
+-    historySubstringSearch.enable = true;
+-
+-    sessionVariables = {
+-      EDITOR = "zed --wait";
+-      VISUAL = "zed --wait";
+-      LANG = "en_US.UTF-8";
+-      LC_ALL = "en_US.UTF-8";
+-      ARCHFLAGS = "-arch x86_64";
+-      MANPAGER = "less -R --use-color -Dd+r -Du+b";
+-      BAT_PAGER = "less -RF";
+-      CARGO_HOME = "$HOME/.cargo";
+-      RUSTUP_HOME = "$HOME/.rustup";
+-      GOPATH = "$HOME/go";
+-    };
++      autosuggestion.enable = true;
++      syntaxHighlighting.enable = true;
++      historySubstringSearch.enable = true;
++
++      sessionVariables = {
++        EDITOR = "zed --wait";
++        VISUAL = "zed --wait";
++        LANG = "en_US.UTF-8";
++        LC_ALL = "en_US.UTF-8";
++        ARCHFLAGS = "-arch x86_64";
++        MANPAGER = "less -R --use-color -Dd+r -Du+b";
++        BAT_PAGER = "less -RF";
++        CARGO_HOME = "$HOME/.cargo";
++        RUSTUP_HOME = "$HOME/.rustup";
++        GOPATH = "$HOME/go";
++      };
+
+-    shellAliases = {
+-      # Bat
+-      cat = "bat --paging=never";
+-      less = "bat --paging=always";
+-
+-      # eza (modern ls)
+-      ls = "eza --color=always --group-directories-first --icons";
+-      ll = "eza -la --color=always --group-directories-first --icons --git";
+-      la = "eza -a --color=always --group-directories-first --icons";
+-      l = "eza -la --color=always --group-directories-first --icons --git";
+-      lt = "eza -aT --color=always --group-directories-first --icons --level=2";
+-      "l." = "eza -a --color=always --group-directories-first --icons | grep '\\.'";
+-
+-      # General
+-      ".." = "cd ..";
+-      "..." = "cd ../..";
+-      "...." = "cd ../../..";
+-      grep = "grep --color=auto";
+-      df = "df -h";
+-      du = "du -h";
+-      free = "free -h";
+-
+-      # Safety nets
+-      rm = "rm -i";
+-      cp = "cp -i";
+-      mv = "mv -i";
+-
+-      # NixOS package management (replaces pacman/yay)
+-      nixup = "nh os switch /etc/nixos";
+-      nixsrch = "nix search nixpkgs";
+-      nixshell = "nix shell nixpkgs#";
+-      nixtmp = "nix-shell -p";
+-      gcclean = "sudo nix-collect-garbage -d && sudo nix store optimise";
+-      flkupd = "nix flake update";
+-
+-      # System management (systemd)
+-      srestart = "sudo systemctl restart";
+-      sstatus = "sudo systemctl status";
+-      senable = "sudo systemctl enable";
+-      sdisable = "sudo systemctl disable";
+-      jctl = "journalctl -xe";
+-
+-      # Git
+-      g = "git";
+-      gs = "git status";
+-      ga = "git add";
+-      gaa = "git add --all";
+-      gc = "git commit -v";
+-      gcm = "git commit -m";
+-      gp = "git push";
+-      gpl = "git pull";
+-      gd = "git diff";
+-      gl = "git log --oneline --graph --decorate";
+-      gco = "git checkout";
+-      gb = "git branch";
+-      gba = "git branch -a";
+-
+-      # Podman (docker-compatible aliases)
+-      d = "podman";
+-      p = "podman";
+-      dc = "podman-compose";
+-      dps = "podman ps";
+-      dpsa = "podman ps -a";
+-      dim = "podman images";
+-      dex = "podman exec -it";
+-      dlog = "podman logs -f";
+-
+-      # Python
+-      py = "python";
+-      py3 = "python3";
+-      venv = "python -m venv";
+-      activate = "source venv/bin/activate";
+-
+-      # Rust / Cargo
+-      c = "cargo";
+-      cb = "cargo build";
+-      cr = "cargo run";
+-      ct = "cargo test";
+-      cc = "cargo check";
+-      cu = "cargo update";
+-
+-      # Node / npm
+-      nr = "npm run";
+-      ni = "npm install";
+-      nid = "npm install --save-dev";
+-      nt = "npm test";
+-      nb = "npm run build";
+-      ns = "npm start";
+-
+-      # App shortcuts
+-      zed = "zeditor";
+-      zen = "zen-beta";
+-      chrome = "google-chrome-stable";
++      shellAliases = {
++        # Bat
++        cat = "bat --paging=never";
++        less = "bat --paging=always";
++
++        # eza (modern ls)
++        ls = "eza --color=always --group-directories-first --icons";
++        ll = "eza -la --color=always --group-directories-first --icons --git";
++        la = "eza -a --color=always --group-directories-first --icons";
++        l = "eza -la --color=always --group-directories-first --icons --git";
++        lt = "eza -aT --color=always --group-directories-first --icons --level=2";
++        "l." = "eza -a --color=always --group-directories-first --icons | grep '\\.'";
++
++        # General
++        ".." = "cd ..";
++        "..." = "cd ../..";
++        "...." = "cd ../../..";
++        grep = "grep --color=auto";
++        df = "df -h";
++        du = "du -h";
++        free = "free -h";
++
++        # Safety nets
++        rm = "rm -i";
++        cp = "cp -i";
++        mv = "mv -i";
++
++        # NixOS package management (replaces pacman/yay)
++        nixup = "nh os switch /etc/nixos";
++        nixsrch = "nix search nixpkgs";
++        nixshell = "nix shell nixpkgs#";
++        nixtmp = "nix-shell -p";
++        gcclean = "sudo nix-collect-garbage -d && sudo nix store optimise";
++        flkupd = "nix flake update";
++
++        # System management (systemd)
++        srestart = "sudo systemctl restart";
++        sstatus = "sudo systemctl status";
++        senable = "sudo systemctl enable";
++        sdisable = "sudo systemctl disable";
++        jctl = "journalctl -xe";
++
++        # Git
++        g = "git";
++        gs = "git status";
++        ga = "git add";
++        gaa = "git add --all";
++        gc = "git commit -v";
++        gcm = "git commit -m";
++        gp = "git push";
++        gpl = "git pull";
++        gd = "git diff";
++        gl = "git log --oneline --graph --decorate";
++        gco = "git checkout";
++        gb = "git branch";
++        gba = "git branch -a";
++
++        # Podman (docker-compatible aliases)
++        d = "podman";
++        p = "podman";
++        dc = "podman-compose";
++        dps = "podman ps";
++        dpsa = "podman ps -a";
++        dim = "podman images";
++        dex = "podman exec -it";
++        dlog = "podman logs -f";
++
++        # Python
++        py = "python";
++        py3 = "python3";
++        venv = "python -m venv";
++        activate = "source venv/bin/activate";
++
++        # Rust / Cargo
++        c = "cargo";
++        cb = "cargo build";
++        cr = "cargo run";
++        ct = "cargo test";
++        cc = "cargo check";
++        cu = "cargo update";
++
++        # Node / npm
++        nr = "npm run";
++        ni = "npm install";
++        nid = "npm install --save-dev";
++        nt = "npm test";
++        nb = "npm run build";
++        ns = "npm start";
++
++        # App shortcuts
++        zed = "zeditor";
++        zen = "zen-beta";
++        chrome = "google-chrome-stable";
+
+-    };
++      };
+
+-    initContent = ''
+-      # ── Key bindings ────────────────────────────────────────────────────────
+-      bindkey '^[[A'  history-substring-search-up
+-      bindkey '^[[B'  history-substring-search-down
+-      bindkey '^[[H'  beginning-of-line
+-      bindkey '^[[F'  end-of-line
+-      bindkey '^[[3~' delete-char
+-
+-      # ESC-ESC to prepend/remove sudo
+-      sudo-command-line() {
+-        [[ -z $BUFFER ]] && zle up-history
+-        if [[ $BUFFER == sudo\ * ]]; then
+-          LBUFFER="''${LBUFFER#sudo }"
+-        else
+-          LBUFFER="sudo $LBUFFER"
+-        fi
+-      }
+-      zle -N sudo-command-line
+-      bindkey '\e\e' sudo-command-line
+-
+-      # CTRL-f — tmux-sessionizer
+-      bindkey -s '^f' 'tmux-sessionizer\n'
+-
+-      # ── PATH ─────────────────────────────────────────────────────────────────
+-      export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.cargo/bin:$GOPATH/bin:$PATH"
+-
+-      # ── Rust ─────────────────────────────────────────────────────────────────
+-      [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+-
+-      # ── mise (universal version manager) ─────────────────────────────────────
+-      command -v mise &>/dev/null && eval "$(mise activate zsh)"
+-
+-      # ── fzf key-bindings (provided by fzf NixOS module) ──────────────────────
+-      [[ -f /run/current-system/sw/share/fzf/key-bindings.zsh ]] &&
+-        source /run/current-system/sw/share/fzf/key-bindings.zsh
+-      [[ -f /run/current-system/sw/share/fzf/completion.zsh ]] &&
+-        source /run/current-system/sw/share/fzf/completion.zsh
+-
+-      # ── kubectl completions ───────────────────────────────────────────────────
+-      command -v kubectl &>/dev/null && source <(kubectl completion zsh)
+-
+-      # ── Shell functions ───────────────────────────────────────────────────────
+-      mkcd() { mkdir -p "$1" && cd "$1"; }
+-
+-      extract() {
+-        if [ -f "$1" ]; then
+-          case "$1" in
+-            *.tar.bz2)  tar xjf "$1"    ;;
+-            *.tar.gz)   tar xzf "$1"    ;;
+-            *.bz2)      bunzip2 "$1"    ;;
+-            *.rar)      unrar x "$1"    ;;
+-            *.gz)       gunzip "$1"     ;;
+-            *.tar)      tar xf "$1"     ;;
+-            *.tgz)      tar xzf "$1"    ;;
+-            *.zip)      unzip "$1"      ;;
+-            *.Z)        uncompress "$1" ;;
+-            *.7z)       7z x "$1"       ;;
+-            *)          echo "'$1' cannot be extracted via extract()" ;;
+-          esac
+-        else
+-          echo "'$1' is not a valid file"
+-        fi
+-      }
+-
+-      qfind()  { find . -iname "*$1*"; }
+-      psgrep() { ps aux | grep -v grep | grep -i -e VSZ -e "$1"; }
+-      gcl()    { git clone "$1" && cd "$(basename "$1" .git)"; }
+-      mkvenv() { python -m venv "''${1:-.venv}" && source "''${1:-.venv}/bin/activate"; }
+-      serve()  { python -m http.server "''${1:-8000}"; }
+-      dclean() { podman system prune -af --volumes; }
+-
+-      sysup() {
+-        nh os switch /etc/nixos
+-        command -v rustup &>/dev/null && rustup update
+-      }
+-
+-      copypath() { print -n "''${1:-$PWD}" | wl-copy && echo "Copied: ''${1:-$PWD}"; }
+-      copyfile() { wl-copy < "$1" && echo "Copied: $1"; }
+-
+-      if command -v fzf &>/dev/null; then
+-        fcd() {
+-          local dir
+-          dir=$(find ''${1:-.} -type d 2>/dev/null | fzf +m) && cd "$dir"
++      initContent = ''
++        # ── Key bindings ────────────────────────────────────────────────────────
++        bindkey '^[[A'  history-substring-search-up
++        bindkey '^[[B'  history-substring-search-down
++        bindkey '^[[H'  beginning-of-line
++        bindkey '^[[F'  end-of-line
++        bindkey '^[[3~' delete-char
++
++        # ESC-ESC to prepend/remove sudo
++        sudo-command-line() {
++          [[ -z $BUFFER ]] && zle up-history
++          if [[ $BUFFER == sudo\ * ]]; then
++            LBUFFER="''${LBUFFER#sudo }"
++          else
++            LBUFFER="sudo $LBUFFER"
++          fi
++        }
++        zle -N sudo-command-line
++        bindkey '\e\e' sudo-command-line
++
++        # CTRL-f — tmux-sessionizer
++        bindkey -s '^f' 'tmux-sessionizer\n'
++
++        # ── PATH ─────────────────────────────────────────────────────────────────
++        export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.cargo/bin:$GOPATH/bin:$PATH"
++
++        # ── Rust ─────────────────────────────────────────────────────────────────
++        [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
++
++        # ── mise (universal version manager) ─────────────────────────────────────
++        command -v mise &>/dev/null && eval "$(mise activate zsh)"
++
++        # ── fzf key-bindings (provided by fzf NixOS module) ──────────────────────
++        [[ -f /run/current-system/sw/share/fzf/key-bindings.zsh ]] &&
++          source /run/current-system/sw/share/fzf/key-bindings.zsh
++        [[ -f /run/current-system/sw/share/fzf/completion.zsh ]] &&
++          source /run/current-system/sw/share/fzf/completion.zsh
++
++        # ── kubectl completions ───────────────────────────────────────────────────
++        command -v kubectl &>/dev/null && source <(kubectl completion zsh)
++
++        # ── Shell functions ───────────────────────────────────────────────────────
++        mkcd() { mkdir -p "$1" && cd "$1"; }
++
++        extract() {
++          if [ -f "$1" ]; then
++            case "$1" in
++              *.tar.bz2)  tar xjf "$1"    ;;
++              *.tar.gz)   tar xzf "$1"    ;;
++              *.bz2)      bunzip2 "$1"    ;;
++              *.rar)      unrar x "$1"    ;;
++              *.gz)       gunzip "$1"     ;;
++              *.tar)      tar xf "$1"     ;;
++              *.tgz)      tar xzf "$1"    ;;
++              *.zip)      unzip "$1"      ;;
++              *.Z)        uncompress "$1" ;;
++              *.7z)       7z x "$1"       ;;
++              *)          echo "'$1' cannot be extracted via extract()" ;;
++            esac
++          else
++            echo "'$1' is not a valid file"
++          fi
+         }
+-      fi
+
+-      # ── Local overrides ───────────────────────────────────────────────────────
+-      [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+-    '';
+-  };
++        qfind()  { find . -iname "*$1*"; }
++        psgrep() { ps aux | grep -v grep | grep -i -e VSZ -e "$1"; }
++        gcl()    { git clone "$1" && cd "$(basename "$1" .git)"; }
++        mkvenv() { python -m venv "''${1:-.venv}" && source "''${1:-.venv}/bin/activate"; }
++        serve()  { python -m http.server "''${1:-8000}"; }
++        dclean() { podman system prune -af --volumes; }
+
+-  # ── Starship prompt ────────────────────────────────────────────────────────────
+-  starship = {
+-    enable = true;
+-    enableZshIntegration = true;
+-    settings = {
+-      "$schema" = "https://starship.rs/config-schema.json";
+-
+-      format = lib.concatStrings [
+-        "[](#282828)"
+-        "$os"
+-        "$username"
+-        "[](bg:#3c3836 fg:#282828)"
+-        "$directory"
+-        "[](fg:#3c3836 bg:#504945)"
+-        "$git_branch"
+-        "$git_status"
+-        "[](fg:#504945 bg:#665c54)"
+-        "$python$nodejs$rust$golang$java"
+-        "[](fg:#665c54 bg:#282828)"
+-        "$time"
+-        "[ ](fg:#282828)"
+-        "\n$character"
+-      ];
++        sysup() {
++          nh os switch /etc/nixos
++          command -v rustup &>/dev/null && rustup update
++        }
+
+-      os = {
+-        disabled = false;
+-        style = "bg:#282828 fg:#d3869b";
+-      };
+-      username = {
+-        show_always = true;
+-        style_user = "bg:#282828 fg:#d4be98";
+-        style_root = "bg:#282828 fg:#ea6962";
+-        format = "[$user ]($style)";
+-        disabled = false;
+-      };
+-      directory = {
+-        style = "bg:#3c3836 fg:#7daea3";
+-        format = "[ $path ]($style)";
+-        truncation_length = 3;
+-        truncation_symbol = "…/";
+-        substitutions = {
+-          "Documents" = "󰈙 ";
+-          "Downloads" = " ";
+-          "Music" = "󰝚 ";
+-          "Pictures" = " ";
+-          "Projects" = "󰲋 ";
+-          ".config" = " ";
++        copypath() { print -n "''${1:-$PWD}" | wl-copy && echo "Copied: ''${1:-$PWD}"; }
++        copyfile() { wl-copy < "$1" && echo "Copied: $1"; }
++
++        if command -v fzf &>/dev/null; then
++          fcd() {
++            local dir
++            dir=$(find ''${1:-.} -type d 2>/dev/null | fzf +m) && cd "$dir"
++          }
++        fi
++
++        # ── Local overrides ───────────────────────────────────────────────────────
++        [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
++      '';
++    };
++
++    # ── Starship prompt ────────────────────────────────────────────────────────────
++    starship = {
++      enable = true;
++      enableZshIntegration = true;
++      settings = {
++        "$schema" = "https://starship.rs/config-schema.json";
++
++        format = lib.concatStrings [
++          "[](#282828)"
++          "$os"
++          "$username"
++          "[](bg:#3c3836 fg:#282828)"
++          "$directory"
++          "[](fg:#3c3836 bg:#504945)"
++          "$git_branch"
++          "$git_status"
++          "[](fg:#504945 bg:#665c54)"
++          "$python$nodejs$rust$golang$java"
++          "[](fg:#665c54 bg:#282828)"
++          "$time"
++          "[ ](fg:#282828)"
++          "\n$character"
++        ];
++
++        os = {
++          disabled = false;
++          style = "bg:#282828 fg:#d3869b";
++        };
++        username = {
++          show_always = true;
++          style_user = "bg:#282828 fg:#d4be98";
++          style_root = "bg:#282828 fg:#ea6962";
++          format = "[$user ]($style)";
++          disabled = false;
++        };
++        directory = {
++          style = "bg:#3c3836 fg:#7daea3";
++          format = "[ $path ]($style)";
++          truncation_length = 3;
++          truncation_symbol = "…/";
++          substitutions = {
++            "Documents" = "󰈙 ";
++            "Downloads" = " ";
++            "Music" = "󰝚 ";
++            "Pictures" = " ";
++            "Projects" = "󰲋 ";
++            ".config" = " ";
++          };
++        };
++        git_branch = {
++          symbol = "";
++          style = "bg:#504945 fg:#a9b665";
++          format = "[ $symbol $branch ]($style)";
++        };
++        git_status = {
++          style = "bg:#504945 fg:#ea6962";
++          format = "[$all_status$ahead_behind ]($style)";
++          conflicted = "⚡";
++          ahead = "⇡\${count}";
++          behind = "⇣\${count}";
++          diverged = "⇕⇡\${ahead_count}⇣\${behind_count}";
++          up_to_date = "✓";
++          untracked = "?";
++          modified = "!";
++          staged = "+";
++          renamed = "»";
++          deleted = "✘";
++        };
++        python = {
++          symbol = "";
++          style = "bg:#665c54 fg:#d8a657";
++          format = "[ $symbol ($version) ]($style)";
++        };
++        nodejs = {
++          symbol = "";
++          style = "bg:#665c54 fg:#a9b665";
++          format = "[ $symbol ($version) ]($style)";
++        };
++        rust = {
++          symbol = "";
++          style = "bg:#665c54 fg:#e78a4e";
++          format = "[ $symbol ($version) ]($style)";
++        };
++        golang = {
++          symbol = "";
++          style = "bg:#665c54 fg:#89b482";
++          format = "[ $symbol ($version) ]($style)";
++        };
++        java = {
++          symbol = "";
++          style = "bg:#665c54 fg:#ea6962";
++          format = "[ $symbol ($version) ]($style)";
++        };
++        time = {
++          disabled = false;
++          time_format = "%H:%M";
++          style = "bg:#282828 fg:#7c6f64";
++          format = "[ 󰥔 $time ]($style)";
++        };
++        character = {
++          success_symbol = "[❯](bold fg:#a9b665)";
++          error_symbol = "[❯](bold fg:#ea6962)";
++          vimcmd_symbol = "[❮](bold fg:#d3869b)";
+         };
+-      };
+-      git_branch = {
+-        symbol = "";
+-        style = "bg:#504945 fg:#a9b665";
+-        format = "[ $symbol $branch ]($style)";
+-      };
+-      git_status = {
+-        style = "bg:#504945 fg:#ea6962";
+-        format = "[$all_status$ahead_behind ]($style)";
+-        conflicted = "⚡";
+-        ahead = "⇡\${count}";
+-        behind = "⇣\${count}";
+-        diverged = "⇕⇡\${ahead_count}⇣\${behind_count}";
+-        up_to_date = "✓";
+-        untracked = "?";
+-        modified = "!";
+-        staged = "+";
+-        renamed = "»";
+-        deleted = "✘";
+-      };
+-      python = {
+-        symbol = "";
+-        style = "bg:#665c54 fg:#d8a657";
+-        format = "[ $symbol ($version) ]($style)";
+-      };
+-      nodejs = {
+-        symbol = "";
+-        style = "bg:#665c54 fg:#a9b665";
+-        format = "[ $symbol ($version) ]($style)";
+-      };
+-      rust = {
+-        symbol = "";
+-        style = "bg:#665c54 fg:#e78a4e";
+-        format = "[ $symbol ($version) ]($style)";
+-      };
+-      golang = {
+-        symbol = "";
+-        style = "bg:#665c54 fg:#89b482";
+-        format = "[ $symbol ($version) ]($style)";
+-      };
+-      java = {
+-        symbol = "";
+-        style = "bg:#665c54 fg:#ea6962";
+-        format = "[ $symbol ($version) ]($style)";
+-      };
+-      time = {
+-        disabled = false;
+-        time_format = "%H:%M";
+-        style = "bg:#282828 fg:#7c6f64";
+-        format = "[ 󰥔 $time ]($style)";
+-      };
+-      character = {
+-        success_symbol = "[❯](bold fg:#a9b665)";
+-        error_symbol = "[❯](bold fg:#ea6962)";
+-        vimcmd_symbol = "[❮](bold fg:#d3869b)";
+       };
+     };
+-  };
+
+-  # ── fzf ────────────────────────────────────────────────────────────────────────
+-  fzf = {
+-    enable = true;
+-    enableZshIntegration = true;
+-    defaultCommand = "fd --type f --hidden --follow --exclude .git";
+-    changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
+-    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
+-    defaultOptions = [
+-      "--height 40%"
+-      "--border rounded"
+-      "--multi"
+-    ];
+-  };
++    # ── fzf ────────────────────────────────────────────────────────────────────────
++    fzf = {
++      enable = true;
++      enableZshIntegration = true;
++      defaultCommand = "fd --type f --hidden --follow --exclude .git";
++      changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
++      fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
++      defaultOptions = [
++        "--height 40%"
++        "--border rounded"
++        "--multi"
++      ];
++    };
+
+-  # ── zoxide (better cd) ─────────────────────────────────────────────────────────
+-  zoxide = {
+-    enable = true;
+-    enableZshIntegration = true;
+-    options = [ "--cmd cd" ];
+-  };
++    # ── zoxide (better cd) ─────────────────────────────────────────────────────────
++    zoxide = {
++      enable = true;
++      enableZshIntegration = true;
++      options = [ "--cmd cd" ];
++    };
+
+-  # ── tmux ───────────────────────────────────────────────────────────────────────
+-  tmux = {
+-    enable = true;
+-    prefix = "C-a";
+-    mouse = true;
+-    historyLimit = 50000;
+-    baseIndex = 1;
+-    keyMode = "vi";
+-    terminal = "tmux-256color";
+-    escapeTime = 0;
+-    focusEvents = true;
+-
+-    extraConfig = ''
+-      set -ga terminal-overrides ",xterm-256color:Tc"
+-      setw -g pane-base-index 1
+-      set  -g renumber-windows on
+-      set  -g set-clipboard on
+-
+-      # Vim-style copy mode
+-      bind -T copy-mode-vi v   send -X begin-selection
+-      bind -T copy-mode-vi y   send -X copy-selection-and-cancel
+-      bind -T copy-mode-vi C-v send -X rectangle-toggle
+-
+-      # Intuitive splits (open in current path)
+-      unbind '"'
+-      unbind %
+-      bind | split-window -h -c "#{pane_current_path}"
+-      bind - split-window -v -c "#{pane_current_path}"
+-      bind c new-window      -c "#{pane_current_path}"
+-
+-      # Vim-style pane navigation
+-      bind h select-pane -L
+-      bind j select-pane -D
+-      bind k select-pane -U
+-      bind l select-pane -R
+-
+-      # Pane resize
+-      bind -r H resize-pane -L 5
+-      bind -r J resize-pane -D 5
+-      bind -r K resize-pane -U 5
+-      bind -r L resize-pane -R 5
+-
+-      # Sessionizer
+-      bind   f run-shell "tmux-sessionizer"
+-      bind C-f run-shell "tmux-sessionizer"
+-
+-      # Reload config
+-      bind r source-file ~/.tmux.conf \; display "Config reloaded"
+-
+-      # ── Theme — Gruvbox Material Dark ─────────────────────────────────────────
+-      set -g status on
+-      set -g status-interval  5
+-      set -g status-position  bottom
+-      set -g status-justify   left
+-      set -g status-style     "bg=#282828"
+-      set -g status-left-length  80
+-      set -g status-right-length 150
+-
+-      set -g status-left \
+-        "#[fg=#282828,bg=#d8a657,bold] #S #[fg=#d8a657,bg=#3c3836,nobold]#[fg=#d4be98,bg=#3c3836] #{b:pane_current_path} #[fg=#3c3836,bg=#282828]"
+-      set -g status-right \
+-        "#[fg=#3c3836,bg=#282828]#[fg=#d4be98,bg=#3c3836] %H:%M #[fg=#504945,bg=#3c3836]#[fg=#d4be98,bg=#504945] %d %b #[fg=#7daea3,bg=#504945]#[fg=#282828,bg=#7daea3,bold] #h "
+-
+-      set -g window-status-format \
+-        "#[fg=#282828,bg=#3c3836]#[fg=#d4be98,bg=#3c3836] #I  #W #[fg=#3c3836,bg=#282828]"
+-      set -g window-status-current-format \
+-        "#[fg=#282828,bg=#d8a657]#[fg=#282828,bg=#d8a657,bold] #I  #W #[fg=#d8a657,bg=#282828]"
+-      set -g window-status-separator ""
+-
+-      set -g pane-border-style        "fg=#504945"
+-      set -g pane-active-border-style "fg=#7daea3"
+-      set -g message-style            "bg=#3c3836,fg=#d4be98"
+-      set -g message-command-style    "bg=#3c3836,fg=#d4be98"
+-      set -g mode-style               "bg=#d8a657,fg=#282828"
+-    '';
+-  };
++    # ── tmux ───────────────────────────────────────────────────────────────────────
++    tmux = {
++      enable = true;
++      prefix = "C-a";
++      mouse = true;
++      historyLimit = 50000;
++      baseIndex = 1;
++      keyMode = "vi";
++      terminal = "tmux-256color";
++      escapeTime = 0;
++      focusEvents = true;
++
++      extraConfig = ''
++        set -ga terminal-overrides ",xterm-256color:Tc"
++        setw -g pane-base-index 1
++        set  -g renumber-windows on
++        set  -g set-clipboard on
++
++        # Vim-style copy mode
++        bind -T copy-mode-vi v   send -X begin-selection
++        bind -T copy-mode-vi y   send -X copy-selection-and-cancel
++        bind -T copy-mode-vi C-v send -X rectangle-toggle
++
++        # Intuitive splits (open in current path)
++        unbind '"'
++        unbind %
++        bind | split-window -h -c "#{pane_current_path}"
++        bind - split-window -v -c "#{pane_current_path}"
++        bind c new-window      -c "#{pane_current_path}"
++
++        # Vim-style pane navigation
++        bind h select-pane -L
++        bind j select-pane -D
++        bind k select-pane -U
++        bind l select-pane -R
++
++        # Pane resize
++        bind -r H resize-pane -L 5
++        bind -r J resize-pane -D 5
++        bind -r K resize-pane -U 5
++        bind -r L resize-pane -R 5
++
++        # Sessionizer
++        bind   f run-shell "tmux-sessionizer"
++        bind C-f run-shell "tmux-sessionizer"
++
++        # Reload config
++        bind r source-file ~/.tmux.conf \; display "Config reloaded"
++
++        # ── Theme — Gruvbox Material Dark ─────────────────────────────────────────
++        set -g status on
++        set -g status-interval  5
++        set -g status-position  bottom
++        set -g status-justify   left
++        set -g status-style     "bg=#282828"
++        set -g status-left-length  80
++        set -g status-right-length 150
++
++        set -g status-left \
++          "#[fg=#282828,bg=#d8a657,bold] #S #[fg=#d8a657,bg=#3c3836,nobold]#[fg=#d4be98,bg=#3c3836] #{b:pane_current_path} #[fg=#3c3836,bg=#282828]"
++        set -g status-right \
++          "#[fg=#3c3836,bg=#282828]#[fg=#d4be98,bg=#3c3836] %H:%M #[fg=#504945,bg=#3c3836]#[fg=#d4be98,bg=#504945] %d %b #[fg=#7daea3,bg=#504945]#[fg=#282828,bg=#7daea3,bold] #h "
++
++        set -g window-status-format \
++          "#[fg=#282828,bg=#3c3836]#[fg=#d4be98,bg=#3c3836] #I  #W #[fg=#3c3836,bg=#282828]"
++        set -g window-status-current-format \
++          "#[fg=#282828,bg=#d8a657]#[fg=#282828,bg=#d8a657,bold] #I  #W #[fg=#d8a657,bg=#282828]"
++        set -g window-status-separator ""
++
++        set -g pane-border-style        "fg=#504945"
++        set -g pane-active-border-style "fg=#7daea3"
++        set -g message-style            "bg=#3c3836,fg=#d4be98"
++        set -g message-command-style    "bg=#3c3836,fg=#d4be98"
++        set -g mode-style               "bg=#d8a657,fg=#282828"
++      '';
++    };
+   };
+ }
 Error: Process completed with exit code 1.

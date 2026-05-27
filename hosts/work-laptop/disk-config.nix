@@ -5,8 +5,7 @@
 #
 # Verify your disk name with `lsblk` on the live ISO before running.
 # Default assumes /dev/sda — change `device` if different (e.g. /dev/nvme0n1).
-_:
-{
+_: {
   disko.devices = {
     disk.main = {
       type = "disk";

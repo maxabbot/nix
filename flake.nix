@@ -102,16 +102,16 @@
             home-manager.nixosModules.home-manager
             {
               home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs =
-                sharedHmArgs
-                // hmArgs
-                // {
-                  inherit inputs;
-                };
-              users.max = import ./home/max;
-            };
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs =
+                  sharedHmArgs
+                  // hmArgs
+                  // {
+                    inherit inputs;
+                  };
+                users.max = import ./home/max;
+              };
             }
           ];
         };
