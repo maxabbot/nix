@@ -36,8 +36,6 @@ compile_settings() {
     WP_DIR=$(jq -r '.wallpaperDir // empty' "$SETTINGS_FILE")
 
     # Safely parse booleans so "false" doesn't trigger a fallback
-    GUIDE_STARTUP=$(jq -r 'if has("openGuideAtStartup") then .openGuideAtStartup else true end' "$SETTINGS_FILE")
-
     PIC_DIR="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")"
     VID_DIR="$(xdg-user-dir VIDEOS 2>/dev/null || echo "$HOME/Videos")"
 

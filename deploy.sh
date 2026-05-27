@@ -134,10 +134,10 @@ fi
 # ─── Final warning ────────────────────────────────────────────────────────────
 
 echo ""
-printf "${RED}${BOLD}  !! WARNING !!${RESET}\n\n"
-printf "  Host   : ${BOLD}${HOST}${RESET}\n"
-printf "  Target : ${BOLD}nixos@${TARGET_IP}${RESET}\n"
-printf "  Disk   : ${RED}${BOLD}${TARGET_DISK}${RESET} will be completely wiped\n"
+printf '%s\n\n' "${RED}${BOLD}  !! WARNING !!${RESET}"
+printf '  Host   : %s\n' "${BOLD}${HOST}${RESET}"
+printf '  Target : %s\n' "${BOLD}nixos@${TARGET_IP}${RESET}"
+printf '  Disk   : %s will be completely wiped\n' "${RED}${BOLD}${TARGET_DISK}${RESET}"
 echo ""
 read -rp "  Wipe ${TARGET_DISK} and install NixOS? [y/N] " confirm
 echo ""

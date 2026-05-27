@@ -28,7 +28,7 @@ trap cleanup EXIT SIGTERM SIGINT
 BT_PID_FILE="$QS_RUN_WORKSPACES/bt_scan_pid"
 
 if [ -f "$BT_PID_FILE" ]; then
-    kill $(cat "$BT_PID_FILE") 2>/dev/null
+    kill "$(cat "$BT_PID_FILE")" 2>/dev/null
     rm -f "$BT_PID_FILE"
 fi
 
@@ -87,7 +87,7 @@ print_workspaces
 # Listen to Hyprland socket wrapped in an infinite loop
 # ============================================================================
 while true; do
-    socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
+    socat -u "UNIX-CONNECT:${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock" - | while read -r line; do
         case "$line" in
             workspace*|focusedmon*|activewindow*|createwindow*|closewindow*|movewindow*|destroyworkspace*)
                 
@@ -95,7 +95,7 @@ while true; do
                 # Hyprland emits HUNDREDS of events a second when you move/resize windows.
                 # This reads and discards all subsequent events arriving within a 50ms window.
                 # It bundles the storm into a single UI update, completely preventing CPU clogging!
-                while read -t 0.05 -r extra_line; do
+                while read -t 0.05 -r _; do
                     continue
                 done
 

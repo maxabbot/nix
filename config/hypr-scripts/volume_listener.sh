@@ -11,7 +11,7 @@ last_vol=$(get_vol)
 last_mute=$(get_mute)
 
 # 2. Loop through events
-pactl subscribe | grep --line-buffered "Event 'change' on sink" | while read -r line; do
+pactl subscribe | grep --line-buffered "Event 'change' on sink" | while read -r _; do
     
     current_sink=$(get_sink)
     current_vol=$(get_vol)

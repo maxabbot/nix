@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # Ensure pactl can connect to PipeWire/PulseAudio regardless of launch context
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export XDG_RUNTIME_DIR
 export PULSE_RUNTIME_PATH="$XDG_RUNTIME_DIR/pulse"
 
 # ---------------------------------------------------------
@@ -88,7 +89,8 @@ if [ "$SCAN_QR_MODE" = true ]; then
     TMP_IMG="$QS_RUN_SCREENSHOT/qr_temp_$$.png"
     grim -g "$GEOMETRY" "$TMP_IMG"
     
-    export XML_OUT=$(zbarimg --xml -q "$TMP_IMG" 2>>"$DEBUG_LOG")
+    XML_OUT=$(zbarimg --xml -q "$TMP_IMG" 2>>"$DEBUG_LOG")
+    export XML_OUT
     
     if [ -n "$XML_OUT" ]; then
         python3 << 'EOF' > "$RES_FILE"
@@ -163,17 +165,17 @@ if [ -f "$CACHE_DIR/rec_pid" ]; then
     FINAL_FILE=$(cat "$CACHE_DIR/final_file")
 
     # 1. SEND STOP SIGNAL TO GPU-SCREEN-RECORDER
-    [ "$REC_PID" != "0" ] && kill -SIGINT $REC_PID 2>/dev/null
+    [ "$REC_PID" != "0" ] && kill -SIGINT "$REC_PID" 2>/dev/null
 
     # 2. WAIT FOR GSR TO CLOSE GRACEFULLY AND FINALIZE MP4
     timeout=30
-    while kill -0 $REC_PID 2>/dev/null && [ $timeout -gt 0 ]; do
+    while kill -0 "$REC_PID" 2>/dev/null && [ "$timeout" -gt 0 ]; do
         sleep 0.1
         timeout=$((timeout - 1))
     done
 
     # FORCE KILL IF STUCK
-    [ "$REC_PID" != "0" ] && kill -9 $REC_PID 2>/dev/null
+    [ "$REC_PID" != "0" ] && kill -9 "$REC_PID" 2>/dev/null
 
     # 3. DESTROY PIPEWIRE VIRTUAL AUDIO CABLES
     if [ -f "$CACHE_DIR/pw_modules" ]; then
@@ -294,9 +296,9 @@ if [ "$FULL_MODE" = true ] || [ -n "$GEOMETRY" ]; then
     [ -n "$GEOMETRY" ] && GRIM_CMD="grim -g \"$GEOMETRY\" -"
 
     if [ "$EDIT_MODE" = true ]; then
-        eval $GRIM_CMD | GSK_RENDERER=gl satty --filename - --output-filename "$FILENAME" --init-tool brush --copy-command wl-copy
+        eval "$GRIM_CMD" | GSK_RENDERER=gl satty --filename - --output-filename "$FILENAME" --init-tool brush --copy-command wl-copy
     else
-        eval $GRIM_CMD | tee "$FILENAME" | wl-copy
+        eval "$GRIM_CMD" | tee "$FILENAME" | wl-copy
     fi
 
     if [ -s "$FILENAME" ]; then
@@ -325,10 +327,11 @@ if pgrep -f "quickshell -p $QML_PATH" > /dev/null; then
 fi
 
 if command -v pactl &> /dev/null; then
-    export QS_MIC_LIST=$(pactl list sources short 2>/dev/null | awk '{print $2}' | grep -v '\.monitor$' | while IFS= read -r name; do
+    QS_MIC_LIST=$(pactl list sources short 2>/dev/null | awk '{print $2}' | grep -v '\.monitor$' | while IFS= read -r name; do
         desc=$(pactl list sources 2>/dev/null | awk -v n="$name" '/Name:/ { found = ($2 == n) } found && /Description:/ { sub(/^[[:space:]]*Description:[[:space:]]*/, ""); print; exit }')
         echo "$name|${desc:-$name}"
     done)
+    export QS_MIC_LIST
 else
     export QS_MIC_LIST=""
 fi
@@ -339,8 +342,11 @@ if [ -f "$PREFS" ]; then
     export QS_DESK_VOL QS_DESK_MUTE QS_MIC_VOL QS_MIC_MUTE QS_MIC_DEV
 fi
 
-[ "$EDIT_MODE" = true ] && export QS_SCREENSHOT_EDIT="true" || export QS_SCREENSHOT_EDIT="false"
-[ -f "$CACHE_FILE" ] && export QS_CACHED_GEOM=$(cat "$CACHE_FILE") || export QS_CACHED_GEOM=""
-[ -f "$MODE_CACHE_FILE" ] && export QS_CACHED_MODE=$(cat "$MODE_CACHE_FILE") || export QS_CACHED_MODE="false"
+if [ "$EDIT_MODE" = true ]; then QS_SCREENSHOT_EDIT="true"; else QS_SCREENSHOT_EDIT="false"; fi
+export QS_SCREENSHOT_EDIT
+if [ -f "$CACHE_FILE" ]; then QS_CACHED_GEOM=$(cat "$CACHE_FILE"); else QS_CACHED_GEOM=""; fi
+export QS_CACHED_GEOM
+if [ -f "$MODE_CACHE_FILE" ]; then QS_CACHED_MODE=$(cat "$MODE_CACHE_FILE"); else QS_CACHED_MODE="false"; fi
+export QS_CACHED_MODE
 
 quickshell -p "$QML_PATH"
