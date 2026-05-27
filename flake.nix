@@ -115,10 +115,12 @@
         };
     in
     {
+      formatter.${system} = mkPkgs.nixfmt-rfc-style;
+
       devShells.${system}.default = mkPkgs.mkShell {
         name = "nixos-config";
         packages = with mkPkgs; [
-          nixfmt
+          nixfmt-rfc-style
           statix
           deadnix
           nil
