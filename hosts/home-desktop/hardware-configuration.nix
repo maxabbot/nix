@@ -11,26 +11,29 @@
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  boot.initrd.availableKernelModules = [
-    "xhci_pci"
-    "ahci"
-    "nvme"
-    "usbhid"
-    "uas"
-    "usb_storage"
-    "sd_mod"
-  ];
-  boot.initrd.kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
-
-  # Intel i7-13700K
-  boot.kernelModules = [
-    "kvm-intel"
-    "it87"
-  ];
-  boot.extraModprobeConfig = ''
-    options it87 ignore_resource_conflict=1 force_id=0x8628
-  '';
-  boot.extraModulePackages = [ ]; # nvidia_x11 added by modules/nixos/nvidia.nix
+  boot = {
+    initrd = {
+      availableKernelModules = [
+        "xhci_pci"
+        "ahci"
+        "nvme"
+        "usbhid"
+        "uas"
+        "usb_storage"
+        "sd_mod"
+      ];
+      kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
+    };
+    # Intel i7-13700K
+    kernelModules = [
+      "kvm-intel"
+      "it87"
+    ];
+    extraModprobeConfig = ''
+      options it87 ignore_resource_conflict=1 force_id=0x8628
+    '';
+    extraModulePackages = [ ]; # nvidia_x11 added by modules/nixos/nvidia.nix
+  };
 
   swapDevices = [ ];
 

@@ -1,9 +1,10 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
 { pkgs, lib, ... }:
 {
+  programs = {
   # ── Kitty terminal ─────────────────────────────────────────────────────────────
   # Colours and font are managed by Stylix; only behaviour settings live here.
-  programs.kitty = {
+  kitty = {
     enable = true;
 
     settings = {
@@ -52,7 +53,7 @@
   # ── btop ───────────────────────────────────────────────────────────────────────
   # Uses the built-in gruvbox_material_dark theme — better fidelity than Stylix's
   # generated theme, so Stylix's btop target is disabled in stylix.nix.
-  programs.btop = {
+  btop = {
     enable = true;
     settings = {
       color_theme = "gruvbox_material_dark";
@@ -76,7 +77,7 @@
 
   # ── bat ────────────────────────────────────────────────────────────────────────
   # Theme is set by Stylix; only pager behaviour here.
-  programs.bat = {
+  bat = {
     enable = true;
     config = {
       pager = "less -RF";
@@ -85,7 +86,7 @@
   };
 
   # ── mpv ────────────────────────────────────────────────────────────────────────
-  programs.mpv = {
+  mpv = {
     enable = true;
     config = {
       profile = "gpu-hq";
@@ -123,7 +124,7 @@
 
   # ── Zathura PDF viewer ─────────────────────────────────────────────────────────
   # Colours are managed by Stylix; only behaviour settings live here.
-  programs.zathura = {
+  zathura = {
     enable = true;
     options = {
       recolor = true;
@@ -148,7 +149,7 @@
 
   # ── Fuzzel launcher ───────────────────────────────────────────────────────────
   # Colours are managed by Stylix; only layout/behaviour settings live here.
-  programs.fuzzel = {
+  fuzzel = {
     enable = true;
     settings = {
       main = {
@@ -173,16 +174,19 @@
       };
     };
   };
+  };
 
-  # ── Wlogout logout screen ─────────────────────────────────────────────────────
-  xdg.configFile."wlogout/layout".source = ../../config/wlogout/layout;
-  xdg.configFile."wlogout/style.css".source = ../../config/wlogout/style.css;
-
-  # ── Fastfetch system info ─────────────────────────────────────────────────────
-  xdg.configFile."fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
-
-  # ── Hyprlock lockscreen config ────────────────────────────────────────────────
-  xdg.configFile."hypr/hyprlock.conf".source = ../../config/hypr/hyprlock.conf;
+  xdg.configFile = {
+    # ── Wlogout logout screen ───────────────────────────────────────────────────
+    "wlogout/layout".source = ../../config/wlogout/layout;
+    "wlogout/style.css".source = ../../config/wlogout/style.css;
+    # ── Fastfetch system info ───────────────────────────────────────────────────
+    "fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
+    # ── Hyprlock lockscreen config ──────────────────────────────────────────────
+    "hypr/hyprlock.conf".source = ../../config/hypr/hyprlock.conf;
+    # ── Mise version manager ────────────────────────────────────────────────────
+    "mise/config.toml".source = ../../config/mise/config.toml;
+  };
 
   # ── Misc packages ─────────────────────────────────────────────────────────────
   home.packages = [
@@ -193,6 +197,4 @@
     ))
   ];
 
-  # ── Mise version manager ──────────────────────────────────────────────────────
-  xdg.configFile."mise/config.toml".source = ../../config/mise/config.toml;
 }

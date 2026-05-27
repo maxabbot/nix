@@ -189,22 +189,28 @@
       '';
     };
 
-  # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ───────────────────────
-  # Mainline it87 doesn't support this chip; the out-of-tree driver does.
-  # Required for pwmconfig / fancontrol to see PWM controls.
-  boot.extraModulePackages = [ config.boot.kernelPackages.it87 ];
-  boot.kernelModules = [ "it87" ];
+  boot = {
+    # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ─────────────────────
+    # Mainline it87 doesn't support this chip; the out-of-tree driver does.
+    # Required for pwmconfig / fancontrol to see PWM controls.
+    extraModulePackages = [ config.boot.kernelPackages.it87 ];
+    kernelModules = [ "it87" ];
 
-  # ── Bootloader ────────────────────────────────────────────────────────────────
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+    # ── Bootloader ──────────────────────────────────────────────────────────────
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
 
-  # btrfs "first mount" free-space-tree init creates a brief window where the
-  # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
-  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.Restart = "on-failure";
-  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.RestartSec = "3";
-  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.StartLimitBurst = 10;
-  boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.StartLimitIntervalSec = "60";
+    # btrfs "first mount" free-space-tree init creates a brief window where the
+    # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
+    initrd.systemd.services.initrd-find-nixos-closure.serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "3";
+      StartLimitBurst = 10;
+      StartLimitIntervalSec = "60";
+    };
+  };
 
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";

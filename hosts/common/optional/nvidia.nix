@@ -26,17 +26,19 @@
     extraPackages32 = with pkgs.pkgsi686Linux; [ libva ];
   };
 
-  boot.kernelParams = [
-    "nvidia-drm.modeset=1"
-    "nvidia-drm.fbdev=1"
-  ];
-  boot.extraModprobeConfig = "options nvidia NVreg_PreserveVideoMemoryAllocations=1";
-  boot.initrd.kernelModules = [
-    "nvidia"
-    "nvidia_modeset"
-    "nvidia_uvm"
-    "nvidia_drm"
-  ];
+  boot = {
+    kernelParams = [
+      "nvidia-drm.modeset=1"
+      "nvidia-drm.fbdev=1"
+    ];
+    extraModprobeConfig = "options nvidia NVreg_PreserveVideoMemoryAllocations=1";
+    initrd.kernelModules = [
+      "nvidia"
+      "nvidia_modeset"
+      "nvidia_uvm"
+      "nvidia_drm"
+    ];
+  };
 
   environment.variables = {
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";

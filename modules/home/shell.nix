@@ -6,8 +6,9 @@
   ...
 }:
 {
+  programs = {
   # ── Zsh ───────────────────────────────────────────────────────────────────────
-  programs.zsh = {
+  zsh = {
     enable = true;
 
     history = {
@@ -226,7 +227,7 @@
   };
 
   # ── Starship prompt ────────────────────────────────────────────────────────────
-  programs.starship = {
+  starship = {
     enable = true;
     enableZshIntegration = true;
     settings = {
@@ -333,7 +334,7 @@
   };
 
   # ── fzf ────────────────────────────────────────────────────────────────────────
-  programs.fzf = {
+  fzf = {
     enable = true;
     enableZshIntegration = true;
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
@@ -347,14 +348,14 @@
   };
 
   # ── zoxide (better cd) ─────────────────────────────────────────────────────────
-  programs.zoxide = {
+  zoxide = {
     enable = true;
     enableZshIntegration = true;
     options = [ "--cmd cd" ];
   };
 
   # ── tmux ───────────────────────────────────────────────────────────────────────
-  programs.tmux = {
+  tmux = {
     enable = true;
     prefix = "C-a";
     mouse = true;
@@ -428,5 +429,6 @@
       set -g message-command-style    "bg=#3c3836,fg=#d4be98"
       set -g mode-style               "bg=#d8a657,fg=#282828"
     '';
+  };
   };
 }

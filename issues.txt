@@ -1,281 +1,346 @@
+Run nix run nixpkgs#statix -- check .
 unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
-evaluation warning: nixfmt-rfc-style is now the same as pkgs.nixfmt which should be used instead.
-evaluation warning: nixfmt-rfc-style is now the same as pkgs.nixfmt which should be used instead.
-these 27 paths will be fetched (16.5 MiB download, 73.9 MiB unpacked):
-  /nix/store/k1shjmzyzw8bf7vp8gyrqn4dn70xpdxx-brotli-1.2.0-lib
-  /nix/store/3lnvi6r17y9kki4r9klzvavranaz3131-bzip2-1.0.8
-  /nix/store/xm1x557414bq1lgrx18gvb7cbz1qrdy8-curl-8.20.0
-  /nix/store/qhmqdg27kcrlkl8ida6d5hiacw0y8d21-elfutils-0.194
+these 7 paths will be fetched (10.7 MiB download, 49.6 MiB unpacked):
   /nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib
   /nix/store/xyikkpwkyxx6syba3kfrr0h67ig5hwmn-gcc-15.2.0-libgcc
   /nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61
-  /nix/store/y56aqb1m3y5davn6hsv4jfbml78qw4mv-gmp-with-cxx-6.3.0
-  /nix/store/6i31ijsdf1f9rwrismd143qdhj6i96sk-json-c-0.18
-  /nix/store/wn2byajlpr3w4pii81n6r0bjfrp5ca31-keyutils-1.6.3-lib
-  /nix/store/5cbjxz04crbjnawysjx5q717gvbsx7k8-krb5-1.22.1-lib
-  /nix/store/2zs4bbi72plfm8j6zxf1js4f3yc4yzwy-libffi-3.5.2
   /nix/store/6qa00czc79b3nb6ld0mdyacfp2p1k3jx-libidn2-2.3.8
-  /nix/store/f0gsxi5sc6hvrwmjk4r7dpb71d4vjgn0-libpsl-0.21.5
-  /nix/store/w3br983xcky4vdsz4df4splnbqhvnwp6-libssh2-1.11.1
   /nix/store/bf6wgamqnl3c91iamlb1branrfcwwy7x-libunistring-1.4.2
-  /nix/store/zshxcsjv43migvylmfn1dh4wsl5wi09v-nghttp2-1.69.0-lib
-  /nix/store/k7ph83pqw7wk69zl9jdniwkg681nzavw-nghttp3-1.15.0
-  /nix/store/7kxphmk7sm9k343hs323z8gd6l1c4xsy-ngtcp2-1.22.1
-  /nix/store/01945jlqwsgq7a9nbw00y0p0x6027yy3-nixfmt-1.2.0
-  /nix/store/wjfhh11sfcdf97mvg7hbxickybxzk850-numactl-2.0.18
-  /nix/store/y18pnbvfarnilsmgayswvi1khaw9wbsc-openssl-3.6.2
-  /nix/store/093bbkmklv9vznvdpg1dmdmirdf3acjg-publicsuffix-list-0-unstable-2026-03-26
+  /nix/store/v5wmprihi3ywkh9ksdvwgiixrxj29r66-statix-0-unstable-2026-05-14
   /nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc
-  /nix/store/waz72vmxc8zk90qqvgg9ikhzdk1kzjy4-xz-5.8.3
-  /nix/store/61a1nwx3w6rqyaisj5rn1sal1981apm7-zlib-1.3.2
-  /nix/store/gd74vdpqzq0qmmikvmrf3r3kghhhnf50-zstd-1.5.7
-copying path '/nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
 copying path '/nix/store/xyikkpwkyxx6syba3kfrr0h67ig5hwmn-gcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
+copying path '/nix/store/g54b6ghpnn98hfdz4yqw87w10c3hx8bv-xgcc-15.2.0-libgcc' from 'https://cache.nixos.org'...
 copying path '/nix/store/bf6wgamqnl3c91iamlb1branrfcwwy7x-libunistring-1.4.2' from 'https://cache.nixos.org'...
-copying path '/nix/store/093bbkmklv9vznvdpg1dmdmirdf3acjg-publicsuffix-list-0-unstable-2026-03-26' from 'https://cache.nixos.org'...
 copying path '/nix/store/6qa00czc79b3nb6ld0mdyacfp2p1k3jx-libidn2-2.3.8' from 'https://cache.nixos.org'...
 copying path '/nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61' from 'https://cache.nixos.org'...
-copying path '/nix/store/k1shjmzyzw8bf7vp8gyrqn4dn70xpdxx-brotli-1.2.0-lib' from 'https://cache.nixos.org'...
-copying path '/nix/store/3lnvi6r17y9kki4r9klzvavranaz3131-bzip2-1.0.8' from 'https://cache.nixos.org'...
-copying path '/nix/store/2zs4bbi72plfm8j6zxf1js4f3yc4yzwy-libffi-3.5.2' from 'https://cache.nixos.org'...
 copying path '/nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib' from 'https://cache.nixos.org'...
-copying path '/nix/store/6i31ijsdf1f9rwrismd143qdhj6i96sk-json-c-0.18' from 'https://cache.nixos.org'...
-copying path '/nix/store/wn2byajlpr3w4pii81n6r0bjfrp5ca31-keyutils-1.6.3-lib' from 'https://cache.nixos.org'...
-copying path '/nix/store/f0gsxi5sc6hvrwmjk4r7dpb71d4vjgn0-libpsl-0.21.5' from 'https://cache.nixos.org'...
-copying path '/nix/store/k7ph83pqw7wk69zl9jdniwkg681nzavw-nghttp3-1.15.0' from 'https://cache.nixos.org'...
-copying path '/nix/store/zshxcsjv43migvylmfn1dh4wsl5wi09v-nghttp2-1.69.0-lib' from 'https://cache.nixos.org'...
-copying path '/nix/store/y18pnbvfarnilsmgayswvi1khaw9wbsc-openssl-3.6.2' from 'https://cache.nixos.org'...
-copying path '/nix/store/waz72vmxc8zk90qqvgg9ikhzdk1kzjy4-xz-5.8.3' from 'https://cache.nixos.org'...
-copying path '/nix/store/61a1nwx3w6rqyaisj5rn1sal1981apm7-zlib-1.3.2' from 'https://cache.nixos.org'...
-copying path '/nix/store/y56aqb1m3y5davn6hsv4jfbml78qw4mv-gmp-with-cxx-6.3.0' from 'https://cache.nixos.org'...
-copying path '/nix/store/gd74vdpqzq0qmmikvmrf3r3kghhhnf50-zstd-1.5.7' from 'https://cache.nixos.org'...
-copying path '/nix/store/wjfhh11sfcdf97mvg7hbxickybxzk850-numactl-2.0.18' from 'https://cache.nixos.org'...
-copying path '/nix/store/5cbjxz04crbjnawysjx5q717gvbsx7k8-krb5-1.22.1-lib' from 'https://cache.nixos.org'...
-copying path '/nix/store/w3br983xcky4vdsz4df4splnbqhvnwp6-libssh2-1.11.1' from 'https://cache.nixos.org'...
-copying path '/nix/store/7kxphmk7sm9k343hs323z8gd6l1c4xsy-ngtcp2-1.22.1' from 'https://cache.nixos.org'...
-copying path '/nix/store/xm1x557414bq1lgrx18gvb7cbz1qrdy8-curl-8.20.0' from 'https://cache.nixos.org'...
-copying path '/nix/store/qhmqdg27kcrlkl8ida6d5hiacw0y8d21-elfutils-0.194' from 'https://cache.nixos.org'...
-copying path '/nix/store/01945jlqwsgq7a9nbw00y0p0x6027yy3-nixfmt-1.2.0' from 'https://cache.nixos.org'...
-diff --git a/hosts/home-desktop/default.nix b/hosts/home-desktop/default.nix
-index cdd7b20..36fe0f7 100644
---- a/hosts/home-desktop/default.nix
-+++ b/hosts/home-desktop/default.nix
-@@ -57,97 +57,127 @@
-   # UUIDs/EDID values are stable hardware identifiers for this machine.
-   system.activationScripts.sddmMonitorConfig =
-     let
--      kwinCfg = pkgs.writeText "kwinoutputconfig.json" (builtins.toJSON [
--        {
--          name = "outputs";
--          data = [
--            {
--              # DP-2 — AOC 4K (3840x2160 @ 60 Hz), index 0
--              allowDdcCi = true;
--              allowSdrSoftwareBrightness = true;
--              autoBrightnessCurve = [ 0 0 0 0 0 0 ];
--              autoRotation = "InTabletMode";
--              automaticBrightness = false;
--              brightness = 1;
--              colorPowerTradeoff = "PreferEfficiency";
--              colorProfileSource = "sRGB";
--              connectorName = "DP-2";
--              detectedDdcCi = false;
--              edidHash = "20a8bbcf2ded99e2c8954fef4ad4d197";
--              edidIdentifier = "AOC 9987 121 9 2026 0";
--              edrPolicy = "always";
--              highDynamicRange = false;
--              iccProfilePath = "";
--              maxBitsPerColor = 0;
--              mode = { height = 2160; refreshRate = 60000; width = 3840; };
--              overscan = 0;
--              rgbRange = "Automatic";
--              scale = 1.7;
--              sdrBrightness = 417;
--              sdrGamutWideness = 0;
--              sharpness = 0;
--              transform = "Normal";
--              uuid = "1c32b0ef-a8c6-4efd-805a-8ab0baaaa435";
--              vrrPolicy = "Never";
--              wideColorGamut = false;
--            }
--            {
--              # DP-3 — AOC 1440p (2560x1440 @ 165 Hz), index 1
--              allowDdcCi = true;
--              allowSdrSoftwareBrightness = true;
--              autoBrightnessCurve = [ 0 0 0 0 0 0 ];
--              autoRotation = "InTabletMode";
--              automaticBrightness = false;
--              brightness = 1;
--              colorPowerTradeoff = "PreferEfficiency";
--              colorProfileSource = "sRGB";
--              connectorName = "DP-3";
--              detectedDdcCi = false;
--              edidHash = "4eb9ea281bef29a9e73ebce35b13ec11";
--              edidIdentifier = "AOC 45829 3301 22 2023 0";
--              edrPolicy = "always";
--              highDynamicRange = false;
--              iccProfilePath = "";
--              maxBitsPerColor = 0;
--              mode = { height = 1440; refreshRate = 165000; width = 2560; };
--              overscan = 0;
--              rgbRange = "Automatic";
--              scale = 1;
--              sdrBrightness = 301;
--              sdrGamutWideness = 0;
--              sharpness = 0;
--              transform = "Normal";
--              uuid = "9537cafe-ef6f-4f25-8c94-eb1ff9bf734b";
--              vrrPolicy = "Never";
--              wideColorGamut = false;
--            }
--          ];
--        }
--        {
--          name = "setups";
--          data = [
--            {
--              lidClosed = false;
--              outputs = [
--                {
--                  enabled = false;
--                  outputIndex = 0;
--                  position = { x = 2560; y = 0; };
--                  priority = 0;
--                  replicationSource = "";
--                }
--                {
--                  enabled = true; # DP-3 primary
--                  outputIndex = 1;
--                  position = { x = 0; y = 0; };
--                  priority = 1;
--                  replicationSource = "";
--                }
--              ];
--            }
--          ];
--        }
--      ]);
-+      kwinCfg = pkgs.writeText "kwinoutputconfig.json" (
-+        builtins.toJSON [
-+          {
-+            name = "outputs";
-+            data = [
-+              {
-+                # DP-2 — AOC 4K (3840x2160 @ 60 Hz), index 0
-+                allowDdcCi = true;
-+                allowSdrSoftwareBrightness = true;
-+                autoBrightnessCurve = [
-+                  0
-+                  0
-+                  0
-+                  0
-+                  0
-+                  0
-+                ];
-+                autoRotation = "InTabletMode";
-+                automaticBrightness = false;
-+                brightness = 1;
-+                colorPowerTradeoff = "PreferEfficiency";
-+                colorProfileSource = "sRGB";
-+                connectorName = "DP-2";
-+                detectedDdcCi = false;
-+                edidHash = "20a8bbcf2ded99e2c8954fef4ad4d197";
-+                edidIdentifier = "AOC 9987 121 9 2026 0";
-+                edrPolicy = "always";
-+                highDynamicRange = false;
-+                iccProfilePath = "";
-+                maxBitsPerColor = 0;
-+                mode = {
-+                  height = 2160;
-+                  refreshRate = 60000;
-+                  width = 3840;
-+                };
-+                overscan = 0;
-+                rgbRange = "Automatic";
-+                scale = 1.7;
-+                sdrBrightness = 417;
-+                sdrGamutWideness = 0;
-+                sharpness = 0;
-+                transform = "Normal";
-+                uuid = "1c32b0ef-a8c6-4efd-805a-8ab0baaaa435";
-+                vrrPolicy = "Never";
-+                wideColorGamut = false;
-+              }
-+              {
-+                # DP-3 — AOC 1440p (2560x1440 @ 165 Hz), index 1
-+                allowDdcCi = true;
-+                allowSdrSoftwareBrightness = true;
-+                autoBrightnessCurve = [
-+                  0
-+                  0
-+                  0
-+                  0
-+                  0
-+                  0
-+                ];
-+                autoRotation = "InTabletMode";
-+                automaticBrightness = false;
-+                brightness = 1;
-+                colorPowerTradeoff = "PreferEfficiency";
-+                colorProfileSource = "sRGB";
-+                connectorName = "DP-3";
-+                detectedDdcCi = false;
-+                edidHash = "4eb9ea281bef29a9e73ebce35b13ec11";
-+                edidIdentifier = "AOC 45829 3301 22 2023 0";
-+                edrPolicy = "always";
-+                highDynamicRange = false;
-+                iccProfilePath = "";
-+                maxBitsPerColor = 0;
-+                mode = {
-+                  height = 1440;
-+                  refreshRate = 165000;
-+                  width = 2560;
-+                };
-+                overscan = 0;
-+                rgbRange = "Automatic";
-+                scale = 1;
-+                sdrBrightness = 301;
-+                sdrGamutWideness = 0;
-+                sharpness = 0;
-+                transform = "Normal";
-+                uuid = "9537cafe-ef6f-4f25-8c94-eb1ff9bf734b";
-+                vrrPolicy = "Never";
-+                wideColorGamut = false;
-+              }
-+            ];
-+          }
-+          {
-+            name = "setups";
-+            data = [
-+              {
-+                lidClosed = false;
-+                outputs = [
-+                  {
-+                    enabled = false;
-+                    outputIndex = 0;
-+                    position = {
-+                      x = 2560;
-+                      y = 0;
-+                    };
-+                    priority = 0;
-+                    replicationSource = "";
-+                  }
-+                  {
-+                    enabled = true; # DP-3 primary
-+                    outputIndex = 1;
-+                    position = {
-+                      x = 0;
-+                      y = 0;
-+                    };
-+                    priority = 1;
-+                    replicationSource = "";
-+                  }
-+                ];
-+              }
-+            ];
-+          }
-+        ]
-+      );
-     in
-     {
-       deps = [ "users" ];
+copying path '/nix/store/v5wmprihi3ywkh9ksdvwgiixrxj29r66-statix-0-unstable-2026-05-14' from 'https://cache.nixos.org'...
+[20] Warning: Avoid repeated keys in attribute sets
+     ╭─[ ./modules/home/shell.nix:17:5 ]
+     │
+  17 │           extended = true;
+     │         ──────┬─────
+     │               ╰─────── The key programs is first assigned here ...
+     │
+ 271 │               "Music" = "󰝚 ";
+     │     ────────┬────────
+     │             ╰────────── ... repeated here ...
+     │
+ 379 │ ╭─▶       # Intuitive splits (open in current path)
+ 380 │ ├─▶       unbind '"'
+     │ │
+     │ ╰────────────────────── ... and here (2 occurrences omitted). Try programs = { zsh=...; starship=...; fzf=...; } instead.
+─────╯
+[04] Warning: Assignment instead of inherit from
+    ╭─[ ./flake.nix:63:9 ]
+    │
+ 63 │ ╭─▶       lib = nixpkgs.lib;
+ 64 │ ├─▶
+    │ │
+    │ ╰────── This assignment is better written with inherit
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+     ╭─[ ./flake.nix:104:19 ]
+     │
+ 104 │                   home-manager.useGlobalPkgs = true;
+     │                       ─────────────┬────────────
+     │                                    ╰────────────── The key home-manager is first assigned here ...
+ 105 │                   home-manager.useUserPackages = true;
+     │                       ──────────────┬─────────────
+     │                                     ╰─────────────── ... repeated here ...
+ 106 │ ╭─▶               home-manager.extraSpecialArgs =
+ 107 │ ├─▶                 sharedHmArgs
+     │ │
+     │ ╰────────────────────────────────── ... and here (1 occurrence omitted). Try home-manager = { useGlobalPkgs=...; useUserPackages=...; extraSpecialArgs=...; } instead.
+─────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/common/optional/gaming.nix:3:3 ]
+    │
+  3 │   programs.steam = {
+    │   ───────┬──────
+    │          ╰──────── The key programs is first assigned here ...
+    │
+ 11 │   programs.gamemode = {
+    │   ────────┬────────
+    │           ╰────────── ... repeated here ...
+    │
+ 20 │   programs.gamescope.enable = true;
+    │   ────────────┬────────────
+    │               ╰────────────── ... and here. Try programs = { steam=...; gamemode=...; gamescope.enable=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/common/optional/productivity.nix:27:28 ]
+    │
+ 27 │ ╭─────▶       pkgs.kdePackages.qtsvg
+ 28 │ ├─────▶       pkgs.kdePackages.qtmultimedia
+    │ │
+    │ ╰───────────────────────────────────────────── The key services is first assigned here ...
+    │
+ 49 │     ╭─▶     NIXOS_OZONE_WL = "1";
+ 50 │     ├─▶     MOZ_ENABLE_WAYLAND = "1";
+    │     │
+    │     ╰─────────────────────────────────── ... repeated here ...
+    │
+ 56 │   ╭───▶     user = "max";
+ 57 │   ├───▶     dataDir = "/home/max";
+    │   │
+    │   ╰────────────────────────────────── ... and here (5 occurrences omitted). Try services = { displayManager.sddm=...; pipewire=...; pulseaudio.enable=...; } instead.
+────╯
+[10] Warning: Found empty pattern in function argument
+   ╭─[ ./hosts/common/optional/podman.nix:1:1 ]
+   │
+ 1 │ { ... }:
+   │ ───┬───
+   │    ╰───── This pattern is empty, use _ instead
+───╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./home/max/cli.nix:25:3 ]
+    │
+ 25 │   programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
+    │   ─────────┬─────────
+    │            ╰─────────── The key programs is first assigned here ...
+    │
+ 27 │   programs.bat = {
+    │   ──────┬─────
+    │         ╰─────── ... repeated here ...
+    │
+ 36 │   programs.eza = {
+    │   ──────┬─────
+    │         ╰─────── ... and here (3 occurrences omitted). Try programs = { zsh.dotDir=...; bat=...; eza=...; } instead.
+────╯
+[10] Warning: Found empty pattern in function argument
+   ╭─[ ./hosts/vm/disk-config.nix:3:3 ]
+   │
+ 3 │ { ... }:
+   │   ───┬───
+   │      ╰───── This pattern is empty, use _ instead
+───╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./modules/home/wm/hyprland.nix:86:35 ]
+    │
+ 86 │         xdg.configFile."hypr/scripts".source = ../../../config/hypr-scripts;
+    │                                       ──────────────────┬─────────────────
+    │                                                         ╰─────────────────── The key xdg is first assigned here ...
+    │
+ 91 │         # ── Per-host monitor + workspace config (generated by Nix) ────────────────
+    │                                           ────────────────────┬────────────────────
+    │                                                               ╰────────────────────── ... repeated here ...
+    │
+ 95 │ ╭─▶     services.hypridle = {
+    ┆ ┆
+ 97 │ ├─▶       settings = {
+    │ │
+    │ ╰──────────────────────── ... and here. Try xdg = { configFile."hypr/scripts".source=...; configFile."hypr/hyprland.lua".source=...; configFile."hypr/monitors.lua".text=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+     ╭─[ ./modules/nixos/base.nix:74:28 ]
+     │
+  74 │   ╭─▶       config = cfg.fancontrol.config;
+     ┆   ┆
+  76 │   ├─▶
+     │   │
+     │   ╰────── The key hardware is first assigned here ...
+     │
+ 105 │               TLP_DEFAULT_MODE = "AC";
+     │            ────────────┬────────────
+     │                        ╰────────────── ... repeated here ...
+     │
+ 107 │ ╭───▶     };
+     ┆ ┆
+ 109 │ ├───▶     # ── Security / auth ────────────────────────────────────────────────────────
+     │ │
+     │ ╰───────────────────────────────────────────────────────────────────────────────────────── ... and here (2 occurrences omitted). Try hardware = { fancontrol=...; bluetooth.enable=...; bluetooth.powerOnBoot=...; } instead.
+─────╯
+[20] Warning: Avoid repeated keys in attribute sets
+     ╭─[ ./modules/nixos/base.nix:109:37 ]
+     │
+ 109 │         # ── Security / auth ────────────────────────────────────────────────────────
+     │                                         ───────────┬───────────
+     │                                                    ╰───────────── The key services is first assigned here ...
+     │
+ 115 │ ╭─▶       enable = true;
+ 116 │ ├─▶       enableSSHSupport = true;
+     │ │
+     │ ╰──────────────────────────────────── ... repeated here ...
+     │
+ 123 │         # ── Shell ──────────────────────────────────────────────────────────────────
+     │                                ────────────┬────────────
+     │                                            ╰────────────── ... and here (4 occurrences omitted). Try services = { blueman.enable=...; printing.enable=...; timesyncd.enable=...; } instead.
+─────╯
+[04] Warning: Assignment instead of inherit from
+     ╭─[ ./modules/nixos/base.nix:227:29 ]
+     │
+ 227 │ ╭─▶         noto-fonts-color-emoji
+     ┆ ┆
+ 231 │ ├─▶     # ── XDG portals (base — compositor modules add their own) ─────────────────
+     │ │
+     │ ╰────────────────────────────────────────────────────────────────────────────────────── This assignment is better written with inherit
+─────╯
+[04] Warning: Assignment instead of inherit from
+     ╭─[ ./modules/nixos/base.nix:231:24 ]
+     │
+ 231 │     # ── XDG portals (base — compositor modules add their own) ─────────────────
+     │                        ───────────────────┬──────────────────
+     │                                           ╰──────────────────── This assignment is better written with inherit
+─────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/common/optional/stylix.nix:50:9 ]
+    │
+ 50 │       stylix.targets.bat.enable = false;
+    │         ────────────┬────────────
+    │                     ╰────────────── The key stylix is first assigned here ...
+ 51 │       stylix.targets.kitty.enable = false;
+    │         ─────────────┬─────────────
+    │                      ╰─────────────── ... repeated here ...
+ 52 │       stylix.targets.tmux.enable = false;
+    │         ─────────────┬────────────
+    │                      ╰────────────── ... and here (4 occurrences omitted). Try stylix = { targets.bat.enable=...; targets.kitty.enable=...; targets.tmux.enable=...; } instead.
+────╯
+[10] Warning: Found empty pattern in function argument
+   ╭─[ ./hosts/home-desktop/disk-config.nix:8:5 ]
+   │
+ 8 │ ╭─▶ { ... }:
+ 9 │ ├─▶ {
+   │ │
+   │ ╰─────── This pattern is empty, use _ instead
+───╯
+[04] Warning: Assignment instead of inherit from
+    ╭─[ ./home/max/desktop.nix:11:5 ]
+    │
+ 11 │     latitude = location.latitude;
+    │     ──────────────┬──────────────
+    │                   ╰──────────────── This assignment is better written with inherit
+────╯
+[04] Warning: Assignment instead of inherit from
+    ╭─[ ./home/max/desktop.nix:12:5 ]
+    │
+ 12 │     longitude = location.longitude;
+    │     ───────────────┬───────────────
+    │                    ╰───────────────── This assignment is better written with inherit
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/common/optional/nvidia.nix:29:3 ]
+    │
+ 29 │   boot.kernelParams = [
+    │   ────────┬────────
+    │           ╰────────── The key boot is first assigned here ...
+    │
+ 33 │   boot.extraModprobeConfig = "options nvidia NVreg_PreserveVideoMemoryAllocations=1";
+    │   ────────────┬───────────
+    │               ╰───────────── ... repeated here ...
+ 34 │   boot.initrd.kernelModules = [
+    │   ────────────┬────────────
+    │               ╰────────────── ... and here. Try boot = { kernelParams=...; extraModprobeConfig=...; initrd.kernelModules=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/vm/hardware-configuration.nix:12:5 ]
+    │
+ 12 │   boot.initrd.availableKernelModules = [
+    │     ─────────────────┬────────────────
+    │                      ╰────────────────── The key boot is first assigned here ...
+    │
+ 20 │   boot.initrd.kernelModules = [ ];
+    │     ────────────┬────────────
+    │                 ╰────────────── ... repeated here ...
+ 21 │   boot.kernelModules = [ ];
+    │     ─────────┬────────
+    │              ╰────────── ... and here (1 occurrence omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/home-desktop/hardware-configuration.nix:14:5 ]
+    │
+ 14 │   boot.initrd.availableKernelModules = [
+    │     ─────────────────┬────────────────
+    │                      ╰────────────────── The key boot is first assigned here ...
+    │
+ 23 │   boot.initrd.kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
+    │     ────────────┬────────────
+    │                 ╰────────────── ... repeated here ...
+    │
+ 26 │   boot.kernelModules = [
+    │     ─────────┬────────
+    │              ╰────────── ... and here (2 occurrences omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/work-laptop/hardware-configuration.nix:13:5 ]
+    │
+ 13 │   boot.initrd.availableKernelModules = [
+    │     ─────────────────┬────────────────
+    │                      ╰────────────────── The key boot is first assigned here ...
+    │
+ 20 │   boot.initrd.kernelModules = [ ];
+    │     ────────────┬────────────
+    │                 ╰────────────── ... repeated here ...
+ 21 │   boot.kernelModules = [ "kvm-intel" ];
+    │     ─────────┬────────
+    │              ╰────────── ... and here (1 occurrence omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./modules/home/apps.nix:11:41 ]
+    │
+ 11 │ ╭─▶       hide_window_decorations = "titlebar-only";
+ 12 │ ├─▶       background_opacity = "0.95";
+    │ │
+    │ ╰──────────────────────────────────────── The key programs is first assigned here ...
+    │
+ 65 │           cpu_invert_lower = true;
+    │               ──────┬──────
+    │                     ╰──────── ... repeated here ...
+    │
+ 97 │           gpu-context = "wayland";
+    │     ──────┬─────
+    │           ╰─────── ... and here (3 occurrences omitted). Try programs = { kitty=...; btop=...; bat=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/common/optional/plymouth.nix:3:3 ]
+    │
+  3 │   boot.plymouth = {
+    │   ──────┬──────
+    │         ╰──────── The key boot is first assigned here ...
+    │
+ 21 │   boot.consoleLogLevel = 0;
+    │   ──────────┬─────────
+    │             ╰─────────── ... repeated here ...
+ 22 │   boot.initrd.verbose = false;
+    │   ─────────┬─────────
+    │            ╰─────────── ... and here (1 occurrence omitted). Try boot = { plymouth=...; consoleLogLevel=...; initrd.verbose=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+    ╭─[ ./hosts/minimal/hardware-configuration.nix:13:5 ]
+    │
+ 13 │   boot.initrd.availableKernelModules = [
+    │     ─────────────────┬────────────────
+    │                      ╰────────────────── The key boot is first assigned here ...
+    │
+ 21 │   boot.initrd.kernelModules = [ ];
+    │     ────────────┬────────────
+    │                 ╰────────────── ... repeated here ...
+ 22 │   boot.kernelModules = [ ];
+    │     ─────────┬────────
+    │              ╰────────── ... and here (1 occurrence omitted). Try boot = { initrd.availableKernelModules=...; initrd.kernelModules=...; kernelModules=...; } instead.
+────╯
+[20] Warning: Avoid repeated keys in attribute sets
+     ╭─[ ./hosts/home-desktop/default.nix:202:12 ]
+     │
+ 202 │   ╭─▶   # btrfs "first mount" free-space-tree init creates a brief window where the
+     │   │              ────────────┬───────────
+     │   │                          ╰───────────── The key boot is first assigned here ...
+ 203 │   ├─▶   # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
+     │   │
+     │   ╰────────────────────────────────────────────────────────────────────────────────────── ... repeated here ...
+     │
+ 205 │ ╭───▶   boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.RestartSec = "3";
+ 206 │ ├───▶   boot.initrd.systemd.services.initrd-find-nixos-closure.serviceConfig.StartLimitBurst = 10;
+     │ │
+     │ ╰──────────────────────────────────────────────────────────────────────────────────────────────────── ... and here (5 occurrences omitted). Try boot = { extraModulePackages=...; kernelModules=...; loader.systemd-boot.enable=...; } instead.
+─────╯
+[10] Warning: Found empty pattern in function argument
+   ╭─[ ./hosts/work-laptop/disk-config.nix:8:5 ]
+   │
+ 8 │ ╭─▶ { ... }:
+ 9 │ ├─▶ {
+   │ │
+   │ ╰─────── This pattern is empty, use _ instead
+───╯
+Error: Process completed with exit code 1.

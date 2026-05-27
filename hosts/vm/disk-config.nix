@@ -1,6 +1,6 @@
 # hosts/vm/disk-config.nix — QEMU virtio disk layout via disko.
 # QuickGUI VMs present the disk as /dev/vda. Verify with `lsblk` on the live ISO.
-{ ... }:
+_:
 {
   disko.devices = {
     disk.main = {

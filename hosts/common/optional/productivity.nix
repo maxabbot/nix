@@ -15,51 +15,54 @@
 
   home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ];
 
-  # ── Display manager (SDDM) ────────────────────────────────────────────────────
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-    wayland.compositor = "kwin";
-    theme = "sugar-dark";
-    extraPackages = [
-      pkgs.sddm-sugar-dark
-      pkgs.kdePackages.breeze
-      pkgs.kdePackages.qtsvg
-      pkgs.kdePackages.qtmultimedia
-    ];
-    settings.Theme = {
-      CursorTheme = "breeze_cursors";
-      CursorSize = "24";
+  services = {
+    # ── Display manager (SDDM) ──────────────────────────────────────────────────
+    displayManager.sddm = {
+      enable = true;
+      wayland.enable = true;
+      wayland.compositor = "kwin";
+      theme = "sugar-dark";
+      extraPackages = [
+        pkgs.sddm-sugar-dark
+        pkgs.kdePackages.breeze
+        pkgs.kdePackages.qtsvg
+        pkgs.kdePackages.qtmultimedia
+      ];
+      settings.Theme = {
+        CursorTheme = "breeze_cursors";
+        CursorSize = "24";
+      };
     };
+    # ── PipeWire audio stack ────────────────────────────────────────────────────
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+      wireplumber.enable = true;
+    };
+    pulseaudio.enable = false;
+    # ── Syncthing ───────────────────────────────────────────────────────────────
+    syncthing = {
+      enable = true;
+      user = "max";
+      dataDir = "/home/max";
+      configDir = "/home/max/.config/syncthing";
+    };
+    # ── Flatpak ─────────────────────────────────────────────────────────────────
+    flatpak.enable = true;
+    # ── Misc services ───────────────────────────────────────────────────────────
+    udev.packages = [ pkgs.openrgb-with-all-plugins ];
+    gvfs.enable = true;
+    tumbler.enable = true;
   };
-
-  # ── PipeWire audio stack ──────────────────────────────────────────────────────
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
-    wireplumber.enable = true;
-  };
-  services.pulseaudio.enable = false;
 
   # ── Wayland session variables ─────────────────────────────────────────────────
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     MOZ_ENABLE_WAYLAND = "1";
   };
-
-  # ── Syncthing ─────────────────────────────────────────────────────────────────
-  services.syncthing = {
-    enable = true;
-    user = "max";
-    dataDir = "/home/max";
-    configDir = "/home/max/.config/syncthing";
-  };
-
-  # ── Flatpak ───────────────────────────────────────────────────────────────────
-  services.flatpak.enable = true;
 
   # ── System packages ───────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
@@ -110,7 +113,4 @@
     yazi
   ];
 
-  services.udev.packages = [ pkgs.openrgb-with-all-plugins ];
-  services.gvfs.enable = true;
-  services.tumbler.enable = true;
 }

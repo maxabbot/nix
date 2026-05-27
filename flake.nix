@@ -60,7 +60,7 @@
     }@inputs:
     let
       system = "x86_64-linux";
-      lib = nixpkgs.lib;
+      inherit (nixpkgs) lib;
 
       mkPkgs = import nixpkgs {
         inherit system;
@@ -101,15 +101,17 @@
           modules = modules ++ [
             home-manager.nixosModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs =
+              home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs =
                 sharedHmArgs
                 // hmArgs
                 // {
                   inherit inputs;
                 };
-              home-manager.users.max = import ./home/max;
+              users.max = import ./home/max;
+            };
             }
           ];
         };

@@ -68,10 +68,18 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # ── Fancontrol ────────────────────────────────────────────────────────────────
-    hardware.fancontrol = lib.mkIf (cfg.fancontrol.enable && cfg.fancontrol.config != "") {
-      enable = true;
-      config = cfg.fancontrol.config;
+    # ── Hardware ──────────────────────────────────────────────────────────────────
+    hardware = {
+      fancontrol = lib.mkIf (cfg.fancontrol.enable && cfg.fancontrol.config != "") {
+        enable = true;
+        inherit (cfg.fancontrol) config;
+      };
+      bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+      };
+      enableAllFirmware = true;
+      enableRedistributableFirmware = true;
     };
 
     # ── Locale & timezone ──────────────────────────────────────────────────────
@@ -85,40 +93,28 @@ in
     networking.networkmanager.enable = true;
     networking.firewall.enable = cfg.firewall;
 
-    # ── Bluetooth ──────────────────────────────────────────────────────────────
-    hardware.bluetooth.enable = true;
-    hardware.bluetooth.powerOnBoot = true;
-    services.blueman.enable = true;
-
-    # ── Printing ───────────────────────────────────────────────────────────────
-    services.printing.enable = true;
-
-    # ── Time sync ──────────────────────────────────────────────────────────────
-    services.timesyncd.enable = true;
-
-    # ── Power management ───────────────────────────────────────────────────────
-    services.power-profiles-daemon.enable = cfg.powerManagement == "power-profiles-daemon";
-
-    services.tlp = lib.mkIf (cfg.powerManagement == "tlp") {
-      enable = true;
-      settings = {
-        TLP_DEFAULT_MODE = "AC";
+    # ── Services ──────────────────────────────────────────────────────────────────
+    services = {
+      blueman.enable = true;
+      printing.enable = true;
+      timesyncd.enable = true;
+      power-profiles-daemon.enable = cfg.powerManagement == "power-profiles-daemon";
+      tlp = lib.mkIf (cfg.powerManagement == "tlp") {
+        enable = true;
+        settings.TLP_DEFAULT_MODE = "AC";
       };
+      gnome.gnome-keyring.enable = true;
+      upower.enable = true;
     };
 
     # ── Security / auth ────────────────────────────────────────────────────────
     security.polkit.enable = true;
     security.rtkit.enable = true; # required by PipeWire real-time scheduling
-    services.gnome.gnome-keyring.enable = true;
 
     programs.gnupg.agent = {
       enable = true;
       enableSSHSupport = true;
     };
-
-    # ── Firmware ───────────────────────────────────────────────────────────────
-    hardware.enableAllFirmware = true;
-    hardware.enableRedistributableFirmware = true;
 
     # ── Shell ──────────────────────────────────────────────────────────────────
     programs.zsh.enable = true;
@@ -238,9 +234,6 @@ in
         extraPortals = [ gtkPortal ];
         configPackages = [ gtkPortal ];
       };
-
-    # ── upower ─────────────────────────────────────────────────────────────────
-    services.upower.enable = true;
 
     # ── Nix settings ───────────────────────────────────────────────────────────
     nix.settings = {

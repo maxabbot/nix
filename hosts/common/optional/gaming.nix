@@ -1,23 +1,23 @@
 { config, pkgs, ... }:
 {
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true;
-    dedicatedServer.openFirewall = false;
-    gamescopeSession.enable = true;
-    extraCompatPackages = [ pkgs.proton-ge-bin ];
-  };
-
-  programs.gamemode = {
-    enable = true;
-    enableRenice = true;
-    settings.general = {
-      renice = 10;
-      inhibit_screensaver = 1;
+  programs = {
+    steam = {
+      enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = false;
+      gamescopeSession.enable = true;
+      extraCompatPackages = [ pkgs.proton-ge-bin ];
     };
+    gamemode = {
+      enable = true;
+      enableRenice = true;
+      settings.general = {
+        renice = 10;
+        inhibit_screensaver = 1;
+      };
+    };
+    gamescope.enable = true;
   };
-
-  programs.gamescope.enable = true;
 
   environment.systemPackages = with pkgs; [
     mangohud
