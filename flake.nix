@@ -23,10 +23,7 @@
 
     hyprland = {
       url = "github:hyprwm/Hyprland/v0.55.0";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        xdph.inputs.nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     lanzaboote = {
