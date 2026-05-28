@@ -8,7 +8,6 @@
 }:
 let
   cfg = config.custom.hm;
-  wsModule = "hyprland/workspaces";
   winModule = "hyprland/window";
 
   sysinfo-script = pkgs.writeShellScript "waybar-sysinfo" ''
@@ -46,7 +45,6 @@ in
           spacing = 4;
 
           "modules-left" = [
-            wsModule
             winModule
           ];
           "modules-center" = [ "clock" ];
@@ -60,25 +58,6 @@ in
           ]
           ++ lib.optional (machineType == "desktop") "custom/gpu"
           ++ lib.optional (machineType == "laptop") "battery";
-
-          "${wsModule}" = {
-            disable-scroll = false;
-            format = "{name}";
-            persistent-workspaces =
-              lib.optionalAttrs (cfg.monitors.primaryName != "" && cfg.monitors.secondary != null)
-                {
-                  "${cfg.monitors.primaryName}" = [
-                    1
-                    2
-                    3
-                  ];
-                  "${lib.head (lib.splitString "," cfg.monitors.secondary)}" = [
-                    4
-                    5
-                    6
-                  ];
-                };
-          };
 
           "${winModule}" = {
             format = "{}";
@@ -179,35 +158,6 @@ in
 
         window#waybar {
           background: rgba(40, 40, 40, 0.9);
-          color: #d4be98;
-        }
-
-        #workspaces {
-          background: transparent;
-          margin: 5px;
-          padding: 0px 5px;
-        }
-
-        #workspaces button {
-          padding: 0px 10px;
-          background: transparent;
-          color: #7c6f64;
-          border-bottom: 3px solid transparent;
-        }
-
-        #workspaces button.focused,
-        #workspaces button.active {
-          color: #7daea3;
-          border-bottom: 3px solid #7daea3;
-        }
-
-        #workspaces button.urgent {
-          color: #ea6962;
-          border-bottom: 3px solid #ea6962;
-        }
-
-        #workspaces button:hover {
-          background: rgba(60, 56, 54, 0.5);
           color: #d4be98;
         }
 

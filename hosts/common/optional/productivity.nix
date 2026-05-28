@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   inputs,
   zen-browser,
   ...
@@ -55,7 +56,57 @@
     tumbler.enable = true;
   };
 
-  programs.silentSDDM.enable = true;
+  programs.silentSDDM = {
+    enable = true;
+    theme = "gruvbox";
+
+    # Stylix image deployed into the theme's backgrounds directory
+    backgrounds = {
+      "wallpaper.png" = config.stylix.image;
+    };
+
+    settings = {
+      # ── Backgrounds ───────────────────────────────────────────────────────
+      "LoginScreen" = {
+        background = "wallpaper.png";
+        blur = 8;
+        brightness = -0.1;
+      };
+      "LockScreen" = {
+        background = "wallpaper.png";
+        blur = 28;
+        brightness = -0.15;
+      };
+
+      # ── Login panel — right side so wallpaper is visible ──────────────────
+      "LoginScreen.LoginArea" = {
+        position = "right";
+      };
+
+      # ── Lock screen clock — 24h ───────────────────────────────────────────
+      "LockScreen.Clock" = {
+        format = "HH:mm";
+      };
+      "LockScreen.Date" = {
+        locale = "en_NZ";
+      };
+
+      # ── Accent color — Gruvbox Material teal instead of standard green ────
+      "LoginScreen.LoginArea.Avatar" = {
+        active-border-color = "#7daea3";
+        inactive-border-color = "#504945";
+      };
+      "LoginScreen.LoginArea.PasswordInput" = {
+        border-color = "#7daea3";
+        content-color = "#d4be98";
+        background-color = "#3c3836";
+      };
+      "LoginScreen.LoginArea.LoginButton" = {
+        border-color = "#7daea3";
+        content-color = "#d4be98";
+      };
+    };
+  };
 
   # ── Wayland session variables ─────────────────────────────────────────────────
   environment.sessionVariables = {
