@@ -15,17 +15,14 @@
 
   services = {
     # ── Display manager (SDDM) ──────────────────────────────────────────────────
+    # Theme is managed by Stylix (stylix.targets.sddm is enabled by default).
+    # Do NOT set `theme` here — it overrides Stylix with a theme that may be
+    # incompatible with Qt6 SDDM (e.g. sugar-dark uses QtGraphicalEffects,
+    # which was removed in Qt6).
     displayManager.sddm = {
       enable = true;
       wayland.enable = true;
       wayland.compositor = "kwin";
-      theme = "sugar-dark";
-      extraPackages = [
-        pkgs.sddm-sugar-dark
-        pkgs.kdePackages.breeze
-        pkgs.kdePackages.qtsvg
-        pkgs.kdePackages.qtmultimedia
-      ];
       settings.Theme = {
         CursorTheme = "breeze_cursors";
         CursorSize = "24";
@@ -64,7 +61,6 @@
 
   # ── System packages ───────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
-    sddm-sugar-dark
     grim
     slurp
     awww # wallpaper daemon — NOT "swww"
