@@ -64,13 +64,16 @@
     };
 
     settings = {
-      # ── Background ────────────────────────────────────────────────────────
+      # ── Background — gruvbox preset has use-background-color = true which
+      # overrides the image; must explicitly disable it here.
       "LoginScreen" = {
         background = "leaves-wall.png";
+        use-background-color = false;
         blur = 8;
       };
       "LockScreen" = {
         background = "leaves-wall.png";
+        use-background-color = false;
         blur = 28;
       };
 

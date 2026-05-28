@@ -15,8 +15,4 @@
     };
   };
 
-  xdg.configFile = lib.mkIf (machineType != "server") {
-    "wlogout/layout".source = ../../config/wlogout/layout;
-    "wlogout/style.css".source = ../../config/wlogout/style.css;
-  };
 }
