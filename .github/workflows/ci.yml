@@ -50,7 +50,7 @@ jobs:
 
       - name: Check Nix formatting (nixfmt-rfc-style)
         run: |
-          nix fmt .
+          nix fmt
           git diff --exit-code
 
   shellcheck:

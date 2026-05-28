@@ -115,12 +115,12 @@
         };
     in
     {
-      formatter.${system} = mkPkgs.nixfmt;
+      formatter.${system} = mkPkgs.nixfmt-tree;
 
       devShells.${system}.default = mkPkgs.mkShell {
         name = "nixos-config";
         packages = with mkPkgs; [
-          nixfmt
+          nixfmt-tree
           statix
           deadnix
           nil

@@ -16,9 +16,7 @@
   ];
 
   custom.hm = {
-    compositor = compositor;
-    monitors = monitors;
-    nvidia = nvidia;
+    inherit compositor monitors nvidia;
   };
 
   home = {
