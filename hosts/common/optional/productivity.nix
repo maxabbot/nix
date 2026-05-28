@@ -1,6 +1,5 @@
 {
   pkgs,
-  config,
   inputs,
   zen-browser,
   ...
@@ -60,23 +59,16 @@
     enable = true;
     theme = "gruvbox";
 
-    # package.nix uses bg.name for derivations, so the filename in settings must
-    # match config.stylix.image.name (i.e. the runCommand name, not the attrset key).
-    backgrounds = {
-      wallpaper = config.stylix.image;
-    };
-
     settings = {
-      # ── Backgrounds ───────────────────────────────────────────────────────
+      # ── Background — gruvbox theme defaults to #282828 solid, which already
+      # matches Stylix. No image needed; use-background-color handles it.
       "LoginScreen" = {
-        background = config.stylix.image.name;
-        blur = 8;
-        brightness = -0.1;
+        use-background-color = true;
+        background-color = "#282828";
       };
       "LockScreen" = {
-        background = config.stylix.image.name;
-        blur = 28;
-        brightness = -0.15;
+        use-background-color = true;
+        background-color = "#282828";
       };
 
       # ── Login panel — right side so wallpaper is visible ──────────────────
