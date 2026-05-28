@@ -54,11 +54,11 @@
     ssh = {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks."*" = {
-        addKeysToAgent = "yes";
-        serverAliveInterval = 60;
-        serverAliveCountMax = 3;
-        extraOptions.IdentityAgent = "/run/user/1000/gnupg/S.gpg-agent.ssh";
+      settings."*" = {
+        AddKeysToAgent = "yes";
+        ServerAliveInterval = 60;
+        ServerAliveCountMax = 3;
+        IdentityAgent = "/run/user/1000/gnupg/S.gpg-agent.ssh";
       };
     };
     direnv = {

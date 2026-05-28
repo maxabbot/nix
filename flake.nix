@@ -73,6 +73,7 @@
           email = "abbot.max.nz@gmail.com";
           signingkey = "";
         };
+        nvidia = false;
       };
 
       # Builds a NixosSystem with Home Manager wired in.

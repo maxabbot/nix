@@ -55,6 +55,7 @@
         btop.enable = false;
         waybar.enable = false;
         hyprland.enable = false;
+        mpv.enable = false;
       };
     }
   ];
