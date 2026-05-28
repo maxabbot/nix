@@ -10,7 +10,7 @@
     # Solid dark background — desktop wallpaper is managed separately by swww.
     image = pkgs.runCommand "gruvbox-wallpaper" {
       nativeBuildInputs = [ pkgs.imagemagick ];
-    } "convert -size 3840x2160 xc:'#282828' $out";
+    } "magick -size 3840x2160 xc:'#282828' PNG:$out";
 
     fonts = {
       monospace = {
