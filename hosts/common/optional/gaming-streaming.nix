@@ -9,6 +9,7 @@
 
   services.apollo = {
     enable = true;
+    package = inputs.apollo-flake.packages.x86_64-linux.default;
     capSysAdmin = true;
     openFirewall = true;
   };
