@@ -1,9 +1,12 @@
 {
   pkgs,
+  inputs,
   zen-browser,
   ...
 }:
 {
+  imports = [ inputs.silentSDDM.nixosModules.default ];
+
   # ── Hyprland ──────────────────────────────────────────────────────────────────
   # Using nixpkgs' hyprland module and package avoids referencing the flake's
   # source tarball at evaluation time (which breaks nix flake check).
@@ -14,25 +17,14 @@
   };
 
   services = {
-    # ── Display manager (SDDM) ──────────────────────────────────────────────────
-    # sddm-astronaut is Qt6-native (uses kdePackages). Do NOT use sugar-dark —
-    # it depends on libsForQt5.qtgraphicaleffects which is Qt5-only and
-    # incompatible with SDDM 0.21+ (Qt6). Stylix has no SDDM target.
-    displayManager.sddm = {
-      enable = true;
-      wayland.enable = true;
-      wayland.compositor = "kwin";
-      theme = "sddm-astronaut-theme";
-      extraPackages = with pkgs; [
-        sddm-astronaut
-        kdePackages.qtsvg
-        kdePackages.qtmultimedia
-        kdePackages.qtvirtualkeyboard
-      ];
-      settings.Theme = {
-        CursorTheme = "breeze_cursors";
-        CursorSize = "24";
-      };
+    # ── Display manager (SDDM via SilentSDDM) ──────────────────────────────────
+    # silentSDDM module handles enable/theme/extraPackages/QML2_IMPORT_PATH.
+    # Do NOT use sugar-dark — it depends on Qt5 QtGraphicalEffects which
+    # doesn't exist in Qt6 (SDDM 0.21+). Stylix has no SDDM target.
+    displayManager.sddm.wayland.compositor = "kwin";
+    displayManager.sddm.settings.Theme = {
+      CursorTheme = "breeze_cursors";
+      CursorSize = "24";
     };
     # ── PipeWire audio stack ────────────────────────────────────────────────────
     pipewire = {
@@ -59,15 +51,15 @@
     tumbler.enable = true;
   };
 
+  programs.silentSDDM.enable = true;
+
   # ── Wayland session variables ─────────────────────────────────────────────────
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     MOZ_ENABLE_WAYLAND = "1";
   };
 
-  # ── System packages ───────────────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
-    sddm-astronaut
     grim
     slurp
     awww # wallpaper daemon — NOT "swww"
