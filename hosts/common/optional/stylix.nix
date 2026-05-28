@@ -56,6 +56,7 @@
         waybar.enable = false;
         hyprland.enable = false;
         mpv.enable = false;
+        vscode.enable = false;
       };
     }
   ];
