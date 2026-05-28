@@ -67,7 +67,7 @@
     sddm-sugar-dark
     grim
     slurp
-    awww
+    awww # wallpaper daemon — NOT "swww"
     wl-clipboard
     cliphist
     wlogout
