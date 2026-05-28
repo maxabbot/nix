@@ -23,6 +23,9 @@
     # doesn't exist in Qt6 (SDDM 0.21+). Stylix has no SDDM target.
     # Do NOT set wayland.compositor — the nixpkgs default ("weston") handles
     # mouse/keyboard correctly in VMs; kwin is GPU-heavy and breaks input.
+    # kdePackages.breeze must be in extraPackages so breeze_cursors is findable
+    # on disk — silentSDDM's module only ships its own propagatedBuildInputs.
+    displayManager.sddm.extraPackages = [ pkgs.kdePackages.breeze ];
     displayManager.sddm.settings.Theme = {
       CursorTheme = "breeze_cursors";
       CursorSize = "24";
