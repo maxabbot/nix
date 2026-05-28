@@ -15,7 +15,7 @@
     # HM registers these with Zed's extension manager directly.
     extensions = [
       "gruvbox-material"
-      "colored-zed-icons"
+      "colored-zed-icons-theme"
       "dockerfile"
       "github-actions"
       "ruff"
@@ -28,7 +28,7 @@
       # ── Extensions (auto-installed) ───────────────────────────────────────────
       auto_install_extensions = {
         "gruvbox-material" = true;
-        "colored-zed-icons" = true;
+        "colored-zed-icons-theme" = true;
         "dockerfile" = true;
         "github-actions" = true;
         "ruff" = true;
@@ -41,12 +41,9 @@
       # Force dark — "system" reads portal/GTK which may report light on Hyprland.
       theme = "Gruvbox Material";
       # icon_theme only supports a plain string (no mode/light/dark object).
-      icon_theme = "Colored Zed Icons Theme Dark";
+      icon_theme = "Colored Zed Icons Theme";
 
-      # Suppress the title bar onboarding banner (shown until signed into zed.dev).
-      title_bar = {
-        show_onboarding_banner = false;
-      };
+      show_onboarding_banner = false;
       ui_font_family = "JetBrainsMono Nerd Font";
       ui_font_size = 16;
       buffer_font_family = "JetBrainsMono Nerd Font";
@@ -67,7 +64,6 @@
       scrollbar = {
         show = "never";
       };
-      relative_line_numbers = true;
 
       indent_guides = {
         enabled = true;
