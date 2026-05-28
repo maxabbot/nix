@@ -15,9 +15,11 @@
     inputs.nix-index-database.homeModules.nix-index
   ];
 
-  custom.hm.compositor = compositor;
-  custom.hm.monitors = monitors;
-  custom.hm.nvidia = nvidia;
+  custom.hm = {
+    compositor = compositor;
+    monitors = monitors;
+    nvidia = nvidia;
+  };
 
   home = {
     username = "max";

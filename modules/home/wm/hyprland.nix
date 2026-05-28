@@ -130,10 +130,11 @@ in
       };
     };
 
-    # ── Hyprland WM — HM generates hyprland.lua (default on 26.05) from
-    # extraLuaConfig; the systemd dbus activation block is prepended automatically.
+    # ── Hyprland WM — HM 26.05 generates hyprland.lua from extraLuaConfig;
+    # the systemd dbus activation block is prepended automatically.
     # package is pkgs.hyprland (not the flake's) so the onChange handler can
-    # compute its store path without needing the flake source in the local store.
+    # compute its store path without needing the hyprland flake source in the
+    # local store.
     wayland.windowManager.hyprland = {
       enable = true;
       xwayland.enable = true;

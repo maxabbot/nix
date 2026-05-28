@@ -16,6 +16,9 @@ env:
 jobs:
   nix-flake-check:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -23,7 +26,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Cache Nix store
-        uses: DeterminateSystems/magic-nix-cache-action@v9
+        uses: DeterminateSystems/flakehub-cache-action@v9
 
       - name: Pre-fetch all flake inputs
         run: nix flake archive --json > /dev/null
@@ -33,6 +36,9 @@ jobs:
 
   nixfmt:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -40,11 +46,11 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Cache Nix store
-        uses: DeterminateSystems/magic-nix-cache-action@v9
+        uses: DeterminateSystems/flakehub-cache-action@v9
 
       - name: Check Nix formatting (nixfmt-rfc-style)
         run: |
-          nix fmt
+          nix fmt .
           git diff --exit-code
 
   shellcheck:
@@ -60,6 +66,9 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -67,7 +76,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Cache Nix store
-        uses: DeterminateSystems/magic-nix-cache-action@v9
+        uses: DeterminateSystems/flakehub-cache-action@v9
 
       - name: statix
         run: nix develop --command statix check .
