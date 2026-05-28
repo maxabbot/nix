@@ -1,5 +1,5 @@
 # hosts/vm/default.nix — Home-desktop stack in a QEMU/virtio VM (no NVIDIA, no fancontrol).
-{ ... }:
+{ lib, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -40,7 +40,7 @@
 
   # SilentSDDM sets InputMethod = "qtvirtualkeyboard" which steals pointer events
   # in QEMU VMs. Clearing it restores normal mouse input on the login screen.
-  services.displayManager.sddm.settings.General.InputMethod = "";
+  services.displayManager.sddm.settings.General.InputMethod = lib.mkForce "";
 
   # SilentSDDM sets wayland.enable = !xserver.enable. Enabling xserver switches
   # SDDM to X11 mode, which uses software cursors — required because QEMU's GPU
