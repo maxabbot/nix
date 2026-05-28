@@ -1,9 +1,11 @@
 # modules/home/editor.nix — Zed (primary) and VSCode (backup) configuration.
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
   # ── Zed ────────────────────────────────────────────────────────────────────────
+  # Using zed-editor-flake for pre-built binaries that track upstream more
+  # closely than nixpkgs. Binary name is "zed" (not "zeditor" like nixpkgs).
   home.packages = [
-    pkgs.zed-editor
+    inputs.zed-flake.packages.${pkgs.stdenv.hostPlatform.system}.zed-editor-bin
     pkgs.nano
   ];
 
