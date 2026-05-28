@@ -2,7 +2,6 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }:
 let
@@ -136,15 +135,14 @@ in
     };
 
     # ── Hyprland WM — configType "lua" makes HM write hyprland.lua; extraConfig
-    # is appended to it. package is pkgs.hyprland (not the flake's) so the
-    # onChange handler can compute its store path without needing the hyprland
-    # flake source in the local store.
+    # is appended to it. nixpkgs' hyprland is used (the default), which avoids
+    # the flake source-tarball evaluation-time fetch issue.
     wayland.windowManager.hyprland = {
       enable = true;
       xwayland.enable = true;
-      package = pkgs.hyprland;
       configType = "lua";
       extraConfig = builtins.readFile ../../../config/hypr/hyprland.lua;
+      systemd.enable = false; # UWSM handles session/systemd integration
     };
   };
 }

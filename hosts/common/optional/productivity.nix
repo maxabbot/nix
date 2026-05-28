@@ -1,19 +1,17 @@
 {
   pkgs,
-  inputs,
   zen-browser,
   ...
 }:
 {
-  imports = [ inputs.hyprland.nixosModules.default ];
-
   # ── Hyprland ──────────────────────────────────────────────────────────────────
+  # Using nixpkgs' hyprland module and package avoids referencing the flake's
+  # source tarball at evaluation time (which breaks nix flake check).
   programs.hyprland = {
     enable = true;
+    withUWSM = true;
     xwayland.enable = true;
   };
-
-  home-manager.sharedModules = [ inputs.hyprland.homeManagerModules.default ];
 
   services = {
     # ── Display manager (SDDM) ──────────────────────────────────────────────────

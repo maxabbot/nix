@@ -21,11 +21,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hyprland = {
-      url = "github:hyprwm/Hyprland/v0.55.2";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v0.4.1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +40,7 @@
       url = "github:nil-andreas/apollo-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
   };
 
   outputs =
