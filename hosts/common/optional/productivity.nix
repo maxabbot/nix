@@ -60,20 +60,21 @@
     enable = true;
     theme = "gruvbox";
 
-    # Stylix image deployed into the theme's backgrounds directory
+    # package.nix uses bg.name for derivations, so the filename in settings must
+    # match config.stylix.image.name (i.e. the runCommand name, not the attrset key).
     backgrounds = {
-      "wallpaper.png" = config.stylix.image;
+      wallpaper = config.stylix.image;
     };
 
     settings = {
       # ── Backgrounds ───────────────────────────────────────────────────────
       "LoginScreen" = {
-        background = "wallpaper.png";
+        background = config.stylix.image.name;
         blur = 8;
         brightness = -0.1;
       };
       "LockScreen" = {
-        background = "wallpaper.png";
+        background = config.stylix.image.name;
         blur = 28;
         brightness = -0.15;
       };

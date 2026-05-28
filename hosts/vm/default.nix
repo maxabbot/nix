@@ -47,5 +47,13 @@
   # Hyprland still launches as a Wayland session via UWSM regardless.
   services.displayManager.sddm.wayland.enable = lib.mkForce false;
 
+  virtualisation.vmVariant = {
+    virtualisation = {
+      memorySize = 8192;
+      cores = 8;
+      diskSize = 20480;
+    };
+  };
+
   system.stateVersion = "24.11";
 }
