@@ -57,6 +57,7 @@
         hyprland.enable = false;
         mpv.enable = false;
         vscode.enable = false;
+        zed.enable = false;
       };
     }
   ];

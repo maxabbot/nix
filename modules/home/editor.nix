@@ -4,16 +4,18 @@
   # ── Zed ────────────────────────────────────────────────────────────────────────
   # Using zed-editor-flake for pre-built binaries that track upstream more
   # closely than nixpkgs. Binary name is "zed" (not "zeditor" like nixpkgs).
-  home.packages = [
-    inputs.zed-flake.packages.${pkgs.stdenv.hostPlatform.system}.zed-editor-bin
-    pkgs.nano
-  ];
+  # mutableUserSettings = true so Zed can write back state (onboarding completion,
+  # extension install state) — without this the file is a read-only store symlink
+  # and Zed resets to the onboarding screen every launch.
+  home.packages = [ pkgs.nano ];
 
-  xdg.configFile."zed/settings.json" = {
-    force = true;
-    text = builtins.toJSON {
+  programs.zed-editor = {
+    enable = true;
+    package = inputs.zed-flake.packages.${pkgs.stdenv.hostPlatform.system}.zed-editor-bin;
+    mutableUserSettings = true;
 
-      # ── Extensions (auto-installed) ─────────────────────────────────────────────
+    userSettings = {
+      # ── Extensions (auto-installed) ───────────────────────────────────────────
       auto_install_extensions = {
         "gruvbox-material" = true;
         "colored-zed-icons" = true;
@@ -25,21 +27,20 @@
         "nix" = true;
       };
 
-      # ── Appearance ──────────────────────────────────────────────────────────────
+      # ── Appearance ────────────────────────────────────────────────────────────
       theme = {
         mode = "system";
         light = "Gruvbox Material Light";
         dark = "Gruvbox Material Dark";
       };
       # icon_theme only supports a plain string (no mode/light/dark object).
-      # Use your preferred single theme here; Colored Zed Icons has a dark variant.
       icon_theme = "Colored Zed Icons Theme Dark";
       ui_font_family = "JetBrainsMono Nerd Font";
       ui_font_size = 16;
       buffer_font_family = "JetBrainsMono Nerd Font";
       buffer_font_size = 15;
 
-      # ── Editor ──────────────────────────────────────────────────────────────────
+      # ── Editor ────────────────────────────────────────────────────────────────
       base_keymap = "VSCode";
       cli_default_open_behavior = "existing_window";
       soft_wrap = "editor_width";
@@ -67,7 +68,7 @@
         show_other_hints = true;
       };
 
-      # ── Panels ──────────────────────────────────────────────────────────────────
+      # ── Panels ────────────────────────────────────────────────────────────────
       project_panel = {
         entry_spacing = "comfortable";
         dock = "left";
@@ -84,7 +85,7 @@
         button = false;
       };
 
-      # ── MCP context servers ──────────────────────────────────────────────────────
+      # ── MCP context servers ───────────────────────────────────────────────────
       context_servers = {
         "mcp-server-markitdown" = {
           enabled = true;
@@ -105,7 +106,7 @@
         };
       };
 
-      # ── Agent servers ────────────────────────────────────────────────────────────
+      # ── Agent servers ─────────────────────────────────────────────────────────
       agent_servers = {
         "claude-acp" = {
           type = "registry";
@@ -115,7 +116,7 @@
         };
       };
 
-      # ── Agent ───────────────────────────────────────────────────────────────────
+      # ── Agent ─────────────────────────────────────────────────────────────────
       agent = {
         dock = "right";
         sidebar_side = "right";
@@ -138,14 +139,14 @@
         };
       };
 
-      # ── Git ─────────────────────────────────────────────────────────────────────
+      # ── Git ───────────────────────────────────────────────────────────────────
       git = {
         inline_blame = {
           show_commit_summary = true;
         };
       };
 
-      # ── Terminal ────────────────────────────────────────────────────────────────
+      # ── Terminal ──────────────────────────────────────────────────────────────
       terminal = {
         font_family = "JetBrainsMono Nerd Font";
         font_size = 15;
@@ -160,12 +161,12 @@
         };
       };
 
-      # ── File type associations ───────────────────────────────────────────────────
+      # ── File type associations ─────────────────────────────────────────────────
       file_types = {
         "sql" = [ "*.sql" ];
       };
 
-      # ── LSP ─────────────────────────────────────────────────────────────────────
+      # ── LSP ───────────────────────────────────────────────────────────────────
       lsp = {
         "rust-analyzer" = {
           initialization_options = {
@@ -233,7 +234,7 @@
         };
       };
 
-      # ── Per-language settings ────────────────────────────────────────────────────
+      # ── Per-language settings ──────────────────────────────────────────────────
       languages = {
         "Python" = {
           tab_size = 4;
