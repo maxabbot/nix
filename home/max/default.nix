@@ -2,6 +2,7 @@
   compositor,
   monitors,
   inputs,
+  nvidia ? false,
   ...
 }:
 {
@@ -16,6 +17,7 @@
 
   custom.hm.compositor = compositor;
   custom.hm.monitors = monitors;
+  custom.hm.nvidia = nvidia;
 
   home = {
     username = "max";

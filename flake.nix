@@ -139,6 +139,7 @@
           hmArgs = {
             machineType = "desktop";
             compositor = "hyprland";
+            nvidia = true;
             monitors = {
               # DP-2: 4K portrait monitor (left); logical size after 90° rotation = 2160x3840
               secondary = "DP-2,3840x2160@60,0x0,1,transform,1";
