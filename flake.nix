@@ -41,13 +41,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Pre-built Zed binaries updated every few hours — much fresher than nixpkgs.
-    # nixpkgs unstable lags by days/weeks; this flake tracks upstream directly.
-    zed-flake = {
-      url = "github:Rishabh5321/zed-editor-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     silentSDDM = {
       url = "github:uiriansan/SilentSDDM";
       inputs.nixpkgs.follows = "nixpkgs";

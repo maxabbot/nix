@@ -1,9 +1,8 @@
 # modules/home/editor.nix — Zed (primary) and VSCode (backup) configuration.
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
   # ── Zed ────────────────────────────────────────────────────────────────────────
-  # Using zed-editor-flake for pre-built binaries that track upstream more
-  # closely than nixpkgs. Binary name is "zed" (not "zeditor" like nixpkgs).
+  # nixpkgs unstable ships 1.3.5+ — no flake override needed.
   # mutableUserSettings = true so Zed can write back state (onboarding completion,
   # extension install state) — without this the file is a read-only store symlink
   # and Zed resets to the onboarding screen every launch.
@@ -11,8 +10,19 @@
 
   programs.zed-editor = {
     enable = true;
-    package = inputs.zed-flake.packages.${pkgs.stdenv.hostPlatform.system}.zed-editor-bin;
     mutableUserSettings = true;
+
+    # HM registers these with Zed's extension manager directly.
+    extensions = [
+      "gruvbox-material"
+      "colored-zed-icons"
+      "dockerfile"
+      "github-actions"
+      "ruff"
+      "toml"
+      "html"
+      "nix"
+    ];
 
     userSettings = {
       # ── Extensions (auto-installed) ───────────────────────────────────────────
@@ -28,13 +38,19 @@
       };
 
       # ── Appearance ────────────────────────────────────────────────────────────
+      # Force dark — "system" reads portal/GTK which may report light on Hyprland.
       theme = {
-        mode = "system";
+        mode = "dark";
         light = "Gruvbox Material Light";
         dark = "Gruvbox Material Dark";
       };
       # icon_theme only supports a plain string (no mode/light/dark object).
       icon_theme = "Colored Zed Icons Theme Dark";
+
+      # Suppress the title bar onboarding banner (shown until signed into zed.dev).
+      title_bar = {
+        show_onboarding_banner = false;
+      };
       ui_font_family = "JetBrainsMono Nerd Font";
       ui_font_size = 16;
       buffer_font_family = "JetBrainsMono Nerd Font";
