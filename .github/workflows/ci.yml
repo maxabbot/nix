@@ -26,7 +26,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Cache Nix store
-        uses: DeterminateSystems/flakehub-cache-action@v9
+        uses: DeterminateSystems/flakehub-cache-action@v3
 
       - name: Pre-fetch all flake inputs
         run: nix flake archive --json > /dev/null
@@ -46,7 +46,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Cache Nix store
-        uses: DeterminateSystems/flakehub-cache-action@v9
+        uses: DeterminateSystems/flakehub-cache-action@v3
 
       - name: Check Nix formatting (nixfmt-rfc-style)
         run: |
@@ -76,7 +76,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Cache Nix store
-        uses: DeterminateSystems/flakehub-cache-action@v9
+        uses: DeterminateSystems/flakehub-cache-action@v3
 
       - name: statix
         run: nix develop --command statix check .
