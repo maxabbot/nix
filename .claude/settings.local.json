@@ -30,7 +30,9 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\modules\\\\nixos\\\\plymouth.nix\")",
       "Bash(mkdir -p \"C:\\\\Users\\\\MaxAbbot\\\\OneDrive - Parallel 42\\\\Desktop\\\\repos\\\\nix\\\\config\\\\stylix\")",
       "PowerShell(ls \"$env:APPDATA\\\\Zed\" -ErrorAction SilentlyContinue; ls \"$env:LOCALAPPDATA\\\\Zed\" -ErrorAction SilentlyContinue; ls \"$env:USERPROFILE\\\\.config\\\\zed\" -ErrorAction SilentlyContinue)",
-      "Bash(nix search *)"
+      "Bash(nix search *)",
+      "mcp__mcp-server-brave-search__brave_web_search",
+      "WebFetch(domain:wiki.hypr.land)"
     ]
   }
 }

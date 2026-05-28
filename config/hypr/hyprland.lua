@@ -160,64 +160,64 @@ hl.window_rule({ match = { class = "discord" }, workspace = "4" })
 local mainMod = "SUPER"
 
 -- Apps
-hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
-hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox"))
-hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("fuzzel"))
-hl.bind(mainMod .. " SHIFT + D",hl.dsp.exec_cmd("fuzzel --terminal=kitty"))
+hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd("kitty"))
+hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("nautilus"))
+hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("firefox"))
+hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"))
+hl.bind(mainMod .. " + SHIFT + D",  hl.dsp.exec_cmd("fuzzel --terminal=kitty"))
 
 -- Window management
-hl.bind(mainMod .. " + Q",       hl.dsp.window.kill())
-hl.bind(mainMod .. " SHIFT + Q", hl.dsp.exit())
-hl.bind(mainMod .. " + F",       hl.dsp.window.fullscreen())
-hl.bind(mainMod .. " SHIFT + F", hl.dsp.window.fullscreen({ client_state = 0, internal_state = 3 }))
-hl.bind(mainMod .. " + Space",   hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + P",       hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J",       hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + Q",         hl.dsp.window.kill())
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exit())
+hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen())
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen_state({ client_state = 0, internal_state = 3 }))
+hl.bind(mainMod .. " + Space",     hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + P",         hl.dsp.window.pseudo())
+hl.bind(mainMod .. " + J",         hl.dsp.layout("togglesplit"))
 
 -- Focus
-hl.bind(mainMod .. " + left",  hl.dsp.window.focus("l"))
-hl.bind(mainMod .. " + right", hl.dsp.window.focus("r"))
-hl.bind(mainMod .. " + up",    hl.dsp.window.focus("u"))
-hl.bind(mainMod .. " + down",  hl.dsp.window.focus("d"))
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 
 -- Move window
-hl.bind(mainMod .. " SHIFT + left",  hl.dsp.window.move("l"))
-hl.bind(mainMod .. " SHIFT + right", hl.dsp.window.move("r"))
-hl.bind(mainMod .. " SHIFT + up",    hl.dsp.window.move("u"))
-hl.bind(mainMod .. " SHIFT + down",  hl.dsp.window.move("d"))
+hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
+hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
 
 -- Resize window
-hl.bind(mainMod .. " CTRL + left",  hl.dsp.window.resize({ x = -50, y = 0 }))
-hl.bind(mainMod .. " CTRL + right", hl.dsp.window.resize({ x = 50,  y = 0 }))
-hl.bind(mainMod .. " CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -50 }))
-hl.bind(mainMod .. " CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 50 }))
+hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -50, y = 0 }))
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = 50,  y = 0 }))
+hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -50 }))
+hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 50 }))
 
 -- Workspaces 1–10
 for i = 1, 10 do
     local key = tostring(i % 10)  -- 10 maps to "0"
-    hl.bind(mainMod .. " + " .. key,         hl.dsp.workspace.switch(i))
-    hl.bind(mainMod .. " SHIFT + " .. key,   hl.dsp.window.move_to_workspace(i))
+    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i }))
+    hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
 -- Scroll through workspaces
-hl.bind(mainMod .. " + mouse_down", hl.dsp.workspace.switch("e+1"))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.workspace.switch("e-1"))
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 
 -- Scratchpad
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.special("magic"))
-hl.bind(mainMod .. " SHIFT + S",   hl.dsp.window.move_to_workspace("special:magic"))
+hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- System
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))
-hl.bind(mainMod .. " SHIFT + L",   hl.dsp.exec_cmd("systemctl suspend"))
-hl.bind(mainMod .. " SHIFT + E",   hl.dsp.exec_cmd("wlogout -p layer-shell"))
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"))
+hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("wlogout -p layer-shell"))
 hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("swaync-client -t -sw"))
-hl.bind(mainMod .. " SHIFT + V",   hl.dsp.exec_cmd("cliphist list | fuzzel -d | cliphist decode | wl-copy"))
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel -d | cliphist decode | wl-copy"))
 
 -- Screenshots
-hl.bind("Print",             hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
-hl.bind("SHIFT + Print",     hl.dsp.exec_cmd("grim - | wl-copy"))
+hl.bind("Print",               hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
+hl.bind("SHIFT + Print",       hl.dsp.exec_cmd("grim - | wl-copy"))
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png'))
 
 -- Volume
@@ -235,7 +235,7 @@ hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),        { locked = tr
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),    { locked = true })
 
 -- Gaming toggle
-hl.bind(mainMod .. " SHIFT + G", hl.dsp.exec_cmd("~/.config/hypr/scripts/gaming-toggle.sh"))
+hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("~/.config/hypr/scripts/gaming-toggle.sh"))
 
 -- Mouse binds
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
