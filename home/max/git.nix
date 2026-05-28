@@ -2,10 +2,19 @@
 {
   programs.git = {
     enable = true;
-    userName = git.name;
-    userEmail = git.email;
-
-    extraConfig = {
+    settings = {
+      user.name = git.name;
+      user.email = git.email;
+      alias = {
+        st = "status -sb";
+        co = "checkout";
+        br = "branch -vv";
+        lg = "log --oneline --graph --decorate --all";
+        last = "log -1 HEAD --stat";
+        undo = "reset HEAD~1 --mixed";
+        unstage = "reset HEAD --";
+        wip = "!git add -A && git commit -m 'wip'";
+      };
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
@@ -22,17 +31,6 @@
         editor = "zed --wait";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       };
-    };
-
-    aliases = {
-      st = "status -sb";
-      co = "checkout";
-      br = "branch -vv";
-      lg = "log --oneline --graph --decorate --all";
-      last = "log -1 HEAD --stat";
-      undo = "reset HEAD~1 --mixed";
-      unstage = "reset HEAD --";
-      wip = "!git add -A && git commit -m 'wip'";
     };
   };
 

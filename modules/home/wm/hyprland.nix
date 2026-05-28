@@ -1,5 +1,5 @@
 # modules/home/wm/hyprland.nix — Hyprland window manager configuration.
-{ lib, config, ... }:
+{ lib, config, pkgs, ... }:
 let
   cfg = config.custom.hm;
 
@@ -114,11 +114,14 @@ in
     };
 
     # ── Hyprland WM — hyprlang mode writes an empty hyprland.conf;
-    # Hyprland 0.55+ sees hyprland.lua and uses it instead. ───────────────────
+    # Hyprland 0.55+ sees hyprland.lua and uses it instead.
+    # package is pinned to pkgs.hyprland so the HM onChange handler can compute
+    # its store path without needing the hyprland flake source in the local store.
     wayland.windowManager.hyprland = {
       enable = true;
       xwayland.enable = true;
       configType = "hyprlang";
+      package = pkgs.hyprland;
     };
   };
 }
