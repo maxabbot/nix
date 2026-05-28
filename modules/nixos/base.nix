@@ -97,7 +97,7 @@ in
     services = {
       blueman.enable = true;
       printing.enable = true;
-      timesyncd.enable = true;
+      timesyncd.enable = lib.mkDefault true;
       power-profiles-daemon.enable = cfg.powerManagement == "power-profiles-daemon";
       tlp = lib.mkIf (cfg.powerManagement == "tlp") {
         enable = true;
