@@ -39,10 +39,7 @@
 
       # ── Appearance ────────────────────────────────────────────────────────────
       # Force dark — "system" reads portal/GTK which may report light on Hyprland.
-      theme = {
-        mode = "dark";
-        dark = "Gruvbox Material";
-      };
+      theme = "Gruvbox Material";
       # icon_theme only supports a plain string (no mode/light/dark object).
       icon_theme = "Colored Zed Icons Theme Dark";
 
