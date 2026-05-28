@@ -21,7 +21,8 @@
     # silentSDDM module handles enable/theme/extraPackages/QML2_IMPORT_PATH.
     # Do NOT use sugar-dark — it depends on Qt5 QtGraphicalEffects which
     # doesn't exist in Qt6 (SDDM 0.21+). Stylix has no SDDM target.
-    displayManager.sddm.wayland.compositor = "kwin";
+    # Do NOT set wayland.compositor — the nixpkgs default ("weston") handles
+    # mouse/keyboard correctly in VMs; kwin is GPU-heavy and breaks input.
     displayManager.sddm.settings.Theme = {
       CursorTheme = "breeze_cursors";
       CursorSize = "24";
