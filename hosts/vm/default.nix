@@ -19,6 +19,7 @@
     ../common/optional/stylix.nix
     ../common/optional/gaming.nix
     ../common/optional/wine.nix
+    ../common/optional/plymouth.nix
   ];
 
   home-manager.backupFileExtension = "backup";

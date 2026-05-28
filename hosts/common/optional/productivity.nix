@@ -59,16 +59,19 @@
     enable = true;
     theme = "gruvbox";
 
+    backgrounds = {
+      wallpaper = ../../../config/sddm/leaves-wall.png;
+    };
+
     settings = {
-      # ── Background — gruvbox theme defaults to #282828 solid, which already
-      # matches Stylix. No image needed; use-background-color handles it.
+      # ── Background ────────────────────────────────────────────────────────
       "LoginScreen" = {
-        use-background-color = true;
-        background-color = "#282828";
+        background = "leaves-wall.png";
+        blur = 8;
       };
       "LockScreen" = {
-        use-background-color = true;
-        background-color = "#282828";
+        background = "leaves-wall.png";
+        blur = 28;
       };
 
       # ── Login panel — right side so wallpaper is visible ──────────────────

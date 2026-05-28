@@ -3,18 +3,10 @@
   boot = {
     plymouth = {
       enable = true;
-      theme = "simple";
+      theme = "spin";
       themePackages = [
-        (pkgs.stdenv.mkDerivation {
-          pname = "plymouth-theme-simple";
-          version = "1.0";
-          src = ../../../config/plymouth/simple;
-          installPhase = ''
-            mkdir -p $out/share/plymouth/themes/simple
-            cp -r * $out/share/plymouth/themes/simple/
-            substituteInPlace $out/share/plymouth/themes/simple/simple.plymouth \
-              --replace "@out@" "$out"
-          '';
+        (pkgs.adi1090x-plymouth-themes.override {
+          selected_themes = [ "spin" ];
         })
       ];
     };
