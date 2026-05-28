@@ -1,10 +1,10 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   boot = {
     plymouth = {
       enable = true;
-      theme = "spin";
-      themePackages = [
+      theme = lib.mkForce "spin";
+      themePackages = lib.mkForce [
         (pkgs.adi1090x-plymouth-themes.override {
           selected_themes = [ "spin" ];
         })
