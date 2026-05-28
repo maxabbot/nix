@@ -38,5 +38,9 @@
 
   networking.hostName = "vm";
 
+  # SilentSDDM sets InputMethod = "qtvirtualkeyboard" which steals pointer events
+  # in QEMU VMs. Clearing it restores normal mouse input on the login screen.
+  services.displayManager.sddm.settings.General.InputMethod = "";
+
   system.stateVersion = "24.11";
 }
