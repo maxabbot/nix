@@ -1,5 +1,5 @@
 # hosts/vm/default.nix — Home-desktop stack in a QEMU/virtio VM (no NVIDIA, no fancontrol).
-{ lib, ... }:
+{ ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -42,10 +42,11 @@
   # in QEMU VMs. Clearing it restores normal mouse input on the login screen.
   services.displayManager.sddm.settings.General.InputMethod = "";
 
-  # SDDM Wayland mode (weston) uses hardware cursor planes that QEMU's GPU doesn't
-  # support — cursor is functional but invisible. X11 mode uses software cursors.
+  # SilentSDDM sets wayland.enable = !xserver.enable. Enabling xserver switches
+  # SDDM to X11 mode, which uses software cursors — required because QEMU's GPU
+  # doesn't support hardware cursor planes (cursor renders invisible in Wayland).
   # Hyprland still launches as a Wayland session via UWSM regardless.
-  services.displayManager.sddm.wayland.enable = lib.mkForce false;
+  services.xserver.enable = true;
 
   virtualisation.vmVariant = {
     virtualisation = {
