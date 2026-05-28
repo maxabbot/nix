@@ -41,8 +41,7 @@
       # Force dark — "system" reads portal/GTK which may report light on Hyprland.
       theme = {
         mode = "dark";
-        light = "Gruvbox Material Light";
-        dark = "Gruvbox Material Dark";
+        dark = "Gruvbox Material";
       };
       # icon_theme only supports a plain string (no mode/light/dark object).
       icon_theme = "Colored Zed Icons Theme Dark";
@@ -328,7 +327,6 @@
       userSettings = {
         "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'Droid Sans Mono', monospace";
         "editor.fontSize" = 14;
-        "editor.lineNumbers" = "relative";
         "editor.formatOnSave" = true;
         "editor.rulers" = [ 100 ];
         "editor.minimap.enabled" = false;
