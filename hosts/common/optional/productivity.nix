@@ -90,20 +90,6 @@
         locale = "en_NZ";
       };
 
-      # ── Accent color — Gruvbox Material teal instead of standard green ────
-      "LoginScreen.LoginArea.Avatar" = {
-        active-border-color = "#7daea3";
-        inactive-border-color = "#504945";
-      };
-      "LoginScreen.LoginArea.PasswordInput" = {
-        border-color = "#7daea3";
-        content-color = "#d4be98";
-        background-color = "#3c3836";
-      };
-      "LoginScreen.LoginArea.LoginButton" = {
-        border-color = "#7daea3";
-        content-color = "#d4be98";
-      };
     };
   };
 
