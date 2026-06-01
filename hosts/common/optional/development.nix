@@ -34,7 +34,11 @@
   services.openssh = {
     enable = true;
     settings = {
-      PasswordAuthentication = true;
+      # Key-only auth. Populate custom.base.sshKeys with your public key BEFORE
+      # deploying/rebuilding a remote host, or you will be locked out of SSH
+      # (local console login via the account password still works).
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
     };
   };

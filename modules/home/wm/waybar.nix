@@ -3,6 +3,7 @@
   lib,
   config,
   pkgs,
+  osConfig,
   machineType,
   ...
 }:
@@ -79,7 +80,7 @@ in
           };
 
           clock = {
-            timezone = "Pacific/Auckland";
+            timezone = osConfig.time.timeZone;
             format = "{:%H:%M  %b %d}";
             tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
             format-alt = "{:%Y-%m-%d}";

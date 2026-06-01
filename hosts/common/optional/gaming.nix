@@ -27,6 +27,7 @@
     protonup-qt
     protontricks
     heroic
+    lutris
     itch
     goverlay
     vkbasalt
