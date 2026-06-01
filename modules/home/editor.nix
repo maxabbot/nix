@@ -131,7 +131,7 @@
         play_sound_when_agent_done = "when_hidden";
         commit_message_model = {
           provider = "zed.dev";
-          model = "gemini-3.5-flash";
+          model = "claude-haiku-4-5";
         };
         default_model = {
           provider = "zed.dev";
