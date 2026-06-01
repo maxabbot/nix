@@ -11,6 +11,7 @@
     gh
     mkcert
     httpie
+    pandoc # renders SHORTCUTS.md → HTML for the cheat-sheet wallpaper
     ffmpeg-full
     imagemagick
     nix-tree

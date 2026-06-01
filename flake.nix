@@ -162,10 +162,10 @@
             compositor = "hyprland";
             nvidia = true;
             monitors = {
-              # DP-2: 4K portrait monitor (left); logical size after 90° rotation = 2160x3840
-              secondary = "DP-2,3840x2160@60,0x0,1,transform,1";
-              # DP-3: primary 1440p gaming monitor (right)
-              primary = "DP-3,2560x1440@165,2160x0,1";
+              # DP-2: 4K portrait monitor (left); 90° rotation + 1.5x scale → logical 1440x2560
+              secondary = "DP-2,3840x2160@60,0x0,1.5,transform,1";
+              # DP-3: primary 1440p gaming monitor (right), placed just past DP-2's 1440 logical width
+              primary = "DP-3,2560x1440@165,1440x0,1";
               primaryName = "DP-3";
             };
             location = {

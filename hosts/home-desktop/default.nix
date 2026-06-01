@@ -51,6 +51,12 @@
     };
   };
 
+  # SDDM greeter compositor — KWin, overriding productivity.nix's weston default
+  # (that default is for the QEMU VM, which has no hardware cursor). KWin is
+  # required for the kwinoutputconfig.json below to be honoured; weston ignores
+  # it, which leaves the greeter on the rotated 4K monitor.
+  services.displayManager.sddm.wayland.compositor = "kwin";
+
   # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────
   # Activation runs on every boot before SDDM starts. chmod 444 prevents KWin
   # (running as sddm) from overwriting the config during the greeter session.
