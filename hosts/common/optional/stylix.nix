@@ -50,6 +50,10 @@
 
   home-manager.sharedModules = [
     {
+      # HM-level stylix module has its own release check (the "max profile"
+      # warning) — silence it too, same reason as the NixOS-level one above.
+      stylix.enableReleaseChecks = false;
+
       # Keep manual themes for apps with complex non-colour config.
       stylix.targets = {
         bat.enable = false;
