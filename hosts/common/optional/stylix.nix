@@ -7,7 +7,7 @@
     base16Scheme = ../../../config/stylix/gruvbox-material-dark.yaml;
     polarity = "dark";
 
-    # Solid dark background — desktop wallpaper is managed separately by swww.
+    # Solid dark background — desktop wallpaper is managed separately by awww.
     image = pkgs.runCommand "gruvbox-wallpaper" {
       nativeBuildInputs = [ pkgs.imagemagick ];
     } "magick -size 3840x2160 xc:'#282828' PNG:$out";

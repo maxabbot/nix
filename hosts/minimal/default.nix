@@ -6,6 +6,8 @@
     ../../modules/nixos/base.nix
   ];
 
+  home-manager.backupFileExtension = "backup";
+
   custom.base = {
     enable = true;
     username = "max";

@@ -21,7 +21,7 @@
         "usb_storage"
         "sd_mod"
       ];
-      kernelModules = [ ]; # NVIDIA modules added by modules/nixos/nvidia.nix
+      kernelModules = [ ]; # NVIDIA modules added by hosts/common/optional/nvidia.nix
     };
     # Intel i7-13700K
     kernelModules = [
@@ -31,7 +31,7 @@
     extraModprobeConfig = ''
       options it87 ignore_resource_conflict=1 force_id=0x8628
     '';
-    extraModulePackages = [ ]; # nvidia_x11 added by modules/nixos/nvidia.nix
+    extraModulePackages = [ ]; # nvidia_x11 added by hosts/common/optional/nvidia.nix
   };
 
   swapDevices = [ ];

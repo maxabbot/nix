@@ -48,7 +48,7 @@ jobs:
       - name: Cache Nix store
         uses: DeterminateSystems/flakehub-cache-action@v3
 
-      - name: Check Nix formatting (nixfmt-rfc-style)
+      - name: Check Nix formatting (nixfmt-tree)
         run: |
           nix fmt
           git diff --exit-code

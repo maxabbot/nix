@@ -7,12 +7,10 @@
   programs.nix-index-database.comma.enable = true;
 
   home.packages = with pkgs; [
-    jq
     yq-go
     gh
     mkcert
     httpie
-    rsync
     ffmpeg-full
     imagemagick
     nix-tree

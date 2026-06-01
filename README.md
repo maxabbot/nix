@@ -8,6 +8,7 @@ Declarative, reproducible NixOS workstations using **Nix Flakes** and **Home Man
 |------|---------|------------|----------|
 | `home-desktop` | Gaming workstation (i7-13700K, RTX 40-series) | Hyprland | full stack |
 | `work-laptop`  | Dev laptop | Hyprland | dev + productivity + TLP |
+| `vm`           | home-desktop stack in a QEMU/virtio VM | Hyprland | no NVIDIA/CUDA/fancontrol |
 | `minimal`      | Headless / server | — | base only |
 
 ## Structure
@@ -17,6 +18,7 @@ flake.nix                        # inputs, mkHost helper, devShells
 hosts/
   home-desktop/                  # RTX 40-series gaming workstation
   work-laptop/                   # Dev laptop (TLP, powersave specialisation)
+  vm/                            # home-desktop stack in a QEMU/virtio VM
   minimal/                       # Headless base
   common/optional/               # Import-composition feature files
     productivity.nix             #   Hyprland, SDDM, PipeWire, Syncthing
@@ -32,7 +34,8 @@ modules/
     editor.nix                   #   Zed, nil LSP
     apps.nix                     #   Kitty, btop, mpv, Zathura, Yazi, fuzzel
     theme.nix                    #   Gruvbox Material — GTK, Qt, cursors
-    wm/hyprland.nix              #   Hyprland + Waybar (compositor-gated)
+    wm/hyprland.nix              #   Hyprland (compositor-gated)
+    wm/waybar.nix                #   Waybar status bar (compositor-gated)
 home/max/                        # User config entry point + feature files
 overlays/                        # Custom package overrides
 pkgs/                            # Local derivations

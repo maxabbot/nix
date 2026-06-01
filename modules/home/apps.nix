@@ -75,15 +75,7 @@
       };
     };
 
-    # ── bat ────────────────────────────────────────────────────────────────────────
-    # Theme is set by Stylix; only pager behaviour here.
-    bat = {
-      enable = true;
-      config = {
-        pager = "less -RF";
-        italic-text = "always";
-      };
-    };
+    # ── bat ── configured in home/max/cli.nix (theme + pager) ──────────────────────
 
     # ── mpv ────────────────────────────────────────────────────────────────────────
     mpv = {
