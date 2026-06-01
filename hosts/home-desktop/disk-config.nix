@@ -9,7 +9,7 @@ _: {
   disko.devices = {
     disk.main = {
       type = "disk";
-      device = "/dev/sda";
+      device = "/dev/nvme1n1";
       content = {
         type = "gpt";
         partitions = {
