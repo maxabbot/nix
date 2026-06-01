@@ -4,9 +4,8 @@
 
   stylix = {
     enable = true;
-    # Tracking nixpkgs-unstable + home-manager master: HM's version label (26.11)
-    # leads nixpkgs-unstable's (26.05) until it bumps, which trips Stylix's release
-    # heuristic. The inputs are date-aligned and compatible, so silence the check.
+    # Stylix tracks master (no release-26.05 branch yet) while the system is on
+    # stable nixpkgs/HM 26.05 — silence the resulting version-mismatch check.
     enableReleaseChecks = false;
     base16Scheme = ../../../config/stylix/gruvbox-material-dark.yaml;
     polarity = "dark";
@@ -50,8 +49,8 @@
 
   home-manager.sharedModules = [
     {
-      # HM-level stylix module has its own release check (the "max profile"
-      # warning) — silence it too, same reason as the NixOS-level one above.
+      # HM-level stylix module has its own release check — silence it too
+      # (Stylix master on stable HM 26.05; see the NixOS-level note above).
       stylix.enableReleaseChecks = false;
 
       # Keep manual themes for apps with complex non-colour config.

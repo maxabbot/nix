@@ -2,7 +2,8 @@
 { pkgs, ... }:
 {
   # ── Zed ────────────────────────────────────────────────────────────────────────
-  # nixpkgs unstable ships 1.3.5+ — no flake override needed.
+  # System tracks stable nixpkgs; Zed moves fast, so pull it from the unstable
+  # overlay (pkgs.unstable, defined in flake.nix) to stay current.
   # mutableUserSettings = true so Zed can write back state (onboarding completion,
   # extension install state) — without this the file is a read-only store symlink
   # and Zed resets to the onboarding screen every launch.
@@ -10,6 +11,7 @@
 
   programs.zed-editor = {
     enable = true;
+    package = pkgs.unstable.zed-editor;
     mutableUserSettings = true;
 
     # HM registers these with Zed's extension manager directly.

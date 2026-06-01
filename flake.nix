@@ -2,10 +2,11 @@
   description = "NixOS system configuration — home-desktop / work-laptop / minimal";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -26,8 +27,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Stylix has no release-26.05 branch yet (lags the nixpkgs release), so track
+    # master and suppress its version check in stylix.nix. Switch to
+    # github:nix-community/stylix/release-26.05 once that branch exists.
     stylix = {
-      url = "github:danth/stylix";
+      url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -64,7 +68,17 @@
       mkPkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
-        overlays = [ (import ./overlays) ];
+        overlays = [
+          (import ./overlays)
+          # Expose the unstable package set as pkgs.unstable.* — used to pull
+          # individual fast-moving packages (e.g. Zed) onto an otherwise stable system.
+          (_final: _prev: {
+            unstable = import inputs.nixpkgs-unstable {
+              inherit system;
+              config.allowUnfree = true;
+            };
+          })
+        ];
       };
 
       # Shared hmArgs applied to every host — override per-host as needed.
