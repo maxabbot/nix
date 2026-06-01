@@ -34,7 +34,9 @@ in
   config = lib.mkIf (cfg.compositor == "hyprland") {
     programs.waybar = {
       enable = true;
-      package = pkgs.waybar;
+      # From the unstable overlay — the stable 26.05 waybar duplicates a bar on
+      # one output during Hyprland startup; the newer build doesn't.
+      package = pkgs.unstable.waybar;
       systemd.enable = true;
       systemd.targets = [ "graphical-session.target" ];
 
