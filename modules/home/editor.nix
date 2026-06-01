@@ -45,7 +45,10 @@
       # icon_theme only supports a plain string (no mode/light/dark object).
       icon_theme = "Colored Zed Icons Theme";
 
-      show_onboarding_banner = false;
+      # show_onboarding_banner nests under title_bar (top-level is ignored).
+      title_bar = {
+        show_onboarding_banner = false;
+      };
       ui_font_family = "JetBrainsMono Nerd Font";
       ui_font_size = 16;
       buffer_font_family = "JetBrainsMono Nerd Font";
@@ -333,6 +336,11 @@
         "files.autoSave" = "onFocusChange";
         "window.titleBarStyle" = "custom";
         "telemetry.telemetryLevel" = "off";
+        # ── Onboarding / welcome screens ──────────────────────────────────────────
+        "workbench.startupEditor" = "none";
+        "workbench.welcomePage.walkthroughs.openOnInstall" = false;
+        "workbench.tips.enabled" = false;
+        "update.showReleaseNotes" = false;
       };
 
       extensions = with pkgs.vscode-extensions; [
