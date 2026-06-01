@@ -31,7 +31,7 @@
     enable = true;
     username = "max";
     timezone = "Pacific/Auckland";
-    initialPassword = "123"; # change after first login
+    hashedPassword = "$y$j9T$2U13TXbQqrmp.PD068E0E.$1uJPVe1dF1C0KhlXbn.iMg2qthRxOdp.9s/h6GG6YC6";
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "power-profiles-daemon";
     firewall = true;

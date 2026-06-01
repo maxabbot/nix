@@ -31,12 +31,13 @@
 
   programs.direnv.enable = true;
 
+  # SSH server disabled — no incoming SSH on these hosts. Outbound git/ssh is
+  # unaffected, as is deploy.sh (which talks to the live-ISO sshd at install time).
+  # To allow remote login later: set enable = true and populate custom.base.sshKeys
+  # (the settings below keep it key-only so re-enabling is safe by default).
   services.openssh = {
-    enable = true;
+    enable = false;
     settings = {
-      # Key-only auth. Populate custom.base.sshKeys with your public key BEFORE
-      # deploying/rebuilding a remote host, or you will be locked out of SSH
-      # (local console login via the account password still works).
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
