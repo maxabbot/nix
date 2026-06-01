@@ -67,7 +67,12 @@
 
       mkPkgs = import nixpkgs {
         inherit system;
-        config.allowUnfree = true;
+        config = {
+          allowUnfree = true;
+          # Several Electron desktop apps in 26.05 (Slack/Discord/Obsidian/Element/…)
+          # still bundle Electron 39, which is EOL and flagged insecure. Allow it.
+          permittedInsecurePackages = [ "electron-39.8.10" ];
+        };
         overlays = [
           (import ./overlays)
           # Expose the unstable package set as pkgs.unstable.* — used to pull
