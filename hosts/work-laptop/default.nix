@@ -1,5 +1,5 @@
 # hosts/work-laptop/default.nix — Work laptop (Hyprland, TLP, no gaming/nvidia).
-{ ... }:
+{ lib, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -34,7 +34,7 @@
     settings = {
       CPU_SCALING_GOVERNOR_ON_AC = "performance";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+      CPU_ENERGY_PERF_POLICY_ON_AC = lib.mkForce "performance";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
       WIFI_PWR_ON_BAT = 5;
       NMI_WATCHDOG = 0;
