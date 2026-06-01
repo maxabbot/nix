@@ -5,11 +5,11 @@
 #
 # Verify your disk name with `lsblk` on the live ISO before running.
 # Default assumes a single NVMe drive — change `device` if different (e.g. /dev/sda).
-{ disk ? "/dev/nvme0n1", ... }: {
+_: {
   disko.devices = {
     disk.main = {
       type = "disk";
-      device = disk;
+      device = "/dev/nvme1n1";
       content = {
         type = "gpt";
         partitions = {
