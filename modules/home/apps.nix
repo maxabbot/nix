@@ -172,10 +172,9 @@
     # ── Wlogout logout screen ───────────────────────────────────────────────────
     "wlogout/layout".source = ../../config/wlogout/layout;
     # Icons live in the Nix store, not /usr/share — generate CSS with correct path.
-    "wlogout/style.css".text = builtins.replaceStrings
-      [ "/usr/share/wlogout/icons" ]
-      [ "${pkgs.wlogout}/share/wlogout/icons" ]
-      (builtins.readFile ../../config/wlogout/style.css);
+    "wlogout/style.css".text =
+      builtins.replaceStrings [ "/usr/share/wlogout/icons" ] [ "${pkgs.wlogout}/share/wlogout/icons" ]
+        (builtins.readFile ../../config/wlogout/style.css);
     # ── Fastfetch system info ───────────────────────────────────────────────────
     "fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
     # ── Hyprlock lockscreen config ──────────────────────────────────────────────

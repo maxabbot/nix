@@ -4,6 +4,10 @@
 
   stylix = {
     enable = true;
+    # Tracking nixpkgs-unstable + home-manager master: HM's version label (26.11)
+    # leads nixpkgs-unstable's (26.05) until it bumps, which trips Stylix's release
+    # heuristic. The inputs are date-aligned and compatible, so silence the check.
+    enableReleaseChecks = false;
     base16Scheme = ../../../config/stylix/gruvbox-material-dark.yaml;
     polarity = "dark";
 
