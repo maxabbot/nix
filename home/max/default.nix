@@ -3,6 +3,7 @@
   monitors,
   inputs,
   nvidia ? false,
+  kanshi ? { enable = false; },
   ...
 }:
 {
@@ -16,7 +17,7 @@
   ];
 
   custom.hm = {
-    inherit compositor monitors nvidia;
+    inherit compositor monitors nvidia kanshi;
   };
 
   home = {

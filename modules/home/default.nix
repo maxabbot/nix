@@ -8,5 +8,6 @@
     ./theme.nix
     ./wm/hyprland.nix
     ./wm/waybar.nix
+    ./wm/kanshi.nix
   ];
 }
