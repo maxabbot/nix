@@ -94,7 +94,9 @@
           signingkey = "";
         };
         nvidia = false;
-        kanshi = { enable = false; };
+        kanshi = {
+          enable = false;
+        };
       };
 
       # Builds a NixosSystem with Home Manager wired in.
@@ -199,12 +201,12 @@
             kanshi = {
               enable = true;
               internal = {
-                output = "eDP-1";          # Lenovo internal panel — almost universal
+                output = "eDP-1"; # Lenovo internal panel — almost universal
                 mode = "1920x1200@60";
               };
               docked = {
-                left  = null;              # TODO: replace with connector name from wlr-randr
-                right = null;              # TODO: replace with connector name from wlr-randr
+                left = null; # TODO: replace with connector name from wlr-randr
+                right = null; # TODO: replace with connector name from wlr-randr
                 # leftMode / rightMode default to 2560x1440@60 — override if refresh differs
                 # rightPosition defaults to "2560,0" (left monitor width)
                 # laptopPosition defaults to "1600,1440" (centred below 2×2560 externals)
