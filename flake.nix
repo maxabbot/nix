@@ -94,6 +94,7 @@
           signingkey = "";
         };
         nvidia = false;
+        kanshi = { enable = false; };
       };
 
       # Builds a NixosSystem with Home Manager wired in.
