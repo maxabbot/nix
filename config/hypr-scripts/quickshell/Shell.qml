@@ -1,30 +1,108 @@
 // Shell.qml — Quickshell entry point.
 // Launch: quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 //
-// Spawns one bottom bar per connected screen.
-// Receives IPC from qs_manager.sh via: quickshell ipc call main handleCommand ...
+// Manages:
+//   • Bottom bar (one per screen via Variants)
+//   • All pop-up panels (visibility gated by activePanel)
+//   • Notification server (replaces swaync — D-Bus org.freedesktop.Notifications)
+//   • IPC from qs_manager.sh: quickshell ipc call main handleCommand <action> <target> <subtarget>
 
 import Quickshell
+import Quickshell.Services.Notifications
 import QtQuick
 
 ShellRoot {
     id: root
 
-    // ── IPC handler ───────────────────────────────────────────────────────────
-    // qs_manager.sh routes: quickshell -p Shell.qml ipc call main handleCommand <action> <target> <subtarget>
+    // ── Global state ───────────────────────────────────────────────────────────
+    property string activePanel: ""
+    property bool   dndEnabled:  false
+
+    function togglePanel(name) {
+        activePanel = (activePanel === name) ? "" : name
+    }
+
+    // ── IPC handler (qs_manager.sh routes here) ────────────────────────────────
     IpcHandler {
         target: "main"
+        function handleCommand(action, target, subtarget) {
+            if (action === "close")        root.activePanel = ""
+            else if (action === "toggle")  root.togglePanel(target)
+            else if (action === "open")    root.activePanel = target
+        }
+    }
 
-        function handleCommand(action: string, target: string, subtarget: string): void {
-            if (action === "close") {
-                // TODO: close named panels as they are added
-            } else if (action === "open" || action === "toggle") {
-                // TODO: dispatch to network / wallpaper / guide panels
+    // ── Notification server ────────────────────────────────────────────────────
+    // Registers as org.freedesktop.Notifications on the session D-Bus.
+    // Remove swaync from autostart — only one daemon may run at a time.
+    NotificationServer {
+        id: notifServer
+        keepOnReload: true
+        actionsSupported: true
+        bodySupported: true
+        imageSupported: true
+        persistenceSupported: true
+    }
+
+    // ── Notification popup (top-right, transient) ──────────────────────────────
+    PanelWindow {
+        anchors { top: true; right: true }
+        margins { top: 8; right: 8 }
+        width: 390
+        height: toastCol.implicitHeight + 16
+        exclusiveZone: 0  // don't push tiled windows
+        color: "transparent"
+        visible: notifServer.notifications.count > 0 && !root.dndEnabled
+
+        Column {
+            id: toastCol
+            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 8 }
+            spacing: 6
+
+            Repeater {
+                model: notifServer.notifications
+                delegate: NotificationToast {
+                    required property var modelData
+                    notification: modelData
+                    width: 374
+                }
             }
         }
     }
 
-    // ── One bottom bar per screen ─────────────────────────────────────────────
+    // ── Panels ─────────────────────────────────────────────────────────────────
+    NotificationCenter {
+        visible: root.activePanel === "notifications"
+        model: notifServer.notifications
+    }
+
+    AppLauncher {
+        visible: root.activePanel === "launcher"
+    }
+
+    PowerMenu {
+        visible: root.activePanel === "power"
+    }
+
+    ControlCenter {
+        visible: root.activePanel === "control"
+        dndEnabled: root.dndEnabled
+        onDndToggled: root.dndEnabled = !root.dndEnabled
+    }
+
+    AudioMixer {
+        visible: root.activePanel === "audio"
+    }
+
+    MonitorManager {
+        visible: root.activePanel === "monitors"
+    }
+
+    WallpaperPicker {
+        visible: root.activePanel === "wallpaper"
+    }
+
+    // ── Bottom bar (one per screen) ─────────────────────────────────────────────
     Variants {
         model: Quickshell.screens
 
@@ -32,19 +110,16 @@ ShellRoot {
             required property var modelData
             screen: modelData
 
-            anchors {
-                left: true
-                right: true
-                bottom: true
-            }
-
+            anchors { left: true; right: true; bottom: true }
             height: 40
-            // Reserve the bar height so windows don't go under it.
             exclusiveZone: height
             color: "transparent"
 
             Bar {
                 anchors.fill: parent
+                activePanel: root.activePanel
+                notifCount:  notifServer.notifications.count
+                onPanelToggled: (name) => root.togglePanel(name)
             }
         }
     }
