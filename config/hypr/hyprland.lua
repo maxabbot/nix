@@ -27,6 +27,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("sleep 1 && nm-applet --indicator")
     hl.exec_cmd("sleep 1.5 && syncthingtray")
     hl.exec_cmd("gammastep")
+    hl.exec_cmd("quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml")
 end)
 
 --------------------
@@ -124,6 +125,7 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6,  bezier = "defaul
 ---------------------
 
 hl.layer_rule({ match = { namespace = "waybar" },                 blur = true,  ignore_alpha = 0.0 })
+hl.layer_rule({ match = { namespace = "quickshell" },             blur = true,  ignore_alpha = 0.0 })
 hl.layer_rule({ match = { namespace = "swaync-control-center" },  blur = true,  ignore_alpha = 0.0 })
 hl.layer_rule({ match = { namespace = "notifications" },          blur = true,  ignore_alpha = 0.0 })
 

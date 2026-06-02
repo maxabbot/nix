@@ -145,6 +145,7 @@
     syncthingtray
     swaynotificationcenter
     yazi
+    quickshell
   ];
 
 }
