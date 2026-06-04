@@ -54,7 +54,7 @@ ShellRoot {
         implicitHeight: toastCol.implicitHeight + 16
         exclusiveZone: 0  // don't push tiled windows
         color: "transparent"
-        visible: notifServer.notifications.count > 0 && !root.dndEnabled
+        visible: (notifServer.notifications?.count ?? 0) > 0 && !root.dndEnabled
 
         Column {
             id: toastCol
@@ -134,7 +134,7 @@ ShellRoot {
             Bar {
                 anchors.fill: parent
                 activePanel:    root.activePanel
-                notifCount:     notifServer.notifications.count
+                notifCount:     notifServer.notifications?.count ?? 0
                 rebuildRunning: root.rebuildRunning
                 onPanelToggled: (name) => root.togglePanel(name)
             }

@@ -183,7 +183,7 @@ PanelWindow {
                     id: streamRepeater
                     // Filter to output audio streams (apps producing sound)
                     model: PwObjectTracker {
-                        objects: Pipewire.nodes.values.filter(n =>
+                        objects: (Pipewire.nodes?.values ?? []).filter(n =>
                             n.mediaClass === "Stream/Output/Audio" && n.isSink
                         )
                     }
