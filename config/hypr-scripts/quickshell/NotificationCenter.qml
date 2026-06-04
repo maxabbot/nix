@@ -2,6 +2,7 @@
 import Quickshell
 import Quickshell.Services.Notifications
 import QtQuick
+import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
 PanelWindow {
