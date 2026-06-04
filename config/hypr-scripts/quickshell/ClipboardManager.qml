@@ -12,8 +12,8 @@ PanelWindow {
 
     anchors { bottom: true; right: true }
     margins { bottom: 44; right: 4 }
-    width: 420
-    height: 560
+    implicitWidth: 420
+    implicitHeight: 560
     color: "transparent"
 
     property string clipScript: Qt.resolvedUrl("qs_clipboard.sh").toString().replace(/^file:\/\//, "")

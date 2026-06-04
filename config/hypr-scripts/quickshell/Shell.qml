@@ -27,7 +27,7 @@ ShellRoot {
     // ── IPC handler (qs_manager.sh routes here) ────────────────────────────────
     IpcHandler {
         target: "main"
-        function handleCommand(action, target, subtarget) {
+        function handleCommand(action: string, target: string, subtarget: string): void {
             if (action === "close")        root.activePanel = ""
             else if (action === "toggle")  root.togglePanel(target)
             else if (action === "open")    root.activePanel = target
@@ -50,8 +50,8 @@ ShellRoot {
     PanelWindow {
         anchors { top: true; right: true }
         margins { top: 8; right: 8 }
-        width: 390
-        height: toastCol.implicitHeight + 16
+        implicitWidth: 390
+        implicitHeight: toastCol.implicitHeight + 16
         exclusiveZone: 0  // don't push tiled windows
         color: "transparent"
         visible: notifServer.notifications.count > 0 && !root.dndEnabled
@@ -127,8 +127,8 @@ ShellRoot {
             screen: modelData
 
             anchors { left: true; right: true; bottom: true }
-            height: 40
-            exclusiveZone: height
+            implicitHeight: 40
+            exclusiveZone: implicitHeight
             color: "transparent"
 
             Bar {

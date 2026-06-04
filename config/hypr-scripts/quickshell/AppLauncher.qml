@@ -12,7 +12,7 @@ PanelWindow {
 
     anchors { bottom: true; left: true; right: true }
     margins.bottom: 44
-    height: 420
+    implicitHeight: 420
     color: "transparent"
 
     // ── App model ──────────────────────────────────────────────────────────────

@@ -20,7 +20,7 @@ if [ -f "$GAMING_STATE_FILE" ]; then
     # Restore bar and notifications
     waybar &
     disown
-    swaync &
+    quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml >/dev/null 2>&1 &
     disown
 else
     # Enter gaming mode
@@ -28,7 +28,7 @@ else
 
     # Kill distractions
     pkill -f waybar 2>/dev/null || true
-    pkill -f swaync 2>/dev/null || true
+    pkill -f "quickshell.*Shell.qml" 2>/dev/null || true
 
     # Disable compositor effects for performance
     hyprctl keyword decoration:blur:enabled 0

@@ -17,7 +17,7 @@ PanelWindow {
 
     anchors { bottom: true; left: true; right: true }
     margins.bottom: 44
-    height: 460
+    implicitHeight: 460
     color: "transparent"
 
     // ── State ──────────────────────────────────────────────────────────────────

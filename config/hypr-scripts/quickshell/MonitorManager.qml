@@ -13,7 +13,7 @@ PanelWindow {
 
     anchors { bottom: true; left: true; right: true }
     margins.bottom: 44
-    height: 360
+    implicitHeight: 360
     color: "transparent"
 
     property var selectedMonitor: null

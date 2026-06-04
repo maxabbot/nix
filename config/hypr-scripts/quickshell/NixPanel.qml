@@ -12,8 +12,8 @@ PanelWindow {
 
     anchors { bottom: true; right: true }
     margins { bottom: 44; right: 4 }
-    width: 480
-    height: 660
+    implicitWidth: 480
+    implicitHeight: 660
     color: "transparent"
 
     signal rebuildStarted()

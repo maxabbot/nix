@@ -143,7 +143,6 @@
     papirus-icon-theme
     foot
     syncthingtray
-    swaynotificationcenter
     yazi
     quickshell
   ];

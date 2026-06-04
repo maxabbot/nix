@@ -12,8 +12,8 @@ PanelWindow {
 
     anchors { bottom: true; right: true }
     margins { bottom: 44; right: 4 }
-    width: 390
-    height: 500
+    implicitWidth: 390
+    implicitHeight: 500
     color: "transparent"
 
     Rectangle {

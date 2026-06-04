@@ -11,8 +11,8 @@ PanelWindow {
 
     anchors { bottom: true; right: true }
     margins { bottom: 44; right: 4 }
-    width: 480
-    height: 560
+    implicitWidth: 480
+    implicitHeight: 560
     color: "transparent"
 
     ListModel { id: allBinds }
