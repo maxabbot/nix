@@ -8,6 +8,7 @@
 //   • IPC from qs_manager.sh: quickshell ipc call main handleCommand <action> <target> <subtarget>
 
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
 import QtQuick
 
