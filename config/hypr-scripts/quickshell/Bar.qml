@@ -1,5 +1,5 @@
 // Bar.qml — Bottom bar content.
-// Parent (Shell.qml) sets activePanel and notifCount; bar emits panelToggled(name).
+// Parent (Shell.qml) sets activePanel, notifCount, rebuildRunning; bar emits panelToggled(name).
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Services.Mpris
@@ -9,8 +9,9 @@ import QtQuick.Layouts
 Rectangle {
     id: root
 
-    property string activePanel: ""
-    property int    notifCount:  0
+    property string activePanel:    ""
+    property int    notifCount:     0
+    property bool   rebuildRunning: false
 
     signal panelToggled(string name)
 
@@ -34,7 +35,7 @@ Rectangle {
 
         // ── Left: launcher + workspaces ────────────────────────────────────────
         BarButton {
-            icon: ""
+            icon: ""
             tooltip: "App Launcher"
             active: root.activePanel === "launcher"
             onClicked: root.panelToggled("launcher")
@@ -55,14 +56,66 @@ Rectangle {
         // ── Right: system tray buttons ─────────────────────────────────────────
 
         BarButton {
-            icon: ""
+            icon: "󰌌"
+            tooltip: "Keybind Sheet"
+            active: root.activePanel === "keybinds"
+            onClicked: root.panelToggled("keybinds")
+        }
+
+        BarButton {
+            icon: "󰅇"
+            tooltip: "Clipboard"
+            active: root.activePanel === "clipboard"
+            onClicked: root.panelToggled("clipboard")
+        }
+
+        // Rebuild spinner — visible during nh os/home switch
+        Item {
+            id: rebuildSpinner
+            visible: root.rebuildRunning
+            width: 24; height: 34
+            Layout.alignment: Qt.AlignVCenter
+
+            property int idx: 0
+            property var chars: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+            Text {
+                anchors.centerIn: parent
+                text: rebuildSpinner.chars[rebuildSpinner.idx]
+                color: "#7daea3"; font.pixelSize: 14
+                font.family: "JetBrainsMono Nerd Font"
+            }
+
+            Timer {
+                running: rebuildSpinner.visible
+                interval: 80; repeat: true
+                onTriggered: rebuildSpinner.idx = (rebuildSpinner.idx + 1) % rebuildSpinner.chars.length
+            }
+        }
+
+        BarButton {
+            icon: "󱄅"
+            tooltip: "Nix"
+            active: root.activePanel === "nix"
+            onClicked: root.panelToggled("nix")
+        }
+
+        // Separator
+        Rectangle {
+            width: 1; height: 20
+            color: "#3c3836"
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        BarButton {
+            icon: ""
             tooltip: "Monitors"
             active: root.activePanel === "monitors"
             onClicked: root.panelToggled("monitors")
         }
 
         BarButton {
-            icon: ""
+            icon: ""
             tooltip: "Wallpapers"
             active: root.activePanel === "wallpaper"
             onClicked: root.panelToggled("wallpaper")
@@ -76,7 +129,7 @@ Rectangle {
         }
 
         BarButton {
-            icon: ""
+            icon: ""
             tooltip: "Notifications"
             active: root.activePanel === "notifications"
             badge: root.notifCount
@@ -84,21 +137,21 @@ Rectangle {
         }
 
         BarButton {
-            icon: ""
+            icon: ""
             tooltip: "Control Center"
             active: root.activePanel === "control"
             onClicked: root.panelToggled("control")
         }
 
         BarButton {
-            icon: ""
+            icon: ""
             tooltip: "Audio"
             active: root.activePanel === "audio"
             onClicked: root.panelToggled("audio")
         }
 
         BarButton {
-            icon: ""
+            icon: ""
             tooltip: "Power"
             active: root.activePanel === "power"
             onClicked: root.panelToggled("power")

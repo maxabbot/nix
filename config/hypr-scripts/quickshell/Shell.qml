@@ -15,8 +15,9 @@ ShellRoot {
     id: root
 
     // ── Global state ───────────────────────────────────────────────────────────
-    property string activePanel: ""
-    property bool   dndEnabled:  false
+    property string activePanel:    ""
+    property bool   dndEnabled:     false
+    property bool   rebuildRunning: false
 
     function togglePanel(name) {
         activePanel = (activePanel === name) ? "" : name
@@ -102,6 +103,20 @@ ShellRoot {
         visible: root.activePanel === "wallpaper"
     }
 
+    KeybindCheatSheet {
+        visible: root.activePanel === "keybinds"
+    }
+
+    ClipboardManager {
+        visible: root.activePanel === "clipboard"
+    }
+
+    NixPanel {
+        visible: root.activePanel === "nix"
+        onRebuildStarted:       root.rebuildRunning = true
+        onRebuildFinished: (ok) => root.rebuildRunning = false
+    }
+
     // ── Bottom bar (one per screen) ─────────────────────────────────────────────
     Variants {
         model: Quickshell.screens
@@ -117,8 +132,9 @@ ShellRoot {
 
             Bar {
                 anchors.fill: parent
-                activePanel: root.activePanel
-                notifCount:  notifServer.notifications.count
+                activePanel:    root.activePanel
+                notifCount:     notifServer.notifications.count
+                rebuildRunning: root.rebuildRunning
                 onPanelToggled: (name) => root.togglePanel(name)
             }
         }
