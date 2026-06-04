@@ -191,13 +191,13 @@ PanelWindow {
                             }
 
                             // Percentage text
-                            ctx.font = "bold 18px JetBrainsMono Nerd Font"
+                            ctx.font = "bold 18px 'JetBrainsMono Nerd Font'"
                             ctx.fillStyle = "#d4be98"
                             ctx.textAlign = "center"
                             ctx.textBaseline = "middle"
                             ctx.fillText(Math.round(fraction * 100) + "%", cx, cy - 8)
 
-                            ctx.font = "11px JetBrainsMono Nerd Font"
+                            ctx.font = "11px 'JetBrainsMono Nerd Font'"
                             ctx.fillStyle = "#928374"
                             ctx.fillText("used", cx, cy + 10)
                         }

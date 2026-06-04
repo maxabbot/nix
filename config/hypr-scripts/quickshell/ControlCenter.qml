@@ -64,6 +64,23 @@ PanelWindow {
     Process { id: setBright; command: [] }
     Process { id: setNight;  command: [] }
 
+    function runSetWifi(enabled) {
+        setWifi.command = ["nmcli", "radio", "wifi", enabled ? "on" : "off"]
+        setWifi.running = true
+    }
+    function runSetBt(enabled) {
+        setBt.command = ["bash", "-c", "bluetoothctl power " + (enabled ? "on" : "off")]
+        setBt.running = true
+    }
+    function runSetBright(v) {
+        setBright.command = ["brightnessctl", "s", Math.round(v * 100) + "%"]
+        setBright.running = true
+    }
+    function runSetNight() {
+        setNight.command = ["bash", "-c", "pgrep gammastep && pkill gammastep || gammastep &"]
+        setNight.running = true
+    }
+
     // ── UI ──────────────────────────────────────────────────────────────────────
     Rectangle {
         anchors.fill: parent
@@ -161,19 +178,14 @@ PanelWindow {
                                 switch (modelData.action) {
                                     case "wifi":
                                         root.wifiEnabled = !root.wifiEnabled
-                                        setWifi.command = ["nmcli", "radio", "wifi", root.wifiEnabled ? "on" : "off"]
-                                        setWifi.running = true
+                                        root.runSetWifi(root.wifiEnabled)
                                         break
                                     case "bt":
                                         root.btEnabled = !root.btEnabled
-                                        setBt.command = ["bash", "-c",
-                                            "bluetoothctl power " + (root.btEnabled ? "on" : "off")]
-                                        setBt.running = true
+                                        root.runSetBt(root.btEnabled)
                                         break
                                     case "night":
-                                        setNight.command = ["bash", "-c",
-                                            "pgrep gammastep && pkill gammastep || gammastep &"]
-                                        setNight.running = true
+                                        root.runSetNight()
                                         break
                                     case "dnd":
                                         root.dndToggled()
@@ -192,8 +204,7 @@ PanelWindow {
                 value: root.brightness
                 onMoved: (v) => {
                     root.brightness = v
-                    setBright.command = ["brightnessctl", "s", Math.round(v * 100) + "%"]
-                    setBright.running = true
+                    root.runSetBright(v)
                 }
             }
         }

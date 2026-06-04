@@ -18,6 +18,8 @@ PanelWindow {
 
     property var selectedMonitor: null
 
+    Process { id: setMonitor; command: [] }
+
     // ── Scale factor: fit the total pixel canvas into the preview area ──────────
     readonly property real totalW: {
         var mx = 0
@@ -206,12 +208,14 @@ PanelWindow {
                                     onClicked: {
                                         if (!root.selectedMonitor) return
                                         var m = root.selectedMonitor
-                                        Hyprland.dispatch(
-                                            "keyword monitor " + m.name + "," +
+                                        setMonitor.command = [
+                                            "hyprctl", "keyword", "monitor",
+                                            m.name + "," +
                                             m.width + "x" + m.height + "@" +
                                             Math.round(m.refreshRate) + "," +
                                             m.x + "x" + m.y + "," + modelData
-                                        )
+                                        ]
+                                        setMonitor.running = true
                                     }
                                 }
                             }
