@@ -109,39 +109,33 @@ PanelWindow {
                 spacing: 8
 
                 Repeater {
+                    // Static model — active/label computed in delegate to avoid mid-click delegate teardown
                     model: [
-                        {
-                            icon: "",
-                            label: root.wifiSsid !== "" && root.wifiEnabled ? root.wifiSsid : "Wi-Fi",
-                            active: root.wifiEnabled,
-                            action: "wifi"
-                        },
-                        {
-                            icon: "",
-                            label: "Bluetooth",
-                            active: root.btEnabled,
-                            action: "bt"
-                        },
-                        {
-                            icon: "",
-                            label: "Night Light",
-                            active: false,
-                            action: "night"
-                        },
-                        {
-                            icon: "",
-                            label: "Do Not Disturb",
-                            active: root.dndEnabled,
-                            action: "dnd"
-                        },
+                        { icon: "", label: "Wi-Fi",          action: "wifi"  },
+                        { icon: "", label: "Bluetooth",       action: "bt"    },
+                        { icon: "", label: "Night Light",     action: "night" },
+                        { icon: "", label: "Do Not Disturb",  action: "dnd"   },
                     ]
 
                     delegate: Rectangle {
                         required property var modelData
+
+                        readonly property bool tileActive: {
+                            switch (modelData.action) {
+                                case "wifi":  return root.wifiEnabled
+                                case "bt":    return root.btEnabled
+                                case "dnd":   return root.dndEnabled
+                                default:      return false
+                            }
+                        }
+                        readonly property string tileLabel:
+                            modelData.action === "wifi" && root.wifiEnabled && root.wifiSsid !== ""
+                                ? root.wifiSsid : modelData.label
+
                         width: (content.width - 24) / 4
                         height: 64
                         radius: 10
-                        color: modelData.active
+                        color: tileActive
                             ? (tileArea.containsMouse ? "#3a5a62" : "#2d4a52")
                             : (tileArea.containsMouse ? "#504945" : "#32302f")
 
@@ -153,14 +147,14 @@ PanelWindow {
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: modelData.icon
-                                color: modelData.active ? "#7daea3" : "#928374"
+                                color: tileActive ? "#7daea3" : "#928374"
                                 font.pixelSize: 18
                                 font.family: "JetBrainsMono Nerd Font"
                             }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.label
-                                color: modelData.active ? "#d4be98" : "#928374"
+                                text: tileLabel
+                                color: tileActive ? "#d4be98" : "#928374"
                                 font.pixelSize: 9
                                 font.family: "JetBrainsMono Nerd Font"
                                 horizontalAlignment: Text.AlignHCenter

@@ -25,12 +25,44 @@ done
 
 mkdir -p "$CACHE"
 
-# Build a self-contained page (own wrapper so pandoc's standalone template,
-# title block, etc. don't interfere with the stylesheet).
+# Split markdown at the first ## heading that should start the right column.
+# Left column: Window Manager + Tmux. Right column: everything from ## Zsh on.
+LEFT_MD=$(python3 -c "
+import re, sys
+md = open('$SRC').read()
+m = re.search(r'^## Zsh', md, re.MULTILINE)
+# header block = H1 + intro paragraph (everything before first ## section)
+hdr_end = re.search(r'^## ', md, re.MULTILINE).start()
+print(md[hdr_end:m.start()], end='')
+")
+RIGHT_MD=$(python3 -c "
+import re, sys
+md = open('$SRC').read()
+m = re.search(r'^## Zsh', md, re.MULTILINE)
+print(md[m.start():], end='')
+")
+HEADER_MD=$(python3 -c "
+import re, sys
+md = open('$SRC').read()
+hdr_end = re.search(r'^## ', md, re.MULTILINE).start()
+print(md[:hdr_end], end='')
+")
+
+LEFT_HTML=$(printf '%s' "$LEFT_MD"   | pandoc -f gfm -t html)
+RIGHT_HTML=$(printf '%s' "$RIGHT_MD"  | pandoc -f gfm -t html)
+HEADER_HTML=$(printf '%s' "$HEADER_MD" | pandoc -f gfm -t html)
+
+# Build a self-contained page with explicit flexbox columns — avoids
+# headless-Chrome CSS multi-column rendering bugs.
 {
   printf '<!DOCTYPE html><html><head><meta charset="utf-8">'
   printf '<link rel="stylesheet" href="file://%s"></head><body>' "$CSS"
-  pandoc "$SRC" -f gfm -t html
+  printf '<div class="header">%s</div>' "$HEADER_HTML"
+  printf '<div class="cols">'
+  printf '<div class="col">%s</div>' "$LEFT_HTML"
+  printf '<div class="col-rule"></div>'
+  printf '<div class="col">%s</div>' "$RIGHT_HTML"
+  printf '</div>'
   printf '</body></html>'
 } >"$HTML"
 

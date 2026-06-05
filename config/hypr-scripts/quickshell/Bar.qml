@@ -35,7 +35,7 @@ Rectangle {
 
         // ── Left: launcher + workspaces ────────────────────────────────────────
         BarButton {
-            icon: ""
+            icon: "󰀻"
             tooltip: "App Launcher"
             active: root.activePanel === "launcher"
             onClicked: root.panelToggled("launcher")
@@ -108,14 +108,14 @@ Rectangle {
         }
 
         BarButton {
-            icon: ""
+            icon: "󰍺"
             tooltip: "Monitors"
             active: root.activePanel === "monitors"
             onClicked: root.panelToggled("monitors")
         }
 
         BarButton {
-            icon: ""
+            icon: "󰔸"
             tooltip: "Wallpapers"
             active: root.activePanel === "wallpaper"
             onClicked: root.panelToggled("wallpaper")
@@ -129,7 +129,7 @@ Rectangle {
         }
 
         BarButton {
-            icon: ""
+            icon: "󰂚"
             tooltip: "Notifications"
             active: root.activePanel === "notifications"
             badge: root.notifCount
@@ -137,21 +137,21 @@ Rectangle {
         }
 
         BarButton {
-            icon: ""
+            icon: "󰒓"
             tooltip: "Control Center"
             active: root.activePanel === "control"
             onClicked: root.panelToggled("control")
         }
 
         BarButton {
-            icon: ""
+            icon: "󰕾"
             tooltip: "Audio"
             active: root.activePanel === "audio"
             onClicked: root.panelToggled("audio")
         }
 
         BarButton {
-            icon: ""
+            icon: "󰐥"
             tooltip: "Power"
             active: root.activePanel === "power"
             onClicked: root.panelToggled("power")

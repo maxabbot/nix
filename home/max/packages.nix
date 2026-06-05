@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
   programs.nix-index = {
     enable = true;
@@ -18,7 +18,7 @@
     nix-diff
     nixpkgs-review
     nil
-    claude-code
+    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
     spotify
     stremio-linux-shell
   ];

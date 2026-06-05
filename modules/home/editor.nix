@@ -1,5 +1,5 @@
 # modules/home/editor.nix — Zed (primary) and VSCode (backup) configuration.
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   # ── Zed ────────────────────────────────────────────────────────────────────────
   # System tracks stable nixpkgs; Zed moves fast, so pull it from the unstable
@@ -7,7 +7,10 @@
   # mutableUserSettings = true so Zed can write back state (onboarding completion,
   # extension install state) — without this the file is a read-only store symlink
   # and Zed resets to the onboarding screen every launch.
-  home.packages = [ pkgs.nano ];
+  home.packages = [
+    pkgs.nano
+    pkgs.nodejs_22
+  ];
 
   programs.zed-editor = {
     enable = true;
@@ -27,6 +30,13 @@
     ];
 
     userSettings = {
+      # ── Node (use system node; Zed's downloaded binary is dynamically linked
+      #    and won't run on NixOS) ───────────────────────────────────────────────
+      node = {
+        path = lib.getExe pkgs.nodejs_22;
+        npm_path = lib.getExe' pkgs.nodejs_22 "npm";
+      };
+
       # ── Extensions (auto-installed) ───────────────────────────────────────────
       auto_install_extensions = {
         "gruvbox-material" = true;
@@ -43,7 +53,7 @@
       # Force dark — "system" reads portal/GTK which may report light on Hyprland.
       theme = "Gruvbox Material";
       # icon_theme only supports a plain string (no mode/light/dark object).
-      icon_theme = "Colored Zed Icons Theme";
+      icon_theme = "Colored Zed Icons Theme Dark";
 
       # show_onboarding_banner nests under title_bar (top-level is ignored).
       title_bar = {

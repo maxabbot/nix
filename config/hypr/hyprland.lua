@@ -165,82 +165,82 @@ hl.window_rule({ match = { class = "discord" }, workspace = "4" })
 local mainMod = "SUPER"
 
 -- Apps
-hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd("kitty"))
-hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("zen-beta"))
-hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"))
-hl.bind(mainMod .. " + SHIFT + D",  hl.dsp.exec_cmd("fuzzel --terminal=kitty"))
+hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd("kitty"),                         { description = "Apps | Terminal" })
+hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("nautilus"),                      { description = "Apps | Files" })
+hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("zen-beta"),                      { description = "Apps | Browser" })
+hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"),                        { description = "Apps | Launcher" })
+hl.bind(mainMod .. " + SHIFT + D",  hl.dsp.exec_cmd("fuzzel --terminal=kitty"),       { description = "Apps | Launcher (terminal)" })
 
 -- Window management
-hl.bind(mainMod .. " + Q",         hl.dsp.window.kill())
-hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exit())
-hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen())
-hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen_state({ client = 0, internal = 3 }))
-hl.bind(mainMod .. " + Space",     hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + P",         hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J",         hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + Q",         hl.dsp.window.kill(),                                              { description = "Window | Close" })
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exit(),                                                     { description = "Window | Exit Hyprland" })
+hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen(),                                        { description = "Window | Fullscreen" })
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen_state({ client = 0, internal = 3 }),      { description = "Window | Fullscreen (fake)" })
+hl.bind(mainMod .. " + Space",     hl.dsp.window.float({ action = "toggle" }),                        { description = "Window | Toggle float" })
+hl.bind(mainMod .. " + P",         hl.dsp.window.pseudo(),                                            { description = "Window | Pseudo tile" })
+hl.bind(mainMod .. " + J",         hl.dsp.layout("togglesplit"),                                      { description = "Window | Toggle split" })
 
 -- Focus
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }),  { description = "Focus | Left" })
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }), { description = "Focus | Right" })
+hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }),    { description = "Focus | Up" })
+hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }),  { description = "Focus | Down" })
 
 -- Move window
-hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
-hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
-hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
-hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
+hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }),  { description = "Move | Left" })
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }), { description = "Move | Right" })
+hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }),    { description = "Move | Up" })
+hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }),  { description = "Move | Down" })
 
 -- Resize window
-hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -50, y = 0 }))
-hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = 50,  y = 0 }))
-hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -50 }))
-hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 50 }))
+hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -50, y = 0 }),   { description = "Resize | Left" })
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = 50,  y = 0 }),   { description = "Resize | Right" })
+hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -50 }), { description = "Resize | Up" })
+hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 50 }),  { description = "Resize | Down" })
 
 -- Workspaces 1–10
 for i = 1, 10 do
     local key = tostring(i % 10)  -- 10 maps to "0"
-    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+    hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }),       { description = "Workspaces | Switch to " .. i })
+    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), { description = "Workspaces | Move to " .. i })
 end
 
 -- Scroll through workspaces
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), { description = "Workspaces | Next" })
+hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }), { description = "Workspaces | Prev" })
 
 -- Scratchpad
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"),             { description = "Workspaces | Toggle scratchpad" })
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }),  { description = "Workspaces | Move to scratchpad" })
 
 -- System
-hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))
-hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"))
-hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("wlogout -p layer-shell"))
-hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle notifications"))
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel -d | cliphist decode | wl-copy"))
+hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"),                                                          { description = "System | Lock" })
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"),                                                 { description = "System | Suspend" })
+hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("wlogout -p layer-shell"),                                            { description = "System | Logout menu" })
+hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle notifications"),         { description = "System | Notifications" })
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel -d | cliphist decode | wl-copy"),             { description = "System | Clipboard history" })
 
 -- Screenshots
-hl.bind("Print",               hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
-hl.bind("SHIFT + Print",       hl.dsp.exec_cmd("grim - | wl-copy"))
-hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png'))
+hl.bind("Print",               hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'),                                        { description = "Screenshots | Region to clipboard" })
+hl.bind("SHIFT + Print",       hl.dsp.exec_cmd("grim - | wl-copy"),                                                      { description = "Screenshots | Screen to clipboard" })
+hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png'), { description = "Screenshots | Region to file" })
 
 -- Volume
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume raise"), { locked = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("swayosd-client --output-volume lower"), { locked = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("swayosd-client --output-volume mute-toggle"), { locked = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume raise"),        { locked = true, description = "Media | Volume up" })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("swayosd-client --output-volume lower"),        { locked = true, description = "Media | Volume down" })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("swayosd-client --output-volume mute-toggle"),  { locked = true, description = "Media | Mute" })
 
 -- Brightness
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set +10%"), { locked = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 10%-"), { locked = true })
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set +10%"), { locked = true, description = "Media | Brightness up" })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 10%-"), { locked = true, description = "Media | Brightness down" })
 
 -- Media
-hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),        { locked = true })
-hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),    { locked = true })
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Media | Play/pause" })
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),        { locked = true, description = "Media | Next track" })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),    { locked = true, description = "Media | Prev track" })
 
 -- Gaming toggle
-hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("~/.config/hypr/scripts/gaming-toggle.sh"))
+hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("~/.config/hypr/scripts/gaming-toggle.sh"), { description = "Gaming | Toggle gaming mode" })
 
 -- Mouse binds
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })

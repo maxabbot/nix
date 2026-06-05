@@ -1,5 +1,6 @@
 // KeybindCheatSheet.qml — Searchable Hyprland keybind overlay (bottom-right).
 // Reads live bindings from `hyprctl binds -j` on first open; cached in-memory.
+// Descriptions must follow "Section | Name" format (set in hyprland.lua).
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -19,24 +20,38 @@ PanelWindow {
     ListModel { id: filteredBinds }
     property bool loaded: false
 
-    function modStr(mod) {
+    function modStr(mask) {
         var parts = []
-        if (mod & 64) parts.push("Super")
-        if (mod & 4)  parts.push("Ctrl")
-        if (mod & 1)  parts.push("Shift")
-        if (mod & 8)  parts.push("Alt")
+        if (mask & 64) parts.push("Super")
+        if (mask & 4)  parts.push("Ctrl")
+        if (mask & 1)  parts.push("Shift")
+        if (mask & 8)  parts.push("Alt")
         return parts.join("+")
+    }
+
+    function parseDesc(desc) {
+        var sep = desc.indexOf(" | ")
+        if (sep >= 0) return { section: desc.slice(0, sep), name: desc.slice(sep + 3) }
+        return { section: "", name: desc }
     }
 
     function filter(query) {
         filteredBinds.clear()
         var q = query.toLowerCase().trim()
+        var lastSection = null
         for (var i = 0; i < allBinds.count; i++) {
             var b = allBinds.get(i)
             var combo = ((b.mod ? b.mod + "+" : "") + b.key).toLowerCase()
-            if (!q || combo.includes(q) || b.action.toLowerCase().includes(q)
-                    || b.arg.toLowerCase().includes(q) || b.desc.toLowerCase().includes(q))
-                filteredBinds.append(b)
+            if (!q || combo.includes(q) || b.name.toLowerCase().includes(q)
+                    || b.section.toLowerCase().includes(q)) {
+                if (b.section !== lastSection) {
+                    filteredBinds.append({ isHeader: true, section: b.section,
+                        mod: "", key: "", action: "", arg: "", name: "" })
+                    lastSection = b.section
+                }
+                filteredBinds.append({ isHeader: false, section: b.section,
+                    mod: b.mod, key: b.key, action: b.action, arg: b.arg, name: b.name })
+            }
         }
     }
 
@@ -59,13 +74,16 @@ PanelWindow {
                 allBinds.clear()
                 for (var i = 0; i < binds.length; i++) {
                     var b = binds[i]
-                    if (!b.key && !b.catchAll) continue
+                    if (!b.key && !b.catch_all) continue
+                    if (b.mouse) continue
+                    var parsed = root.parseDesc(b.description || "")
                     allBinds.append({
-                        mod:    root.modStr(b.mod),
-                        key:    b.key || "catch-all",
-                        action: b.handler || "",
-                        arg:    b.arg || "",
-                        desc:   b.description || ""
+                        mod:     root.modStr(b.modmask),
+                        key:     b.key || "catch-all",
+                        action:  b.dispatcher || "",
+                        arg:     b.arg || "",
+                        name:    parsed.name || (b.dispatcher !== "__lua" ? (b.dispatcher + (b.arg ? "  " + b.arg : "")) : ""),
+                        section: parsed.section
                     })
                 }
             } catch(e) {}
@@ -151,7 +169,7 @@ PanelWindow {
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                 Column {
-                    width: parent.width; spacing: 4
+                    width: parent.width; spacing: 2
 
                     Item {
                         visible: filteredBinds.count === 0
@@ -175,49 +193,63 @@ PanelWindow {
 
                     Repeater {
                         model: filteredBinds
-                        delegate: Rectangle {
+
+                        delegate: Item {
                             width: parent.width
-                            height: bindRow.implicitHeight + 14
-                            radius: 6; color: "#32302f"
-                            border.color: "#3c3836"; border.width: 1
+                            height: model.isHeader ? sectionLabel.implicitHeight + 14 : bindRow.implicitHeight + 12
 
-                            RowLayout {
-                                id: bindRow
-                                anchors {
-                                    left: parent.left; right: parent.right
-                                    verticalCenter: parent.verticalCenter; margins: 8
-                                }
-                                spacing: 8
+                            // Section header
+                            Text {
+                                id: sectionLabel
+                                visible: model.isHeader
+                                anchors { left: parent.left; leftMargin: 4; verticalCenter: parent.verticalCenter }
+                                text: model.isHeader ? model.section.toUpperCase() : ""
+                                color: "#928374"; font.pixelSize: 9; font.bold: true
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.letterSpacing: 1.2
+                            }
+                            Rectangle {
+                                visible: model.isHeader
+                                anchors { left: sectionLabel.right; leftMargin: 6; right: parent.right; rightMargin: 4; verticalCenter: parent.verticalCenter }
+                                height: 1; color: "#3c3836"
+                            }
 
-                                Rectangle {
-                                    radius: 4; color: "#1d2021"
-                                    border.color: "#504945"; border.width: 1
-                                    implicitWidth: kbdText.implicitWidth + 12
-                                    implicitHeight: kbdText.implicitHeight + 6
-                                    Text {
-                                        id: kbdText
-                                        anchors.centerIn: parent
-                                        text: (model.mod ? model.mod + "+" : "") + model.key.toUpperCase()
-                                        color: "#7daea3"; font.pixelSize: 10
-                                        font.family: "JetBrainsMono Nerd Font"
+                            // Bind row
+                            Rectangle {
+                                visible: !model.isHeader
+                                anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                                height: bindRow.implicitHeight + 12
+                                radius: 6; color: "#32302f"
+                                border.color: "#3c3836"; border.width: 1
+
+                                RowLayout {
+                                    id: bindRow
+                                    anchors {
+                                        left: parent.left; right: parent.right
+                                        verticalCenter: parent.verticalCenter; margins: 8
                                     }
-                                }
+                                    spacing: 8
 
-                                Column {
-                                    Layout.fillWidth: true; spacing: 2
+                                    Rectangle {
+                                        radius: 4; color: "#1d2021"
+                                        border.color: "#504945"; border.width: 1
+                                        implicitWidth: kbdText.implicitWidth + 12
+                                        implicitHeight: kbdText.implicitHeight + 6
+                                        Text {
+                                            id: kbdText
+                                            anchors.centerIn: parent
+                                            text: (model.mod ? model.mod + "+" : "") + model.key.toUpperCase()
+                                            color: "#7daea3"; font.pixelSize: 10
+                                            font.family: "JetBrainsMono Nerd Font"
+                                        }
+                                    }
+
                                     Text {
-                                        text: model.desc !== "" ? model.desc
-                                            : (model.action + (model.arg !== "" ? "  " + model.arg : ""))
+                                        Layout.fillWidth: true
+                                        text: model.name
                                         color: "#d4be98"; font.pixelSize: 11
                                         font.family: "JetBrainsMono Nerd Font"
-                                        elide: Text.ElideRight; width: parent.width
-                                    }
-                                    Text {
-                                        visible: model.desc !== "" && (model.arg !== "" || model.action !== "")
-                                        text: model.action + (model.arg !== "" ? "  " + model.arg : "")
-                                        color: "#665c54"; font.pixelSize: 10
-                                        font.family: "JetBrainsMono Nerd Font"
-                                        elide: Text.ElideRight; width: parent.width
+                                        elide: Text.ElideRight
                                     }
                                 }
                             }

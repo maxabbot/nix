@@ -79,7 +79,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (Pipewire.defaultAudioSink?.audio)
+                                if (Pipewire.defaultAudioSink?.ready && Pipewire.defaultAudioSink?.audio)
                                     Pipewire.defaultAudioSink.audio.muted = !Pipewire.defaultAudioSink.audio.muted
                             }
                         }
@@ -91,7 +91,7 @@ PanelWindow {
                     label: "Volume"
                     value: Pipewire.defaultAudioSink?.audio?.volume ?? 0
                     onMoved: (v) => {
-                        if (Pipewire.defaultAudioSink?.audio)
+                        if (Pipewire.defaultAudioSink?.ready && Pipewire.defaultAudioSink?.audio)
                             Pipewire.defaultAudioSink.audio.volume = v
                     }
                 }
@@ -144,7 +144,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (Pipewire.defaultAudioSource?.audio)
+                                if (Pipewire.defaultAudioSource?.ready && Pipewire.defaultAudioSource?.audio)
                                     Pipewire.defaultAudioSource.audio.muted = !Pipewire.defaultAudioSource.audio.muted
                             }
                         }
@@ -156,7 +156,7 @@ PanelWindow {
                     label: "Mic"
                     value: Pipewire.defaultAudioSource?.audio?.volume ?? 0
                     onMoved: (v) => {
-                        if (Pipewire.defaultAudioSource?.audio)
+                        if (Pipewire.defaultAudioSource?.ready && Pipewire.defaultAudioSource?.audio)
                             Pipewire.defaultAudioSource.audio.volume = v
                     }
                 }
@@ -191,9 +191,9 @@ PanelWindow {
                     delegate: SliderRow {
                         required property var modelData
                         width: content.width
-                        label: modelData.name.length > 12 ? modelData.name.slice(0, 12) + "…" : modelData.name
+                        label: (modelData.name?.length ?? 0) > 12 ? modelData.name.slice(0, 12) + "…" : (modelData.name ?? "")
                         value: modelData.audio?.volume ?? 0
-                        onMoved: (v) => { if (modelData.audio) modelData.audio.volume = v }
+                        onMoved: (v) => { if (modelData.ready && modelData.audio) modelData.audio.volume = v }
                     }
                 }
             }

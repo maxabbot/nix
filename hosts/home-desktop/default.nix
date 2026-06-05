@@ -39,14 +39,14 @@
       enable = true;
       config = ''
         INTERVAL=10
-        DEVPATH=hwmon9=/sys/devices/platform/it87.2624
-        DEVNAME=hwmon9=it8628
-        FCTEMPS=hwmon9/pwm1=hwmon4/temp1_input hwmon9/pwm3=hwmon4/temp1_input hwmon9/pwm4=hwmon4/temp1_input
-        FCFANS=hwmon9/pwm1=hwmon9/fan1_input hwmon9/pwm3=hwmon9/fan3_input hwmon9/pwm4=hwmon9/fan4_input
-        MINTEMP=hwmon9/pwm1=40 hwmon9/pwm3=40 hwmon9/pwm4=40
-        MAXTEMP=hwmon9/pwm1=75 hwmon9/pwm3=75 hwmon9/pwm4=75
-        MINSTART=hwmon9/pwm1=50 hwmon9/pwm3=50 hwmon9/pwm4=50
-        MINSTOP=hwmon9/pwm1=30 hwmon9/pwm3=30 hwmon9/pwm4=30
+        DEVPATH=hwmon2=/sys/devices/platform/it87.2624
+        DEVNAME=hwmon2=it8628
+        FCTEMPS=hwmon2/pwm1=hwmon4/temp1_input hwmon2/pwm3=hwmon4/temp1_input hwmon2/pwm4=hwmon4/temp1_input
+        FCFANS=hwmon2/pwm1=hwmon2/fan1_input hwmon2/pwm3=hwmon2/fan3_input hwmon2/pwm4=hwmon2/fan4_input
+        MINTEMP=hwmon2/pwm1=40 hwmon2/pwm3=40 hwmon2/pwm4=40
+        MAXTEMP=hwmon2/pwm1=75 hwmon2/pwm3=75 hwmon2/pwm4=75
+        MINSTART=hwmon2/pwm1=50 hwmon2/pwm3=50 hwmon2/pwm4=50
+        MINSTOP=hwmon2/pwm1=30 hwmon2/pwm3=30 hwmon2/pwm4=30
       '';
     };
   };

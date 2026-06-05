@@ -50,6 +50,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Native Claude Code binary — updates hourly, ahead of nixpkgs
+    claude-code-nix.url = "github:sadjow/claude-code-nix";
+
   };
 
   outputs =
