@@ -20,6 +20,6 @@
     nil
     claude-code
     spotify
-    stremio
+    stremio-linux-shell
   ];
 }
