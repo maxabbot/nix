@@ -19,5 +19,7 @@
     nixpkgs-review
     nil
     claude-code
+    spotify
+    stremio
   ];
 }
