@@ -218,6 +218,12 @@
     };
   };
 
+  # ── udev ─────────────────────────────────────────────────────────────────────
+  # NuPhy Air75 V3 — grants userspace hidraw access for nuphy.io configurator
+  services.udev.extraRules = ''
+    KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0666"
+  '';
+
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";
 
