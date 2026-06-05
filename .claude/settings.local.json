@@ -34,7 +34,10 @@
       "mcp__mcp-server-brave-search__brave_web_search",
       "WebFetch(domain:wiki.hypr.land)",
       "WebFetch(domain:stylix.danth.me)",
-      "WebFetch(domain:nix-community.github.io)"
+      "WebFetch(domain:nix-community.github.io)",
+      "Bash(nix flake *)",
+      "Bash(nixup *)",
+      "Bash(nh os *)"
     ]
   }
 }

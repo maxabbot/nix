@@ -1,4 +1,4 @@
-{ git, ... }:
+{ git, pkgs, ... }:
 {
   programs.git = {
     enable = true;
@@ -23,6 +23,10 @@
       diff.colorMoved = "default";
       rebase.autoStash = true;
       rerere.enabled = true;
+      credential = {
+        "https://github.com".helper = "!${pkgs.gh}/bin/gh auth git-credential";
+        "https://gist.github.com".helper = "!${pkgs.gh}/bin/gh auth git-credential";
+      };
       safe.directory = "/etc/nixos";
       column.ui = "auto";
       branch.sort = "-committerdate";

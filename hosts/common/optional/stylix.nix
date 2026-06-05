@@ -2,6 +2,10 @@
 {
   imports = [ inputs.stylix.nixosModules.stylix ];
 
+  # stylix's kmscon module sets services.kmscon.config which was removed in
+  # NixOS 26.05 (renamed to extraConfig). Disable the module entirely.
+  disabledModules = [ "${inputs.stylix}/modules/kmscon/nixos.nix" ];
+
   stylix = {
     enable = true;
     # Stylix tracks master (no release-26.05 branch yet) while the system is on

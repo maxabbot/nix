@@ -113,6 +113,7 @@
     grimblast
     pavucontrol
     pamixer
+    pulseaudio
     swayosd
     hypridle
     thunar
