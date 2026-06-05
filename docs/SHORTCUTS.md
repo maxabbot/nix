@@ -10,7 +10,7 @@ All navigation follows vim-style `hjkl` movement. Modifier keys: `Super` (WM), `
 |-----|--------|
 | `Super+Return` | Terminal (kitty) |
 | `Super+D` | App launcher (fuzzel) |
-| `Super+B` | Browser (Chrome) |
+| `Super+B` | Browser (Zen) |
 | `Super+E` | File manager (thunar) |
 | `Super+Q` | Kill window |
 | `Super+Shift+Q` | Exit Hyprland |

@@ -167,7 +167,7 @@ local mainMod = "SUPER"
 -- Apps
 hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd("kitty"))
 hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("firefox"))
+hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("zen-beta"))
 hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"))
 hl.bind(mainMod .. " + SHIFT + D",  hl.dsp.exec_cmd("fuzzel --terminal=kitty"))
 
