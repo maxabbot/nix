@@ -8,15 +8,13 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 **`Shell.qml`** — Entry point. Owns all global state (`activePanel`, `dndEnabled`, `rebuildRunning`), the `IpcHandler` for `qs_manager.sh` commands, the `NotificationServer` (D-Bus `org.freedesktop.Notifications`), the transient toast window, and spawns one `Bar` per screen via `Variants`.
 
-**`Bar.qml`** — Bottom bar content (40px, full-width per screen). Left: launcher button + workspace dots. Centre: media player. Right: keybinds, clipboard, rebuild spinner, nix, monitors, wallpaper, notifications, control center, audio, power buttons. Emits `panelToggled(name)` up to Shell.
+**`Bar.qml`** — Bottom bar content (40px, full-width per screen). Left: workspace dots. Centre: media player. Right: keybinds, rebuild spinner, nix, monitors, wallpaper, notifications, control center, audio, power buttons. Emits `panelToggled(name)` up to Shell. (App launching and clipboard history are handled by fuzzel — see `modules/home/apps.nix` and `config/hypr-scripts/clipboard-fuzzel.sh`.)
 
 **`BarButton.qml`** — Shared icon button used by Bar. Supports `active` highlight, `badge` count, and tooltip.
 
 **`Workspaces.qml`** — Clickable workspace dots in the bar. Reads `Hyprland.workspaces`, highlights the focused one, switches via `modelData.activate()`.
 
 **`MediaPlayer.qml`** — Centre bar widget showing current MPRIS track (title + artist), prev/play/next controls. Visible only when a player is active.
-
-**`AppLauncher.qml`** — Full-width bottom panel. Enumerates `.desktop` files via `list-apps.sh`, filters by search input, launches with `gtk-launch`.
 
 **`NotificationCenter.qml`** — Scrollable notification history (bottom-right, 390×500). Shows all current notifications with dismiss and clear-all. Fed the `NotificationServer`'s model from Shell.
 
@@ -27,8 +25,6 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 **`AudioMixer.qml`** — PipeWire volume panel (bottom-right, 360px). Default sink volume + mute, default source (mic) volume + mute, per-app stream volumes via `PwObjectTracker`.
 
 **`SliderRow.qml`** — Shared label + `Slider` + value display component. Used by AudioMixer and ControlCenter.
-
-**`ClipboardManager.qml`** — Clipboard history panel (bottom-right, 420×560). Reads `cliphist list`, filters by search, copies selection back via `wl-copy`.
 
 **`KeybindCheatSheet.qml`** — Searchable keybind overlay (bottom-right, 480×560). Reads `hyprctl binds -j` on first open, cached in-memory.
 
@@ -51,7 +47,7 @@ quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 
 # Toggle a panel:
 ~/.config/hypr/scripts/qs_manager.sh toggle <name>
-# Names: launcher, notifications, control, audio, power, clipboard, keybinds, nix, monitors, wallpaper
+# Names: notifications, control, audio, power, keybinds, nix, monitors, wallpaper
 
 # Close all panels:
 ~/.config/hypr/scripts/qs_manager.sh close

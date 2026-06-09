@@ -33,14 +33,7 @@ Rectangle {
         }
         spacing: 4
 
-        // ── Left: launcher + workspaces ────────────────────────────────────────
-        BarButton {
-            icon: "󰀻"
-            tooltip: "App Launcher"
-            active: root.activePanel === "launcher"
-            onClicked: root.panelToggled("launcher")
-        }
-
+        // ── Left: workspaces ───────────────────────────────────────────────────
         Workspaces { Layout.alignment: Qt.AlignVCenter }
 
         // ── Centre: media player ───────────────────────────────────────────────
@@ -60,13 +53,6 @@ Rectangle {
             tooltip: "Keybind Sheet"
             active: root.activePanel === "keybinds"
             onClicked: root.panelToggled("keybinds")
-        }
-
-        BarButton {
-            icon: "󰅇"
-            tooltip: "Clipboard"
-            active: root.activePanel === "clipboard"
-            onClicked: root.panelToggled("clipboard")
         }
 
         // Rebuild spinner — visible during nh os/home switch

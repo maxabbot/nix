@@ -18,7 +18,14 @@ let
     read -r a2 t2 < <(awk '/^cpu /{print $2+$4, $2+$3+$4+$5+$6+$7+$8}' /proc/stat)
     cpu=$(( (a2-a1)*100/(t2-t1) ))
     mem=$(awk '/MemTotal/{t=$2}/MemAvailable/{a=$2}END{printf "%d",100*(t-a)/t}' /proc/meminfo)
-    temp_raw=$(cat /sys/class/thermal/thermal_zone2/temp 2>/dev/null || echo 0)
+    # Find the CPU package thermal zone by type rather than a fixed index,
+    # which drifts between kernels/hardware.
+    temp_raw=0
+    for z in /sys/class/thermal/thermal_zone*; do
+      case "$(cat "$z/type" 2>/dev/null)" in
+        x86_pkg_temp|k10temp|coretemp) temp_raw=$(cat "$z/temp" 2>/dev/null || echo 0); break ;;
+      esac
+    done
     temp=$(( temp_raw / 1000 ))
     echo "CPU ''${cpu}% MEM ''${mem}% ''${temp}°C"
   '';
@@ -48,19 +55,32 @@ in
           spacing = 4;
 
           "modules-left" = [
+            "hyprland/workspaces"
             winModule
           ];
           "modules-center" = [ "clock" ];
           "modules-right" = [
             "tray"
             "idle_inhibitor"
+            "bluetooth"
             "pulseaudio"
+            "pulseaudio#source"
             "network"
             "disk"
             "custom/sysinfo"
           ]
           ++ lib.optional (machineType == "desktop") "custom/gpu"
           ++ lib.optional (machineType == "laptop") "battery";
+
+          "hyprland/workspaces" = {
+            format = "{name}";
+            on-click = "activate";
+            on-scroll-up = "hyprctl dispatch workspace e+1";
+            on-scroll-down = "hyprctl dispatch workspace e-1";
+            persistent-workspaces = {
+              "*" = 5;
+            };
+          };
 
           "${winModule}" = {
             format = "{}";
@@ -76,9 +96,22 @@ in
           idle_inhibitor = {
             format = "{icon}";
             format-icons = {
-              activated = "AWAKE";
-              deactivated = "IDLE";
+              activated = "";
+              deactivated = "";
             };
+            tooltip-format-activated = "Idle inhibited (awake)";
+            tooltip-format-deactivated = "Idle allowed";
+          };
+
+          bluetooth = {
+            format = "BT";
+            format-disabled = "";
+            format-off = "";
+            format-connected = "BT {device_alias}";
+            tooltip-format = "{controller_alias}\t{controller_address}\n\n{num_connections} connected";
+            tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}";
+            tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+            on-click = "blueman-manager";
           };
 
           clock = {
@@ -147,6 +180,15 @@ in
             format-muted = "muted";
             on-click = "pavucontrol";
           };
+
+          "pulseaudio#source" = {
+            format = "{format_source}";
+            format-source = "MIC {volume}%";
+            format-source-muted = "MIC muted";
+            on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+            on-click-right = "pavucontrol -t 4";
+            scroll-step = 5;
+          };
         }
       ];
 
@@ -177,12 +219,37 @@ in
         #disk,
         #network,
         #pulseaudio,
+        #bluetooth,
         #tray,
         #idle_inhibitor {
           padding: 0 10px;
           margin: 5px 0px;
           background: #3c3836;
           border-radius: 8px;
+        }
+
+        #workspaces {
+          margin: 5px 0px;
+          background: #3c3836;
+          border-radius: 8px;
+        }
+        #workspaces button {
+          padding: 0 8px;
+          color: #7c6f64;
+          background: transparent;
+          border-radius: 8px;
+        }
+        #workspaces button.active {
+          color: #282828;
+          background: #d8a657;
+        }
+        #workspaces button.urgent {
+          color: #282828;
+          background: #ea6962;
+        }
+        #workspaces button:hover {
+          color: #d4be98;
+          background: #504945;
         }
 
         #clock {
@@ -222,6 +289,22 @@ in
         }
         #pulseaudio.muted {
           color: #7c6f64;
+        }
+        #pulseaudio.source {
+          color: #83a598;
+        }
+        #pulseaudio.source.source-muted {
+          color: #7c6f64;
+        }
+        #bluetooth {
+          color: #7daea3;
+        }
+        #bluetooth.disabled,
+        #bluetooth.off {
+          color: #7c6f64;
+        }
+        #bluetooth.connected {
+          color: #89b482;
         }
         #tray {
           background: transparent;

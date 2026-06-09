@@ -78,10 +78,6 @@ ShellRoot {
         model: notifServer.notifications
     }
 
-    AppLauncher {
-        visible: root.activePanel === "launcher"
-    }
-
     PowerMenu {
         visible: root.activePanel === "power"
     }
@@ -106,10 +102,6 @@ ShellRoot {
 
     KeybindCheatSheet {
         visible: root.activePanel === "keybinds"
-    }
-
-    ClipboardManager {
-        visible: root.activePanel === "clipboard"
     }
 
     NixPanel {
