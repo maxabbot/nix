@@ -22,14 +22,14 @@ Item {
         // Previous
         Rectangle {
             width: 26; height: 26; radius: 6
-            color: prevArea.containsMouse ? "#3c3836" : "transparent"
+            color: prevArea.containsMouse ? Theme.border : "transparent"
             Behavior on color { ColorAnimation { duration: 80 } }
             Text {
                 anchors.centerIn: parent
                 text: ""
-                color: root.player?.canGoPrevious ? "#d4be98" : "#504945"
+                color: root.player?.canGoPrevious ? Theme.fg : Theme.borderStrong
                 font.pixelSize: 12
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
             }
             MouseArea {
                 id: prevArea; anchors.fill: parent; hoverEnabled: true
@@ -41,14 +41,14 @@ Item {
         // Play / Pause
         Rectangle {
             width: 26; height: 26; radius: 6
-            color: playArea.containsMouse ? "#3c3836" : "transparent"
+            color: playArea.containsMouse ? Theme.border : "transparent"
             Behavior on color { ColorAnimation { duration: 80 } }
             Text {
                 anchors.centerIn: parent
                 text: root.playing ? "" : ""
-                color: "#7daea3"
+                color: Theme.accent
                 font.pixelSize: 12
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
             }
             MouseArea {
                 id: playArea; anchors.fill: parent; hoverEnabled: true
@@ -60,14 +60,14 @@ Item {
         // Next
         Rectangle {
             width: 26; height: 26; radius: 6
-            color: nextArea.containsMouse ? "#3c3836" : "transparent"
+            color: nextArea.containsMouse ? Theme.border : "transparent"
             Behavior on color { ColorAnimation { duration: 80 } }
             Text {
                 anchors.centerIn: parent
                 text: ""
-                color: root.player?.canGoNext ? "#d4be98" : "#504945"
+                color: root.player?.canGoNext ? Theme.fg : Theme.borderStrong
                 font.pixelSize: 12
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
             }
             MouseArea {
                 id: nextArea; anchors.fill: parent; hoverEnabled: true
@@ -84,18 +84,18 @@ Item {
 
             Text {
                 text: root.player?.trackTitle ?? ""
-                color: "#d4be98"
+                color: Theme.fg
                 font.pixelSize: 11
                 font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 elide: Text.ElideRight
                 width: parent.width
             }
             Text {
                 text: root.player?.trackArtist ?? ""
-                color: "#928374"
+                color: Theme.gray
                 font.pixelSize: 10
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 elide: Text.ElideRight
                 width: parent.width
             }

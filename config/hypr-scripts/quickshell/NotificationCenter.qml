@@ -19,8 +19,8 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: "#282828"
-        border.color: "#3c3836"
+        color: Theme.bg
+        border.color: Theme.border
         border.width: 1
 
         // ── Header ─────────────────────────────────────────────────────────────
@@ -31,26 +31,26 @@ PanelWindow {
 
             Text {
                 text: "Notifications"
-                color: "#d4be98"
+                color: Theme.fg
                 font.pixelSize: 14
                 font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 Layout.fillWidth: true
             }
 
             // Clear all
             Rectangle {
                 width: 64; height: 26; radius: 6
-                color: clearArea.containsMouse ? "#3c3836" : "transparent"
+                color: clearArea.containsMouse ? Theme.border : "transparent"
                 Behavior on color { ColorAnimation { duration: 80 } }
                 visible: (root.model?.count ?? 0) > 0
 
                 Text {
                     anchors.centerIn: parent
                     text: "Clear all"
-                    color: "#928374"
+                    color: Theme.gray
                     font.pixelSize: 11
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Theme.font
                 }
 
                 MouseArea {
@@ -74,7 +74,7 @@ PanelWindow {
             id: divider
             anchors { top: header.bottom; left: parent.left; right: parent.right; margins: 0 }
             height: 1
-            color: "#3c3836"
+            color: Theme.border
         }
 
         // ── Notification list ───────────────────────────────────────────────────
@@ -105,16 +105,16 @@ PanelWindow {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: ""
-                            color: "#504945"
+                            color: Theme.borderStrong
                             font.pixelSize: 28
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "No notifications"
-                            color: "#665c54"
+                            color: Theme.grayDim
                             font.pixelSize: 13
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                         }
                     }
                 }
@@ -127,8 +127,8 @@ PanelWindow {
                         width: parent.width
                         height: itemLayout.implicitHeight + 16
                         radius: 8
-                        color: "#32302f"
-                        border.color: modelData.urgency === NotificationUrgency.Critical ? "#ea6962" : "#3c3836"
+                        color: Theme.bgAlt
+                        border.color: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.border
                         border.width: 1
 
                         RowLayout {
@@ -142,25 +142,25 @@ PanelWindow {
 
                                 Text {
                                     text: modelData.appName
-                                    color: "#928374"
+                                    color: Theme.gray
                                     font.pixelSize: 10
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
                                 Text {
                                     text: modelData.summary
-                                    color: "#ebdbb2"
+                                    color: Theme.fgBright
                                     font.pixelSize: 12
                                     font.bold: true
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                     elide: Text.ElideRight
                                     width: parent.width
                                 }
                                 Text {
                                     visible: modelData.body !== ""
                                     text: modelData.body
-                                    color: "#bdae93"
+                                    color: Theme.fgDim
                                     font.pixelSize: 11
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                     wrapMode: Text.WordWrap
                                     width: parent.width
                                     maximumLineCount: 4
@@ -170,16 +170,16 @@ PanelWindow {
 
                             Rectangle {
                                 width: 20; height: 20; radius: 10
-                                color: dismissArea.containsMouse ? "#504945" : "transparent"
+                                color: dismissArea.containsMouse ? Theme.borderStrong : "transparent"
                                 Layout.alignment: Qt.AlignTop
                                 Behavior on color { ColorAnimation { duration: 80 } }
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: ""
-                                    color: "#928374"
+                                    color: Theme.gray
                                     font.pixelSize: 9
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
 
                                 MouseArea {

@@ -17,8 +17,8 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: "#282828"
-        border.color: "#3c3836"
+        color: Theme.bg
+        border.color: Theme.border
         border.width: 1
 
         Column {
@@ -28,10 +28,10 @@ PanelWindow {
 
             Text {
                 text: "Power"
-                color: "#928374"
+                color: Theme.gray
                 font.pixelSize: 11
                 font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 leftPadding: 4
             }
 
@@ -49,7 +49,7 @@ PanelWindow {
                     width: grid.width
                     height: 38
                     radius: 8
-                    color: area.containsMouse ? "#3c3836" : "transparent"
+                    color: area.containsMouse ? Theme.border : "transparent"
                     Behavior on color { ColorAnimation { duration: 80 } }
 
                     RowLayout {
@@ -58,16 +58,16 @@ PanelWindow {
 
                         Text {
                             text: modelData.icon
-                            color: "#d4be98"
+                            color: Theme.fg
                             font.pixelSize: 14
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                         }
 
                         Text {
                             text: modelData.label
-                            color: "#ebdbb2"
+                            color: Theme.fgBright
                             font.pixelSize: 13
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                             Layout.fillWidth: true
                         }
                     }

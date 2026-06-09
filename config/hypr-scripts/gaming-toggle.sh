@@ -15,6 +15,7 @@ if [ -f "$GAMING_STATE_FILE" ]; then
 
     # Kill game launchers
     pkill -x lutris 2>/dev/null || true
+    pkill -x gamescope 2>/dev/null || true
     pkill -x steam 2>/dev/null || true
 
     # Restore bar and notifications
@@ -37,6 +38,7 @@ else
     # Launch game launchers
     lutris &
     disown
-    steam -silent &
+    # Gamescope wraps BPM for direct GPU rendering — avoids XWayland lag
+    gamescope -W 2560 -H 1440 -r 165 -f -e -- steam -bigpicture &
     disown
 fi

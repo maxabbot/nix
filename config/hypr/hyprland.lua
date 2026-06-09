@@ -139,6 +139,9 @@ hl.window_rule({ match = { class = "Minecraft" },                   immediate = 
 hl.window_rule({ match = { class = "steam",   title = "Steam Big Picture Mode" }, fullscreen = true })
 hl.window_rule({ match = { class = "lutris" }, workspace = "10 silent" })
 hl.window_rule({ match = { class = "steam"  }, workspace = "10 silent" })
+-- Steam dropdown menus are empty-title XWayland popups; without this they
+-- steal focus and land on the wrong monitor.
+hl.window_rule({ match = { class = "steam", title = "^$" }, no_focus = true })
 
 -- Float
 hl.window_rule({ match = { class = "pavucontrol" },        float = true })

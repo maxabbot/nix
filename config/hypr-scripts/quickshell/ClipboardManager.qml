@@ -118,8 +118,8 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 12; color: "#282828"
-        border.color: "#3c3836"; border.width: 1
+        radius: 12; color: Theme.bg
+        border.color: Theme.border; border.width: 1
 
         ColumnLayout {
             anchors { fill: parent; margins: 12 }
@@ -131,26 +131,26 @@ PanelWindow {
 
                 Text {
                     text: "󰅇  Clipboard"
-                    color: "#d4be98"; font.pixelSize: 14; font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Theme.fg; font.pixelSize: 14; font.bold: true
+                    font.family: Theme.font
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: filteredEntries.count + " items"
-                    color: "#665c54"; font.pixelSize: 10
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Theme.grayDim; font.pixelSize: 10
+                    font.family: Theme.font
                 }
 
                 Rectangle {
                     width: 48; height: 24; radius: 6
-                    color: wipeArea.containsMouse ? "#6b2a2a" : "#3c3836"
+                    color: wipeArea.containsMouse ? Theme.redDark : Theme.border
                     Behavior on color { ColorAnimation { duration: 80 } }
                     Text {
                         anchors.centerIn: parent
                         text: "Wipe"
-                        color: "#ea6962"; font.pixelSize: 10
-                        font.family: "JetBrainsMono Nerd Font"
+                        color: Theme.red; font.pixelSize: 10
+                        font.family: Theme.font
                     }
                     MouseArea {
                         id: wipeArea
@@ -169,22 +169,22 @@ PanelWindow {
             // Search
             Rectangle {
                 Layout.fillWidth: true; height: 36; radius: 8
-                color: "#32302f"
-                border.color: searchField.activeFocus ? "#7daea3" : "#504945"
+                color: Theme.bgAlt
+                border.color: searchField.activeFocus ? Theme.accent : Theme.borderStrong
                 border.width: 1
                 Behavior on border.color { ColorAnimation { duration: 120 } }
 
                 RowLayout {
                     anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
                     spacing: 8
-                    Text { text: ""; color: "#928374"; font.pixelSize: 13; font.family: "JetBrainsMono Nerd Font" }
+                    Text { text: ""; color: Theme.gray; font.pixelSize: 13; font.family: Theme.font }
                     TextField {
                         id: searchField
                         Layout.fillWidth: true
                         placeholderText: "Search clipboard…"
                         background: null
-                        color: "#ebdbb2"; placeholderTextColor: "#665c54"
-                        font.pixelSize: 13; font.family: "JetBrainsMono Nerd Font"
+                        color: Theme.fgBright; placeholderTextColor: Theme.grayDim
+                        font.pixelSize: 13; font.family: Theme.font
                         onTextChanged: root.filter(text)
                         Keys.onEscapePressed: root.visible = false
                     }
@@ -208,14 +208,14 @@ PanelWindow {
                             anchors.centerIn: parent; spacing: 8
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: "󰅇"; color: "#504945"; font.pixelSize: 28
-                                font.family: "JetBrainsMono Nerd Font"
+                                text: "󰅇"; color: Theme.borderStrong; font.pixelSize: 28
+                                font.family: Theme.font
                             }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: "Clipboard is empty"
-                                color: "#665c54"; font.pixelSize: 13
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.grayDim; font.pixelSize: 13
+                                font.family: Theme.font
                             }
                         }
                     }
@@ -232,8 +232,8 @@ PanelWindow {
                             width: parent.width
                             height: entryCol.implicitHeight + 16
                             radius: 6
-                            color: entryArea.containsMouse ? "#383432" : "#32302f"
-                            border.color: lang !== "text" ? "#504945" : "#3c3836"
+                            color: entryArea.containsMouse ? Theme.bgSoft : Theme.bgAlt
+                            border.color: lang !== "text" ? Theme.borderStrong : Theme.border
                             border.width: 1
                             Behavior on color { ColorAnimation { duration: 80 } }
 
@@ -247,16 +247,16 @@ PanelWindow {
 
                                     Rectangle {
                                         visible: entryRect.lang !== "text"
-                                        radius: 3; color: "#1d2021"
-                                        border.color: "#504945"; border.width: 1
+                                        radius: 3; color: Theme.bgHard
+                                        border.color: Theme.borderStrong; border.width: 1
                                         implicitWidth: langLabel.implicitWidth + 8
                                         implicitHeight: langLabel.implicitHeight + 4
                                         Text {
                                             id: langLabel
                                             anchors.centerIn: parent
                                             text: entryRect.lang.toUpperCase()
-                                            color: "#7daea3"; font.pixelSize: 9
-                                            font.family: "JetBrainsMono Nerd Font"
+                                            color: Theme.accent; font.pixelSize: 9
+                                            font.family: Theme.font
                                         }
                                     }
 
@@ -264,12 +264,12 @@ PanelWindow {
 
                                     Rectangle {
                                         width: 18; height: 18; radius: 9
-                                        color: delArea.containsMouse ? "#504945" : "transparent"
+                                        color: delArea.containsMouse ? Theme.borderStrong : "transparent"
                                         Behavior on color { ColorAnimation { duration: 80 } }
                                         Text {
                                             anchors.centerIn: parent
-                                            text: ""; color: "#928374"; font.pixelSize: 9
-                                            font.family: "JetBrainsMono Nerd Font"
+                                            text: ""; color: Theme.gray; font.pixelSize: 9
+                                            font.family: Theme.font
                                         }
                                         MouseArea {
                                             id: delArea
@@ -288,8 +288,8 @@ PanelWindow {
                                     width: parent.width
                                     text: root.highlight(entryRect.preview, entryRect.lang)
                                     textFormat: Text.RichText
-                                    color: "#bdae93"; font.pixelSize: 11
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    color: Theme.fgDim; font.pixelSize: 11
+                                    font.family: Theme.font
                                     wrapMode: Text.NoWrap
                                     elide: Text.ElideRight
                                     maximumLineCount: 3

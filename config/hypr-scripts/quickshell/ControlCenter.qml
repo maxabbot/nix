@@ -85,8 +85,8 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: "#282828"
-        border.color: "#3c3836"
+        color: Theme.bg
+        border.color: Theme.border
         border.width: 1
 
         Column {
@@ -96,10 +96,10 @@ PanelWindow {
 
             Text {
                 text: "Control Center"
-                color: "#d4be98"
+                color: Theme.fg
                 font.pixelSize: 14
                 font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
             }
 
             // ── Toggle row ────────────────────────────────────────────────────────
@@ -136,8 +136,8 @@ PanelWindow {
                         height: 64
                         radius: 10
                         color: tileActive
-                            ? (tileArea.containsMouse ? "#3a5a62" : "#2d4a52")
-                            : (tileArea.containsMouse ? "#504945" : "#32302f")
+                            ? (tileArea.containsMouse ? Theme.accentBgHover : Theme.accentBg)
+                            : (tileArea.containsMouse ? Theme.borderStrong : Theme.bgAlt)
 
                         Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -147,16 +147,16 @@ PanelWindow {
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: modelData.icon
-                                color: tileActive ? "#7daea3" : "#928374"
+                                color: tileActive ? Theme.accent : Theme.gray
                                 font.pixelSize: 18
-                                font.family: "JetBrainsMono Nerd Font"
+                                font.family: Theme.font
                             }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: tileLabel
-                                color: tileActive ? "#d4be98" : "#928374"
+                                color: tileActive ? Theme.fg : Theme.gray
                                 font.pixelSize: 9
-                                font.family: "JetBrainsMono Nerd Font"
+                                font.family: Theme.font
                                 horizontalAlignment: Text.AlignHCenter
                                 width: parent.parent.width - 8
                                 elide: Text.ElideRight

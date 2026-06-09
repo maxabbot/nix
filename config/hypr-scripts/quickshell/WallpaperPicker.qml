@@ -98,8 +98,8 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: "#282828"
-        border.color: "#3c3836"
+        color: Theme.bg
+        border.color: Theme.border
         border.width: 1
 
         Column {
@@ -110,17 +110,17 @@ PanelWindow {
                 width: parent.width
                 Text {
                     text: "Wallpapers"
-                    color: "#d4be98"
+                    color: Theme.fg
                     font.pixelSize: 14
                     font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Theme.font
                     Layout.fillWidth: true
                 }
                 Text {
                     text: thumbModel.count + " wallpapers  ·  " + root.srcDir
-                    color: "#504945"
+                    color: Theme.borderStrong
                     font.pixelSize: 10
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Theme.font
                     elide: Text.ElideLeft
                     Layout.maximumWidth: 300
                 }
@@ -147,9 +147,9 @@ PanelWindow {
                         Rectangle {
                             anchors { fill: parent; margins: 4 }
                             radius: 8
-                            color: "#1d2021"
+                            color: Theme.bgHard
                             clip: true
-                            border.color: model.isCurrent ? "#7daea3" : "transparent"
+                            border.color: model.isCurrent ? Theme.accent : "transparent"
                             border.width: 2
 
                             Image {
@@ -163,13 +163,13 @@ PanelWindow {
                                 Rectangle {
                                     visible: parent.status !== Image.Ready
                                     anchors.fill: parent
-                                    color: "#32302f"
+                                    color: Theme.bgAlt
                                     Text {
                                         anchors.centerIn: parent
                                         text: model.isVideo ? "" : ""
-                                        color: "#504945"
+                                        color: Theme.borderStrong
                                         font.pixelSize: 20
-                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.family: Theme.font
                                     }
                                 }
                             }
@@ -179,13 +179,13 @@ PanelWindow {
                                 visible: model.isVideo
                                 anchors { top: parent.top; left: parent.left; margins: 4 }
                                 width: 20; height: 14; radius: 3
-                                color: "#282828cc"
+                                color: Theme.bgFloat
                                 Text {
                                     anchors.centerIn: parent
                                     text: ""
-                                    color: "#d8a657"
+                                    color: Theme.yellow
                                     font.pixelSize: 8
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
                             }
 
@@ -194,13 +194,13 @@ PanelWindow {
                                 visible: model.isCurrent
                                 anchors { top: parent.top; right: parent.right; margins: 4 }
                                 width: 16; height: 16; radius: 8
-                                color: "#7daea3"
+                                color: Theme.accent
                                 Text {
                                     anchors.centerIn: parent
                                     text: ""
-                                    color: "#1d2021"
+                                    color: Theme.bgHard
                                     font.pixelSize: 8
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
                             }
 

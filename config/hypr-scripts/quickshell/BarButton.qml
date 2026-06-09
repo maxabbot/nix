@@ -15,16 +15,16 @@ Rectangle {
     implicitWidth: 34
     implicitHeight: 34
     radius: 8
-    color: area.containsMouse ? "#3c3836" : (active ? "#2d4a52" : "transparent")
+    color: area.containsMouse ? Theme.border : (active ? Theme.accentBg : "transparent")
 
     Behavior on color { ColorAnimation { duration: 80 } }
 
     Text {
         anchors.centerIn: parent
         text: root.icon
-        color: root.active ? "#7daea3" : "#d4be98"
+        color: root.active ? Theme.accent : Theme.fg
         font.pixelSize: 15
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Theme.font
         renderType: Text.NativeRendering
     }
 
@@ -38,16 +38,16 @@ Rectangle {
         width: Math.max(14, badgeTxt.implicitWidth + 6)
         height: 14
         radius: 7
-        color: "#ea6962"
+        color: Theme.red
 
         Text {
             id: badgeTxt
             anchors.centerIn: parent
             text: root.badge > 99 ? "99+" : root.badge
-            color: "#1d2021"
+            color: Theme.bgHard
             font.pixelSize: 8
             font.bold: true
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Theme.font
         }
     }
 

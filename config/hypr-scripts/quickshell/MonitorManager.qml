@@ -35,8 +35,8 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: "#282828"
-        border.color: "#3c3836"
+        color: Theme.bg
+        border.color: Theme.border
         border.width: 1
 
         ColumnLayout {
@@ -48,17 +48,17 @@ PanelWindow {
                 Layout.fillWidth: true
                 Text {
                     text: "Monitors"
-                    color: "#d4be98"
+                    color: Theme.fg
                     font.pixelSize: 14
                     font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Theme.font
                     Layout.fillWidth: true
                 }
                 Text {
                     text: Hyprland.monitors.count + " connected"
-                    color: "#928374"
+                    color: Theme.gray
                     font.pixelSize: 11
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Theme.font
                 }
             }
 
@@ -67,7 +67,7 @@ PanelWindow {
                 Layout.fillWidth: true
                 height: 160
                 radius: 8
-                color: "#1d2021"
+                color: Theme.bgHard
                 clip: true
 
                 Item {
@@ -93,8 +93,8 @@ PanelWindow {
                             height: logH * root.previewScale
 
                             radius: 4
-                            color: isSelected ? "#2d4a52" : "#32302f"
-                            border.color: isSelected ? "#7daea3" : "#504945"
+                            color: isSelected ? Theme.accentBg : Theme.bgAlt
+                            border.color: isSelected ? Theme.accent : Theme.borderStrong
                             border.width: isSelected ? 2 : 1
 
                             Behavior on color { ColorAnimation { duration: 120 } }
@@ -106,17 +106,17 @@ PanelWindow {
                                 Text {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: modelData.name
-                                    color: isSelected ? "#7daea3" : "#928374"
+                                    color: isSelected ? Theme.accent : Theme.gray
                                     font.pixelSize: 9
                                     font.bold: isSelected
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
                                 Text {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: modelData.width + "×" + modelData.height
-                                    color: "#665c54"
+                                    color: Theme.grayDim
                                     font.pixelSize: 8
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
                             }
 
@@ -142,25 +142,25 @@ PanelWindow {
 
                     Text {
                         text: root.selectedMonitor?.name ?? ""
-                        color: "#7daea3"
+                        color: Theme.accent
                         font.pixelSize: 13
                         font.bold: true
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                     }
                     Text {
                         text: (root.selectedMonitor?.width ?? 0) + "×" +
                               (root.selectedMonitor?.height ?? 0) + " @ " +
                               Math.round(root.selectedMonitor?.refreshRate ?? 0) + " Hz  ·  " +
                               "scale " + (root.selectedMonitor?.scale ?? 1)
-                        color: "#928374"
+                        color: Theme.gray
                         font.pixelSize: 11
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                     }
                     Text {
                         text: "Position: " + (root.selectedMonitor?.x ?? 0) + ", " + (root.selectedMonitor?.y ?? 0)
-                        color: "#665c54"
+                        color: Theme.grayDim
                         font.pixelSize: 10
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                     }
                 }
 
@@ -170,9 +170,9 @@ PanelWindow {
 
                     Text {
                         text: "Scale"
-                        color: "#928374"
+                        color: Theme.gray
                         font.pixelSize: 11
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                     }
 
                     RowLayout {
@@ -187,17 +187,17 @@ PanelWindow {
                                 color: {
                                     var cur = (root.selectedMonitor?.scale ?? 1).toString()
                                     return cur === modelData
-                                        ? "#2d4a52"
-                                        : (scaleArea.containsMouse ? "#3c3836" : "#32302f")
+                                        ? Theme.accentBg
+                                        : (scaleArea.containsMouse ? Theme.border : Theme.bgAlt)
                                 }
                                 Behavior on color { ColorAnimation { duration: 80 } }
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: modelData + "×"
-                                    color: "#d4be98"
+                                    color: Theme.fg
                                     font.pixelSize: 11
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Theme.font
                                 }
 
                                 MouseArea {
@@ -228,9 +228,9 @@ PanelWindow {
             Text {
                 visible: root.selectedMonitor === null
                 text: "Click a monitor above to select it"
-                color: "#504945"
+                color: Theme.borderStrong
                 font.pixelSize: 12
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 Layout.alignment: Qt.AlignHCenter
             }
         }

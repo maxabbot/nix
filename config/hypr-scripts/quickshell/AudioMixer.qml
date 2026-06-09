@@ -17,8 +17,8 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         radius: 12
-        color: "#282828"
-        border.color: "#3c3836"
+        color: Theme.bg
+        border.color: Theme.border
         border.width: 1
 
         Column {
@@ -29,10 +29,10 @@ PanelWindow {
             // ── Header ───────────────────────────────────────────────────────────
             Text {
                 text: "Audio"
-                color: "#d4be98"
+                color: Theme.fg
                 font.pixelSize: 14
                 font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
             }
 
             // ── Output (default sink) ─────────────────────────────────────────────
@@ -45,16 +45,16 @@ PanelWindow {
 
                     Text {
                         text: ""
-                        color: "#7daea3"
+                        color: Theme.accent
                         font.pixelSize: 14
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                     }
 
                     Text {
                         text: "Output"
-                        color: "#d4be98"
+                        color: Theme.fg
                         font.pixelSize: 12
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                         Layout.fillWidth: true
                         leftPadding: 8
                     }
@@ -62,15 +62,15 @@ PanelWindow {
                     // Mute toggle
                     Rectangle {
                         width: 28; height: 28; radius: 7
-                        color: muteOutArea.containsMouse ? "#3c3836" : "transparent"
+                        color: muteOutArea.containsMouse ? Theme.border : "transparent"
                         Behavior on color { ColorAnimation { duration: 80 } }
 
                         Text {
                             anchors.centerIn: parent
                             text: (Pipewire.defaultAudioSink?.audio?.muted ?? false) ? "" : ""
-                            color: (Pipewire.defaultAudioSink?.audio?.muted ?? false) ? "#ea6962" : "#928374"
+                            color: (Pipewire.defaultAudioSink?.audio?.muted ?? false) ? Theme.red : Theme.gray
                             font.pixelSize: 13
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                         }
 
                         MouseArea {
@@ -98,7 +98,7 @@ PanelWindow {
             }
 
             // Divider
-            Rectangle { width: parent.width; height: 1; color: "#3c3836" }
+            Rectangle { width: parent.width; height: 1; color: Theme.border }
 
             // ── Input (default source) ─────────────────────────────────────────────
             Column {
@@ -110,16 +110,16 @@ PanelWindow {
 
                     Text {
                         text: ""
-                        color: "#d3869b"
+                        color: Theme.purple
                         font.pixelSize: 14
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                     }
 
                     Text {
                         text: "Input"
-                        color: "#d4be98"
+                        color: Theme.fg
                         font.pixelSize: 12
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                         Layout.fillWidth: true
                         leftPadding: 8
                     }
@@ -127,15 +127,15 @@ PanelWindow {
                     // Mute microphone toggle
                     Rectangle {
                         width: 28; height: 28; radius: 7
-                        color: muteInArea.containsMouse ? "#3c3836" : "transparent"
+                        color: muteInArea.containsMouse ? Theme.border : "transparent"
                         Behavior on color { ColorAnimation { duration: 80 } }
 
                         Text {
                             anchors.centerIn: parent
                             text: (Pipewire.defaultAudioSource?.audio?.muted ?? false) ? "" : ""
-                            color: (Pipewire.defaultAudioSource?.audio?.muted ?? false) ? "#ea6962" : "#928374"
+                            color: (Pipewire.defaultAudioSource?.audio?.muted ?? false) ? Theme.red : Theme.gray
                             font.pixelSize: 13
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                         }
 
                         MouseArea {
@@ -169,14 +169,14 @@ PanelWindow {
                 spacing: 6
                 visible: streamRepeater.count > 0
 
-                Rectangle { width: parent.width; height: 1; color: "#3c3836" }
+                Rectangle { width: parent.width; height: 1; color: Theme.border }
 
                 Text {
                     text: "Apps"
-                    color: "#928374"
+                    color: Theme.gray
                     font.pixelSize: 11
                     font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Theme.font
                 }
 
                 Repeater {

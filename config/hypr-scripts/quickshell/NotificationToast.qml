@@ -11,15 +11,15 @@ Rectangle {
 
     readonly property color urgencyColor: {
         switch (notification.urgency) {
-            case NotificationUrgency.Low:      return "#3c3836"
-            case NotificationUrgency.Critical: return "#6b2a2a"
-            default:                           return "#2d3b3b"
+            case NotificationUrgency.Low:      return Theme.border
+            case NotificationUrgency.Critical: return Theme.redDark
+            default:                           return Theme.toastBg
         }
     }
 
     radius: 10
     color: urgencyColor
-    border.color: notification.urgency === NotificationUrgency.Critical ? "#ea6962" : "#504945"
+    border.color: notification.urgency === NotificationUrgency.Critical ? Theme.red : Theme.borderStrong
     border.width: 1
     implicitHeight: body.implicitHeight + 20
 
@@ -41,19 +41,19 @@ Rectangle {
 
             Text {
                 text: notification.appName
-                color: "#928374"
+                color: Theme.gray
                 font.pixelSize: 10
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 elide: Text.ElideRight
                 width: parent.width
             }
 
             Text {
                 text: notification.summary
-                color: "#ebdbb2"
+                color: Theme.fgBright
                 font.pixelSize: 13
                 font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 elide: Text.ElideRight
                 width: parent.width
             }
@@ -61,9 +61,9 @@ Rectangle {
             Text {
                 visible: notification.body !== ""
                 text: notification.body
-                color: "#d5c4a1"
+                color: Theme.fgSoft
                 font.pixelSize: 12
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
                 wrapMode: Text.WordWrap
                 width: parent.width
                 maximumLineCount: 3
@@ -76,16 +76,16 @@ Rectangle {
             width: 22
             height: 22
             radius: 11
-            color: closeArea.containsMouse ? "#504945" : "transparent"
+            color: closeArea.containsMouse ? Theme.borderStrong : "transparent"
             Layout.alignment: Qt.AlignTop
             Behavior on color { ColorAnimation { duration: 80 } }
 
             Text {
                 anchors.centerIn: parent
                 text: ""
-                color: "#928374"
+                color: Theme.gray
                 font.pixelSize: 10
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Theme.font
             }
 
             MouseArea {

@@ -18,9 +18,9 @@ RowLayout {
 
     Text {
         text: root.label
-        color: "#928374"
+        color: Theme.gray
         font.pixelSize: 12
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Theme.font
         Layout.minimumWidth: 64
     }
 
@@ -38,13 +38,13 @@ RowLayout {
             width: sl.availableWidth
             height: 4
             radius: 2
-            color: "#3c3836"
+            color: Theme.border
 
             Rectangle {
                 width: sl.visualPosition * parent.width
                 height: parent.height
                 radius: 2
-                color: "#7daea3"
+                color: Theme.accent
             }
         }
 
@@ -54,16 +54,16 @@ RowLayout {
             width: 14
             height: 14
             radius: 7
-            color: sl.pressed ? "#89b482" : "#7daea3"
+            color: sl.pressed ? Theme.accentBright : Theme.accent
             Behavior on color { ColorAnimation { duration: 80 } }
         }
     }
 
     Text {
         text: Math.round(root.value * (root.unit === "%" ? 100 : root.to)) + root.unit
-        color: "#d4be98"
+        color: Theme.fg
         font.pixelSize: 11
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Theme.font
         Layout.minimumWidth: 36
         horizontalAlignment: Text.AlignRight
     }

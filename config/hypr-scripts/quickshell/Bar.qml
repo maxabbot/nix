@@ -16,13 +16,13 @@ Rectangle {
     signal panelToggled(string name)
 
     // bg0 at 92% opacity — matches Waybar
-    color: Qt.rgba(40/255, 40/255, 40/255, 0.92)
+    color: Theme.barBg
 
     // Hairline top border
     Rectangle {
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: 1
-        color: "#3c3836"
+        color: Theme.border
     }
 
     RowLayout {
@@ -82,8 +82,8 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: rebuildSpinner.chars[rebuildSpinner.idx]
-                color: "#7daea3"; font.pixelSize: 14
-                font.family: "JetBrainsMono Nerd Font"
+                color: Theme.accent; font.pixelSize: 14
+                font.family: Theme.font
             }
 
             Timer {
@@ -103,7 +103,7 @@ Rectangle {
         // Separator
         Rectangle {
             width: 1; height: 20
-            color: "#3c3836"
+            color: Theme.border
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -124,7 +124,7 @@ Rectangle {
         // Separator
         Rectangle {
             width: 1; height: 20
-            color: "#3c3836"
+            color: Theme.border
             Layout.alignment: Qt.AlignVCenter
         }
 

@@ -29,7 +29,7 @@ RowLayout {
             width: 26
             height: 26
             radius: 13
-            color: isActive ? "#7daea3" : "#3c3836"
+            color: isActive ? Theme.accent : Theme.border
 
             Behavior on color {
                 ColorAnimation { duration: 120 }
@@ -39,7 +39,7 @@ RowLayout {
             Text {
                 anchors.centerIn: parent
                 text: modelData.id
-                color: parent.isActive ? "#1d2021" : "#928374"
+                color: parent.isActive ? Theme.bgHard : Theme.gray
                 font.pixelSize: 10
                 font.weight: parent.isActive ? Font.Bold : Font.Normal
             }

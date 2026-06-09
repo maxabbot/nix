@@ -66,7 +66,7 @@ PanelWindow {
     function appendLog(text, color) {
         var clean = text.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, "").replace(/\r/g, "")
         if (!clean) return
-        logModel.append({ text: clean, color: color || "#bdae93" })
+        logModel.append({ text: clean, color: color || Theme.fgDim })
         // Keep last 300 lines
         if (logModel.count > 300) logModel.remove(0)
         Qt.callLater(() => { logView.positionViewAtEnd() })
@@ -74,11 +74,11 @@ PanelWindow {
 
     function logColor(line) {
         var l = line.toLowerCase()
-        if (/error:|failed|abort/i.test(l))                     return "#ea6962"
-        if (/warning:|warn:/i.test(l))                          return "#d8a657"
-        if (/building '|copying '|fetching '|downloading/i.test(l)) return "#7daea3"
-        if (/✓|activated|done\b|success|finished/i.test(l))    return "#a9b665"
-        return "#bdae93"
+        if (/error:|failed|abort/i.test(l))                     return Theme.red
+        if (/warning:|warn:/i.test(l))                          return Theme.yellow
+        if (/building '|copying '|fetching '|downloading/i.test(l)) return Theme.accent
+        if (/✓|activated|done\b|success|finished/i.test(l))    return Theme.green
+        return Theme.fgDim
     }
 
     function startRebuild(cmd) {
@@ -101,7 +101,7 @@ PanelWindow {
             root.rebuilding = false
             root.rebuildStatus = ok ? "success" : "failed"
             root.appendLog(ok ? "── Build succeeded ──" : "── Build failed (exit " + rebuilder.exitCode + ") ──",
-                           ok ? "#a9b665" : "#ea6962")
+                           ok ? Theme.green : Theme.red)
             root.rebuildFinished(ok)
             pollDisk.running = true
             pollPaths.running = true
@@ -113,8 +113,8 @@ PanelWindow {
     // ── UI ───────────────────────────────────────────────────────────────────────
     Rectangle {
         anchors.fill: parent
-        radius: 12; color: "#282828"
-        border.color: "#3c3836"; border.width: 1
+        radius: 12; color: Theme.bg
+        border.color: Theme.border; border.width: 1
 
         ColumnLayout {
             anchors { fill: parent; margins: 12 }
@@ -125,15 +125,15 @@ PanelWindow {
                 Layout.fillWidth: true; height: 28; spacing: 8
                 Text {
                     text: "󱄅  Nix"
-                    color: "#d4be98"; font.pixelSize: 14; font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Theme.fg; font.pixelSize: 14; font.bold: true
+                    font.family: Theme.font
                     Layout.fillWidth: true
                 }
                 Rectangle {
                     visible: root.rebuildStatus !== "idle"
-                    radius: 4; color: "#1d2021"
-                    border.color: root.rebuildStatus === "success" ? "#a9b665"
-                                : root.rebuildStatus === "failed"  ? "#ea6962" : "#7daea3"
+                    radius: 4; color: Theme.bgHard
+                    border.color: root.rebuildStatus === "success" ? Theme.green
+                                : root.rebuildStatus === "failed"  ? Theme.red : Theme.accent
                     border.width: 1
                     implicitWidth: statusLabel.implicitWidth + 10
                     implicitHeight: statusLabel.implicitHeight + 4
@@ -141,9 +141,9 @@ PanelWindow {
                         id: statusLabel
                         anchors.centerIn: parent
                         text: root.rebuildStatus
-                        color: root.rebuildStatus === "success" ? "#a9b665"
-                             : root.rebuildStatus === "failed"  ? "#ea6962" : "#7daea3"
-                        font.pixelSize: 10; font.family: "JetBrainsMono Nerd Font"
+                        color: root.rebuildStatus === "success" ? Theme.green
+                             : root.rebuildStatus === "failed"  ? Theme.red : Theme.accent
+                        font.pixelSize: 10; font.family: Theme.font
                     }
                 }
             }
@@ -151,7 +151,7 @@ PanelWindow {
             // ── Store gauge ──────────────────────────────────────────────────────
             Rectangle {
                 Layout.fillWidth: true; height: 180; radius: 8
-                color: "#32302f"; border.color: "#3c3836"; border.width: 1
+                color: Theme.bgAlt; border.color: Theme.border; border.width: 1
 
                 RowLayout {
                     anchors { fill: parent; margins: 12 }
@@ -174,7 +174,7 @@ PanelWindow {
                             // Track
                             ctx.beginPath()
                             ctx.arc(cx, cy, r, 0, Math.PI * 2)
-                            ctx.strokeStyle = "#3c3836"
+                            ctx.strokeStyle = Theme.border
                             ctx.lineWidth = 10
                             ctx.stroke()
 
@@ -183,22 +183,22 @@ PanelWindow {
                                 var start = -Math.PI / 2
                                 ctx.beginPath()
                                 ctx.arc(cx, cy, r, start, start + Math.PI * 2 * Math.min(fraction, 1))
-                                ctx.strokeStyle = fraction > 0.9 ? "#ea6962"
-                                               : fraction > 0.75 ? "#d8a657" : "#7daea3"
+                                ctx.strokeStyle = fraction > 0.9 ? Theme.red
+                                               : fraction > 0.75 ? Theme.yellow : Theme.accent
                                 ctx.lineWidth = 10
                                 ctx.lineCap = "round"
                                 ctx.stroke()
                             }
 
                             // Percentage text
-                            ctx.font = "bold 18px 'JetBrainsMono Nerd Font'"
-                            ctx.fillStyle = "#d4be98"
+                            ctx.font = "bold 18px '" + Theme.font + "'"
+                            ctx.fillStyle = Theme.fg
                             ctx.textAlign = "center"
                             ctx.textBaseline = "middle"
                             ctx.fillText(Math.round(fraction * 100) + "%", cx, cy - 8)
 
-                            ctx.font = "11px 'JetBrainsMono Nerd Font'"
-                            ctx.fillStyle = "#928374"
+                            ctx.font = "11px '" + Theme.font + "'"
+                            ctx.fillStyle = Theme.gray
                             ctx.fillText("used", cx, cy + 10)
                         }
                     }
@@ -209,39 +209,39 @@ PanelWindow {
 
                         Column {
                             spacing: 2
-                            Text { text: "Used"; color: "#928374"; font.pixelSize: 10; font.family: "JetBrainsMono Nerd Font" }
+                            Text { text: "Used"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
                             Text {
                                 text: (root.diskUsed / 1073741824).toFixed(1) + " GB"
-                                color: "#ebdbb2"; font.pixelSize: 16; font.bold: true
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.fgBright; font.pixelSize: 16; font.bold: true
+                                font.family: Theme.font
                             }
                         }
 
                         Column {
                             spacing: 2
-                            Text { text: "Total"; color: "#928374"; font.pixelSize: 10; font.family: "JetBrainsMono Nerd Font" }
+                            Text { text: "Total"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
                             Text {
                                 text: (root.diskTotal / 1073741824).toFixed(1) + " GB"
-                                color: "#d4be98"; font.pixelSize: 13
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.fg; font.pixelSize: 13
+                                font.family: Theme.font
                             }
                         }
 
                         Column {
                             spacing: 2
-                            Text { text: "Store paths"; color: "#928374"; font.pixelSize: 10; font.family: "JetBrainsMono Nerd Font" }
+                            Text { text: "Store paths"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
                             Text {
                                 text: root.storePaths.toLocaleString()
-                                color: "#d4be98"; font.pixelSize: 13
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.fg; font.pixelSize: 13
+                                font.family: Theme.font
                             }
                         }
 
                         // GC button
                         Rectangle {
                             width: parent.width; height: 32; radius: 6
-                            color: gcArea.containsMouse ? (gcProcess.running ? "#504945" : "#2d4a52") : "#32302f"
-                            border.color: "#504945"; border.width: 1
+                            color: gcArea.containsMouse ? (gcProcess.running ? Theme.borderStrong : Theme.accentBg) : Theme.bgAlt
+                            border.color: Theme.borderStrong; border.width: 1
                             Behavior on color { ColorAnimation { duration: 80 } }
 
                             RowLayout {
@@ -249,13 +249,13 @@ PanelWindow {
                                 spacing: 6
                                 Text {
                                     text: gcProcess.running ? "" : "󱃅"
-                                    color: "#7daea3"; font.pixelSize: 13
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    color: Theme.accent; font.pixelSize: 13
+                                    font.family: Theme.font
                                 }
                                 Text {
                                     text: gcProcess.running ? "Collecting…" : "Collect Garbage"
-                                    color: "#d4be98"; font.pixelSize: 12
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    color: Theme.fg; font.pixelSize: 12
+                                    font.family: Theme.font
                                     Layout.fillWidth: true
                                 }
                             }
@@ -282,7 +282,7 @@ PanelWindow {
             }
 
             // ── Divider ──────────────────────────────────────────────────────────
-            Rectangle { Layout.fillWidth: true; height: 1; color: "#3c3836" }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
             // ── Rebuild section ──────────────────────────────────────────────────
             RowLayout {
@@ -290,23 +290,23 @@ PanelWindow {
 
                 Text {
                     text: "Rebuild"
-                    color: "#928374"; font.pixelSize: 11; font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Theme.gray; font.pixelSize: 11; font.bold: true
+                    font.family: Theme.font
                     Layout.fillWidth: true
                 }
 
                 // NixOS switch
                 Rectangle {
                     implicitWidth: nixLabel.implicitWidth + 20; height: 30; radius: 6
-                    color: nixBtn.containsMouse && !root.rebuilding ? "#2d4a52" : "#32302f"
-                    border.color: "#504945"; border.width: 1
+                    color: nixBtn.containsMouse && !root.rebuilding ? Theme.accentBg : Theme.bgAlt
+                    border.color: Theme.borderStrong; border.width: 1
                     Behavior on color { ColorAnimation { duration: 80 } }
                     Text {
                         id: nixLabel
                         anchors.centerIn: parent
                         text: "NixOS Switch"
-                        color: root.rebuilding ? "#665c54" : "#d4be98"
-                        font.pixelSize: 11; font.family: "JetBrainsMono Nerd Font"
+                        color: root.rebuilding ? Theme.grayDim : Theme.fg
+                        font.pixelSize: 11; font.family: Theme.font
                     }
                     MouseArea {
                         id: nixBtn
@@ -320,15 +320,15 @@ PanelWindow {
                 // HM switch
                 Rectangle {
                     implicitWidth: hmLabel.implicitWidth + 20; height: 30; radius: 6
-                    color: hmBtn.containsMouse && !root.rebuilding ? "#2d4a52" : "#32302f"
-                    border.color: "#504945"; border.width: 1
+                    color: hmBtn.containsMouse && !root.rebuilding ? Theme.accentBg : Theme.bgAlt
+                    border.color: Theme.borderStrong; border.width: 1
                     Behavior on color { ColorAnimation { duration: 80 } }
                     Text {
                         id: hmLabel
                         anchors.centerIn: parent
                         text: "HM Switch"
-                        color: root.rebuilding ? "#665c54" : "#d4be98"
-                        font.pixelSize: 11; font.family: "JetBrainsMono Nerd Font"
+                        color: root.rebuilding ? Theme.grayDim : Theme.fg
+                        font.pixelSize: 11; font.family: Theme.font
                     }
                     MouseArea {
                         id: hmBtn
@@ -343,7 +343,7 @@ PanelWindow {
             // ── Log output ───────────────────────────────────────────────────────
             Rectangle {
                 Layout.fillWidth: true; Layout.fillHeight: true; radius: 6
-                color: "#1d2021"; border.color: "#3c3836"; border.width: 1
+                color: Theme.bgHard; border.color: Theme.border; border.width: 1
 
                 // Empty state
                 Column {
@@ -351,14 +351,14 @@ PanelWindow {
                     anchors.centerIn: parent; spacing: 8
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "󱄅"; color: "#504945"; font.pixelSize: 28
-                        font.family: "JetBrainsMono Nerd Font"
+                        text: "󱄅"; color: Theme.borderStrong; font.pixelSize: 28
+                        font.family: Theme.font
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: "No rebuild log yet"
-                        color: "#665c54"; font.pixelSize: 12
-                        font.family: "JetBrainsMono Nerd Font"
+                        color: Theme.grayDim; font.pixelSize: 12
+                        font.family: Theme.font
                     }
                 }
 
@@ -375,7 +375,7 @@ PanelWindow {
                         text: model.text
                         color: model.color
                         font.pixelSize: 10
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Theme.font
                         wrapMode: Text.NoWrap
                         elide: Text.ElideRight
                     }

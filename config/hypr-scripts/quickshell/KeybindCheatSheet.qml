@@ -94,8 +94,8 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 12; color: "#282828"
-        border.color: "#3c3836"; border.width: 1
+        radius: 12; color: Theme.bg
+        border.color: Theme.border; border.width: 1
 
         ColumnLayout {
             anchors { fill: parent; margins: 12 }
@@ -107,25 +107,25 @@ PanelWindow {
 
                 Text {
                     text: "󰌌  Keybinds"
-                    color: "#d4be98"; font.pixelSize: 14; font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Theme.fg; font.pixelSize: 14; font.bold: true
+                    font.family: Theme.font
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: filteredBinds.count + " / " + allBinds.count
-                    color: "#665c54"; font.pixelSize: 10
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Theme.grayDim; font.pixelSize: 10
+                    font.family: Theme.font
                 }
 
                 Rectangle {
                     width: 26; height: 26; radius: 6
-                    color: refreshArea.containsMouse ? "#3c3836" : "transparent"
+                    color: refreshArea.containsMouse ? Theme.border : "transparent"
                     Behavior on color { ColorAnimation { duration: 80 } }
                     Text {
                         anchors.centerIn: parent
-                        text: ""; color: "#928374"; font.pixelSize: 12
-                        font.family: "JetBrainsMono Nerd Font"
+                        text: ""; color: Theme.gray; font.pixelSize: 12
+                        font.family: Theme.font
                     }
                     MouseArea {
                         id: refreshArea
@@ -139,22 +139,22 @@ PanelWindow {
             // Search
             Rectangle {
                 Layout.fillWidth: true; height: 36; radius: 8
-                color: "#32302f"
-                border.color: searchField.activeFocus ? "#7daea3" : "#504945"
+                color: Theme.bgAlt
+                border.color: searchField.activeFocus ? Theme.accent : Theme.borderStrong
                 border.width: 1
                 Behavior on border.color { ColorAnimation { duration: 120 } }
 
                 RowLayout {
                     anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
                     spacing: 8
-                    Text { text: ""; color: "#928374"; font.pixelSize: 13; font.family: "JetBrainsMono Nerd Font" }
+                    Text { text: ""; color: Theme.gray; font.pixelSize: 13; font.family: Theme.font }
                     TextField {
                         id: searchField
                         Layout.fillWidth: true
                         placeholderText: "Search keybinds…"
                         background: null
-                        color: "#ebdbb2"; placeholderTextColor: "#665c54"
-                        font.pixelSize: 13; font.family: "JetBrainsMono Nerd Font"
+                        color: Theme.fgBright; placeholderTextColor: Theme.grayDim
+                        font.pixelSize: 13; font.family: Theme.font
                         onTextChanged: root.filter(text)
                         Keys.onEscapePressed: root.visible = false
                     }
@@ -179,14 +179,14 @@ PanelWindow {
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: root.loaded ? "󰌌" : ""
-                                color: "#504945"; font.pixelSize: 28
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.borderStrong; font.pixelSize: 28
+                                font.family: Theme.font
                             }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: root.loaded ? "No binds match" : "Loading…"
-                                color: "#665c54"; font.pixelSize: 13
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.grayDim; font.pixelSize: 13
+                                font.family: Theme.font
                             }
                         }
                     }
@@ -204,14 +204,14 @@ PanelWindow {
                                 visible: model.isHeader
                                 anchors { left: parent.left; leftMargin: 4; verticalCenter: parent.verticalCenter }
                                 text: model.isHeader ? model.section.toUpperCase() : ""
-                                color: "#928374"; font.pixelSize: 9; font.bold: true
-                                font.family: "JetBrainsMono Nerd Font"
+                                color: Theme.gray; font.pixelSize: 9; font.bold: true
+                                font.family: Theme.font
                                 font.letterSpacing: 1.2
                             }
                             Rectangle {
                                 visible: model.isHeader
                                 anchors { left: sectionLabel.right; leftMargin: 6; right: parent.right; rightMargin: 4; verticalCenter: parent.verticalCenter }
-                                height: 1; color: "#3c3836"
+                                height: 1; color: Theme.border
                             }
 
                             // Bind row
@@ -219,8 +219,8 @@ PanelWindow {
                                 visible: !model.isHeader
                                 anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
                                 height: bindRow.implicitHeight + 12
-                                radius: 6; color: "#32302f"
-                                border.color: "#3c3836"; border.width: 1
+                                radius: 6; color: Theme.bgAlt
+                                border.color: Theme.border; border.width: 1
 
                                 RowLayout {
                                     id: bindRow
@@ -231,24 +231,24 @@ PanelWindow {
                                     spacing: 8
 
                                     Rectangle {
-                                        radius: 4; color: "#1d2021"
-                                        border.color: "#504945"; border.width: 1
+                                        radius: 4; color: Theme.bgHard
+                                        border.color: Theme.borderStrong; border.width: 1
                                         implicitWidth: kbdText.implicitWidth + 12
                                         implicitHeight: kbdText.implicitHeight + 6
                                         Text {
                                             id: kbdText
                                             anchors.centerIn: parent
                                             text: (model.mod ? model.mod + "+" : "") + model.key.toUpperCase()
-                                            color: "#7daea3"; font.pixelSize: 10
-                                            font.family: "JetBrainsMono Nerd Font"
+                                            color: Theme.accent; font.pixelSize: 10
+                                            font.family: Theme.font
                                         }
                                     }
 
                                     Text {
                                         Layout.fillWidth: true
                                         text: model.name
-                                        color: "#d4be98"; font.pixelSize: 11
-                                        font.family: "JetBrainsMono Nerd Font"
+                                        color: Theme.fg; font.pixelSize: 11
+                                        font.family: Theme.font
                                         elide: Text.ElideRight
                                     }
                                 }

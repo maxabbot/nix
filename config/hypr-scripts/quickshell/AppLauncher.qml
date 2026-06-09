@@ -76,8 +76,8 @@ PanelWindow {
             anchors.bottom: parent.bottom
             width: Math.min(parent.width - 32, 760)
             radius: 12
-            color: "#282828"
-            border.color: "#3c3836"
+            color: Theme.bg
+            border.color: Theme.border
             border.width: 1
 
             Column {
@@ -89,8 +89,8 @@ PanelWindow {
                     width: parent.width
                     height: 40
                     radius: 8
-                    color: "#32302f"
-                    border.color: searchField.activeFocus ? "#7daea3" : "#504945"
+                    color: Theme.bgAlt
+                    border.color: searchField.activeFocus ? Theme.accent : Theme.borderStrong
                     border.width: 1
                     Behavior on border.color { ColorAnimation { duration: 120 } }
 
@@ -100,9 +100,9 @@ PanelWindow {
 
                         Text {
                             text: ""
-                            color: "#928374"
+                            color: Theme.gray
                             font.pixelSize: 14
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                         }
 
                         TextField {
@@ -110,10 +110,10 @@ PanelWindow {
                             Layout.fillWidth: true
                             placeholderText: "Search applications…"
                             background: null
-                            color: "#ebdbb2"
-                            placeholderTextColor: "#665c54"
+                            color: Theme.fgBright
+                            placeholderTextColor: Theme.grayDim
                             font.pixelSize: 14
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Theme.font
                             onTextChanged: root.filterApps(text)
                             Keys.onEscapePressed: root.visible = false
                             Keys.onReturnPressed: {
@@ -145,7 +145,7 @@ PanelWindow {
                             Rectangle {
                                 anchors { fill: parent; margins: 4 }
                                 radius: 8
-                                color: appArea.containsMouse ? "#3c3836" : "transparent"
+                                color: appArea.containsMouse ? Theme.border : "transparent"
                                 Behavior on color { ColorAnimation { duration: 80 } }
 
                                 Column {
@@ -157,23 +157,23 @@ PanelWindow {
                                     Rectangle {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         width: 32; height: 32; radius: 8
-                                        color: "#32302f"
+                                        color: Theme.bgAlt
                                         Text {
                                             anchors.centerIn: parent
                                             text: model.name.charAt(0).toUpperCase()
-                                            color: "#7daea3"
+                                            color: Theme.accent
                                             font.pixelSize: 16
                                             font.bold: true
-                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.family: Theme.font
                                         }
                                     }
 
                                     Text {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         text: model.name
-                                        color: "#d4be98"
+                                        color: Theme.fg
                                         font.pixelSize: 10
-                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.family: Theme.font
                                         elide: Text.ElideRight
                                         width: parent.width
                                         horizontalAlignment: Text.AlignHCenter
