@@ -172,7 +172,6 @@ hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd("kitty"),                   
 hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("nautilus"),                      { description = "Apps | Files" })
 hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("zen-beta"),                      { description = "Apps | Browser" })
 hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"),                        { description = "Apps | Launcher" })
-hl.bind(mainMod .. " + SHIFT + D",  hl.dsp.exec_cmd("fuzzel --terminal=kitty"),       { description = "Apps | Launcher (terminal)" })
 
 -- Window management
 hl.bind(mainMod .. " + Q",         hl.dsp.window.kill(),                                              { description = "Window | Close" })
@@ -221,7 +220,7 @@ hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"),                 
 hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"),                                                 { description = "System | Suspend" })
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("wlogout -p layer-shell"),                                            { description = "System | Logout menu" })
 hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle notifications"),         { description = "System | Notifications" })
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel -d | cliphist decode | wl-copy"),             { description = "System | Clipboard history" })
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/clipboard-fuzzel.sh"),                   { description = "System | Clipboard history" })
 
 -- Screenshots
 hl.bind("Print",               hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'),                                        { description = "Screenshots | Region to clipboard" })

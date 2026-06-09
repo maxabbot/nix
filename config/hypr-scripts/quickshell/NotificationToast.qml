@@ -23,10 +23,13 @@ Rectangle {
     border.width: 1
     implicitHeight: body.implicitHeight + 20
 
-    // Auto-dismiss after timeout (or 6 s default for persistent/unspecified notifications)
+    // Auto-dismiss after timeout (or 6 s default). Critical notifications never
+    // auto-expire per the freedesktop spec — they stay until explicitly dismissed.
+    readonly property bool critical: notification.urgency === NotificationUrgency.Critical
+
     Timer {
         interval: notification.expireTimeout > 0 ? notification.expireTimeout : 6000
-        running: true
+        running: !root.critical
         onTriggered: notification.close(NotificationCloseReason.Expired)
     }
 

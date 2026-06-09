@@ -1,7 +1,6 @@
 // PowerMenu.qml — Power action panel (bottom-right).
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
@@ -82,10 +81,5 @@ PanelWindow {
                 }
             }
         }
-    }
-
-    Process {
-        id: sysCmd
-        command: []
     }
 }

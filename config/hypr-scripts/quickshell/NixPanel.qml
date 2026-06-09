@@ -51,7 +51,8 @@ PanelWindow {
 
     Process {
         id: pollPaths
-        command: ["bash", "-c", "ls /nix/store | wc -l"]
+        // -U skips the sort — /nix/store can hold hundreds of thousands of entries
+        command: ["bash", "-c", "ls -1U /nix/store | wc -l"]
         stdout: SplitParser {
             onRead: (line) => {
                 var n = parseInt(line.trim())

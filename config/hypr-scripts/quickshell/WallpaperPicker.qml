@@ -39,7 +39,7 @@ PanelWindow {
         command: ["bash", "-c",
             "echo \"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell/wallpaper_picker/thumbs\";" +
             "echo \"${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}\";" +
-            "awww query 2>/dev/null | grep -o '[^ ]*\\.(png\\|jpg\\|jpeg\\|gif\\|mp4\\|mkv\\|mov\\|webm)' | head -n1 || true"
+            "awww query 2>/dev/null | grep -oiE '[^ ]*\\.(png|jpg|jpeg|gif|mp4|mkv|mov|webm)' | head -n1 || true"
         ]
         stdout: SplitParser {
             property int lineNo: 0

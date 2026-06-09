@@ -147,6 +147,7 @@
         main = {
           dpi-aware = "auto";
           prompt = "❯ ";
+          placeholder = "Search…";
           icons-enabled = true;
           icon-theme = "Papirus-Dark";
           lines = 10;
@@ -154,7 +155,13 @@
           horizontal-pad = 20;
           vertical-pad = 8;
           inner-pad = 4;
-          fuzzy = true;
+          line-height = 22;
+          # fuzzel 1.13+ replaced the old `fuzzy` bool with match-mode (exact|fzf|fuzzy).
+          match-mode = "fzf";
+          # Show "match/total" so you can see how many results a query has.
+          match-counter = true;
+          # Larger inline thumbnails for image entries (clipboard picker).
+          image-size-ratio = 0.9;
           terminal = "kitty";
         };
         border = {

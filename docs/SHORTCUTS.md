@@ -11,7 +11,6 @@ Gruvbox Material Dark · home-desktop
 | Super + E | Files (nautilus) |
 | Super + B | Browser (zen) |
 | Super + D | Launcher (fuzzel) |
-| Super + Shift + D | Launcher (terminal) |
 | **Windows** | |
 | Super + Q | Close window |
 | Super + F | Fullscreen |

@@ -4,6 +4,8 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 ## Components
 
+**`Theme.qml`** — `pragma Singleton` holding the Gruvbox Material Dark palette, the UI font (`JetBrainsMono Nerd Font`), and shared metrics. Every component references colours/fonts as `Theme.<token>` (e.g. `Theme.bg`, `Theme.accent`, `Theme.font`) — no `import` needed, it resolves by same-directory registration. Change a colour here once and it updates across the whole shell.
+
 **`Shell.qml`** — Entry point. Owns all global state (`activePanel`, `dndEnabled`, `rebuildRunning`), the `IpcHandler` for `qs_manager.sh` commands, the `NotificationServer` (D-Bus `org.freedesktop.Notifications`), the transient toast window, and spawns one `Bar` per screen via `Variants`.
 
 **`Bar.qml`** — Bottom bar content (40px, full-width per screen). Left: launcher button + workspace dots. Centre: media player. Right: keybinds, clipboard, rebuild spinner, nix, monitors, wallpaper, notifications, control center, audio, power buttons. Emits `panelToggled(name)` up to Shell.

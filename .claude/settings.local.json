@@ -1,7 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(awk '{print $3}')"
+      "Bash(awk '{print $3}')",
+      "Bash(shellcheck -S warning qs_clipboard.sh list-apps.sh ../qs_manager.sh)",
+      "Bash(sed -n '18,20p')",
+      "Bash(sed -n '18,20p' config/hypr-scripts/quickshell/Bar.qml)",
+      "Bash(chmod +x config/hypr-scripts/clipboard-fuzzel.sh)",
+      "Bash(shellcheck config/hypr-scripts/clipboard-fuzzel.sh)",
+      "Bash(bash -n config/hypr-scripts/clipboard-fuzzel.sh)",
+      "Bash(command -v luac)",
+      "Bash(luac -p config/hypr/hyprland.lua)",
+      "Bash(command -v lua)",
+      "Bash(lua -e \"assert\\(loadfile\\('config/hypr/hyprland.lua'\\)\\)\")",
+      "Bash(fuzzel --help)",
+      "Bash(col -b)",
+      "Bash(grep -nA8 -iE 'dmenu mode|Th\\(e|is\\) icon|\\\\\\\\\\\\\\\\0icon|0icon|ICON')",
+      "Bash(command -v cliphist)",
+      "Bash(cliphist list *)",
+      "Bash(timeout 2 fuzzel --dmenu --check-config)",
+      "Bash(timeout 2 fuzzel --dmenu)",
+      "Bash(grep -niA6 -E 'match-mode|fuzzy-min|fuzzy')"
     ]
   }
 }
