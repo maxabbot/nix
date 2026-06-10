@@ -31,7 +31,32 @@
       "Bash(sed -n '1,60p' /etc/nixos/config/hypr-scripts/settings_watcher.sh)",
       "Bash(awk '{ if \\(length\\($2\\) <= 2 && NF==2\\) c++ } END { print c \" of 30 commits have 1-2 char messages\" }')",
       "Bash(shellcheck /etc/nixos/config/hypr-scripts/gaming-toggle.sh /etc/nixos/config/hypr-scripts/qs_manager.sh /etc/nixos/config/hypr-scripts/shortcuts-wallpaper.sh)",
-      "Bash(shellcheck config/hypr-scripts/*.sh)"
+      "Bash(shellcheck config/hypr-scripts/*.sh)",
+      "Bash(systemctl --user is-active waybar.service)",
+      "Bash(systemctl --user list-units --all)",
+      "Bash(command -v gpu-screen-recorder)",
+      "Bash(command -v satty)",
+      "Bash(command -v zbarimg)",
+      "Read(//run/user/1000/**)",
+      "Bash(bash -x ~/.config/hypr/scripts/gaming-toggle.sh)",
+      "Read(//home/max/**)",
+      "Bash(bash ~/.config/hypr/scripts/gaming-toggle.sh)",
+      "Bash(echo \"after dispatch-stop: $\\(systemctl --user is-active waybar.service\\)\")",
+      "Bash(systemctl --user start waybar.service)",
+      "Bash(echo \"restored: $\\(systemctl --user is-active waybar.service\\)\")",
+      "Bash(rm -f /tmp/claude-exec-test)",
+      "Read(//tmp/**)",
+      "Bash(quickshell *)",
+      "Bash(pkill quickshell *)",
+      "Bash(quickshell -p /home/max/.config/hypr/scripts/quickshell/Shell.qml)",
+      "Bash(systemctl --user show waybar.service -p Restart -p ExecStart)",
+      "Bash(xargs ls -lt)",
+      "Bash(awk '$1 == \"100644\" {print $4, \"MISSING +x\"} $1 == \"100755\" {print $4, \"ok\"}')",
+      "Bash(shellcheck /etc/nixos/config/hypr-scripts/gaming-toggle.sh)",
+      "Bash(awk '{print $1, $4}')",
+      "Bash(command -v uwsm)",
+      "Bash(uwsm stop *)",
+      "Bash(systemctl --user list-units)"
     ]
   }
 }

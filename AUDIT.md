@@ -108,11 +108,12 @@ These are symlinked into `~/.config/hypr/scripts/` but referenced by **nothing**
 | `lock.sh` | ✅ deleted | Launched a nonexistent `Lock.qml` (B2) |
 | `workspaces.sh` (107) | ✅ deleted | Superseded: `Workspaces.qml` reads `Hyprland.workspaces` natively |
 | `volume_listener.sh` (40) | ✅ deleted | OSD is driven by `swayosd` binds in `hyprland.lua` instead |
-| `screenshot.sh` (352 lines) | still present | Requires `satty` and `zbarimg`, which **no module installs** — it would fail its own dependency check if ever run |
+| `exit.sh` | ✅ deleted | Pre-UWSM logout helper; wlogout's logout action now uses `uwsm stop` (the canonical clean logout), making it redundant |
+| `reload.sh` | ✅ deleted | Unreferenced; also called a nonexistent `forceReload` IPC function |
+| `screenshot.sh` (352 lines) | being revived | `satty`/`zbar` now installed and a Quickshell screenshot UI is in progress — no longer dead code |
 | `settings_watcher.sh` (147) | still present | References `weather.sh`, `templates/`, `install.sh` artifacts and a `calendar/.env` that don't exist in this repo — imported from another dotfiles project |
-| `exit.sh`, `reload.sh` | still present | Unreferenced; `reload.sh` uses `qs` while everything else uses `quickshell` |
 
-Recommendation for the remainder: delete them too (git history keeps them). They're
+Recommendation for the remainder: delete `settings_watcher.sh` (git history keeps it). It's
 live-symlinked into every Hyprland host's home directory today.
 
 ### 🟡 D2 — `deploy.sh` is referenced but doesn't exist
@@ -125,7 +126,7 @@ Root `SHORTCUTS.md` and `docs/SHORTCUTS.md` differ; everything that matters
 (`modules/home/wm/hyprland.nix:156`, the cheat-sheet wallpaper, `PACKAGES.md`) points at
 `docs/SHORTCUTS.md`. The root copy will drift further — delete or symlink it.
 
-### 🔵 D4 — `pkgs/default.nix` is unused boilerplate
+### 🔵 D4 — ✅ FIXED (deleted; CLAUDE.md row updated to match practice) — `pkgs/default.nix` is unused boilerplate
 `overlays/default.nix` calls `callPackage ../pkgs/wine-ge-custom` directly; nothing imports
 `pkgs/default.nix`. Either wire it up as the aggregation point CLAUDE.md describes, or delete
 it and fix the CLAUDE.md "Adding things" row.

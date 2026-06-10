@@ -1,9 +1,9 @@
-// ScreenshotOverlay.qml — Screenshot / recording mode picker.
-// Opened via: qs_manager.sh toggle screenshot
-// On tile click: signals Shell.qml to close this panel, waits 150 ms for the
-// compositor to clear the layer surface, then runs the chosen screenshot.sh command.
+// ScreenshotOverlay.qml — Fullscreen screenshot mode picker.
+// Tile clicks use Hyprland.dispatch("exec ...") — the same mechanism as PowerMenu —
+// which routes through Hyprland IPC and is independent of this component's lifecycle.
+// The launched script closes the overlay, waits 200 ms, then runs the command.
 import Quickshell
-import Quickshell.Io
+import Quickshell.Hyprland
 import QtQuick
 
 PanelWindow {
@@ -11,118 +11,86 @@ PanelWindow {
 
     signal closeRequested()
 
-    anchors { bottom: true }
-    margins { bottom: Theme.panelGap }
-    implicitWidth: 340
-    implicitHeight: col.implicitHeight + 32
+    anchors { top: true; left: true; right: true; bottom: true }
+    exclusiveZone: -1
     color: "transparent"
 
-    property string pendingCmd: ""
+    // ── Dimmer — click outside toolbar to dismiss ───────────────────────────
+    Rectangle {
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.55)
 
-    Timer {
-        id: execTimer
-        interval: 150
-        onTriggered: {
-            if (root.pendingCmd !== "") {
-                proc.command = ["bash", "-c", root.pendingCmd]
-                proc.running = true
-                root.pendingCmd = ""
-            }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.closeRequested()
         }
     }
 
-    Process { id: proc }
-
-    function launch(cmd) {
-        root.pendingCmd = cmd
-        root.closeRequested()
-        execTimer.start()
-    }
-
+    // ── Top toolbar ─────────────────────────────────────────────────────────
     Rectangle {
-        anchors.fill: parent
-        radius: Theme.radiusPanel
+        anchors { top: parent.top; left: parent.left; right: parent.right }
+        height: 96
         color: Theme.bg
-        border.color: Theme.border
-        border.width: 1
 
-        Column {
-            id: col
-            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 16 }
-            spacing: 12
+        Rectangle {
+            anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
+            height: 1
+            color: Theme.border
+        }
 
-            Text {
-                text: "Screenshot"
-                color: Theme.fg
-                font.pixelSize: 14
-                font.bold: true
-                font.family: Theme.font
-            }
+        Row {
+            anchors.centerIn: parent
+            spacing: 8
 
-            Grid {
-                id: tileGrid
-                width: parent.width
-                columns: 3
-                spacing: 8
+            Repeater {
+                model: [
+                    { icon: "󰹸", label: "Region",     mode: "region" },
+                    { icon: "󰏫", label: "Annotate",   mode: "annotate" },
+                    { icon: "󰍹", label: "Fullscreen",  mode: "full" },
+                    { icon: "󰖯", label: "Window",      mode: "window" },
+                    { icon: "⏺", label: "Record",      mode: "record" },
+                    { icon: "󰐱", label: "Scan QR",     mode: "qr" },
+                ]
 
-                Repeater {
-                    model: [
-                        { icon: "󰹸", label: "Region",
-                          cmd: 'GEOM=$(slurp) && bash "$HOME"/.config/hypr/scripts/screenshot.sh --geometry "$GEOM"' },
-                        { icon: "󰏫", label: "Annotate",
-                          cmd: 'GEOM=$(slurp) && bash "$HOME"/.config/hypr/scripts/screenshot.sh --edit --geometry "$GEOM"' },
-                        { icon: "󰍹", label: "Fullscreen",
-                          cmd: 'bash "$HOME"/.config/hypr/scripts/screenshot.sh --full' },
-                        { icon: "󰖯", label: "Window",
-                          cmd: 'bash "$HOME"/.config/hypr/scripts/screenshot.sh --window' },
-                        { icon: "⏺", label: "Record",
-                          cmd: 'bash "$HOME"/.config/hypr/scripts/screenshot.sh --record --full' },
-                        { icon: "󰐱", label: "Scan QR",
-                          cmd: 'bash "$HOME"/.config/hypr/scripts/screenshot.sh --scan-qr-notify' },
-                    ]
+                delegate: Rectangle {
+                    required property var modelData
 
-                    delegate: Rectangle {
-                        required property var modelData
+                    width: 100
+                    height: 72
+                    radius: Theme.radiusButton
+                    color: area.containsMouse ? Theme.borderStrong : Theme.bgAlt
+                    Behavior on color { ColorAnimation { duration: Theme.animFast } }
 
-                        width: (tileGrid.width - 16) / 3
-                        height: 72
-                        radius: Theme.radiusButton
-                        color: area.containsMouse ? Theme.borderStrong : Theme.bgAlt
-                        Behavior on color { ColorAnimation { duration: Theme.animFast } }
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 6
 
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 6
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.icon
-                                color: Theme.accent
-                                font.pixelSize: 20
-                                font.family: Theme.font
-                            }
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.label
-                                color: Theme.fgBright
-                                font.pixelSize: 11
-                                font.family: Theme.font
-                            }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.icon
+                            color: Theme.accent
+                            font.pixelSize: 20
+                            font.family: Theme.font
                         }
 
-                        MouseArea {
-                            id: area
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.launch(modelData.cmd)
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.label
+                            color: Theme.fgBright
+                            font.pixelSize: 11
+                            font.family: Theme.font
                         }
+                    }
+
+                    MouseArea {
+                        id: area
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Hyprland.dispatch('exec bash "$HOME"/.config/hypr/scripts/screenshot-launch.sh ' + modelData.mode)
                     }
                 }
             }
-
-            Item { height: 4 }
         }
     }
 }

@@ -107,13 +107,6 @@ Rectangle {
             onClicked: root.panelToggled("wallpaper")
         }
 
-        BarButton {
-            icon: "󰄀"
-            tooltip: "Screenshot"
-            active: root.activePanel === "screenshot"
-            onClicked: root.panelToggled("screenshot")
-        }
-
         // Separator
         Rectangle {
             width: 1; height: 20
@@ -141,13 +134,6 @@ Rectangle {
             tooltip: "Audio"
             active: root.activePanel === "audio"
             onClicked: root.panelToggled("audio")
-        }
-
-        BarButton {
-            icon: "󰐥"
-            tooltip: "Power"
-            active: root.activePanel === "power"
-            onClicked: root.panelToggled("power")
         }
     }
 }

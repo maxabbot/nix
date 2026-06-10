@@ -78,10 +78,6 @@ ShellRoot {
         model: notifServer.notifications
     }
 
-    PowerMenu {
-        visible: root.activePanel === "power"
-    }
-
     ControlCenter {
         visible: root.activePanel === "control"
         dndEnabled: root.dndEnabled

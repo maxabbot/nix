@@ -223,7 +223,7 @@ hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_ma
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/clipboard-fuzzel.sh"),                   { description = "System | Clipboard history" })
 
 -- Screenshots
-hl.bind("Print", hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })
+hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })
 
 -- Volume
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume raise"),        { locked = true, description = "Media | Volume up" })

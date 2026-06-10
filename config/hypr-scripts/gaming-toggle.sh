@@ -9,9 +9,10 @@ if [ -f "$GAMING_STATE_FILE" ]; then
     # Exit gaming mode
     rm "$GAMING_STATE_FILE"
 
-    # Restore compositor effects
-    hyprctl keyword decoration:blur:enabled 1
-    hyprctl keyword animations:enabled 1
+    # Restore compositor effects. `hyprctl keyword` doesn't work with the Lua
+    # config parser ("keyword can't work with non-legacy parsers") — use eval
+    # with a partial hl.config, which merges into the running config.
+    hyprctl eval 'hl.config({ decoration = { blur = { enabled = true } }, animations = { enabled = true } })'
 
     # Kill game launchers
     pkill -x lutris 2>/dev/null || true
@@ -32,9 +33,8 @@ else
     systemctl --user stop waybar.service
     pkill -f "quickshell.*Shell.qml" 2>/dev/null || true
 
-    # Disable compositor effects for performance
-    hyprctl keyword decoration:blur:enabled 0
-    hyprctl keyword animations:enabled 0
+    # Disable compositor effects for performance (eval, not keyword — see above)
+    hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } }, animations = { enabled = false } })'
 
     # Launch game launchers
     lutris &
