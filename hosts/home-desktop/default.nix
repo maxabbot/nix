@@ -39,6 +39,9 @@
         INTERVAL=10
         DEVPATH=hwmon2=devices/platform/it87.2624 hwmon4=devices/platform/coretemp.0
         DEVNAME=hwmon2=it8628 hwmon4=coretemp
+        # pwm1/fan1: unknown
+        # pwm3/fan3: case fans
+        # pwm4/fan4: unknown
         FCTEMPS=hwmon2/pwm1=hwmon4/temp1_input hwmon2/pwm3=hwmon4/temp1_input hwmon2/pwm4=hwmon4/temp1_input
         FCFANS=hwmon2/pwm1=hwmon2/fan1_input hwmon2/pwm3=hwmon2/fan3_input hwmon2/pwm4=hwmon2/fan4_input
         MINTEMP=hwmon2/pwm1=40 hwmon2/pwm3=40 hwmon2/pwm4=40

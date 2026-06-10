@@ -33,9 +33,6 @@ Rectangle {
         }
         spacing: 4
 
-        // ── Left: workspaces ───────────────────────────────────────────────────
-        Workspaces { Layout.alignment: Qt.AlignVCenter }
-
         // ── Centre: media player ───────────────────────────────────────────────
         Item { Layout.fillWidth: true }
 
@@ -80,60 +77,11 @@ Rectangle {
         }
 
         BarButton {
-            icon: "󱄅"
-            tooltip: "Nix"
-            active: root.activePanel === "nix"
-            onClicked: root.panelToggled("nix")
-        }
-
-        // Separator
-        Rectangle {
-            width: 1; height: 20
-            color: Theme.border
-            Layout.alignment: Qt.AlignVCenter
-        }
-
-        BarButton {
-            icon: "󰍺"
-            tooltip: "Monitors"
-            active: root.activePanel === "monitors"
-            onClicked: root.panelToggled("monitors")
-        }
-
-        BarButton {
-            icon: "󰔸"
-            tooltip: "Wallpapers"
-            active: root.activePanel === "wallpaper"
-            onClicked: root.panelToggled("wallpaper")
-        }
-
-        // Separator
-        Rectangle {
-            width: 1; height: 20
-            color: Theme.border
-            Layout.alignment: Qt.AlignVCenter
-        }
-
-        BarButton {
             icon: "󰂚"
             tooltip: "Notifications"
             active: root.activePanel === "notifications"
             badge: root.notifCount
             onClicked: root.panelToggled("notifications")
-        }
-
-        BarButton {
-            icon: "󰒓"
-            tooltip: "Control Center"
-            active: root.activePanel === "control"
-            onClicked: root.panelToggled("control")
-        }
-
-        BarButton {
-            icon: "󰕾"
-            tooltip: "Audio"
-            active: root.activePanel === "audio"
-            onClicked: root.panelToggled("audio")
         }
     }
 }

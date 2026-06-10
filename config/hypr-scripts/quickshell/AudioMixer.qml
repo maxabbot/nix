@@ -21,6 +21,13 @@ PanelWindow {
     implicitHeight: content.implicitHeight + 32
     color: "transparent"
 
+    // The default sink/source must be bound before .audio/.ready populate —
+    // untracked nodes leave the Volume/Mic sliders stuck at 0 and read-only.
+    // (The per-app section already binds its streams via the Repeater model.)
+    PwObjectTracker {
+        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource].filter(n => n)
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: 12

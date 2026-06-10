@@ -12,8 +12,9 @@ let
   winModule = "hyprland/window";
 
   # Quickshell panel toggles — "top" anchors the panel under this (top) bar
-  # as a dropdown instead of above the bottom Quickshell bar.
-  qs = "~/.config/hypr/scripts/qs_manager.sh";
+  # as a dropdown instead of above the bottom Quickshell bar. Invoked via
+  # bash so it works even if the deployed script loses its exec bit.
+  qs = "bash ~/.config/hypr/scripts/qs_manager.sh";
 
   sysinfo-script = pkgs.writeShellScript "waybar-sysinfo" ''
     set -euo pipefail
@@ -187,7 +188,7 @@ in
             tooltip-format = "{ifname} via {gwaddr}";
             format-linked = "{ifname} (No IP)";
             format-disconnected = "Disconnected";
-            on-click = "${qs} toggle control top";
+            on-click = "${qs} toggle network top";
             on-click-right = "nm-connection-editor";
           };
 

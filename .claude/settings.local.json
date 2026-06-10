@@ -84,7 +84,16 @@
       "Bash(bash *)",
       "Bash(command -v qmllint qml quickshell)",
       "Bash(qmllint /etc/nixos/config/hypr-scripts/quickshell/SysInfoPanel.qml)",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(ps -o pid,lstart,cmd -C quickshell)",
+      "Bash(systemctl --user show waybar.service -p ExecMainStartTimestamp)",
+      "Bash(lsblk *)",
+      "Bash(chmod +x /etc/nixos/config/hypr-scripts/qs_manager.sh)",
+      "Bash(nmcli -t -f WIFI radio)",
+      "Bash(nmcli -t -f ACTIVE,SSID dev wifi)",
+      "Bash(systemctl is-active *)",
+      "Bash(command -v gammastep brightnessctl bluetoothctl)",
+      "Bash(wpctl get-volume *)"
     ]
   }
 }

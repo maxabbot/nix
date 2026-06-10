@@ -160,7 +160,9 @@ fi
 if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
     if [[ "$TARGET" == "network" ]]; then
         handle_network_prep
-        [[ -n "$SUBTARGET" ]] && echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
+        # "top"/"bottom" is the panel-edge subtarget (consumed by Shell.qml),
+        # not a network mode — don't let it clobber the mode file.
+        [[ -n "$SUBTARGET" && "$SUBTARGET" != "top" && "$SUBTARGET" != "bottom" ]] && echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
         quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "$ACTION" "$TARGET" "$SUBTARGET" >/dev/null 2>&1
         exit 0
     fi

@@ -158,11 +158,6 @@ hl.window_rule({ match = { class = "firefox" },      opacity = "1.0 override 1.0
 hl.window_rule({ match = { class = "chromium" },     opacity = "1.0 override 1.0 override" })
 hl.window_rule({ match = { class = "google-chrome" },opacity = "1.0 override 1.0 override" })
 
--- Workspace assignments
-hl.window_rule({ match = { class = "firefox" }, workspace = "1" })
-hl.window_rule({ match = { class = "Code"    }, workspace = "2" })
-hl.window_rule({ match = { class = "kitty"   }, workspace = "3" })
-hl.window_rule({ match = { class = "discord" }, workspace = "4" })
 
 --------------------
 ---- KEYBINDS ------

@@ -105,6 +105,11 @@ ShellRoot {
         edge: root.panelEdge
     }
 
+    NetworkPanel {
+        visible: root.activePanel === "network"
+        edge: root.panelEdge
+    }
+
     MonitorManager {
         visible: root.activePanel === "monitors"
     }
