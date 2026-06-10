@@ -148,7 +148,6 @@ in
     veracrypt
     kdePackages.qtstyleplugin-kvantum
     papirus-icon-theme
-    foot
     yazi
     quickshell
   ];
