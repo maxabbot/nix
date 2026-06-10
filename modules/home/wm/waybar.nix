@@ -43,7 +43,14 @@ in
       enable = true;
       # From the unstable overlay — the stable 26.05 waybar duplicates a bar on
       # one output during Hyprland startup; the newer build doesn't.
-      package = pkgs.unstable.waybar;
+      # Patched: workspace clicks dispatch via Hyprland's Lua syntax
+      # (hl.dsp.focus); the stock classic "dispatch workspace N" is rejected
+      # by the Lua config parser, making clicks silent no-ops.
+      package = pkgs.unstable.waybar.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          ../../../pkgs/waybar/hyprland-lua-dispatch.patch
+        ];
+      });
       systemd.enable = true;
       systemd.targets = [ "graphical-session.target" ];
 
@@ -77,8 +84,10 @@ in
           "hyprland/workspaces" = {
             format = "{name}";
             on-click = "activate";
-            on-scroll-up = "hyprctl dispatch workspace e+1";
-            on-scroll-down = "hyprctl dispatch workspace e-1";
+            # This Hyprland evaluates dispatch requests as Lua — classic
+            # "workspace e+1" syntax fails silently (see hyprland.lua binds).
+            on-scroll-up = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e+1' })\"";
+            on-scroll-down = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e-1' })\"";
             persistent-workspaces = {
               "*" = 5;
             };
@@ -98,8 +107,8 @@ in
           idle_inhibitor = {
             format = "{icon}";
             format-icons = {
-              activated = "";
-              deactivated = "";
+              activated = "󰅶"; # filled coffee cup — staying awake
+              deactivated = "󰛊"; # outline coffee cup — idle allowed
             };
             tooltip-format-activated = "Idle inhibited (awake)";
             tooltip-format-deactivated = "Idle allowed";

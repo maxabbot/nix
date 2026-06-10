@@ -164,6 +164,9 @@ in
           model = "claude-haiku-4-5";
           enable_thinking = false;
         };
+        # Deliberate trade-off: let Zed's AI agent run terminal commands without
+        # per-command prompts. Convenience over containment on a single-user
+        # workstation — flip to "ask" if this machine ever runs untrusted projects.
         tool_permissions = {
           tools = {
             terminal = {

@@ -58,7 +58,9 @@
         AddKeysToAgent = "yes";
         ServerAliveInterval = 60;
         ServerAliveCountMax = 3;
-        IdentityAgent = "/run/user/1000/gnupg/S.gpg-agent.ssh";
+        # Force gpg-agent even if something else (e.g. gcr-ssh-agent) claims
+        # SSH_AUTH_SOCK. ssh expands env vars here, so no hardcoded UID needed.
+        IdentityAgent = "\${XDG_RUNTIME_DIR}/gnupg/S.gpg-agent.ssh";
       };
     };
     direnv = {

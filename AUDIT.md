@@ -8,13 +8,14 @@ warnings surfaced (B4, B5).
 
 Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 
-> **Remediation status (same day):** B1–B4, B6–B8, S2, R1, R2, R4, R5, R6 fixed; D1
-> partially resolved (`lock.sh`, `workspaces.sh`, `volume_listener.sh` deleted —
-> `screenshot.sh`, `settings_watcher.sh`, `exit.sh`, `reload.sh` remain). Doc drift
+> **Remediation status (same day):** B1–B4, B6–B8, S2–S4, D1–D5, R1–R10 fixed (R10's
+> `caching.sh`/`QS_DIR` sub-item turned out stale — the script now uses it). Doc drift
 > (section 4) fixed in CLAUDE.md/TODO.md/nix comments. `nix flake check` re-verified clean,
-> statix now clean, kanshi deprecation warning gone, and `minimal` verified GUI-free
-> (kitty/Zed/VSCode/GTK all evaluate to disabled). Items are annotated ✅ below;
-> unannotated items are still open.
+> statix/deadnix clean, kanshi deprecation warning gone, and `minimal` verified GUI-free
+> (kitty/Zed/VSCode/GTK all evaluate to disabled). Items are annotated ✅ below.
+> **Still open:** S1 (secrets — needs agenix/sops-nix decision + password rotation),
+> B5 (xorg rename warnings from a flake input), and section 6 suggestions
+> (CI, pre-commit hook, nixos-hardware, backups, `programs.nh.clean`).
 
 ---
 
@@ -85,12 +86,12 @@ to the keyboard's HID interface. Now `MODE="0660", GROUP="input"`. (`TAG+="uacce
 an option: `extraRules` becomes `99-local.rules`, which runs after `73-seat-late.rules` has
 already processed uaccess tags.)
 
-### 🟡 S3 — Zed agent terminal auto-allow
+### 🟡 S3 — ✅ FIXED (deliberate-trade-off comment added) — Zed agent terminal auto-allow
 `modules/home/editor.nix:156` sets agent `tool_permissions.tools.terminal.default = "allow"`,
 letting the editor's AI agent run shell commands without prompting. Deliberate trade-off
 perhaps, but worth an explicit comment so it isn't cargo-culted later.
 
-### 🔵 S4 — clamav is installed but never runs
+### 🔵 S4 — ✅ FIXED (package dropped) — clamav is installed but never runs
 `modules/nixos/base.nix:211` ships the `clamav` package without `services.clamav.daemon` or
 `.updater`. A scanner with no freshclam updates and no service provides no protection — either
 enable the services or drop the package.
@@ -99,7 +100,7 @@ enable the services or drop the package.
 
 ## 3. Dead code
 
-### 🔴 D1 — ✅ PARTIAL — Orphaned scripts in `config/hypr-scripts/` (~750 lines)
+### 🔴 D1 — ✅ FIXED — Orphaned scripts in `config/hypr-scripts/` (~750 lines)
 These are symlinked into `~/.config/hypr/scripts/` but referenced by **nothing** (checked
 `hyprland.lua`, all QML, all nix modules, all other scripts):
 
@@ -111,17 +112,14 @@ These are symlinked into `~/.config/hypr/scripts/` but referenced by **nothing**
 | `exit.sh` | ✅ deleted | Pre-UWSM logout helper; wlogout's logout action now uses `uwsm stop` (the canonical clean logout), making it redundant |
 | `reload.sh` | ✅ deleted | Unreferenced; also called a nonexistent `forceReload` IPC function |
 | `screenshot.sh` (352 lines) | being revived | `satty`/`zbar` now installed and a Quickshell screenshot UI is in progress — no longer dead code |
-| `settings_watcher.sh` (147) | still present | References `weather.sh`, `templates/`, `install.sh` artifacts and a `calendar/.env` that don't exist in this repo — imported from another dotfiles project |
+| `settings_watcher.sh` (147) | ✅ deleted | Referenced `weather.sh`, `templates/`, `install.sh` artifacts and a `calendar/.env` that never existed in this repo — imported from another dotfiles project |
 
-Recommendation for the remainder: delete `settings_watcher.sh` (git history keeps it). It's
-live-symlinked into every Hyprland host's home directory today.
-
-### 🟡 D2 — `deploy.sh` is referenced but doesn't exist
+### 🟡 D2 — ✅ FIXED (references removed with the section-4 doc-drift pass) — `deploy.sh` is referenced but doesn't exist
 `CLAUDE.md`, `TODO.md`, `hosts/common/optional/development.nix` (comment) and
 `hosts/minimal/default.nix` (comment) all mention `deploy.sh`. There is no such file — the
 install path documented in `TODO.md` is nixos-anywhere. Update the references.
 
-### 🟡 D3 — Stale duplicate `SHORTCUTS.md` at repo root
+### 🟡 D3 — ✅ FIXED (root copy deleted; everything pointed at `docs/`) — Stale duplicate `SHORTCUTS.md` at repo root
 Root `SHORTCUTS.md` and `docs/SHORTCUTS.md` differ; everything that matters
 (`modules/home/wm/hyprland.nix:156`, the cheat-sheet wallpaper, `PACKAGES.md`) points at
 `docs/SHORTCUTS.md`. The root copy will drift further — delete or symlink it.
@@ -131,7 +129,7 @@ Root `SHORTCUTS.md` and `docs/SHORTCUTS.md` differ; everything that matters
 `pkgs/default.nix`. Either wire it up as the aggregation point CLAUDE.md describes, or delete
 it and fix the CLAUDE.md "Adding things" row.
 
-### 🔵 D5 — `sharedHmArgs.git.signingkey = ""` is never consumed
+### 🔵 D5 — ✅ FIXED (removed) — `sharedHmArgs.git.signingkey = ""` is never consumed
 `flake.nix:97` defines it; `home/max/git.nix` never reads it. Remove until GPG signing
 (TODO.md item) is actually implemented.
 
@@ -166,7 +164,7 @@ short sentence per commit would pay for itself.
 (minus GBM) in the generated Hyprland `env.lua` (`modules/home/wm/hyprland.nix:69`).
 `sessionVariables` alone covers login sessions; keep one source of truth.
 
-### 🟡 R3 — Package duplication across optional modules
+### 🟡 R3 — ✅ FIXED (obs deduped; vulkan dev tools out of nvidia.nix; wine packages moved into wine.nix) — Package duplication across optional modules
 - `obs-studio` in both `streaming-tools.nix` and `gaming-streaming.nix` (both imported by home-desktop).
 - `vulkan-tools`, `vulkan-loader`, `vulkan-validation-layers` in both `nvidia.nix` and `gaming.nix`.
 - Wine is split oddly: `gaming.nix` carries `wineWow64Packages.staging` + `winetricks`, while
@@ -193,22 +191,22 @@ receives `config`).
 coherent interpreter, or drop them and rely on the already-present `uv` + direnv per-project
 flow.
 
-### 🔵 R7 — TLP configured in two places for work-laptop
+### 🔵 R7 — ✅ FIXED (base only enables; all settings in the host file) — TLP configured in two places for work-laptop
 `custom.base.powerManagement = "tlp"` makes `base.nix` enable TLP with
 `TLP_DEFAULT_MODE = "AC"`, then `hosts/work-laptop/default.nix:32` re-enables it with its own
 settings. It merges, but the split is confusing — pick one home (host file is the natural one;
 or extend the base option with a `settings` passthrough).
 
-### 🔵 R8 — Redundant per-host defaults
+### 🔵 R8 — ✅ FIXED (defaults removed from all hosts) — Redundant per-host defaults
 Every host repeats `firewall = true` and three of four repeat
 `powerManagement = "power-profiles-daemon"` — both are already the option defaults.
 
-### 🔵 R9 — Hardcoded UID in ssh config
+### 🔵 R9 — ✅ FIXED (`''${XDG_RUNTIME_DIR}` — ssh expands env vars in IdentityAgent) — Hardcoded UID in ssh config
 `home/max/cli.nix` sets `IdentityAgent = "/run/user/1000/gnupg/S.gpg-agent.ssh"`. Use
 `${config.home.homeDirectory}`-independent `gpgconf --list-dirs agent-ssh-socket` via an env
 var, or at least derive from `osConfig.users` — UID 1000 is an assumption.
 
-### 🔵 R10 — Misc small ones
+### 🔵 R10 — ✅ FIXED (kernel/it87 risk documented rather than switching to LTS; `QS_DIR` item was stale — caching.sh uses it now) — Misc small ones
 - `modules/home/theme.nix` duplicates `MOZ_ENABLE_WAYLAND` (already set system-wide in `productivity.nix`).
 - `xdg.mimeApps`: `video/mkv` is not a registered MIME type — Matroska is `video/x-matroska`.
 - kitty `listen_on = "unix:/tmp/kitty"`: all instances share one socket path and clash; use

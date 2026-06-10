@@ -48,7 +48,9 @@ in
         sync_to_monitor = true;
         close_on_child_death = false;
         allow_remote_control = "yes";
-        listen_on = "unix:/tmp/kitty";
+        # Per-instance socket — a shared /tmp/kitty path clashes between instances.
+        # kitty expands env vars and substitutes {kitty_pid} itself.
+        listen_on = "unix:\${XDG_RUNTIME_DIR}/kitty-{kitty_pid}.sock";
       };
 
       keybindings = {

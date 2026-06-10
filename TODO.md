@@ -17,7 +17,7 @@ cp /mnt/etc/nixos/hardware-configuration.nix hosts/<name>/hardware-configuration
 
 - Move `hashedPassword` out of the host files into agenix or sops-nix (`hashedPasswordFile`) — the current hash is committed to git history, so rotate the password once secrets land
 - Populate `sshKeys` in `custom.base` before enabling `services.openssh` for remote login
-- Fill in `signingkey` in `flake.nix` for GPG commit signing
+- GPG commit signing: add a `signingkey` hmArg in `flake.nix` and consume it in `home/max/git.nix` (the old empty stub was removed as dead code)
 
 Full setup: add `agenix` to flake inputs, create `secrets/secrets.nix` with the host's SSH public key (`/etc/ssh/ssh_host_ed25519_key.pub`), then:
 

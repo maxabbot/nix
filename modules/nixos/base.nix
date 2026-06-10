@@ -87,6 +87,9 @@ in
     i18n.defaultLocale = "en_US.UTF-8";
 
     # ── Kernel ─────────────────────────────────────────────────────────────────
+    # Known risk: home-desktop builds the out-of-tree it87 module (fancontrol)
+    # against this kernel — a `latest` bump can break the module until the
+    # driver catches up. Accepted; fall back to the default LTS kernel if it bites.
     boot.kernelPackages = pkgs.linuxPackages_latest;
 
     # ── Networking ─────────────────────────────────────────────────────────────
@@ -99,10 +102,8 @@ in
       printing.enable = true;
       timesyncd.enable = lib.mkDefault true;
       power-profiles-daemon.enable = cfg.powerManagement == "power-profiles-daemon";
-      tlp = lib.mkIf (cfg.powerManagement == "tlp") {
-        enable = true;
-        settings.TLP_DEFAULT_MODE = "AC";
-      };
+      # TLP settings live in the host file (see work-laptop); base only enables it.
+      tlp.enable = cfg.powerManagement == "tlp";
       gnome.gnome-keyring.enable = true;
       upower.enable = true;
     };
@@ -206,9 +207,8 @@ in
       libnotify
       nh
 
-      # Security / monitoring
+      # Monitoring
       lm_sensors
-      clamav
 
       # upower — needed by Waybar battery module
     ];

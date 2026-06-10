@@ -37,7 +37,7 @@
       QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
       GDK_SCALE = "1";
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
-      MOZ_ENABLE_WAYLAND = "1";
+      # MOZ_ENABLE_WAYLAND is set system-wide in productivity.nix
       _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 
@@ -53,7 +53,7 @@
         "image/gif" = [ "imv.desktop" ];
         "image/svg+xml" = [ "imv.desktop" ];
         "video/mp4" = [ "mpv.desktop" ];
-        "video/mkv" = [ "mpv.desktop" ];
+        "video/x-matroska" = [ "mpv.desktop" ];
         "video/webm" = [ "mpv.desktop" ];
         "audio/mpeg" = [ "mpv.desktop" ];
         "audio/flac" = [ "mpv.desktop" ];

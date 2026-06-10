@@ -21,8 +21,6 @@
 
   environment.systemPackages = with pkgs; [
     mangohud
-    wineWow64Packages.staging
-    winetricks
     linuxConsoleTools
     protonup-qt
     protontricks

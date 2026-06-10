@@ -37,6 +37,9 @@ end)
 hl.config({
     cursor = {
         no_hardware_cursors = true,
+        -- Keep the cursor where it is on workspace switches — hl.dsp.focus
+        -- otherwise warps it to the newly focused window.
+        no_warps = true,
     },
 
     xwayland = {
@@ -240,7 +243,7 @@ hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),        { locked = tr
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),    { locked = true, description = "Media | Prev track" })
 
 -- Gaming toggle
-hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("~/.config/hypr/scripts/gaming-toggle.sh"), { description = "Gaming | Toggle gaming mode" })
+hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/gaming-toggle.sh"), { description = "Gaming | Toggle gaming mode" })
 
 -- Mouse binds
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })

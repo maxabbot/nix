@@ -2,8 +2,8 @@
 {
   imports = [ inputs.apollo-flake.nixosModules."x86_64-linux".default ];
 
+  # obs-studio comes from streaming-tools.nix (imported alongside this module).
   environment.systemPackages = with pkgs; [
-    obs-studio
     moonlight-qt
   ];
 

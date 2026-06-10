@@ -25,13 +25,13 @@
     hashedPassword = "$y$j9T$2U13TXbQqrmp.PD068E0E.$1uJPVe1dF1C0KhlXbn.iMg2qthRxOdp.9s/h6GG6YC6";
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "tlp";
-    firewall = true;
   };
 
   # ── TLP battery management ────────────────────────────────────────────────────
+  # base.nix enables the service (powerManagement = "tlp"); all settings live here.
   services.tlp = {
-    enable = true;
     settings = {
+      TLP_DEFAULT_MODE = "AC";
       CPU_SCALING_GOVERNOR_ON_AC = lib.mkDefault "performance";
       CPU_SCALING_GOVERNOR_ON_BAT = lib.mkDefault "powersave";
       CPU_ENERGY_PERF_POLICY_ON_AC = lib.mkDefault "performance";

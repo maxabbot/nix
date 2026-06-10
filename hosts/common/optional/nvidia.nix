@@ -15,13 +15,13 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+    # Only driver components (VA-API) belong here — the Vulkan loader ships with
+    # the driver, and vulkan-tools/validation-layers are CLI/dev tools that live
+    # in gaming.nix's systemPackages where they actually land on PATH.
     extraPackages = with pkgs; [
       nvidia-vaapi-driver
       libva
       libva-utils
-      vulkan-loader
-      vulkan-tools
-      vulkan-validation-layers
     ];
     extraPackages32 = with pkgs.pkgsi686Linux; [ libva ];
   };

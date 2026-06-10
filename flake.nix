@@ -94,7 +94,6 @@
         git = {
           name = "Max Abbot";
           email = "abbot.max.nz@gmail.com";
-          signingkey = "";
         };
         nvidia = false;
         kanshi = {

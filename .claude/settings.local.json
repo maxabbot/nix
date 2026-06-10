@@ -69,7 +69,18 @@
       "Bash(grim -o DP-2 /tmp/clip_dbg2.png)",
       "Bash(grim -o DP-3 /tmp/clip_dbg3.png)",
       "Bash(magick /tmp/clip_dbg2.png -gravity Center -crop 700x800+0+0 /tmp/clip_dbg2c.png)",
-      "Bash(magick /tmp/clip_dbg3.png -gravity Center -crop 700x800+0+0 /tmp/clip_dbg3c.png)"
+      "Bash(magick /tmp/clip_dbg3.png -gravity Center -crop 700x800+0+0 /tmp/clip_dbg3c.png)",
+      "Bash(systemctl --user list-unit-files waybar.service)",
+      "Bash(chmod +x /etc/nixos/config/hypr-scripts/gaming-toggle.sh)",
+      "Bash(~/.config/hypr/scripts/caching.sh)",
+      "Bash(waybar --version)",
+      "Bash(statix check *)",
+      "Bash(deadnix -f .)",
+      "Bash(ldd /nix/store/abixvrj9nj6n1s88xq6ccrnricfragv2-hyprland-0.55.2/bin/Hyprland)",
+      "Bash(nix-store -r /nix/store/m2nf72757wlzmw6pslbgaadw597igjsm-source)",
+      "Bash(diff -u a/src/modules/hyprland/workspace.cpp b/src/modules/hyprland/workspace.cpp)",
+      "Bash(sed -i '1s|\\\\t.*||;2s|\\\\t.*||' /etc/nixos/pkgs/waybar/hyprland-lua-dispatch.patch)",
+      "Bash(rm -rf /tmp/wbpatch /tmp/glyphs.txt /tmp/glyphs.png)"
     ]
   }
 }
