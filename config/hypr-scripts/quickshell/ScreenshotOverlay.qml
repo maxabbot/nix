@@ -1,9 +1,12 @@
 // ScreenshotOverlay.qml — Fullscreen screenshot mode picker.
-// Tile clicks use Hyprland.dispatch("exec ...") — the same mechanism as PowerMenu —
-// which routes through Hyprland IPC and is independent of this component's lifecycle.
+// Tile clicks use Hyprland.dispatch() which routes through Hyprland IPC and is
+// independent of this component's lifecycle. Hyprland evaluates dispatch requests
+// as Lua, so the request must use hl.dsp syntax (hl.dsp.exec_cmd(...)), not the
+// classic "exec ..." string.
 // The launched script closes the overlay, waits 200 ms, then runs the command.
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import QtQuick
 
 PanelWindow {
@@ -14,6 +17,15 @@ PanelWindow {
     anchors { top: true; left: true; right: true; bottom: true }
     exclusiveZone: -1
     color: "transparent"
+
+    // Grab the keyboard while visible so Escape can dismiss the overlay
+    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+    Item {
+        anchors.fill: parent
+        focus: true
+        Keys.onEscapePressed: root.closeRequested()
+    }
 
     // ── Dimmer — click outside toolbar to dismiss ───────────────────────────
     Rectangle {
@@ -87,7 +99,7 @@ PanelWindow {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Hyprland.dispatch('exec bash "$HOME"/.config/hypr/scripts/screenshot-launch.sh ' + modelData.mode)
+                        onClicked: Hyprland.dispatch('hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/screenshot-launch.sh ' + modelData.mode + '")')
                     }
                 }
             }

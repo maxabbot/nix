@@ -56,7 +56,20 @@
       "Bash(awk '{print $1, $4}')",
       "Bash(command -v uwsm)",
       "Bash(uwsm stop *)",
-      "Bash(systemctl --user list-units)"
+      "Bash(systemctl --user list-units)",
+      "Bash(bash ~/.config/hypr/scripts/screenshot-launch.sh full)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(sudo -n true)",
+      "Bash(bash config/hypr-scripts/clipboard-prep.sh)",
+      "Bash(echo \"entries: $\\(bash config/hypr-scripts/clipboard-prep.sh)",
+      "Bash(cliphist decode *)",
+      "Bash(magick /tmp/clip_dp2.png -gravity SouthEast -crop 760x900+0+0 /tmp/clip_crop.png)",
+      "Bash(bash /home/max/.config/hypr/scripts/quickshell/../clipboard-prep.sh)",
+      "Bash(bash ~/.config/hypr/scripts/qs_manager.sh open clipboard)",
+      "Bash(grim -o DP-2 /tmp/clip_dbg2.png)",
+      "Bash(grim -o DP-3 /tmp/clip_dbg3.png)",
+      "Bash(magick /tmp/clip_dbg2.png -gravity Center -crop 700x800+0+0 /tmp/clip_dbg2c.png)",
+      "Bash(magick /tmp/clip_dbg3.png -gravity Center -crop 700x800+0+0 /tmp/clip_dbg3c.png)"
     ]
   }
 }

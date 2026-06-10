@@ -105,6 +105,11 @@ ShellRoot {
         onCloseRequested: root.activePanel = ""
     }
 
+    ClipboardPanel {
+        visible: root.activePanel === "clipboard"
+        onCloseRequested: root.activePanel = ""
+    }
+
     NixPanel {
         visible: root.activePanel === "nix"
         onRebuildStarted:       root.rebuildRunning = true
