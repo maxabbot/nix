@@ -56,4 +56,5 @@ Singleton {
     readonly property int animFast:     80   // ms — hover/colour transitions
     readonly property int barHeight:    40
     readonly property int panelGap:     44   // bottom margin clearing the bar
+    readonly property int panelGapTop:  38   // top margin clearing Waybar (34px)
 }

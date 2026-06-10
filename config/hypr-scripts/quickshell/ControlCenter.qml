@@ -1,4 +1,5 @@
-// ControlCenter.qml — Quick-settings panel (bottom-right).
+// ControlCenter.qml — Quick-settings panel (right edge; drops from Waybar
+// when edge is "top", rises from the Quickshell bar when "bottom").
 // Network and Bluetooth state is read/set via nmcli and bluetoothctl (Process).
 // Brightness uses brightnessctl (laptop only; silently no-ops on desktop).
 import Quickshell
@@ -9,11 +10,16 @@ import QtQuick.Layouts
 PanelWindow {
     id: root
 
+    property string edge: "bottom"
     property bool dndEnabled: false
     signal dndToggled()
 
-    anchors { bottom: true; right: true }
-    margins { bottom: 44; right: 4 }
+    anchors { top: root.edge === "top"; bottom: root.edge === "bottom"; right: true }
+    margins {
+        top: root.edge === "top" ? Theme.panelGapTop : 0
+        bottom: root.edge === "bottom" ? Theme.panelGap : 0
+        right: 4
+    }
     implicitWidth: 360
     implicitHeight: content.implicitHeight + 32
     color: "transparent"

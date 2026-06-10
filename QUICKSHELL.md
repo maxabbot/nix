@@ -20,9 +20,11 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 **`NotificationToast.qml`** — Transient top-right toast for incoming notifications. Used in the repeater inside Shell's toast `PanelWindow`.
 
-**`ControlCenter.qml`** — Quick-settings panel (bottom-right, 360px). Toggles: Wi-Fi (`nmcli`), Bluetooth (`bluetoothctl`), Night Light (`gammastep`), Do Not Disturb. Brightness slider (`brightnessctl`). Polls state on open.
+**`ControlCenter.qml`** — Quick-settings panel (right edge, 360px, edge-aware). Toggles: Wi-Fi (`nmcli`), Bluetooth (`bluetoothctl`), Night Light (`gammastep`), Do Not Disturb. Brightness slider (`brightnessctl`). Polls state on open.
 
-**`AudioMixer.qml`** — PipeWire volume panel (bottom-right, 360px). Default sink volume + mute, default source (mic) volume + mute, per-app stream volumes via `PwObjectTracker`.
+**`AudioMixer.qml`** — PipeWire volume panel (right edge, 360px, edge-aware). Default sink volume + mute, default source (mic) volume + mute, per-app stream volumes via `PwObjectTracker`.
+
+**`SysInfoPanel.qml`** — System stats panel (right edge, 360px, edge-aware). CPU usage + package temp, memory, root disk, and GPU (`nvidia-smi`; row hidden when absent), each as a thin progress bar polled every 2s while open. Header button opens `btop` in kitty.
 
 **`SliderRow.qml`** — Shared label + `Slider` + value display component. Used by AudioMixer and ControlCenter.
 
@@ -44,8 +46,10 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 
 # Toggle a panel:
-~/.config/hypr/scripts/qs_manager.sh toggle <name>
-# Names: notifications, control, audio, keybinds, nix, monitors, wallpaper
+~/.config/hypr/scripts/qs_manager.sh toggle <name> [top|bottom]
+# Names: notifications, control, audio, sysinfo, keybinds, nix, monitors, wallpaper
+# Edge-aware panels (control, audio, sysinfo) accept a subtarget: "top" drops
+# the panel down from Waybar, "bottom" (default) rises from the Quickshell bar.
 
 # Close all panels:
 ~/.config/hypr/scripts/qs_manager.sh close

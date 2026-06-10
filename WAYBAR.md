@@ -30,19 +30,21 @@ Top status bar for the Hyprland hosts, themed Gruvbox Material Dark. Defined ent
 
 **`idle_inhibitor`** — Coffee-cup glyph: filled/green when inhibited (awake), empty when idle is allowed. Click toggles.
 
-**`bluetooth`** — Shows connected device alias; tooltip enumerates connections. Click opens `blueman-manager`. Teal idle → green connected → grey when off/disabled.
+**`bluetooth`** — Shows connected device alias; tooltip enumerates connections. Click drops down the Quickshell Control Center, right-click opens `blueman-manager`. Teal idle → green connected → grey when off/disabled.
 
-**`pulseaudio`** — Default sink: `VOL {volume}%`, `BT {volume}%` on Bluetooth, `muted` when muted. Scroll adjusts (step 5), click opens `pavucontrol`.
+**`pulseaudio`** — Default sink: `VOL {volume}%`, `BT {volume}%` on Bluetooth, `muted` when muted. Scroll adjusts (step 5), click drops down the Quickshell Audio mixer, right-click opens `pavucontrol`.
 
-**`pulseaudio#source`** — Microphone: `MIC {volume}%` / `MIC muted`. Click toggles mute (`wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle`), right-click opens pavucontrol's input tab. Blue normally, grey when muted.
+**`pulseaudio#source`** — Microphone: `MIC {volume}%` / `MIC muted`. Click toggles mute (`wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle`), right-click drops down the Quickshell Audio mixer. Blue normally, grey when muted.
 
-**`network`** — `WiFi: {essid} ({signal}%)` or `ETH: {ip}/{cidr}`; left-click toggles to interface/IP, right-click opens `nm-connection-editor`. Red when disconnected.
+**`network`** — `WiFi: {essid} ({signal}%)` or `ETH: {ip}/{cidr}`; left-click drops down the Quickshell Control Center, right-click opens `nm-connection-editor`. Red when disconnected.
 
-**`disk`** — Root filesystem `DISK {used}%`, tooltip `used / total`, click opens `btop` in kitty. 30s interval.
+**`disk`** — Root filesystem `DISK {used}%`, tooltip `used / total`, click drops down the Quickshell SysInfo panel, right-click opens `btop` in kitty. 30s interval.
 
-**`custom/sysinfo`** — `CPU x% MEM y% z°C` every 2s from `waybar-sysinfo` script (see below). Click opens `btop`.
+**`custom/sysinfo`** — `CPU x% MEM y% z°C` every 2s from `waybar-sysinfo` script (see below). Click drops down the Quickshell SysInfo panel, right-click opens `btop`.
 
-**`custom/gpu`** *(desktop)* — `GPU x% z°C` from `nvidia-smi` every 2s. Click opens `btop`.
+**`custom/gpu`** *(desktop)* — `GPU x% z°C` from `nvidia-smi` every 2s. Click drops down the Quickshell SysInfo panel, right-click opens `btop`.
+
+> Dropdowns: clicks route through `qs_manager.sh toggle <panel> top` — the `top` subtarget anchors the Quickshell panel just under this bar instead of above the bottom bar (see `QUICKSHELL.md`).
 
 **`battery`** *(laptop)* — Icon + capacity; charging/plugged variants; `format-alt` shows time remaining. States: good ≥95, warning ≤30, critical ≤15 (blinks red).
 

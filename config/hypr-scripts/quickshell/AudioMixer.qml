@@ -1,4 +1,5 @@
-// AudioMixer.qml — PipeWire volume panel (bottom-right).
+// AudioMixer.qml — PipeWire volume panel (right edge; drops from Waybar
+// when edge is "top", rises from the Quickshell bar when "bottom").
 // Uses Quickshell.Services.Pipewire for native PipeWire access.
 import Quickshell
 import Quickshell.Services.Pipewire
@@ -8,8 +9,14 @@ import QtQuick.Layouts
 PanelWindow {
     id: root
 
-    anchors { bottom: true; right: true }
-    margins { bottom: 44; right: 4 }
+    property string edge: "bottom"
+
+    anchors { top: root.edge === "top"; bottom: root.edge === "bottom"; right: true }
+    margins {
+        top: root.edge === "top" ? Theme.panelGapTop : 0
+        bottom: root.edge === "bottom" ? Theme.panelGap : 0
+        right: 4
+    }
     implicitWidth: 360
     implicitHeight: content.implicitHeight + 32
     color: "transparent"

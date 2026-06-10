@@ -17,20 +17,30 @@ ShellRoot {
 
     // ── Global state ───────────────────────────────────────────────────────────
     property string activePanel:    ""
+    property string panelEdge:      "bottom"  // "bottom" (Quickshell bar) or "top" (Waybar dropdown)
     property bool   dndEnabled:     false
     property bool   rebuildRunning: false
 
-    function togglePanel(name) {
-        activePanel = (activePanel === name) ? "" : name
+    function togglePanel(name, edge) {
+        var e = edge || "bottom"
+        if (activePanel === name && panelEdge === e) {
+            activePanel = ""
+        } else {
+            panelEdge = e
+            activePanel = name
+        }
     }
 
     // ── IPC handler (qs_manager.sh routes here) ────────────────────────────────
+    // subtarget "top"/"bottom" picks the panel edge (Waybar passes "top");
+    // any other subtarget (network mode, wallpaper thumb) leaves it "bottom".
     IpcHandler {
         target: "main"
         function handleCommand(action: string, target: string, subtarget: string): void {
+            var edge = (subtarget === "top" || subtarget === "bottom") ? subtarget : "bottom"
             if (action === "close")        root.activePanel = ""
-            else if (action === "toggle")  root.togglePanel(target)
-            else if (action === "open")    root.activePanel = target
+            else if (action === "toggle")  root.togglePanel(target, edge)
+            else if (action === "open")    { root.panelEdge = edge; root.activePanel = target }
         }
     }
 
@@ -80,12 +90,19 @@ ShellRoot {
 
     ControlCenter {
         visible: root.activePanel === "control"
+        edge: root.panelEdge
         dndEnabled: root.dndEnabled
         onDndToggled: root.dndEnabled = !root.dndEnabled
     }
 
     AudioMixer {
         visible: root.activePanel === "audio"
+        edge: root.panelEdge
+    }
+
+    SysInfoPanel {
+        visible: root.activePanel === "sysinfo"
+        edge: root.panelEdge
     }
 
     MonitorManager {

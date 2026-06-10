@@ -11,6 +11,10 @@ let
   cfg = config.custom.hm;
   winModule = "hyprland/window";
 
+  # Quickshell panel toggles — "top" anchors the panel under this (top) bar
+  # as a dropdown instead of above the bottom Quickshell bar.
+  qs = "~/.config/hypr/scripts/qs_manager.sh";
+
   sysinfo-script = pkgs.writeShellScript "waybar-sysinfo" ''
     set -euo pipefail
     read -r a1 t1 < <(awk '/^cpu /{print $2+$4, $2+$3+$4+$5+$6+$7+$8}' /proc/stat)
@@ -122,7 +126,8 @@ in
             tooltip-format = "{controller_alias}\t{controller_address}\n\n{num_connections} connected";
             tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}";
             tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
-            on-click = "blueman-manager";
+            on-click = "${qs} toggle control top";
+            on-click-right = "blueman-manager";
           };
 
           clock = {
@@ -137,21 +142,24 @@ in
             format = "DISK {percentage_used}%";
             path = "/";
             tooltip-format = "{used} / {total}";
-            on-click = "kitty -e btop";
+            on-click = "${qs} toggle sysinfo top";
+            on-click-right = "kitty -e btop";
           };
 
           "custom/sysinfo" = {
             exec = "${sysinfo-script}";
             interval = 2;
             tooltip = false;
-            on-click = "kitty -e btop";
+            on-click = "${qs} toggle sysinfo top";
+            on-click-right = "kitty -e btop";
           };
 
           "custom/gpu" = {
             exec = "${gpu-script}";
             interval = 2;
             tooltip = false;
-            on-click = "kitty -e btop";
+            on-click = "${qs} toggle sysinfo top";
+            on-click-right = "kitty -e btop";
           };
 
           battery = {
@@ -179,7 +187,7 @@ in
             tooltip-format = "{ifname} via {gwaddr}";
             format-linked = "{ifname} (No IP)";
             format-disconnected = "Disconnected";
-            format-alt = "{ifname}: {ipaddr}/{cidr}";
+            on-click = "${qs} toggle control top";
             on-click-right = "nm-connection-editor";
           };
 
@@ -189,7 +197,8 @@ in
             format-bluetooth = "BT {volume}%";
             format-bluetooth-muted = "BT muted";
             format-muted = "muted";
-            on-click = "pavucontrol";
+            on-click = "${qs} toggle audio top";
+            on-click-right = "pavucontrol";
           };
 
           "pulseaudio#source" = {
@@ -197,7 +206,7 @@ in
             format-source = "MIC {volume}%";
             format-source-muted = "MIC muted";
             on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-            on-click-right = "pavucontrol -t 4";
+            on-click-right = "${qs} toggle audio top";
             scroll-step = 5;
           };
         }
