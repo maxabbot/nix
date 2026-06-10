@@ -69,7 +69,9 @@ in
             "disk"
             "custom/sysinfo"
           ]
-          ++ lib.optional (machineType == "desktop") "custom/gpu"
+          # Gate on the nvidia flag, not machineType — the VM is machineType
+          # "desktop" but has no GPU, so nvidia-smi would show "GPU ?% ?°C".
+          ++ lib.optional cfg.nvidia "custom/gpu"
           ++ lib.optional (machineType == "laptop") "battery";
 
           "hyprland/workspaces" = {

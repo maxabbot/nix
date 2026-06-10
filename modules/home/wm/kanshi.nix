@@ -78,42 +78,53 @@ in
   config = lib.mkIf (k.enable && cfg.compositor == "hyprland") {
     services.kanshi = {
       enable = true;
-      profiles = {
-        undocked.outputs = [
-          {
-            criteria = k.internal.output;
-            status = "enable";
-            mode = k.internal.mode;
-            position = "0,0";
-            scale = k.internal.scale;
-          }
-        ];
-      }
-      // lib.optionalAttrs hasDocked {
-        docked.outputs = [
-          {
-            criteria = k.docked.left;
-            status = "enable";
-            mode = k.docked.leftMode;
-            position = "0,0";
-            scale = 1.0;
-          }
-          {
-            criteria = k.docked.right;
-            status = "enable";
-            mode = k.docked.rightMode;
-            position = k.docked.rightPosition;
-            scale = 1.0;
-          }
-          {
-            criteria = k.internal.output;
-            status = "enable";
-            mode = k.internal.mode;
-            position = k.docked.laptopPosition;
-            scale = k.internal.scale;
-          }
-        ];
-      };
+      # `settings` (list of sections) replaces the deprecated `profiles` attrset.
+      settings = [
+        {
+          profile = {
+            name = "undocked";
+            outputs = [
+              {
+                criteria = k.internal.output;
+                status = "enable";
+                mode = k.internal.mode;
+                position = "0,0";
+                scale = k.internal.scale;
+              }
+            ];
+          };
+        }
+      ]
+      ++ lib.optionals hasDocked [
+        {
+          profile = {
+            name = "docked";
+            outputs = [
+              {
+                criteria = k.docked.left;
+                status = "enable";
+                mode = k.docked.leftMode;
+                position = "0,0";
+                scale = 1.0;
+              }
+              {
+                criteria = k.docked.right;
+                status = "enable";
+                mode = k.docked.rightMode;
+                position = k.docked.rightPosition;
+                scale = 1.0;
+              }
+              {
+                criteria = k.internal.output;
+                status = "enable";
+                mode = k.internal.mode;
+                position = k.docked.laptopPosition;
+                scale = k.internal.scale;
+              }
+            ];
+          };
+        }
+      ];
     };
   };
 }

@@ -5,6 +5,7 @@ pragma Singleton
 //
 // Colour token values are byte-for-byte the Gruvbox hexes previously inlined
 // across every panel; change a colour here and it updates everywhere.
+import QtQuick
 import Quickshell
 
 Singleton {

@@ -15,8 +15,8 @@ cp /mnt/etc/nixos/hardware-configuration.nix hosts/<name>/hardware-configuration
 
 ### Secrets
 
-- Replace `initialPassword = "123"` with a hashed password via agenix or sops-nix
-- Populate `sshKeys` in `custom.base` before using `deploy.sh`
+- Move `hashedPassword` out of the host files into agenix or sops-nix (`hashedPasswordFile`) — the current hash is committed to git history, so rotate the password once secrets land
+- Populate `sshKeys` in `custom.base` before enabling `services.openssh` for remote login
 - Fill in `signingkey` in `flake.nix` for GPG commit signing
 
 Full setup: add `agenix` to flake inputs, create `secrets/secrets.nix` with the host's SSH public key (`/etc/ssh/ssh_host_ed25519_key.pub`), then:
@@ -63,7 +63,7 @@ nix run github:nix-community/nixos-anywhere -- \
 - [ ] `nvidia-smi` shows GPU
 - [ ] Steam launches, Proton available
 - [ ] Syncthing UI at `localhost:8384`
-- [ ] Swaync notifications work (`notify-send test`)
+- [ ] Quickshell notifications work (`notify-send test` — served by Shell.qml's NotificationServer)
 - [ ] Apollo streaming UI at `https://localhost:47990`
 
 ---

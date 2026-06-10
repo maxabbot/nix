@@ -1,9 +1,20 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    python3
-    python3Packages.pip
-    python3Packages.virtualenv
+    # One coherent interpreter with its libraries on PYTHONPATH — individual
+    # python3Packages.* entries in systemPackages are separate store paths the
+    # interpreter can't import from. Project work should still prefer uv/direnv.
+    (python3.withPackages (
+      ps: with ps; [
+        pip
+        virtualenv
+        matplotlib
+        numpy
+        pandas
+        scipy
+        scikit-learn
+      ]
+    ))
     go
     rustup
     jdk
@@ -11,11 +22,6 @@
     clang
     cmake
     gnumake
-    python3Packages.matplotlib
-    python3Packages.numpy
-    python3Packages.pandas
-    python3Packages.scipy
-    python3Packages.scikit-learn
     shellcheck
     tig
     sqlite
@@ -32,7 +38,7 @@
   programs.direnv.enable = true;
 
   # SSH server disabled — no incoming SSH on these hosts. Outbound git/ssh is
-  # unaffected, as is deploy.sh (which talks to the live-ISO sshd at install time).
+  # unaffected, as is nixos-anywhere (which talks to the live-ISO sshd at install time).
   # To allow remote login later: set enable = true and populate custom.base.sshKeys
   # (the settings below keep it key-only so re-enabling is safe by default).
   services.openssh = {

@@ -19,7 +19,19 @@
       "Bash(cliphist list *)",
       "Bash(timeout 2 fuzzel --dmenu --check-config)",
       "Bash(timeout 2 fuzzel --dmenu)",
-      "Bash(grep -niA6 -E 'match-mode|fuzzy-min|fuzzy')"
+      "Bash(grep -niA6 -E 'match-mode|fuzzy-min|fuzzy')",
+      "Bash(sudo /nix/store/dbz2n95j3k5kj2rgkgdr3azjr46cagpq-lm-sensors-3.6.2-bin/bin/fancontrol /nix/store/gjzw3y5bh0dsrwc6fsan7glzq5skkwsf-fancontrol.conf)",
+      "Bash(sudo nixos-rebuild switch --flake /etc/nixos#home-desktop)",
+      "Bash(command -v statix deadnix shellcheck nixfmt)",
+      "Bash(shellcheck config/hypr-scripts/*.sh config/scripts/* deploy.sh)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(shellcheck config/hypr-scripts/*.sh config/scripts/tmux-sessionizer)",
+      "Bash(echo \"shellcheck exit: $?\")",
+      "Bash(sed -n '1,80p' /etc/nixos/config/hypr-scripts/screenshot.sh)",
+      "Bash(sed -n '1,60p' /etc/nixos/config/hypr-scripts/settings_watcher.sh)",
+      "Bash(awk '{ if \\(length\\($2\\) <= 2 && NF==2\\) c++ } END { print c \" of 30 commits have 1-2 char messages\" }')",
+      "Bash(shellcheck /etc/nixos/config/hypr-scripts/gaming-toggle.sh /etc/nixos/config/hypr-scripts/qs_manager.sh /etc/nixos/config/hypr-scripts/shortcuts-wallpaper.sh)",
+      "Bash(shellcheck config/hypr-scripts/*.sh)"
     ]
   }
 }

@@ -1,5 +1,15 @@
 # modules/home/editor.nix — Zed (primary) and VSCode (backup) configuration.
-{ pkgs, lib, ... }:
+# Both editors are GUI apps, gated on a compositor being configured so the
+# headless `minimal` host gets neither (nano stays for console editing).
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  gui = config.custom.hm.compositor != "none";
+in
 {
   # ── Zed ────────────────────────────────────────────────────────────────────────
   # System tracks stable nixpkgs; Zed moves fast, so pull it from the unstable
@@ -9,10 +19,11 @@
   # and Zed resets to the onboarding screen every launch.
   home.packages = [
     pkgs.nano
-    pkgs.nodejs_22
-  ];
+  ]
+  # nodejs is only here for Zed (its downloaded binary won't run on NixOS)
+  ++ lib.optionals gui [ pkgs.nodejs_22 ];
 
-  programs.zed-editor = {
+  programs.zed-editor = lib.mkIf gui {
     enable = true;
     package = pkgs.unstable.zed-editor;
     mutableUserSettings = true;
@@ -327,7 +338,7 @@
   };
 
   # ── VSCode (backup editor) ─────────────────────────────────────────────────────
-  programs.vscode = {
+  programs.vscode = lib.mkIf gui {
     enable = true;
     package = pkgs.vscode;
 

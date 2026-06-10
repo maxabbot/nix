@@ -107,6 +107,13 @@ Rectangle {
             onClicked: root.panelToggled("wallpaper")
         }
 
+        BarButton {
+            icon: "󰄀"
+            tooltip: "Screenshot"
+            active: root.activePanel === "screenshot"
+            onClicked: root.panelToggled("screenshot")
+        }
+
         // Separator
         Rectangle {
             width: 1; height: 20

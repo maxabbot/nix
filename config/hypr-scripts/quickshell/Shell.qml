@@ -104,6 +104,11 @@ ShellRoot {
         visible: root.activePanel === "keybinds"
     }
 
+    ScreenshotOverlay {
+        visible: root.activePanel === "screenshot"
+        onCloseRequested: root.activePanel = ""
+    }
+
     NixPanel {
         visible: root.activePanel === "nix"
         onRebuildStarted:       root.rebuildRunning = true

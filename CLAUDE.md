@@ -65,7 +65,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#<host>
 
 ### Shell scripts
 
-All `*.sh` linted with shellcheck. Use `bash`, `set -euo pipefail`, quote properly.
+All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -euo pipefail` for new scripts (long-running event loops in `config/hypr-scripts/` intentionally omit it so one failed poll doesn't kill the loop).
 
 ## Adding things
 
@@ -78,13 +78,13 @@ All `*.sh` linted with shellcheck. Use `bash`, `set -euo pipefail`, quote proper
 | New HM feature | New file in `home/max/`, add to imports in `home/max/default.nix` |
 | Plain-text dotfile | `config/<app>/...` + wire via `xdg.configFile` |
 | Live-editable script | `config/hypr-scripts/` (symlinked into `~/.config/hypr/scripts/`) |
-| Package not in nixpkgs | Add derivation to `pkgs/default.nix`, expose via `overlays/default.nix` |
+| Package not in nixpkgs | Add derivation under `pkgs/<name>/`, expose via `callPackage` in `overlays/default.nix` |
 
 ## Security
 
 - Never commit credentials — `github_pat`, `*.iso` are gitignored.
-- `hosts/home-desktop/default.nix` ships `initialPassword = "123"` — change on first login or replace with `hashedPassword` before deploy.
-- `sshKeys = [ ]` is empty by default; populate before using `deploy.sh`.
+- Hosts currently set `custom.base.hashedPassword` inline — the hash is in git history, so treat it as exposed: move to agenix/sops-nix (`hashedPasswordFile`) and rotate the password (see TODO.md).
+- `sshKeys = [ ]` is empty by default; populate before enabling `services.openssh` for remote login.
 - Secure boot: add `../common/optional/lanzaboote.nix` to a host after running `sbctl create-keys` + `sbctl enroll-keys`.
 
 ## Theme

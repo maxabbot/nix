@@ -40,11 +40,11 @@
     ];
   };
 
-  environment.variables = {
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    GBM_BACKEND = "nvidia-drm";
-    LIBVA_DRIVER_NAME = "nvidia";
-  };
+  # sessionVariables alone covers login sessions (environment.d / PAM); a
+  # duplicate environment.variables block previously set the first three again.
+  # Hyprland's generated env.lua re-exports them inside the compositor (set via
+  # the nvidia hmArg) — that copy is kept because it applies before any
+  # session-manager environment is loaded.
   environment.sessionVariables = {
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     GBM_BACKEND = "nvidia-drm";

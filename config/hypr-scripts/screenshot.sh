@@ -48,6 +48,8 @@ EDIT_MODE=false
 FULL_MODE=false
 RECORD_MODE=false
 SCAN_QR_MODE=false
+WINDOW_MODE=false
+SCAN_QR_NOTIFY=false
 GEOMETRY=""
 DESK_VOL="1.0"
 DESK_MUTE="false"
@@ -61,6 +63,8 @@ while [[ "$#" -gt 0 ]]; do
         --full) FULL_MODE=true; shift ;;
         --record) RECORD_MODE=true; shift ;;
         --scan-qr) SCAN_QR_MODE=true; shift ;;
+        --scan-qr-notify) SCAN_QR_NOTIFY=true; shift ;;
+        --window) WINDOW_MODE=true; shift ;;
         --geometry) GEOMETRY="$2"; shift 2 ;;
         --desk-vol) DESK_VOL="$2"; shift 2 ;;
         --desk-mute) DESK_MUTE="$2"; shift 2 ;;
@@ -154,6 +158,24 @@ EOF
 fi
 
 # ---------------------------------------------------------
+# SIMPLE QR SCAN (notify + clipboard, no overlay display)
+# ---------------------------------------------------------
+if [ "$SCAN_QR_NOTIFY" = true ]; then
+    TMP_IMG=$(mktemp /tmp/qs_qr_XXXXX.png)
+    GEOM=$(slurp -d 2>/dev/null) || { rm -f "$TMP_IMG"; exit 0; }
+    grim -g "$GEOM" "$TMP_IMG"
+    RESULT=$(zbarimg --raw -q "$TMP_IMG" 2>/dev/null | head -n1)
+    rm -f "$TMP_IMG"
+    if [ -n "$RESULT" ]; then
+        printf '%s' "$RESULT" | wl-copy
+        notify-send -a "QR Scanner" "QR Code" "$RESULT"
+    else
+        notify-send -a "QR Scanner" "Not Found" "No QR code detected in the selected area."
+    fi
+    exit 0
+fi
+
+# ---------------------------------------------------------
 # SMART TOGGLE: STOP RECORDING & CLEANUP VIRTUAL AUDIO
 # ---------------------------------------------------------
 if [ -f "$CACHE_DIR/rec_pid" ]; then
@@ -214,6 +236,21 @@ CACHE_FILE="$QS_CACHE_SCREENSHOT/geometry"
 MODE_CACHE_FILE="$QS_CACHE_SCREENSHOT/video_mode"
 
 rm -f "$CACHE_DIR/processing.lock"
+
+# Resolve active window geometry for --window mode
+if [ "$WINDOW_MODE" = true ]; then
+    GEOMETRY=$(hyprctl activewindow -j 2>/dev/null | python3 -c "
+import sys, json
+try:
+    w = json.load(sys.stdin)
+    print('{},{} {}x{}'.format(w['at'][0], w['at'][1], w['size'][0], w['size'][1]))
+except: pass
+" 2>/dev/null)
+    if [ -z "$GEOMETRY" ]; then
+        notify-send -a "Screenshot" "No Active Window" "Could not detect the active window."
+        exit 1
+    fi
+fi
 
 # ---------------------------------------------------------
 # PHASE 1: Capture Execution (GPU-Screen-Recorder + Virtual Audio)

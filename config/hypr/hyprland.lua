@@ -169,7 +169,7 @@ local mainMod = "SUPER"
 
 -- Apps
 hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd("kitty"),                         { description = "Apps | Terminal" })
-hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("nautilus"),                      { description = "Apps | Files" })
+hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("thunar"),                        { description = "Apps | Files" })
 hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd("zen-beta"),                      { description = "Apps | Browser" })
 hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"),                        { description = "Apps | Launcher" })
 
@@ -223,9 +223,7 @@ hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_ma
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/clipboard-fuzzel.sh"),                   { description = "System | Clipboard history" })
 
 -- Screenshots
-hl.bind("Print",               hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'),                                        { description = "Screenshots | Region to clipboard" })
-hl.bind("SHIFT + Print",       hl.dsp.exec_cmd("grim - | wl-copy"),                                                      { description = "Screenshots | Screen to clipboard" })
-hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" ~/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png'), { description = "Screenshots | Region to file" })
+hl.bind("Print", hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })
 
 -- Volume
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume raise"),        { locked = true, description = "Media | Volume up" })

@@ -1,9 +1,13 @@
 {
+  config,
   pkgs,
   inputs,
   zen-browser,
   ...
 }:
+let
+  inherit (config.custom.base) username;
+in
 {
   imports = [ inputs.silentSDDM.nixosModules.default ];
 
@@ -43,9 +47,9 @@
     # ── Syncthing ───────────────────────────────────────────────────────────────
     syncthing = {
       enable = true;
-      user = "max";
-      dataDir = "/home/max";
-      configDir = "/home/max/.config/syncthing";
+      user = username;
+      dataDir = "/home/${username}";
+      configDir = "/home/${username}/.config/syncthing";
     };
     # ── Flatpak ─────────────────────────────────────────────────────────────────
     flatpak.enable = true;
@@ -102,6 +106,8 @@
   environment.systemPackages = with pkgs; [
     grim
     slurp
+    satty
+    zbar
     awww # wallpaper daemon — NOT "swww"
     wl-clipboard
     cliphist

@@ -1,10 +1,21 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
-{ pkgs, ... }:
+# GUI apps (kitty, mpv, zathura, fuzzel, wlogout/hyprlock config, freetube) are
+# gated on a compositor being configured; CLI tools (btop, fastfetch, mise,
+# tmux-sessionizer) apply everywhere including the headless `minimal` host.
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
+let
+  gui = config.custom.hm.compositor != "none";
+in
 {
   programs = {
     # ── Kitty terminal ─────────────────────────────────────────────────────────────
     # Colours and font are managed by Stylix; only behaviour settings live here.
-    kitty = {
+    kitty = lib.mkIf gui {
       enable = true;
 
       settings = {
@@ -78,7 +89,7 @@
     # ── bat ── configured in home/max/cli.nix (theme + pager) ──────────────────────
 
     # ── mpv ────────────────────────────────────────────────────────────────────────
-    mpv = {
+    mpv = lib.mkIf gui {
       enable = true;
       config = {
         profile = "gpu-hq";
@@ -116,7 +127,7 @@
 
     # ── Zathura PDF viewer ─────────────────────────────────────────────────────────
     # Colours are managed by Stylix; only behaviour settings live here.
-    zathura = {
+    zathura = lib.mkIf gui {
       enable = true;
       options = {
         recolor = true;
@@ -141,7 +152,7 @@
 
     # ── Fuzzel launcher ───────────────────────────────────────────────────────────
     # Colours are managed by Stylix; only layout/behaviour settings live here.
-    fuzzel = {
+    fuzzel = lib.mkIf gui {
       enable = true;
       settings = {
         main = {
@@ -177,26 +188,28 @@
 
   xdg.configFile = {
     # ── Wlogout logout screen ───────────────────────────────────────────────────
-    "wlogout/layout".source = ../../config/wlogout/layout;
+    "wlogout/layout" = lib.mkIf gui { source = ../../config/wlogout/layout; };
     # Icons live in the Nix store, not /usr/share — generate CSS with correct path.
-    "wlogout/style.css".text =
-      builtins.replaceStrings [ "/usr/share/wlogout/icons" ] [ "${pkgs.wlogout}/share/wlogout/icons" ]
-        (builtins.readFile ../../config/wlogout/style.css);
+    "wlogout/style.css" = lib.mkIf gui {
+      text =
+        builtins.replaceStrings [ "/usr/share/wlogout/icons" ] [ "${pkgs.wlogout}/share/wlogout/icons" ]
+          (builtins.readFile ../../config/wlogout/style.css);
+    };
     # ── Fastfetch system info ───────────────────────────────────────────────────
     "fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
     # ── Hyprlock lockscreen config ──────────────────────────────────────────────
-    "hypr/hyprlock.conf".source = ../../config/hypr/hyprlock.conf;
+    "hypr/hyprlock.conf" = lib.mkIf gui { source = ../../config/hypr/hyprlock.conf; };
     # ── Mise version manager ────────────────────────────────────────────────────
     "mise/config.toml".source = ../../config/mise/config.toml;
   };
 
   # ── Misc packages ─────────────────────────────────────────────────────────────
   home.packages = [
-    pkgs.freetube
     pkgs.mise
     (pkgs.writeShellScriptBin "tmux-sessionizer" (
       builtins.readFile ../../config/scripts/tmux-sessionizer
     ))
-  ];
+  ]
+  ++ lib.optionals gui [ pkgs.freetube ];
 
 }

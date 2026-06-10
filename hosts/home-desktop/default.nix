@@ -39,9 +39,9 @@
       enable = true;
       config = ''
         INTERVAL=10
-        DEVPATH=hwmon2=/sys/devices/platform/it87.2624/hwmon/hwmon2
-        DEVNAME=hwmon2=it8628
-        FCTEMPS=hwmon2/pwm1=hwmon4/temp1_input hwmon2/pwm3=hwmon4/temp1_input hwmon2/pwm4=hwmon4/temp1_input
+        DEVPATH=hwmon2=devices/platform/it87.2624 hwmon6=devices/platform/coretemp.0
+        DEVNAME=hwmon2=it8628 hwmon6=coretemp
+        FCTEMPS=hwmon2/pwm1=hwmon6/temp1_input hwmon2/pwm3=hwmon6/temp1_input hwmon2/pwm4=hwmon6/temp1_input
         FCFANS=hwmon2/pwm1=hwmon2/fan1_input hwmon2/pwm3=hwmon2/fan3_input hwmon2/pwm4=hwmon2/fan4_input
         MINTEMP=hwmon2/pwm1=40 hwmon2/pwm3=40 hwmon2/pwm4=40
         MAXTEMP=hwmon2/pwm1=75 hwmon2/pwm3=75 hwmon2/pwm4=75
@@ -51,11 +51,39 @@
     };
   };
 
-  # SDDM greeter compositor — KWin, overriding productivity.nix's weston default
-  # (that default is for the QEMU VM, which has no hardware cursor). KWin is
-  # required for the kwinoutputconfig.json below to be honoured; weston ignores
-  # it, which leaves the greeter on the rotated 4K monitor.
-  services.displayManager.sddm.wayland.compositor = "kwin";
+  services = {
+    # SDDM greeter compositor — KWin, overriding productivity.nix's weston default
+    # (that default is for the QEMU VM, which has no hardware cursor). KWin is
+    # required for the kwinoutputconfig.json below to be honoured; weston ignores
+    # it, which leaves the greeter on the rotated 4K monitor.
+    displayManager.sddm.wayland.compositor = "kwin";
+
+    # ── Audio — route NVIDIA HDMI audio to the TV (HDMI 3 = Philips FTV) ──────
+    # Without this, WirePlumber defaults to hdmi-stereo (HDMI 0 = U27B35 monitor).
+    pipewire.wireplumber.extraConfig = {
+      "10-nvidia-tv-audio" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [ { "device.name" = "alsa_card.pci-0000_01_00.1"; } ];
+            actions.update-props."device.profile" = "output:hdmi-stereo-extra2";
+          }
+        ];
+      };
+      "20-default-tv-sink" = {
+        "wireplumber.settings"."default.configured-audio-sink" =
+          "alsa_output.pci-0000_01_00.1.hdmi-stereo-extra2";
+      };
+    };
+
+    # ── udev ───────────────────────────────────────────────────────────────────
+    # NuPhy Air75 V3 — grants userspace hidraw access for nuphy.io configurator.
+    # 0660 + input group instead of world-writable 0666; the primary user is in
+    # "input" (base.nix). TAG+="uaccess" won't work here: extraRules lands in
+    # 99-local.rules, after 73-seat-late.rules has already processed the tag.
+    udev.extraRules = ''
+      KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", GROUP="input"
+    '';
+  };
 
   # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────
   # Activation runs on every boot before SDDM starts. chmod 444 prevents KWin
@@ -246,20 +274,6 @@
       '';
     };
 
-  # ── Audio — route NVIDIA HDMI audio to the TV (HDMI 3 = Philips FTV) ────────
-  # Without this, WirePlumber defaults to hdmi-stereo (HDMI 0 = U27B35 monitor).
-  services.pipewire.wireplumber.extraConfig."10-nvidia-tv-audio" = {
-    "monitor.alsa.rules" = [
-      {
-        matches = [ { "device.name" = "alsa_card.pci-0000_01_00.1"; } ];
-        actions.update-props."device.profile" = "output:hdmi-stereo-extra2";
-      }
-    ];
-  };
-  services.pipewire.wireplumber.extraConfig."20-default-tv-sink" = {
-    "wireplumber.settings"."default.configured-audio-sink" = "alsa_output.pci-0000_01_00.1.hdmi-stereo-extra2";
-  };
-
   boot = {
     # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ─────────────────────
     # Mainline it87 doesn't support this chip; the out-of-tree driver does.
@@ -282,12 +296,6 @@
       StartLimitIntervalSec = "60";
     };
   };
-
-  # ── udev ─────────────────────────────────────────────────────────────────────
-  # NuPhy Air75 V3 — grants userspace hidraw access for nuphy.io configurator
-  services.udev.extraRules = ''
-    KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0666"
-  '';
 
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";
