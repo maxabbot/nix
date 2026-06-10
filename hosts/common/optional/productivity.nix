@@ -149,7 +149,6 @@ in
     kdePackages.qtstyleplugin-kvantum
     papirus-icon-theme
     foot
-    syncthingtray
     yazi
     quickshell
   ];

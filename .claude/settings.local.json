@@ -93,7 +93,16 @@
       "Bash(nmcli -t -f ACTIVE,SSID dev wifi)",
       "Bash(systemctl is-active *)",
       "Bash(command -v gammastep brightnessctl bluetoothctl)",
-      "Bash(wpctl get-volume *)"
+      "Bash(wpctl get-volume *)",
+      "Bash(magick /tmp/qs-mon-DP-2.png -gravity NorthEast -crop 800x1000+0+0 /tmp/qs-audio-crop.png)",
+      "Bash(grim -o DP-2 /tmp/qs-net.png)",
+      "Bash(magick /tmp/qs-net.png -gravity NorthEast -crop 900x1100+0+0 /tmp/qs-net-crop.png)",
+      "Bash(sudo tee /sys/class/hwmon/hwmon2/pwm2_enable)",
+      "Bash(sudo tee /sys/class/hwmon/hwmon2/pwm2)",
+      "Bash(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY dev wifi list)",
+      "Bash(grim -o DP-2 /tmp/qs-net4.png)",
+      "Bash(magick /tmp/qs-net4.png -gravity NorthEast -crop 900x800+0+0 /tmp/qs-net4-crop.png)",
+      "Bash(pkill -f \"[q]uickshell\")"
     ]
   }
 }

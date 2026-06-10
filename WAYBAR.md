@@ -36,7 +36,7 @@ Top status bar for the Hyprland hosts, themed Gruvbox Material Dark. Defined ent
 
 **`pulseaudio#source`** — Microphone: `MIC {volume}%` / `MIC muted`. Click toggles mute (`wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle`), right-click drops down the Quickshell Audio mixer. Blue normally, grey when muted.
 
-**`network`** — `WiFi: {essid} ({signal}%)` or `ETH: {ip}/{cidr}`; left-click drops down the Quickshell Control Center, right-click opens `nm-connection-editor`. Red when disconnected.
+**`network`** — `WiFi: {essid} ({signal}%)` or `ETH: {ip}/{cidr}`; left-click drops down the Quickshell Wi-Fi panel (scan, connect, password prompt), right-click opens `nm-connection-editor`. Red when disconnected.
 
 **`disk`** — Root filesystem `DISK {used}%`, tooltip `used / total`, click drops down the Quickshell SysInfo panel, right-click opens `btop` in kitty. 30s interval.
 

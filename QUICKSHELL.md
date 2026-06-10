@@ -26,6 +26,8 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 **`SysInfoPanel.qml`** — System stats panel (right edge, 360px, edge-aware). CPU usage + package temp, memory, root disk, and GPU (`nvidia-smi`; row hidden when absent), each as a thin progress bar polled every 2s while open. Header button opens `btop` in kitty.
 
+**`NetworkPanel.qml`** — Wi-Fi panel (right edge, 380px, edge-aware). Radio toggle, scanned network list (strongest AP per SSID, in-use first), click to connect/disconnect via `nmcli` — known networks connect directly, new secured ones get an inline password prompt (keyboard focus grabbed only while the prompt is up; a failed password deletes the half-made profile for clean retries). `qs_manager.sh` kicks a hardware rescan on open; the list refreshes every 8s while visible.
+
 **`SliderRow.qml`** — Shared label + `Slider` + value display component. Used by AudioMixer and ControlCenter.
 
 **`KeybindCheatSheet.qml`** — Searchable keybind overlay (bottom-right, 480×560). Reads `hyprctl binds -j` on first open, cached in-memory.
@@ -47,9 +49,9 @@ quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 
 # Toggle a panel:
 ~/.config/hypr/scripts/qs_manager.sh toggle <name> [top|bottom]
-# Names: notifications, control, audio, sysinfo, keybinds, nix, monitors, wallpaper
-# Edge-aware panels (control, audio, sysinfo) accept a subtarget: "top" drops
-# the panel down from Waybar, "bottom" (default) rises from the Quickshell bar.
+# Names: notifications, control, audio, sysinfo, network, keybinds, nix, monitors, wallpaper
+# Edge-aware panels (control, audio, sysinfo, network) accept a subtarget: "top"
+# drops the panel down from Waybar, "bottom" (default) rises from the Quickshell bar.
 
 # Close all panels:
 ~/.config/hypr/scripts/qs_manager.sh close

@@ -276,6 +276,16 @@ PanelWindow {
                 font.family: Theme.font
             }
 
+            // First scan after a radio flip / fresh open can come back empty
+            // for a moment — the 8s timer fills it in.
+            Text {
+                visible: root.wifiEnabled && root.networks.length === 0
+                text: "Scanning…"
+                color: Theme.gray
+                font.pixelSize: 12
+                font.family: Theme.font
+            }
+
             // ── Network list ──────────────────────────────────────────────────────
             ListView {
                 id: netList
