@@ -102,7 +102,12 @@
       "Bash(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY dev wifi list)",
       "Bash(grim -o DP-2 /tmp/qs-net4.png)",
       "Bash(magick /tmp/qs-net4.png -gravity NorthEast -crop 900x800+0+0 /tmp/qs-net4-crop.png)",
-      "Bash(pkill -f \"[q]uickshell\")"
+      "Bash(pkill -f \"[q]uickshell\")",
+      "Bash(sudo mkdir -p /mnt)",
+      "Bash(sudo mount -t btrfs -o subvol=@ /dev/sda2 /mnt)",
+      "Bash(sudo mount -t btrfs -o subvol=@home /dev/sda2 /mnt/home)",
+      "Bash(sudo mount -t btrfs -o subvol=@nix /dev/sda2 /mnt/nix)",
+      "Bash(sudo mount -t btrfs -o subvol=@log /dev/sda2 /mnt/var/log)"
     ]
   }
 }

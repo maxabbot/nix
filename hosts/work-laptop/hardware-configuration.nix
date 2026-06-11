@@ -12,6 +12,7 @@
     initrd = {
       availableKernelModules = [
         "nvme"
+        "uas"
       ];
       kernelModules = [
         "xhci_pci"
