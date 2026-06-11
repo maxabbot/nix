@@ -1,6 +1,5 @@
-# hosts/work-laptop/hardware-configuration.nix — Placeholder for work-laptop.
-# Replace with the output of: sudo nixos-generate-config --root /mnt
 {
+  config,
   lib,
   modulesPath,
   ...
@@ -11,21 +10,26 @@
   boot = {
     initrd = {
       availableKernelModules = [
+        "xhci_pci"
+        "thunderbolt"
         "nvme"
         "uas"
-      ];
-      kernelModules = [
-        "xhci_pci"
-        "usb_storage"
         "usbhid"
         "sd_mod"
+        "sdhci_pci"
       ];
+      kernelModules = [ ];
     };
     kernelModules = [ "kvm-intel" ];
     extraModulePackages = [ ];
   };
 
   swapDevices = [ ];
+
+  hardware.cpu.intel = {
+    npu.enable = true;
+    updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }
