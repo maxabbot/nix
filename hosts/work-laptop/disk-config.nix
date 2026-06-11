@@ -7,7 +7,10 @@
 # Default assumes /dev/sda — change `device` if different (e.g. /dev/nvme0n1).
 _: {
   disko.devices = {
-    disk.main = {
+    # The disk name determines the GPT partlabels (disk-usbssd-*) that boot
+    # mounts resolve through — keep it unique across machines so this USB drive
+    # never collides with another disko-installed disk in the same system.
+    disk.usbssd = {
       type = "disk";
       device = "/dev/sda";
       content = {

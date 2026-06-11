@@ -55,7 +55,10 @@
 
   # ── Bootloader ────────────────────────────────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  # Portable USB drive: boot via the ESP fallback path (\EFI\BOOT\BOOTX64.EFI)
+  # instead of writing NVRAM entries on whatever machine it happens to be
+  # plugged into during a rebuild.
+  boot.loader.efi.canTouchEfiVariables = false;
   boot.initrd.systemd.enable = true;
 
   # ── Networking ───────────────────────────────────────────────────────────────
