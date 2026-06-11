@@ -1,5 +1,5 @@
 # hosts/work-laptop/default.nix — Work laptop (Hyprland, TLP, no gaming/nvidia).
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -60,6 +60,11 @@
   # plugged into during a rebuild.
   boot.loader.efi.canTouchEfiVariables = false;
   boot.initrd.systemd.enable = true;
+
+  # The ThinkBook's firmware can't enumerate this USB enclosure into its boot
+  # menu and may prune the "NixOS USB" NVRAM entry after booting without the
+  # drive attached; efibootmgr lets us re-pin the entry from the running system.
+  environment.systemPackages = [ pkgs.efibootmgr ];
 
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "work-laptop";
