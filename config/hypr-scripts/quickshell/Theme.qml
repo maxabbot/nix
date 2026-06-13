@@ -7,9 +7,23 @@ pragma Singleton
 // across every panel; change a colour here and it updates everywhere.
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 
 Singleton {
     id: theme
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+    // The QsScreen for the monitor that currently has focus, so bar-dropdown
+    // panels open where the user is working instead of a fixed default screen.
+    // Returns null (→ Quickshell's default screen) until Hyprland reports focus.
+    function focusedScreen() {
+        var fm = Hyprland.focusedMonitor
+        if (!fm) return null
+        var ss = Quickshell.screens
+        for (var i = 0; i < ss.length; i++)
+            if (ss[i].name === fm.name) return ss[i]
+        return null
+    }
 
     // ── Font ────────────────────────────────────────────────────────────────
     readonly property string font: "JetBrainsMono Nerd Font"
@@ -47,14 +61,11 @@ Singleton {
     readonly property color toastBg: "#2d3b3b"  // default-urgency toast fill
 
     // ── Translucent surfaces ────────────────────────────────────────────────
-    readonly property color barBg:   Qt.rgba(40 / 255, 40 / 255, 40 / 255, 0.92)  // bar
     readonly property color bgFloat: Qt.rgba(40 / 255, 40 / 255, 40 / 255, 0.80)  // overlay badge
 
     // ── Metrics ─────────────────────────────────────────────────────────────
     readonly property int radiusPanel:  12
     readonly property int radiusButton: 8
     readonly property int animFast:     80   // ms — hover/colour transitions
-    readonly property int barHeight:    40
-    readonly property int panelGap:     44   // bottom margin clearing the bar
     readonly property int panelGapTop:  38   // top margin clearing Waybar (34px)
 }

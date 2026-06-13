@@ -1,20 +1,14 @@
-// NixPanel.qml — Combined Nix store gauge + live rebuild tracker (bottom-right).
+// NixPanel.qml — Nix store gauge + live rebuild tracker page
+// (embedded in Settings.qml — no window chrome).
 // Store gauge shows /nix partition usage via `df`.
 // Rebuild runs `nh os switch /etc/nixos` or `nh home switch` and streams output.
-import Quickshell
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-PanelWindow {
+Item {
     id: root
-
-    anchors { bottom: true; right: true }
-    margins { bottom: 44; right: 4 }
-    implicitWidth: 480
-    implicitHeight: 660
-    color: "transparent"
 
     signal rebuildStarted()
     signal rebuildFinished(bool success)
@@ -112,274 +106,268 @@ PanelWindow {
     Process { id: gcProcess; command: [] }
 
     // ── UI ───────────────────────────────────────────────────────────────────────
-    Rectangle {
+    ColumnLayout {
         anchors.fill: parent
-        radius: 12; color: Theme.bg
-        border.color: Theme.border; border.width: 1
+        spacing: 10
 
-        ColumnLayout {
-            anchors { fill: parent; margins: 12 }
-            spacing: 10
-
-            // ── Header ──────────────────────────────────────────────────────────
-            RowLayout {
-                Layout.fillWidth: true; height: 28; spacing: 8
+        // ── Header ──────────────────────────────────────────────────────────
+        RowLayout {
+            Layout.fillWidth: true; height: 28; spacing: 8
+            Text {
+                text: "󱄅  Nix"
+                color: Theme.fg; font.pixelSize: 14; font.bold: true
+                font.family: Theme.font
+                Layout.fillWidth: true
+            }
+            Rectangle {
+                visible: root.rebuildStatus !== "idle"
+                radius: 4; color: Theme.bgHard
+                border.color: root.rebuildStatus === "success" ? Theme.green
+                            : root.rebuildStatus === "failed"  ? Theme.red : Theme.accent
+                border.width: 1
+                implicitWidth: statusLabel.implicitWidth + 10
+                implicitHeight: statusLabel.implicitHeight + 4
                 Text {
-                    text: "󱄅  Nix"
-                    color: Theme.fg; font.pixelSize: 14; font.bold: true
-                    font.family: Theme.font
-                    Layout.fillWidth: true
-                }
-                Rectangle {
-                    visible: root.rebuildStatus !== "idle"
-                    radius: 4; color: Theme.bgHard
-                    border.color: root.rebuildStatus === "success" ? Theme.green
-                                : root.rebuildStatus === "failed"  ? Theme.red : Theme.accent
-                    border.width: 1
-                    implicitWidth: statusLabel.implicitWidth + 10
-                    implicitHeight: statusLabel.implicitHeight + 4
-                    Text {
-                        id: statusLabel
-                        anchors.centerIn: parent
-                        text: root.rebuildStatus
-                        color: root.rebuildStatus === "success" ? Theme.green
-                             : root.rebuildStatus === "failed"  ? Theme.red : Theme.accent
-                        font.pixelSize: 10; font.family: Theme.font
-                    }
+                    id: statusLabel
+                    anchors.centerIn: parent
+                    text: root.rebuildStatus
+                    color: root.rebuildStatus === "success" ? Theme.green
+                         : root.rebuildStatus === "failed"  ? Theme.red : Theme.accent
+                    font.pixelSize: 10; font.family: Theme.font
                 }
             }
+        }
 
-            // ── Store gauge ──────────────────────────────────────────────────────
-            Rectangle {
-                Layout.fillWidth: true; height: 180; radius: 8
-                color: Theme.bgAlt; border.color: Theme.border; border.width: 1
+        // ── Store gauge ──────────────────────────────────────────────────────
+        Rectangle {
+            Layout.fillWidth: true; height: 180; radius: 8
+            color: Theme.bgAlt; border.color: Theme.border; border.width: 1
 
-                RowLayout {
-                    anchors { fill: parent; margins: 12 }
-                    spacing: 16
+            RowLayout {
+                anchors { fill: parent; margins: 12 }
+                spacing: 16
 
-                    // Radial ring
-                    Canvas {
-                        id: ring
-                        width: 140; height: 140
-                        Layout.alignment: Qt.AlignVCenter
+                // Radial ring
+                Canvas {
+                    id: ring
+                    width: 140; height: 140
+                    Layout.alignment: Qt.AlignVCenter
 
-                        property real fraction: root.diskTotal > 0 ? root.diskUsed / root.diskTotal : 0
-                        onFractionChanged: requestPaint()
+                    property real fraction: root.diskTotal > 0 ? root.diskUsed / root.diskTotal : 0
+                    onFractionChanged: requestPaint()
 
-                        onPaint: {
-                            var ctx = getContext("2d")
-                            ctx.reset()
-                            var cx = width / 2, cy = height / 2, r = 56
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        var cx = width / 2, cy = height / 2, r = 56
 
-                            // Track
+                        // Track
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, r, 0, Math.PI * 2)
+                        ctx.strokeStyle = Theme.border
+                        ctx.lineWidth = 10
+                        ctx.stroke()
+
+                        // Fill
+                        if (fraction > 0) {
+                            var start = -Math.PI / 2
                             ctx.beginPath()
-                            ctx.arc(cx, cy, r, 0, Math.PI * 2)
-                            ctx.strokeStyle = Theme.border
+                            ctx.arc(cx, cy, r, start, start + Math.PI * 2 * Math.min(fraction, 1))
+                            ctx.strokeStyle = fraction > 0.9 ? Theme.red
+                                           : fraction > 0.75 ? Theme.yellow : Theme.accent
                             ctx.lineWidth = 10
+                            ctx.lineCap = "round"
                             ctx.stroke()
-
-                            // Fill
-                            if (fraction > 0) {
-                                var start = -Math.PI / 2
-                                ctx.beginPath()
-                                ctx.arc(cx, cy, r, start, start + Math.PI * 2 * Math.min(fraction, 1))
-                                ctx.strokeStyle = fraction > 0.9 ? Theme.red
-                                               : fraction > 0.75 ? Theme.yellow : Theme.accent
-                                ctx.lineWidth = 10
-                                ctx.lineCap = "round"
-                                ctx.stroke()
-                            }
-
-                            // Percentage text
-                            ctx.font = "bold 18px '" + Theme.font + "'"
-                            ctx.fillStyle = Theme.fg
-                            ctx.textAlign = "center"
-                            ctx.textBaseline = "middle"
-                            ctx.fillText(Math.round(fraction * 100) + "%", cx, cy - 8)
-
-                            ctx.font = "11px '" + Theme.font + "'"
-                            ctx.fillStyle = Theme.gray
-                            ctx.fillText("used", cx, cy + 10)
-                        }
-                    }
-
-                    // Stats column
-                    Column {
-                        Layout.fillWidth: true; spacing: 10
-
-                        Column {
-                            spacing: 2
-                            Text { text: "Used"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
-                            Text {
-                                text: (root.diskUsed / 1073741824).toFixed(1) + " GB"
-                                color: Theme.fgBright; font.pixelSize: 16; font.bold: true
-                                font.family: Theme.font
-                            }
                         }
 
-                        Column {
-                            spacing: 2
-                            Text { text: "Total"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
-                            Text {
-                                text: (root.diskTotal / 1073741824).toFixed(1) + " GB"
-                                color: Theme.fg; font.pixelSize: 13
-                                font.family: Theme.font
-                            }
-                        }
+                        // Percentage text
+                        ctx.font = "bold 18px '" + Theme.font + "'"
+                        ctx.fillStyle = Theme.fg
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "middle"
+                        ctx.fillText(Math.round(fraction * 100) + "%", cx, cy - 8)
 
-                        Column {
-                            spacing: 2
-                            Text { text: "Store paths"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
-                            Text {
-                                text: root.storePaths.toLocaleString()
-                                color: Theme.fg; font.pixelSize: 13
-                                font.family: Theme.font
-                            }
-                        }
-
-                        // GC button
-                        Rectangle {
-                            width: parent.width; height: 32; radius: 6
-                            color: gcArea.containsMouse ? (gcProcess.running ? Theme.borderStrong : Theme.accentBg) : Theme.bgAlt
-                            border.color: Theme.borderStrong; border.width: 1
-                            Behavior on color { ColorAnimation { duration: 80 } }
-
-                            RowLayout {
-                                anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
-                                spacing: 6
-                                Text {
-                                    text: gcProcess.running ? "" : "󱃅"
-                                    color: Theme.accent; font.pixelSize: 13
-                                    font.family: Theme.font
-                                }
-                                Text {
-                                    text: gcProcess.running ? "Collecting…" : "Collect Garbage"
-                                    color: Theme.fg; font.pixelSize: 12
-                                    font.family: Theme.font
-                                    Layout.fillWidth: true
-                                }
-                            }
-
-                            MouseArea {
-                                id: gcArea
-                                anchors.fill: parent; hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: !gcProcess.running
-                                onClicked: {
-                                    gcProcess.command = ["nix-collect-garbage"]
-                                    gcProcess.running = true
-                                }
-                            }
-                        }
+                        ctx.font = "11px '" + Theme.font + "'"
+                        ctx.fillStyle = Theme.gray
+                        ctx.fillText("used", cx, cy + 10)
                     }
                 }
 
-                // GC post-refresh
-                Connections {
-                    target: gcProcess
-                    function onExited() { pollDisk.running = true; pollPaths.running = true }
-                }
-            }
-
-            // ── Divider ──────────────────────────────────────────────────────────
-            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
-
-            // ── Rebuild section ──────────────────────────────────────────────────
-            RowLayout {
-                Layout.fillWidth: true; spacing: 8
-
-                Text {
-                    text: "Rebuild"
-                    color: Theme.gray; font.pixelSize: 11; font.bold: true
-                    font.family: Theme.font
-                    Layout.fillWidth: true
-                }
-
-                // NixOS switch
-                Rectangle {
-                    implicitWidth: nixLabel.implicitWidth + 20; height: 30; radius: 6
-                    color: nixBtn.containsMouse && !root.rebuilding ? Theme.accentBg : Theme.bgAlt
-                    border.color: Theme.borderStrong; border.width: 1
-                    Behavior on color { ColorAnimation { duration: 80 } }
-                    Text {
-                        id: nixLabel
-                        anchors.centerIn: parent
-                        text: "NixOS Switch"
-                        color: root.rebuilding ? Theme.grayDim : Theme.fg
-                        font.pixelSize: 11; font.family: Theme.font
-                    }
-                    MouseArea {
-                        id: nixBtn
-                        anchors.fill: parent; hoverEnabled: true
-                        cursorShape: root.rebuilding ? Qt.ArrowCursor : Qt.PointingHandCursor
-                        enabled: !root.rebuilding
-                        onClicked: root.startRebuild(["nh", "os", "switch", "/etc/nixos"])
-                    }
-                }
-
-                // HM switch
-                Rectangle {
-                    implicitWidth: hmLabel.implicitWidth + 20; height: 30; radius: 6
-                    color: hmBtn.containsMouse && !root.rebuilding ? Theme.accentBg : Theme.bgAlt
-                    border.color: Theme.borderStrong; border.width: 1
-                    Behavior on color { ColorAnimation { duration: 80 } }
-                    Text {
-                        id: hmLabel
-                        anchors.centerIn: parent
-                        text: "HM Switch"
-                        color: root.rebuilding ? Theme.grayDim : Theme.fg
-                        font.pixelSize: 11; font.family: Theme.font
-                    }
-                    MouseArea {
-                        id: hmBtn
-                        anchors.fill: parent; hoverEnabled: true
-                        cursorShape: root.rebuilding ? Qt.ArrowCursor : Qt.PointingHandCursor
-                        enabled: !root.rebuilding
-                        onClicked: root.startRebuild(["nh", "home", "switch"])
-                    }
-                }
-            }
-
-            // ── Log output ───────────────────────────────────────────────────────
-            Rectangle {
-                Layout.fillWidth: true; Layout.fillHeight: true; radius: 6
-                color: Theme.bgHard; border.color: Theme.border; border.width: 1
-
-                // Empty state
+                // Stats column
                 Column {
-                    visible: logModel.count === 0
-                    anchors.centerIn: parent; spacing: 8
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "󱄅"; color: Theme.borderStrong; font.pixelSize: 28
-                        font.family: Theme.font
+                    Layout.fillWidth: true; spacing: 10
+
+                    Column {
+                        spacing: 2
+                        Text { text: "Used"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
+                        Text {
+                            text: (root.diskUsed / 1073741824).toFixed(1) + " GB"
+                            color: Theme.fgBright; font.pixelSize: 16; font.bold: true
+                            font.family: Theme.font
+                        }
                     }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "No rebuild log yet"
-                        color: Theme.grayDim; font.pixelSize: 12
-                        font.family: Theme.font
+
+                    Column {
+                        spacing: 2
+                        Text { text: "Total"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
+                        Text {
+                            text: (root.diskTotal / 1073741824).toFixed(1) + " GB"
+                            color: Theme.fg; font.pixelSize: 13
+                            font.family: Theme.font
+                        }
+                    }
+
+                    Column {
+                        spacing: 2
+                        Text { text: "Store paths"; color: Theme.gray; font.pixelSize: 10; font.family: Theme.font }
+                        Text {
+                            text: root.storePaths.toLocaleString()
+                            color: Theme.fg; font.pixelSize: 13
+                            font.family: Theme.font
+                        }
+                    }
+
+                    // GC button
+                    Rectangle {
+                        width: parent.width; height: 32; radius: 6
+                        color: gcArea.containsMouse ? (gcProcess.running ? Theme.borderStrong : Theme.accentBg) : Theme.bgAlt
+                        border.color: Theme.borderStrong; border.width: 1
+                        Behavior on color { ColorAnimation { duration: 80 } }
+
+                        RowLayout {
+                            anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                            spacing: 6
+                            Text {
+                                text: gcProcess.running ? "" : "󱃅"
+                                color: Theme.accent; font.pixelSize: 13
+                                font.family: Theme.font
+                            }
+                            Text {
+                                text: gcProcess.running ? "Collecting…" : "Collect Garbage"
+                                color: Theme.fg; font.pixelSize: 12
+                                font.family: Theme.font
+                                Layout.fillWidth: true
+                            }
+                        }
+
+                        MouseArea {
+                            id: gcArea
+                            anchors.fill: parent; hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: !gcProcess.running
+                            onClicked: {
+                                gcProcess.command = ["nix-collect-garbage"]
+                                gcProcess.running = true
+                            }
+                        }
                     }
                 }
+            }
 
-                ListView {
-                    id: logView
-                    anchors { fill: parent; margins: 8 }
-                    clip: true
-                    model: logModel
-                    spacing: 0
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            // GC post-refresh
+            Connections {
+                target: gcProcess
+                function onExited() { pollDisk.running = true; pollPaths.running = true }
+            }
+        }
 
-                    delegate: Text {
-                        width: logView.width
-                        text: model.text
-                        color: model.color
-                        font.pixelSize: 10
-                        font.family: Theme.font
-                        wrapMode: Text.NoWrap
-                        elide: Text.ElideRight
-                    }
+        // ── Divider ──────────────────────────────────────────────────────────
+        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
+
+        // ── Rebuild section ──────────────────────────────────────────────────
+        RowLayout {
+            Layout.fillWidth: true; spacing: 8
+
+            Text {
+                text: "Rebuild"
+                color: Theme.gray; font.pixelSize: 11; font.bold: true
+                font.family: Theme.font
+                Layout.fillWidth: true
+            }
+
+            // NixOS switch
+            Rectangle {
+                implicitWidth: nixLabel.implicitWidth + 20; height: 30; radius: 6
+                color: nixBtn.containsMouse && !root.rebuilding ? Theme.accentBg : Theme.bgAlt
+                border.color: Theme.borderStrong; border.width: 1
+                Behavior on color { ColorAnimation { duration: 80 } }
+                Text {
+                    id: nixLabel
+                    anchors.centerIn: parent
+                    text: "NixOS Switch"
+                    color: root.rebuilding ? Theme.grayDim : Theme.fg
+                    font.pixelSize: 11; font.family: Theme.font
+                }
+                MouseArea {
+                    id: nixBtn
+                    anchors.fill: parent; hoverEnabled: true
+                    cursorShape: root.rebuilding ? Qt.ArrowCursor : Qt.PointingHandCursor
+                    enabled: !root.rebuilding
+                    onClicked: root.startRebuild(["nh", "os", "switch", "/etc/nixos"])
+                }
+            }
+
+            // HM switch
+            Rectangle {
+                implicitWidth: hmLabel.implicitWidth + 20; height: 30; radius: 6
+                color: hmBtn.containsMouse && !root.rebuilding ? Theme.accentBg : Theme.bgAlt
+                border.color: Theme.borderStrong; border.width: 1
+                Behavior on color { ColorAnimation { duration: 80 } }
+                Text {
+                    id: hmLabel
+                    anchors.centerIn: parent
+                    text: "HM Switch"
+                    color: root.rebuilding ? Theme.grayDim : Theme.fg
+                    font.pixelSize: 11; font.family: Theme.font
+                }
+                MouseArea {
+                    id: hmBtn
+                    anchors.fill: parent; hoverEnabled: true
+                    cursorShape: root.rebuilding ? Qt.ArrowCursor : Qt.PointingHandCursor
+                    enabled: !root.rebuilding
+                    onClicked: root.startRebuild(["nh", "home", "switch"])
+                }
+            }
+        }
+
+        // ── Log output ───────────────────────────────────────────────────────
+        Rectangle {
+            Layout.fillWidth: true; Layout.fillHeight: true; radius: 6
+            color: Theme.bgHard; border.color: Theme.border; border.width: 1
+
+            // Empty state
+            Column {
+                visible: logModel.count === 0
+                anchors.centerIn: parent; spacing: 8
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "󱄅"; color: Theme.borderStrong; font.pixelSize: 28
+                    font.family: Theme.font
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "No rebuild log yet"
+                    color: Theme.grayDim; font.pixelSize: 12
+                    font.family: Theme.font
+                }
+            }
+
+            ListView {
+                id: logView
+                anchors { fill: parent; margins: 8 }
+                clip: true
+                model: logModel
+                spacing: 0
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                delegate: Text {
+                    width: logView.width
+                    text: model.text
+                    color: model.color
+                    font.pixelSize: 10
+                    font.family: Theme.font
+                    wrapMode: Text.NoWrap
+                    elide: Text.ElideRight
                 }
             }
         }

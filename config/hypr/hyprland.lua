@@ -219,7 +219,9 @@ hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"),                 
 hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"),                                                 { description = "System | Suspend" })
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("wlogout -p layer-shell"),                                            { description = "System | Logout menu" })
 hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle notifications"),         { description = "System | Notifications" })
+hl.bind(mainMod .. " + I",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle settings"),         { description = "System | Settings" })
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle clipboard"),        { description = "System | Clipboard history" })
+hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 
 -- Screenshots
 hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })

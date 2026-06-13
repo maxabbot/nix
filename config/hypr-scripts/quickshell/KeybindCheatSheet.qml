@@ -1,8 +1,10 @@
-// KeybindCheatSheet.qml — Searchable Hyprland keybind overlay (bottom-right).
+// KeybindCheatSheet.qml — Searchable Hyprland keybind overlay (top-right,
+// drops from Waybar). Esc closes; click-off handled by Shell.qml's focus grab.
 // Reads live bindings from `hyprctl binds -j` on first open; cached in-memory.
 // Descriptions must follow "Section | Name" format (set in hyprland.lua).
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
@@ -10,11 +12,17 @@ import QtQuick.Controls.Basic
 PanelWindow {
     id: root
 
-    anchors { bottom: true; right: true }
-    margins { bottom: 44; right: 4 }
+    signal closeRequested()
+
+    screen: Theme.focusedScreen()
+
+    anchors { top: true; right: true }
+    margins { top: Theme.panelGapTop; right: 12 }
     implicitWidth: 480
     implicitHeight: 560
     color: "transparent"
+
+    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     ListModel { id: allBinds }
     ListModel { id: filteredBinds }
@@ -97,6 +105,11 @@ PanelWindow {
         radius: 12; color: Theme.bg
         border.color: Theme.border; border.width: 1
 
+        // Fallback when the search field doesn't have focus (its own Esc
+        // handler bubbles here otherwise)
+        focus: true
+        Keys.onEscapePressed: root.closeRequested()
+
         ColumnLayout {
             anchors { fill: parent; margins: 12 }
             spacing: 8
@@ -156,7 +169,7 @@ PanelWindow {
                         color: Theme.fgBright; placeholderTextColor: Theme.grayDim
                         font.pixelSize: 13; font.family: Theme.font
                         onTextChanged: root.filter(text)
-                        Keys.onEscapePressed: root.visible = false
+                        Keys.onEscapePressed: root.closeRequested()
                     }
                 }
             }

@@ -113,7 +113,31 @@
       "Bash(cp -f /nix/store/zp51g43pr03sisri6xs1nyba6j2ad5kc-OVMF-202602-fd/FV/OVMF_VARS.fd /tmp/usbssd-ovmf-vars.fd)",
       "Bash(chmod +w /tmp/usbssd-ovmf-vars.fd)",
       "Bash(/nix/store/qgq8fnyksin1biki5c02846c1ddjjaa9-qemu-host-cpu-only-10.2.2/bin/qemu-system-x86_64 -enable-kvm -machine q35 -cpu host -m 4096 -drive if=pflash,format=raw,readonly=on,file=/nix/store/zp51g43pr03sisri6xs1nyba6j2ad5kc-OVMF-202602-fd/FV/OVMF_CODE.fd -drive if=pflash,format=raw,file=/tmp/usbssd-ovmf-vars.fd -drive file=/dev/sda,format=raw,media=disk,snapshot=on -display gtk)",
-      "Bash(pkill -f qemu-system-x86_64)"
+      "Bash(pkill -f qemu-system-x86_64)",
+      "Bash(shellcheck /etc/nixos/config/hypr-scripts/qs_manager.sh)",
+      "Bash(command -v qmllint quickshell qs)",
+      "Bash(command -v nh nixup)",
+      "Bash(pkill -f \"quickshell -p /home/max/.config/hypr/scripts/quickshell/Shell.qml\")",
+      "Bash(disown)",
+      "Bash(grep -iA1 quickshell)",
+      "Bash(systemctl --user status waybar --no-pager -n 0)",
+      "Bash(timeout 6 waybar -c /tmp/waybar-test-config.json -s /home/max/.config/waybar/style.css)",
+      "Bash(command -v grim slurp hyprshot)",
+      "Bash(grim -g \"5136,72 780x620\" /tmp/settings-control.png)",
+      "Bash(timeout 8 quickshell -p /tmp/qs-settings-test/TestShell.qml)",
+      "Bash(grim -g \"5136,72 780x620\" /tmp/settings-fixed.png)",
+      "Bash(wait)",
+      "Bash(grim -o DP-3 /tmp/live-dp3.png)",
+      "Bash(grim -g \"5136,72 780x620\" /tmp/live-panel.png)",
+      "Bash(grim -g \"2576,72 780x620\" /tmp/dp2-panel.png)",
+      "Bash(wpctl move-node *)",
+      "Bash(wpctl set-default *)",
+      "Bash(pactl move-sink-input *)",
+      "Bash(pactl get-default-sink *)",
+      "Bash(echo \"default: $\\(pactl get-default-sink\\)\")",
+      "Bash(grep '\\\\.nix$')",
+      "Bash(echo \"focused now: $\\(hyprctl monitors -j)",
+      "Bash(grim -g \"5128,72 780x620\" /tmp/final-panel.png)"
     ]
   }
 }

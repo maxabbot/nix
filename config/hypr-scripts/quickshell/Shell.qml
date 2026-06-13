@@ -2,12 +2,15 @@
 // Launch: quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 //
 // Manages:
-//   • Bottom bar (one per screen via Variants)
 //   • All pop-up panels (visibility gated by activePanel)
+//   • Tabbed Settings panel (Control/Audio/Monitors/Wallpaper/System/Nix pages)
 //   • Notification server (replaces swaync — D-Bus org.freedesktop.Notifications)
 //   • IPC from qs_manager.sh: quickshell ipc call main handleCommand <action> <target> <subtarget>
+//   • Waybar state bridge: notification count + rebuild flag written to
+//     $XDG_RUNTIME_DIR/quickshell/, waybar custom modules refreshed via RTMIN+8
 
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import QtQuick
@@ -17,30 +20,62 @@ ShellRoot {
 
     // ── Global state ───────────────────────────────────────────────────────────
     property string activePanel:    ""
-    property string panelEdge:      "bottom"  // "bottom" (Quickshell bar) or "top" (Waybar dropdown)
+    property string settingsTab:    "control"
     property bool   dndEnabled:     false
     property bool   rebuildRunning: false
 
-    function togglePanel(name, edge) {
-        var e = edge || "bottom"
-        if (activePanel === name && panelEdge === e) {
-            activePanel = ""
-        } else {
-            panelEdge = e
-            activePanel = name
-        }
+    readonly property var settingsTabs: ["control", "audio", "monitors", "wallpaper", "sysinfo", "nix"]
+
+    // Click-off dismissal grace: a Waybar button press first breaks the focus
+    // grab (closing the panel), then the button's toggle fires on release —
+    // without this it would instantly reopen. Key is "settings:<tab>" or the
+    // panel name.
+    property string dismissedPanel: ""
+    property double dismissedAt:    0
+
+    function justDismissed(key) {
+        return key === dismissedPanel && (Date.now() - dismissedAt) < 350
     }
 
     // ── IPC handler (qs_manager.sh routes here) ────────────────────────────────
-    // subtarget "top"/"bottom" picks the panel edge (Waybar passes "top");
-    // any other subtarget (network mode, wallpaper thumb) leaves it "bottom".
+    // target "settings" takes a tab name as subtarget; the former standalone
+    // panel targets (control/audio/…) are mapped to Settings tabs so old
+    // callers and keybinds keep working. Unknown subtargets (e.g. the legacy
+    // "top"/"bottom" edge values) are ignored.
     IpcHandler {
         target: "main"
         function handleCommand(action: string, target: string, subtarget: string): void {
-            var edge = (subtarget === "top" || subtarget === "bottom") ? subtarget : "bottom"
-            if (action === "close")        root.activePanel = ""
-            else if (action === "toggle")  root.togglePanel(target, edge)
-            else if (action === "open")    { root.panelEdge = edge; root.activePanel = target }
+            if (action === "close") { root.activePanel = ""; return }
+
+            var tgt = target
+            var tab = ""
+            if (target === "settings") {
+                tab = root.settingsTabs.indexOf(subtarget) >= 0 ? subtarget : ""
+            } else if (root.settingsTabs.indexOf(target) >= 0) {
+                tgt = "settings"
+                tab = target
+            } else if (target === "network") {   // legacy target — Wi-Fi lives on the Control tab
+                tgt = "settings"
+                tab = "control"
+            }
+
+            if (tgt === "settings") {
+                if (action === "toggle" && root.activePanel === "settings"
+                        && (tab === "" || tab === root.settingsTab)) {
+                    root.activePanel = ""   // same tab re-clicked → close
+                } else if (action === "toggle" && root.activePanel !== "settings"
+                        && root.justDismissed("settings:" + (tab !== "" ? tab : root.settingsTab))) {
+                    // the click that dismissed it was this button — stay closed
+                } else {
+                    if (tab !== "") root.settingsTab = tab
+                    root.activePanel = "settings"
+                }
+            } else if (action === "toggle") {
+                if (root.activePanel === tgt) root.activePanel = ""
+                else if (!root.justDismissed(tgt)) root.activePanel = tgt
+            } else if (action === "open") {
+                root.activePanel = tgt
+            }
         }
     }
 
@@ -56,6 +91,22 @@ ShellRoot {
         persistenceSupported: true
     }
 
+    // ── Waybar state bridge ────────────────────────────────────────────────────
+    // Event-driven: write state files and poke waybar's custom modules
+    // (custom/notifications, custom/rebuild use "signal": 8, "interval": "once").
+    readonly property int notifCount: notifServer.trackedNotifications?.values.length ?? 0
+
+    function syncWaybar() {
+        Quickshell.execDetached(["bash", "-c",
+            "d=\"${XDG_RUNTIME_DIR:-/tmp}/quickshell\"; mkdir -p \"$d\"; " +
+            "printf '%d' " + notifCount + " > \"$d/notif-count\"; " +
+            "printf '%s' '" + (rebuildRunning ? "1" : "") + "' > \"$d/rebuild\"; " +
+            "pkill -RTMIN+8 waybar"])
+    }
+    onNotifCountChanged: syncWaybar()
+    onRebuildRunningChanged: syncWaybar()
+    Component.onCompleted: syncWaybar()   // reset stale files on (re)start
+
     // ── Notification popup (top-right, transient) ──────────────────────────────
     PanelWindow {
         anchors { top: true; right: true }
@@ -64,7 +115,7 @@ ShellRoot {
         implicitHeight: toastCol.implicitHeight + 16
         exclusiveZone: 0  // don't push tiled windows
         color: "transparent"
-        visible: (notifServer.notifications?.count ?? 0) > 0 && !root.dndEnabled
+        visible: root.notifCount > 0 && !root.dndEnabled
 
         Column {
             id: toastCol
@@ -72,7 +123,7 @@ ShellRoot {
             spacing: 6
 
             Repeater {
-                model: notifServer.notifications
+                model: notifServer.trackedNotifications
                 delegate: NotificationToast {
                     required property var modelData
                     notification: modelData
@@ -84,42 +135,44 @@ ShellRoot {
 
     // ── Panels ─────────────────────────────────────────────────────────────────
     NotificationCenter {
+        id: notifCenter
         visible: root.activePanel === "notifications"
-        model: notifServer.notifications
+        model: notifServer.trackedNotifications
+        onCloseRequested: root.activePanel = ""
     }
 
-    ControlCenter {
-        visible: root.activePanel === "control"
-        edge: root.panelEdge
+    Settings {
+        id: settingsPanel
+        visible: root.activePanel === "settings"
+        currentTab: root.settingsTab
         dndEnabled: root.dndEnabled
+        onCloseRequested: root.activePanel = ""
         onDndToggled: root.dndEnabled = !root.dndEnabled
-    }
-
-    AudioMixer {
-        visible: root.activePanel === "audio"
-        edge: root.panelEdge
-    }
-
-    SysInfoPanel {
-        visible: root.activePanel === "sysinfo"
-        edge: root.panelEdge
-    }
-
-    NetworkPanel {
-        visible: root.activePanel === "network"
-        edge: root.panelEdge
-    }
-
-    MonitorManager {
-        visible: root.activePanel === "monitors"
-    }
-
-    WallpaperPicker {
-        visible: root.activePanel === "wallpaper"
+        onRebuildStarted:        root.rebuildRunning = true
+        onRebuildFinished: (ok) => root.rebuildRunning = false
+        onCurrentTabChanged: root.settingsTab = currentTab   // sidebar clicks update shared state
     }
 
     KeybindCheatSheet {
+        id: keybindSheet
         visible: root.activePanel === "keybinds"
+        onCloseRequested: root.activePanel = ""
+    }
+
+    // Click-off dismissal for the dropdown panels: while one is open it holds
+    // a focus grab; any click outside clears the grab and closes it.
+    HyprlandFocusGrab {
+        active: root.activePanel === "notifications"
+             || root.activePanel === "settings"
+             || root.activePanel === "keybinds"
+        windows: [ notifCenter, settingsPanel, keybindSheet ]
+        onCleared: {
+            if (root.activePanel === "") return
+            root.dismissedPanel = root.activePanel === "settings"
+                ? "settings:" + root.settingsTab : root.activePanel
+            root.dismissedAt = Date.now()
+            root.activePanel = ""
+        }
     }
 
     ScreenshotOverlay {
@@ -130,34 +183,5 @@ ShellRoot {
     ClipboardPanel {
         visible: root.activePanel === "clipboard"
         onCloseRequested: root.activePanel = ""
-    }
-
-    NixPanel {
-        visible: root.activePanel === "nix"
-        onRebuildStarted:       root.rebuildRunning = true
-        onRebuildFinished: (ok) => root.rebuildRunning = false
-    }
-
-    // ── Bottom bar (one per screen) ─────────────────────────────────────────────
-    Variants {
-        model: Quickshell.screens
-
-        PanelWindow {
-            required property var modelData
-            screen: modelData
-
-            anchors { left: true; right: true; bottom: true }
-            implicitHeight: 40
-            exclusiveZone: implicitHeight
-            color: "transparent"
-
-            Bar {
-                anchors.fill: parent
-                activePanel:    root.activePanel
-                notifCount:     notifServer.notifications?.count ?? 0
-                rebuildRunning: root.rebuildRunning
-                onPanelToggled: (name) => root.togglePanel(name)
-            }
-        }
     }
 }

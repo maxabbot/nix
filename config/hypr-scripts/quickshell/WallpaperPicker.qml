@@ -1,24 +1,17 @@
-// WallpaperPicker.qml — Wallpaper browser using thumbnails from qs_manager.sh cache.
+// WallpaperPicker.qml — Wallpaper browser page (embedded in Settings.qml — no window chrome).
 //
 // Thumbnails are pre-generated into ~/.cache/quickshell/wallpaper_picker/thumbs/ by
-// qs_manager.sh (which also starts this panel). On open, this panel lists the thumbs
+// qs_manager.sh (which also starts this panel). On open, this page lists the thumbs
 // directory and displays them in a grid. Clicking a thumbnail applies the wallpaper.
 //
 // Video thumbnails are named 000_<original> — clicking them sets the mpvpaper source.
-import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-PanelWindow {
+Item {
     id: root
-
-    anchors { bottom: true; left: true; right: true }
-    margins.bottom: 44
-    implicitHeight: 460
-    color: "transparent"
 
     // ── State ──────────────────────────────────────────────────────────────────
     ListModel { id: thumbModel }
@@ -95,120 +88,112 @@ PanelWindow {
     }
 
     // ── UI ──────────────────────────────────────────────────────────────────────
-    Rectangle {
+    ColumnLayout {
         anchors.fill: parent
-        radius: 12
-        color: Theme.bg
-        border.color: Theme.border
-        border.width: 1
+        spacing: 10
 
-        Column {
-            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 16 }
-            spacing: 10
-
-            RowLayout {
-                width: parent.width
-                Text {
-                    text: "Wallpapers"
-                    color: Theme.fg
-                    font.pixelSize: 14
-                    font.bold: true
-                    font.family: Theme.font
-                    Layout.fillWidth: true
-                }
-                Text {
-                    text: thumbModel.count + " wallpapers  ·  " + root.srcDir
-                    color: Theme.borderStrong
-                    font.pixelSize: 10
-                    font.family: Theme.font
-                    elide: Text.ElideLeft
-                    Layout.maximumWidth: 300
-                }
+        RowLayout {
+            Layout.fillWidth: true
+            Text {
+                text: "Wallpapers"
+                color: Theme.fg
+                font.pixelSize: 14
+                font.bold: true
+                font.family: Theme.font
+                Layout.fillWidth: true
             }
+            Text {
+                text: thumbModel.count + " wallpapers  ·  " + root.srcDir
+                color: Theme.borderStrong
+                font.pixelSize: 10
+                font.family: Theme.font
+                elide: Text.ElideLeft
+                Layout.maximumWidth: 300
+            }
+        }
 
-            // Thumbnail grid
-            ScrollView {
+        // Thumbnail grid
+        ScrollView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+            GridView {
                 width: parent.width
-                height: root.height - 70
+                model: thumbModel
+                cellWidth: 140
+                cellHeight: 100
                 clip: true
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-                GridView {
-                    width: parent.width
-                    model: thumbModel
-                    cellWidth: 140
-                    cellHeight: 100
-                    clip: true
+                delegate: Item {
+                    width: 140
+                    height: 100
 
-                    delegate: Item {
-                        width: 140
-                        height: 100
+                    Rectangle {
+                        anchors { fill: parent; margins: 4 }
+                        radius: 8
+                        color: Theme.bgHard
+                        clip: true
+                        border.color: model.isCurrent ? Theme.accent : "transparent"
+                        border.width: 2
 
+                        Image {
+                            anchors.fill: parent
+                            source: "file://" + model.thumbPath
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            layer.enabled: true
+
+                            // Loading placeholder
+                            Rectangle {
+                                visible: parent.status !== Image.Ready
+                                anchors.fill: parent
+                                color: Theme.bgAlt
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: model.isVideo ? "" : ""
+                                    color: Theme.borderStrong
+                                    font.pixelSize: 20
+                                    font.family: Theme.font
+                                }
+                            }
+                        }
+
+                        // Video badge
                         Rectangle {
-                            anchors { fill: parent; margins: 4 }
-                            radius: 8
-                            color: Theme.bgHard
-                            clip: true
-                            border.color: model.isCurrent ? Theme.accent : "transparent"
-                            border.width: 2
-
-                            Image {
-                                anchors.fill: parent
-                                source: "file://" + model.thumbPath
-                                fillMode: Image.PreserveAspectCrop
-                                asynchronous: true
-                                layer.enabled: true
-
-                                // Loading placeholder
-                                Rectangle {
-                                    visible: parent.status !== Image.Ready
-                                    anchors.fill: parent
-                                    color: Theme.bgAlt
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: model.isVideo ? "" : ""
-                                        color: Theme.borderStrong
-                                        font.pixelSize: 20
-                                        font.family: Theme.font
-                                    }
-                                }
+                            visible: model.isVideo
+                            anchors { top: parent.top; left: parent.left; margins: 4 }
+                            width: 20; height: 14; radius: 3
+                            color: Theme.bgFloat
+                            Text {
+                                anchors.centerIn: parent
+                                text: ""
+                                color: Theme.yellow
+                                font.pixelSize: 8
+                                font.family: Theme.font
                             }
+                        }
 
-                            // Video badge
-                            Rectangle {
-                                visible: model.isVideo
-                                anchors { top: parent.top; left: parent.left; margins: 4 }
-                                width: 20; height: 14; radius: 3
-                                color: Theme.bgFloat
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: ""
-                                    color: Theme.yellow
-                                    font.pixelSize: 8
-                                    font.family: Theme.font
-                                }
+                        // Active checkmark
+                        Rectangle {
+                            visible: model.isCurrent
+                            anchors { top: parent.top; right: parent.right; margins: 4 }
+                            width: 16; height: 16; radius: 8
+                            color: Theme.accent
+                            Text {
+                                anchors.centerIn: parent
+                                text: ""
+                                color: Theme.bgHard
+                                font.pixelSize: 8
+                                font.family: Theme.font
                             }
+                        }
 
-                            // Active checkmark
-                            Rectangle {
-                                visible: model.isCurrent
-                                anchors { top: parent.top; right: parent.right; margins: 4 }
-                                width: 16; height: 16; radius: 8
-                                color: Theme.accent
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: ""
-                                    color: Theme.bgHard
-                                    font.pixelSize: 8
-                                    font.family: Theme.font
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.applyWallpaper(model.srcName, model.isVideo)
-                            }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.applyWallpaper(model.srcName, model.isVideo)
                         }
                     }
                 }

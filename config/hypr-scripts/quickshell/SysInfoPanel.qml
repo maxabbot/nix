@@ -1,26 +1,12 @@
-// SysInfoPanel.qml — System stats panel (right edge; drops from Waybar when
-// edge is "top", rises from the Quickshell bar when "bottom").
+// SysInfoPanel.qml — System stats page (embedded in Settings.qml — no window chrome).
 // CPU / memory / temperature / disk via /proc and df; GPU via nvidia-smi
 // (row hidden when nvidia-smi is absent — VM and work-laptop).
-import Quickshell
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
-PanelWindow {
+Item {
     id: root
-
-    property string edge: "bottom"
-
-    anchors { top: root.edge === "top"; bottom: root.edge === "bottom"; right: true }
-    margins {
-        top: root.edge === "top" ? Theme.panelGapTop : 0
-        bottom: root.edge === "bottom" ? Theme.panelGap : 0
-        right: 4
-    }
-    implicitWidth: 360
-    implicitHeight: content.implicitHeight + 32
-    color: "transparent"
 
     // ── State (polled while visible) ────────────────────────────────────────────
     property real cpu:      0     // 0.0 – 1.0
@@ -116,83 +102,75 @@ fi
     }
 
     // ── UI ──────────────────────────────────────────────────────────────────────
-    Rectangle {
-        anchors.fill: parent
-        radius: 12
-        color: Theme.bg
-        border.color: Theme.border
-        border.width: 1
+    Column {
+        id: content
+        anchors { top: parent.top; left: parent.left; right: parent.right }
+        spacing: 14
 
-        Column {
-            id: content
-            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 16 }
-            spacing: 14
+        RowLayout {
+            width: parent.width
 
-            RowLayout {
-                width: parent.width
+            Text {
+                text: "System"
+                color: Theme.fg
+                font.pixelSize: 14
+                font.bold: true
+                font.family: Theme.font
+                Layout.fillWidth: true
+            }
+
+            // btop shortcut for the deep dive
+            Rectangle {
+                width: btopLabel.implicitWidth + 16; height: 24; radius: 7
+                color: btopArea.containsMouse ? Theme.borderStrong : Theme.bgAlt
+                Behavior on color { ColorAnimation { duration: 80 } }
 
                 Text {
-                    text: "System"
-                    color: Theme.fg
-                    font.pixelSize: 14
-                    font.bold: true
+                    id: btopLabel
+                    anchors.centerIn: parent
+                    text: "btop"
+                    color: Theme.fgDim
+                    font.pixelSize: 11
                     font.family: Theme.font
-                    Layout.fillWidth: true
                 }
-
-                // btop shortcut for the deep dive
-                Rectangle {
-                    width: btopLabel.implicitWidth + 16; height: 24; radius: 7
-                    color: btopArea.containsMouse ? Theme.borderStrong : Theme.bgAlt
-                    Behavior on color { ColorAnimation { duration: 80 } }
-
-                    Text {
-                        id: btopLabel
-                        anchors.centerIn: parent
-                        text: "btop"
-                        color: Theme.fgDim
-                        font.pixelSize: 11
-                        font.family: Theme.font
-                    }
-                    MouseArea {
-                        id: btopArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: { launchBtop.running = true }
-                    }
-                    Process { id: launchBtop; command: ["kitty", "-e", "btop"] }
+                MouseArea {
+                    id: btopArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: { launchBtop.running = true }
                 }
+                Process { id: launchBtop; command: ["kitty", "-e", "btop"] }
             }
+        }
 
-            StatRow {
-                label: " CPU"
-                valueText: Math.round(root.cpu * 100) + "%   " + root.cpuTemp + "°C"
-                frac: root.cpu
-                barColor: Theme.purple
-            }
+        StatRow {
+            label: " CPU"
+            valueText: Math.round(root.cpu * 100) + "%   " + root.cpuTemp + "°C"
+            frac: root.cpu
+            barColor: Theme.purple
+        }
 
-            StatRow {
-                label: " Memory"
-                valueText: Math.round(root.mem * 100) + "%   " + root.memText
-                frac: root.mem
-                barColor: Theme.yellow
-            }
+        StatRow {
+            label: " Memory"
+            valueText: Math.round(root.mem * 100) + "%   " + root.memText
+            frac: root.mem
+            barColor: Theme.yellow
+        }
 
-            StatRow {
-                label: "󰋊 Disk /"
-                valueText: Math.round(root.disk * 100) + "%   " + root.diskText
-                frac: root.disk
-                barColor: Theme.accent
-            }
+        StatRow {
+            label: "󰋊 Disk /"
+            valueText: Math.round(root.disk * 100) + "%   " + root.diskText
+            frac: root.disk
+            barColor: Theme.accent
+        }
 
-            StatRow {
-                visible: root.hasGpu
-                label: "󰢮 GPU"
-                valueText: Math.round(root.gpu * 100) + "%   " + root.gpuTemp + "°C"
-                frac: root.gpu
-                barColor: Theme.green
-            }
+        StatRow {
+            visible: root.hasGpu
+            label: "󰢮 GPU"
+            valueText: Math.round(root.gpu * 100) + "%   " + root.gpuTemp + "°C"
+            frac: root.gpu
+            barColor: Theme.green
         }
     }
 }

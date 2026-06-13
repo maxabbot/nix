@@ -1,4 +1,9 @@
 # modules/home/wm/waybar.nix — Waybar status bar, Gruvbox Material Dark.
+#
+# Two bar definitions: "main" for landscape outputs and a trimmed "portrait"
+# bar for vertical monitors (derived from the per-host monitor strings —
+# entries with transform 1/3). Hosts without portrait monitors get exactly
+# one bar with no output filter.
 {
   lib,
   config,
@@ -11,10 +16,32 @@ let
   cfg = config.custom.hm;
   winModule = "hyprland/window";
 
-  # Quickshell panel toggles — "top" anchors the panel under this (top) bar
-  # as a dropdown instead of above the bottom Quickshell bar. Invoked via
+  # Quickshell panel toggles. Targets map to Settings tabs inside Shell.qml
+  # (e.g. "toggle settings audio" deep-links to the Audio tab). Invoked via
   # bash so it works even if the deployed script loses its exec bit.
   qs = "bash ~/.config/hypr/scripts/qs_manager.sh";
+
+  # ── Portrait outputs ────────────────────────────────────────────────────────
+  # Monitor strings look like "DP-2,3840x2160@60,1920x0,1.5,transform,1";
+  # transform 1/3 = 90°/270° rotation → portrait.
+  monitorStrings = lib.filter (m: m != null) [
+    cfg.monitors.primary
+    cfg.monitors.secondary
+    cfg.monitors.tertiary
+  ];
+  isPortrait =
+    s:
+    let
+      parts = lib.splitString "," s;
+    in
+    builtins.length parts >= 6
+    && builtins.elemAt parts 4 == "transform"
+    && lib.elem (builtins.elemAt parts 5) [
+      "1"
+      "3"
+    ];
+  portraitOutputs = map (s: lib.head (lib.splitString "," s)) (lib.filter isPortrait monitorStrings);
+  hasPortrait = portraitOutputs != [ ];
 
   sysinfo-script = pkgs.writeShellScript "waybar-sysinfo" ''
     set -euo pipefail
@@ -41,6 +68,265 @@ let
     temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo "?")
     echo "GPU ''${usage}% ''${temp}°C"
   '';
+
+  # Bell + unread count. Quickshell's Shell.qml writes the count file and pokes
+  # the module with RTMIN+8 on every change (event-driven — no polling).
+  notif-script = pkgs.writeShellScript "waybar-notifs" ''
+    set -euo pipefail
+    f="''${XDG_RUNTIME_DIR:-/tmp}/quickshell/notif-count"
+    n=0
+    [ -r "$f" ] && n=$(cat "$f")
+    if [ "$n" -gt 0 ] 2>/dev/null; then
+      printf '{"text":"󰂚 %s","class":"has-notifs"}\n' "$n"
+    else
+      printf '{"text":"󰂚","class":""}\n'
+    fi
+  '';
+
+  # Non-empty while `nh os/home switch` runs from the Nix tab (same signal
+  # mechanism as the notification bell; hidden via hide-empty-text).
+  rebuild-script = pkgs.writeShellScript "waybar-rebuild" ''
+    set -euo pipefail
+    f="''${XDG_RUNTIME_DIR:-/tmp}/quickshell/rebuild"
+    if [ -s "$f" ]; then echo "󱄅 building"; else echo ""; fi
+  '';
+
+  # ── Module definitions shared by both bars ──────────────────────────────────
+  commonModules = {
+    "hyprland/workspaces" = {
+      format = "{name}";
+      on-click = "activate";
+      # This Hyprland evaluates dispatch requests as Lua — classic
+      # "workspace e+1" syntax fails silently (see hyprland.lua binds).
+      on-scroll-up = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e+1' })\"";
+      on-scroll-down = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e-1' })\"";
+      persistent-workspaces = {
+        "*" = 5;
+      };
+    };
+
+    "${winModule}" = {
+      format = "{}";
+      max-length = 50;
+      separate-outputs = true;
+    };
+
+    tray = {
+      icon-size = 18;
+      spacing = 10;
+    };
+
+    idle_inhibitor = {
+      format = "{icon}";
+      format-icons = {
+        activated = "󰅶"; # filled coffee cup — staying awake
+        deactivated = "󰛊"; # outline coffee cup — idle allowed
+      };
+      tooltip-format-activated = "Idle inhibited (awake)";
+      tooltip-format-deactivated = "Idle allowed";
+    };
+
+    bluetooth = {
+      format = "BT";
+      format-disabled = "";
+      format-off = "";
+      format-connected = "BT {device_alias}";
+      tooltip-format = "{controller_alias}\t{controller_address}\n\n{num_connections} connected";
+      tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}";
+      tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+      on-click = "${qs} toggle settings control";
+      on-click-right = "blueman-manager";
+    };
+
+    clock = {
+      timezone = osConfig.time.timeZone;
+      format = "{:%H:%M  %b %d}";
+      tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+      format-alt = "{:%Y-%m-%d}";
+    };
+
+    disk = {
+      interval = 30;
+      format = "DISK {percentage_used}%";
+      path = "/";
+      tooltip-format = "{used} / {total}";
+      on-click = "${qs} toggle settings sysinfo";
+      on-click-right = "kitty -e btop";
+    };
+
+    "custom/sysinfo" = {
+      exec = "${sysinfo-script}";
+      interval = 2;
+      tooltip = false;
+      on-click = "${qs} toggle settings sysinfo";
+      on-click-right = "kitty -e btop";
+    };
+
+    "custom/gpu" = {
+      exec = "${gpu-script}";
+      interval = 2;
+      tooltip = false;
+      on-click = "${qs} toggle settings sysinfo";
+      on-click-right = "kitty -e btop";
+    };
+
+    battery = {
+      states = {
+        good = 95;
+        warning = 30;
+        critical = 15;
+      };
+      format = "{icon} {capacity}%";
+      format-charging = " {capacity}%";
+      format-plugged = " {capacity}%";
+      format-alt = "{icon} {time}";
+      format-icons = [
+        ""
+        ""
+        ""
+        ""
+        ""
+      ];
+    };
+
+    network = {
+      format-wifi = "WiFi: {essid} ({signalStrength}%)";
+      format-ethernet = "ETH: {ipaddr}/{cidr}";
+      tooltip-format = "{ifname} via {gwaddr}";
+      format-linked = "{ifname} (No IP)";
+      format-disconnected = "Disconnected";
+      on-click = "${qs} toggle settings control";
+      on-click-right = "nm-connection-editor";
+    };
+
+    pulseaudio = {
+      scroll-step = 5;
+      format = "VOL {volume}%";
+      format-bluetooth = "BT {volume}%";
+      format-bluetooth-muted = "BT muted";
+      format-muted = "muted";
+      on-click = "${qs} toggle settings audio";
+      on-click-right = "pavucontrol";
+    };
+
+    "pulseaudio#source" = {
+      format = "{format_source}";
+      format-source = "MIC {volume}%";
+      format-source-muted = "MIC muted";
+      on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+      on-click-right = "${qs} toggle settings audio";
+      scroll-step = 5;
+    };
+
+    mpris = {
+      format = "{status_icon} {dynamic}";
+      dynamic-order = [
+        "title"
+        "artist"
+      ];
+      dynamic-len = 40;
+      status-icons = {
+        playing = "";
+        paused = "";
+        stopped = "";
+      };
+      tooltip-format = "{player}: {dynamic}";
+    };
+
+    "custom/notifications" = {
+      exec = "${notif-script}";
+      return-type = "json";
+      interval = "once";
+      signal = 8;
+      tooltip = false;
+      on-click = "${qs} toggle notifications";
+    };
+
+    "custom/rebuild" = {
+      exec = "${rebuild-script}";
+      interval = "once";
+      signal = 8;
+      hide-empty-text = true;
+      tooltip = false;
+      on-click = "${qs} toggle settings nix";
+    };
+
+    "custom/keybinds" = {
+      format = "󰌌";
+      tooltip-format = "Keybind cheat sheet";
+      on-click = "${qs} toggle keybinds";
+    };
+
+    "custom/settings" = {
+      format = "";
+      tooltip-format = "Settings";
+      on-click = "${qs} toggle settings";
+    };
+  };
+
+  mainBar =
+    {
+      name = "main";
+      layer = "top";
+      position = "top";
+      height = 34;
+      spacing = 4;
+
+      "modules-left" = [
+        "hyprland/workspaces"
+        winModule
+      ];
+      "modules-center" = [ "clock" ];
+      "modules-right" = [
+        "mpris"
+        "tray"
+        "idle_inhibitor"
+        "bluetooth"
+        "pulseaudio"
+        "pulseaudio#source"
+        "network"
+        "disk"
+        "custom/sysinfo"
+      ]
+      # Gate on the nvidia flag, not machineType — the VM is machineType
+      # "desktop" but has no GPU, so nvidia-smi would show "GPU ?% ?°C".
+      ++ lib.optional cfg.nvidia "custom/gpu"
+      ++ lib.optional (machineType == "laptop") "battery"
+      ++ [
+        "custom/rebuild"
+        "custom/keybinds"
+        "custom/notifications"
+        "custom/settings"
+      ];
+    }
+    # Everywhere except the portrait outputs. The trailing "*" matters:
+    # waybar's output arrays need a positive match — negations alone
+    # match nothing. Omitted entirely on hosts without portrait monitors.
+    // lib.optionalAttrs hasPortrait { output = map (n: "!" + n) portraitOutputs ++ [ "*" ]; }
+    // commonModules;
+
+  # Trimmed bar for portrait outputs (~1440 logical px on DP-2): drops the
+  # window title, tray, mpris, idle inhibitor, bluetooth, mic, disk and
+  # sysinfo/GPU readouts. Tray stays main-bar-only (multi-instance SNI quirks).
+  slimBar = {
+    name = "portrait";
+    layer = "top";
+    position = "top";
+    height = 34;
+    spacing = 4;
+    output = portraitOutputs;
+
+    "modules-left" = [ "hyprland/workspaces" ];
+    "modules-center" = [ "clock" ];
+    "modules-right" = [
+      "pulseaudio"
+      "network"
+      "custom/rebuild"
+      "custom/notifications"
+      "custom/settings"
+    ];
+  }
+  // commonModules;
 in
 {
   config = lib.mkIf (cfg.compositor == "hyprland") {
@@ -59,159 +345,7 @@ in
       systemd.enable = true;
       systemd.targets = [ "graphical-session.target" ];
 
-      settings = [
-        {
-          layer = "top";
-          position = "top";
-          height = 34;
-          spacing = 4;
-
-          "modules-left" = [
-            "hyprland/workspaces"
-            winModule
-          ];
-          "modules-center" = [ "clock" ];
-          "modules-right" = [
-            "tray"
-            "idle_inhibitor"
-            "bluetooth"
-            "pulseaudio"
-            "pulseaudio#source"
-            "network"
-            "disk"
-            "custom/sysinfo"
-          ]
-          # Gate on the nvidia flag, not machineType — the VM is machineType
-          # "desktop" but has no GPU, so nvidia-smi would show "GPU ?% ?°C".
-          ++ lib.optional cfg.nvidia "custom/gpu"
-          ++ lib.optional (machineType == "laptop") "battery";
-
-          "hyprland/workspaces" = {
-            format = "{name}";
-            on-click = "activate";
-            # This Hyprland evaluates dispatch requests as Lua — classic
-            # "workspace e+1" syntax fails silently (see hyprland.lua binds).
-            on-scroll-up = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e+1' })\"";
-            on-scroll-down = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e-1' })\"";
-            persistent-workspaces = {
-              "*" = 5;
-            };
-          };
-
-          "${winModule}" = {
-            format = "{}";
-            max-length = 50;
-            separate-outputs = true;
-          };
-
-          tray = {
-            icon-size = 18;
-            spacing = 10;
-          };
-
-          idle_inhibitor = {
-            format = "{icon}";
-            format-icons = {
-              activated = "󰅶"; # filled coffee cup — staying awake
-              deactivated = "󰛊"; # outline coffee cup — idle allowed
-            };
-            tooltip-format-activated = "Idle inhibited (awake)";
-            tooltip-format-deactivated = "Idle allowed";
-          };
-
-          bluetooth = {
-            format = "BT";
-            format-disabled = "";
-            format-off = "";
-            format-connected = "BT {device_alias}";
-            tooltip-format = "{controller_alias}\t{controller_address}\n\n{num_connections} connected";
-            tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}";
-            tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
-            on-click = "${qs} toggle control top";
-            on-click-right = "blueman-manager";
-          };
-
-          clock = {
-            timezone = osConfig.time.timeZone;
-            format = "{:%H:%M  %b %d}";
-            tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-            format-alt = "{:%Y-%m-%d}";
-          };
-
-          disk = {
-            interval = 30;
-            format = "DISK {percentage_used}%";
-            path = "/";
-            tooltip-format = "{used} / {total}";
-            on-click = "${qs} toggle sysinfo top";
-            on-click-right = "kitty -e btop";
-          };
-
-          "custom/sysinfo" = {
-            exec = "${sysinfo-script}";
-            interval = 2;
-            tooltip = false;
-            on-click = "${qs} toggle sysinfo top";
-            on-click-right = "kitty -e btop";
-          };
-
-          "custom/gpu" = {
-            exec = "${gpu-script}";
-            interval = 2;
-            tooltip = false;
-            on-click = "${qs} toggle sysinfo top";
-            on-click-right = "kitty -e btop";
-          };
-
-          battery = {
-            states = {
-              good = 95;
-              warning = 30;
-              critical = 15;
-            };
-            format = "{icon} {capacity}%";
-            format-charging = " {capacity}%";
-            format-plugged = " {capacity}%";
-            format-alt = "{icon} {time}";
-            format-icons = [
-              ""
-              ""
-              ""
-              ""
-              ""
-            ];
-          };
-
-          network = {
-            format-wifi = "WiFi: {essid} ({signalStrength}%)";
-            format-ethernet = "ETH: {ipaddr}/{cidr}";
-            tooltip-format = "{ifname} via {gwaddr}";
-            format-linked = "{ifname} (No IP)";
-            format-disconnected = "Disconnected";
-            on-click = "${qs} toggle network top";
-            on-click-right = "nm-connection-editor";
-          };
-
-          pulseaudio = {
-            scroll-step = 5;
-            format = "VOL {volume}%";
-            format-bluetooth = "BT {volume}%";
-            format-bluetooth-muted = "BT muted";
-            format-muted = "muted";
-            on-click = "${qs} toggle audio top";
-            on-click-right = "pavucontrol";
-          };
-
-          "pulseaudio#source" = {
-            format = "{format_source}";
-            format-source = "MIC {volume}%";
-            format-source-muted = "MIC muted";
-            on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-            on-click-right = "${qs} toggle audio top";
-            scroll-step = 5;
-          };
-        }
-      ];
+      settings = [ mainBar ] ++ lib.optional hasPortrait slimBar;
 
       style = ''
         * {
@@ -237,6 +371,11 @@ in
         #battery,
         #custom-sysinfo,
         #custom-gpu,
+        #custom-notifications,
+        #custom-rebuild,
+        #custom-keybinds,
+        #custom-settings,
+        #mpris,
         #disk,
         #network,
         #pulseaudio,
@@ -296,6 +435,25 @@ in
         #custom-gpu {
           color: #e78a4e;
         }
+        #mpris {
+          color: #89b482;
+        }
+        #custom-notifications {
+          color: #d4be98;
+        }
+        #custom-notifications.has-notifs {
+          color: #ea6962;
+        }
+        #custom-keybinds {
+          color: #d4be98;
+        }
+        #custom-settings {
+          color: #d4be98;
+        }
+        #custom-rebuild {
+          color: #d8a657;
+          animation: pulse 1.2s ease-in-out infinite;
+        }
         #disk {
           color: #7daea3;
         }
@@ -346,6 +504,12 @@ in
         @keyframes blink {
           to {
             color: #282828;
+          }
+        }
+
+        @keyframes pulse {
+          50% {
+            color: #504945;
           }
         }
 

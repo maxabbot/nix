@@ -1,6 +1,8 @@
-// NotificationCenter.qml — Scrollable notification history panel (bottom-right).
+// NotificationCenter.qml — Scrollable notification history panel (top-right,
+// drops from Waybar). Esc closes; click-off handled by Shell.qml's focus grab.
 import Quickshell
 import Quickshell.Services.Notifications
+import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -9,12 +11,17 @@ PanelWindow {
     id: root
 
     property var model: null  // ObjectModel<Notification> from Shell.qml
+    signal closeRequested()
 
-    anchors { bottom: true; right: true }
-    margins { bottom: 44; right: 4 }
+    screen: Theme.focusedScreen()
+
+    anchors { top: true; right: true }
+    margins { top: Theme.panelGapTop; right: 12 }
     implicitWidth: 390
     implicitHeight: 500
     color: "transparent"
+
+    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     Rectangle {
         anchors.fill: parent
@@ -22,6 +29,9 @@ PanelWindow {
         color: Theme.bg
         border.color: Theme.border
         border.width: 1
+
+        focus: true
+        Keys.onEscapePressed: root.closeRequested()
 
         // ── Header ─────────────────────────────────────────────────────────────
         RowLayout {
@@ -43,7 +53,7 @@ PanelWindow {
                 width: 64; height: 26; radius: 6
                 color: clearArea.containsMouse ? Theme.border : "transparent"
                 Behavior on color { ColorAnimation { duration: 80 } }
-                visible: (root.model?.count ?? 0) > 0
+                visible: (root.model?.values.length ?? 0) > 0
 
                 Text {
                     anchors.centerIn: parent
@@ -61,7 +71,7 @@ PanelWindow {
                     onClicked: {
                         if (!root.model) return
                         // Close all notifications (iterate backwards to avoid index shifting)
-                        for (let i = root.model.count - 1; i >= 0; i--) {
+                        for (let i = root.model.values.length - 1; i >= 0; i--) {
                             root.model.values[i]?.close(NotificationCloseReason.Dismissed)
                         }
                     }
@@ -94,7 +104,7 @@ PanelWindow {
 
                 // Empty state
                 Item {
-                    visible: (root.model?.count ?? 0) === 0
+                    visible: (root.model?.values.length ?? 0) === 0
                     width: parent.width
                     height: 80
 

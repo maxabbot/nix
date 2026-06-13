@@ -31,7 +31,6 @@ fi
 source "$(dirname "${BASH_SOURCE[0]}")/caching.sh"
 
 qs_ensure_cache "workspaces"
-qs_ensure_cache "network"
 qs_ensure_cache "wallpaper_picker"
 
 BT_PID_FILE="$QS_RUN_DIR/bt_scan_pid"
@@ -42,10 +41,7 @@ PREP_LOCK="$QS_RUN_DIR/wallpaper_prep.lock"
 
 export MAGICK_THREAD_LIMIT=1
 
-QS_NETWORK_CACHE="$QS_CACHE_NETWORK"
-mkdir -p "$QS_NETWORK_CACHE" "$THUMB_DIR"
-
-NETWORK_MODE_FILE="$QS_NETWORK_CACHE/mode"
+mkdir -p "$THUMB_DIR"
 
 MANIFEST="$THUMB_DIR/.manifest"
 
@@ -136,6 +132,10 @@ handle_wallpaper_prep() {
 }
 
 handle_network_prep() {
+    # Kill any previous scanner first — repeated toggles must not leak them
+    if [ -f "$BT_PID_FILE" ]; then
+        kill "$(cat "$BT_PID_FILE")" 2>/dev/null
+    fi
     echo "" > "$BT_SCAN_LOG"
     { echo "scan on"; sleep infinity; } | stdbuf -oL bluetoothctl > "$BT_SCAN_LOG" 2>&1 &
     echo $! > "$BT_PID_FILE"
@@ -158,34 +158,19 @@ if [[ "$ACTION" == "close" ]]; then
 fi
 
 if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
-    if [[ "$TARGET" == "network" ]]; then
+    # Map the request to its Settings tab so the right prep fires. Legacy
+    # targets (control/network/wallpaper/…) still route to Settings tabs
+    # inside Shell.qml's IPC handler.
+    PREP_TAB="$TARGET"
+    [[ "$TARGET" == "settings" ]] && PREP_TAB="$SUBTARGET"
+    [[ "$TARGET" == "network" ]] && PREP_TAB="control"
+
+    if [[ "$PREP_TAB" == "control" ]]; then
         handle_network_prep
-        # "top"/"bottom" is the panel-edge subtarget (consumed by Shell.qml),
-        # not a network mode — don't let it clobber the mode file.
-        [[ -n "$SUBTARGET" && "$SUBTARGET" != "top" && "$SUBTARGET" != "bottom" ]] && echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
-        quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "$ACTION" "$TARGET" "$SUBTARGET" >/dev/null 2>&1
-        exit 0
-    fi
-
-    if [[ "$TARGET" == "wallpaper" ]]; then
+    elif [[ "$PREP_TAB" == "wallpaper" ]]; then
         handle_wallpaper_prep
-        CURRENT_SRC=""
-        if pgrep -a "mpvpaper" > /dev/null; then
-            CURRENT_SRC=$(pgrep -a mpvpaper | grep -o "$SRC_DIR/[^' ]*" | head -n1)
-        elif command -v awww >/dev/null; then
-            CURRENT_SRC=$(awww query 2>/dev/null | grep -o "$SRC_DIR/[^ ]*" | head -n1)
-        fi
-
-        TARGET_THUMB=""
-        if [ -n "$CURRENT_SRC" ]; then
-            BASE=$(basename "$CURRENT_SRC")
-            EXT="${BASE##*.}"
-            [[ "${EXT,,}" =~ ^(mp4|mkv|mov|webm)$ ]] && TARGET_THUMB="000_$BASE" || TARGET_THUMB="$BASE"
-        fi
-
-        quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "$ACTION" "$TARGET" "$TARGET_THUMB" >/dev/null 2>&1
-    else
-        quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "$ACTION" "$TARGET" "$SUBTARGET" >/dev/null 2>&1
     fi
+
+    quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "$ACTION" "$TARGET" "$SUBTARGET" >/dev/null 2>&1
     exit 0
 fi
