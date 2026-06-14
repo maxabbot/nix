@@ -137,7 +137,21 @@
       "Bash(echo \"default: $\\(pactl get-default-sink\\)\")",
       "Bash(grep '\\\\.nix$')",
       "Bash(echo \"focused now: $\\(hyprctl monitors -j)",
-      "Bash(grim -g \"5128,72 780x620\" /tmp/final-panel.png)"
+      "Bash(grim -g \"5128,72 780x620\" /tmp/final-panel.png)",
+      "Bash(grep -E \"pwm[0-9]$|fan[0-9]_input\")",
+      "Bash(sudo -n systemctl reset-failed fancontrol.service)",
+      "Bash(ps -o pid,lstart,etimes -p 4135 --no-headers)",
+      "Bash(pkill -x quickshell)",
+      "Bash(bootctl list *)",
+      "Bash(efibootmgr)",
+      "Read(//boot/loader/**)",
+      "Read(//boot/**)",
+      "Bash(findmnt /boot)",
+      "Bash(sudo bootctl list)",
+      "Bash(sudo ls -la /boot/loader/entries/)",
+      "Bash(sudo ls -la /boot/EFI/)",
+      "Bash(nixos-rebuild list-generations *)",
+      "Bash(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system)"
     ]
   }
 }

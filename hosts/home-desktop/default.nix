@@ -37,12 +37,14 @@
       enable = true;
       config = ''
         INTERVAL=10
-        DEVPATH=hwmon2=devices/platform/it87.2624 hwmon4=devices/platform/coretemp.0
-        DEVNAME=hwmon2=it8628 hwmon4=coretemp
+        # coretemp drifted hwmon4→hwmon6 when the spd5118 RAM-temp sensors
+        # claimed hwmon4/5; the it8628 fan controller stays at hwmon2.
+        DEVPATH=hwmon2=devices/platform/it87.2624 hwmon6=devices/platform/coretemp.0
+        DEVNAME=hwmon2=it8628 hwmon6=coretemp
         # pwm1/fan1: unknown
         # pwm3/fan3: case fans
         # pwm4/fan4: unknown
-        FCTEMPS=hwmon2/pwm1=hwmon4/temp1_input hwmon2/pwm3=hwmon4/temp1_input hwmon2/pwm4=hwmon4/temp1_input
+        FCTEMPS=hwmon2/pwm1=hwmon6/temp1_input hwmon2/pwm3=hwmon6/temp1_input hwmon2/pwm4=hwmon6/temp1_input
         FCFANS=hwmon2/pwm1=hwmon2/fan1_input hwmon2/pwm3=hwmon2/fan3_input hwmon2/pwm4=hwmon2/fan4_input
         MINTEMP=hwmon2/pwm1=40 hwmon2/pwm3=40 hwmon2/pwm4=40
         MAXTEMP=hwmon2/pwm1=75 hwmon2/pwm3=75 hwmon2/pwm4=75
@@ -285,6 +287,8 @@
     # ── Bootloader ──────────────────────────────────────────────────────────────
     loader = {
       systemd-boot.enable = true;
+      # Cap the boot menu so old generations don't accumulate as stale entries.
+      systemd-boot.configurationLimit = 10;
       efi.canTouchEfiVariables = true;
     };
 
