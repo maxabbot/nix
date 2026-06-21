@@ -41,6 +41,7 @@ in
     tealdeer # tldr client — simplified man-page examples
     watchexec # run commands on file change
     glow # render markdown in the terminal
+    mdr # render markdown in the terminal (alt to glow)
 
     v4l-utils
     cheese
