@@ -23,6 +23,7 @@
     cmake
     gnumake
     shellcheck
+    cloc # count lines of code by language
     tig
     sqlite
     yq

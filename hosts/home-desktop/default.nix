@@ -61,8 +61,10 @@
     # it, which leaves the greeter on the rotated 4K monitor.
     displayManager.sddm.wayland.compositor = "kwin";
 
-    # ── Audio — route NVIDIA HDMI audio to the TV (HDMI 3 = Philips FTV) ──────
-    # Without this, WirePlumber defaults to hdmi-stereo (HDMI 0 = U27B35 monitor).
+    # ── Audio ──────────────────────────────────────────────────────────────────
+    # Route NVIDIA HDMI audio to the TV (HDMI 3 = Philips FTV); without this,
+    # WirePlumber picks hdmi-stereo (HDMI 0 = U27B35 monitor).
+    # Default sink is the Built-in analog line out for general apps (waybar etc).
     pipewire.wireplumber.extraConfig = {
       "10-nvidia-tv-audio" = {
         "monitor.alsa.rules" = [
@@ -72,9 +74,9 @@
           }
         ];
       };
-      "20-default-tv-sink" = {
+      "20-default-sink" = {
         "wireplumber.settings"."default.configured-audio-sink" =
-          "alsa_output.pci-0000_01_00.1.hdmi-stereo-extra2";
+          "alsa_output.pci-0000_00_1f.3.analog-stereo";
       };
     };
 

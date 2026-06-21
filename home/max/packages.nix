@@ -25,6 +25,23 @@ in
     nixpkgs-review
     nil
     inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+
+    # ── Data wrangling (CSV/JSON/parquet reconciliation, statement parsing) ──────
+    visidata # interactive TUI table explorer (CSV/JSON/xlsx/parquet)
+    miller # awk/sed/cut for CSV/TSV/JSON, format-aware (mlr)
+    dasel # jq across JSON/YAML/TOML/CSV/XML with one syntax
+    qsv # fast CSV stats/slice/join for large files
+
+    # ── Modern CLI (completes the eza/bat/delta/zoxide family) ───────────────────
+    just # command/task runner (justfile)
+    sd # sed replacement, intuitive find-and-replace
+    dust # du replacement, tree-style disk usage
+    duf # df replacement
+    procs # ps replacement
+    tealdeer # tldr client — simplified man-page examples
+    watchexec # run commands on file change
+    glow # render markdown in the terminal
+
     v4l-utils
     cheese
     spotify

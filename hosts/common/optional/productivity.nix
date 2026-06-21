@@ -97,6 +97,22 @@ in
     };
   };
 
+  # NVIDIA hardware cursor planes sometimes fail silently in KWin/Wayland;
+  # force software cursor so the pointer is always visible in the greeter.
+  # Harmless on Intel/Mesa (software cursor is the only path there anyway).
+  systemd.services.sddm.environment.KWIN_FORCE_SW_CURSOR = "1";
+
+  # KWin reads cursor theme/size from kcminputrc, not from sddm.conf [Theme].
+  system.activationScripts.sddmCursorConfig = {
+    deps = [ "users" ];
+    text = ''
+      mkdir -p /var/lib/sddm/.config
+      printf '[Mouse]\ncursorTheme=breeze_cursors\ncursorSize=24\n' \
+        > /var/lib/sddm/.config/kcminputrc
+      chown sddm:sddm /var/lib/sddm/.config/kcminputrc
+    '';
+  };
+
   # ── Wayland session variables ─────────────────────────────────────────────────
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";

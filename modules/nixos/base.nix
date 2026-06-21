@@ -91,6 +91,7 @@ in
     # against this kernel — a `latest` bump can break the module until the
     # driver catches up. Accepted; fall back to the default LTS kernel if it bites.
     boot.kernelPackages = pkgs.linuxPackages_latest;
+    boot.loader.systemd-boot.configurationLimit = lib.mkDefault 5;
 
     # ── Networking ─────────────────────────────────────────────────────────────
     networking.networkmanager.enable = true;

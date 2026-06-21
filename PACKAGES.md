@@ -18,6 +18,14 @@ A "what did I set up" reference. For keybinds see `docs/SHORTCUTS.md`, for struc
 - **mise** — runtime version manager (Node, Python, Ruby, etc.) activated in zsh
 - `, <pkg>` — run any nixpkgs package without installing (`comma`); e.g. `, ffprobe`
 - `nix locate <file>` — find which package owns a file (`nix-index`)
+- **dust** — replaces `du`; tree-style disk usage
+- **duf** — replaces `df`; coloured, grouped output
+- **procs** — replaces `ps`; coloured, human-readable process list
+- **sd** — replaces `sed` for find-and-replace; intuitive syntax
+- **just** — command/task runner (`justfile`); pairs with devshells
+- **watchexec** — run a command whenever files change
+- **tldr** — simplified man-page examples (`tealdeer` client)
+- **glow** — render markdown in the terminal
 
 Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `g` (git). See `docs/SHORTCUTS.md`.
 
@@ -27,6 +35,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 - **Hyprland** — tiling Wayland compositor; monitor layout generated from Nix per-host
 - **Waybar** — status bar; workspaces, clock, system tray
+- **Quickshell** — notification overlay and widget layer
 - **SDDM** — display manager; KWin Wayland greeter on DP-3 only (home-desktop)
 - **fuzzel** — app launcher (`Super+D`), Gruvbox theme
 - **Kitty** — terminal; JetBrainsMono Nerd Font 13pt, Gruvbox palette, tab bar
@@ -58,6 +67,9 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 | mpv | Video player (vim keybinds, hardware decode) |
 | VLC | Media fallback |
 | Calibre | Ebook manager |
+| Spotify | Music |
+| Stremio | Streaming |
+| qBittorrent | Torrents |
 | Veracrypt | Encrypted volumes |
 | rclone | Cloud storage sync |
 | nvtop | GPU monitor |
@@ -67,21 +79,59 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ---
 
+## Communications (always on desktop hosts)
+
+| App | Purpose |
+|-----|---------|
+| Slack | Work chat |
+| Discord | Community chat |
+| Zoom | Video calls |
+
+---
+
 ## Development (all desktop hosts)
 
 - Python 3 + pip, virtualenv, numpy, pandas, scipy, scikit-learn, matplotlib
-- Go, Rust (via rustup), JDK, GCC, Clang, CMake
+- Go, Rust (via rustup), JDK, GCC, Clang, CMake, make
 - `uv` — fast Python package/project manager
 - `bun` — JS runtime + package manager
-- `shellcheck`, `tig`, `sqlite`, `pgcli`
-- `curlie` (httpie-style curl), `bruno` (API client)
+- `yq` — YAML/JSON/TOML processor
+- `shellcheck`, `cloc`, `tig`, `sqlite`, `pgcli`
+- `curlie` (httpie-style curl), `bruno` (API client), `httpie`, `mkcert`
+- `ffmpeg`, `imagemagick`, `pandoc`
 - `quickemu` / `quickgui` — VM management without libvirt
 - Podman + Docker-compat aliases (`d ps`, `d images`, etc.)
 - kubectl, helm, opentofu, awscli2, azure-cli, google-cloud-sdk, doctl
+- `granted` (`assume` — multi-account AWS role switching), `aws-sam-cli` (local Lambda/API GW), `awslogs` (tail CloudWatch), `localstack` (local AWS emulation), `steampipe` (query AWS as SQL)
+- `visidata` (TUI table explorer), `miller`/`mlr` (CSV/JSON reshaping), `dasel` (jq across formats), `qsv` (fast CSV ops)
 - DBeaver, Beekeeper Studio, mycli, litecli, DuckDB
 - `gh` — GitHub CLI
 - `nix-tree`, `nix-diff`, `nixpkgs-review`, `nil` — Nix dev tools
 - `claude-code` — AI assistant CLI
+
+---
+
+## Creative (home-desktop only)
+
+| App | Purpose |
+|-----|---------|
+| GIMP | Image editor |
+| Inkscape | Vector graphics |
+| Krita | Digital painting |
+
+---
+
+## Streaming & Content (home-desktop only)
+
+| App | Purpose |
+|-----|---------|
+| OBS Studio | Screen/game capture and streaming |
+| Shotcut | Video editor |
+| LosslessCut | Fast lossless video trimmer |
+| gpu-screen-recorder | Low-overhead GPU-accelerated recorder |
+| RustDesk | Remote desktop |
+| Moonlight | Game streaming client |
+| Apollo | Game streaming host (Sunshine fork) |
 
 ---
 
@@ -92,7 +142,11 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - **Gamescope** — micro-compositor for resolution scaling / VRR
 - **MangoHud** — in-game performance overlay
 - **Heroic** — GOG / Epic Games launcher
+- **Lutris** — multi-platform game manager
+- **itch** — itch.io client
 - **ProtonUp-Qt** — Proton GE version manager
+- **protontricks** — Winetricks wrapper for Steam games
+- **GOverlay** — MangoHud / vkbasalt GUI configurator
 - **vkbasalt** — Vulkan post-processing (CAS sharpening, FXAA)
 - **xpadneo** — Xbox controller kernel module (Bluetooth)
 - Wine (WoW64 staging) + winetricks + DXVK
