@@ -2,6 +2,7 @@
 // Network/Bluetooth/profile state is read/set via nmcli, bluetoothctl, powerprofilesctl
 // and friends (Process). Mic mute is native PipeWire. Brightness uses brightnessctl
 // (laptop only; silently no-ops on desktop).
+import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import QtQuick
@@ -39,7 +40,7 @@ Item {
     onVisibleChanged: if (visible) {
         pollWifi.running = true; pollBt.running = true; pollBright.running = true
         pollNight.running = true; pollProfile.running = true; pollCaffeine.running = true
-        pollGame.running = true; pollTailscale.running = true
+        pollGame.running = true; pollTailscale.running = true; pollWeather.running = true
     }
 
     Process {
@@ -199,6 +200,55 @@ Item {
         root.tailscaleUp = on
     }
 
+    // ── Weather (wttr.in — IP-located, no API key; cached 30 min on disk) ────────
+    property string weatherText: ""
+    Process {
+        id: pollWeather
+        command: ["bash", "-c",
+            "d=\"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell\"; mkdir -p \"$d\"; f=\"$d/weather\"; " +
+            "if [ -z \"$(find \"$f\" -mmin -30 2>/dev/null)\" ]; then " +
+            "  w=$(curl -s --max-time 5 'wttr.in/?format=%t|%C' 2>/dev/null); " +
+            "  [ -n \"$w\" ] && printf '%s' \"$w\" > \"$f\"; fi; " +
+            "cat \"$f\" 2>/dev/null"]
+        stdout: SplitParser { onRead: (line) => { if (line.trim() !== "") root.weatherText = line.trim() } }
+    }
+
+    // ── Focus timer (Pomodoro) ──────────────────────────────────────────────────
+    // State lives here, not in Shell — the StackLayout keeps this page alive while
+    // the panel is hidden, so the timer keeps running and notifies on phase change.
+    readonly property int focusLen: 25 * 60
+    readonly property int breakLen: 5 * 60
+    property bool   focusRunning:   false
+    property string focusPhase:     "focus"   // focus | break
+    property int    focusRemaining: focusLen
+
+    function fmtTime(s) {
+        var m = Math.floor(s / 60), ss = s % 60
+        return m + ":" + (ss < 10 ? "0" : "") + ss
+    }
+    function focusToggle() { root.focusRunning = !root.focusRunning }
+    function focusReset() {
+        root.focusRunning = false
+        root.focusPhase = "focus"
+        root.focusRemaining = root.focusLen
+    }
+    function focusSkip() {
+        root.focusPhase = (root.focusPhase === "focus") ? "break" : "focus"
+        root.focusRemaining = (root.focusPhase === "focus") ? root.focusLen : root.breakLen
+    }
+    Timer {
+        interval: 1000; repeat: true; running: root.focusRunning
+        onTriggered: {
+            if (root.focusRemaining > 1) { root.focusRemaining--; return }
+            var done = root.focusPhase
+            root.focusPhase = (done === "focus") ? "break" : "focus"
+            root.focusRemaining = (root.focusPhase === "focus") ? root.focusLen : root.breakLen
+            Quickshell.execDetached(["notify-send", "-a", "Focus",
+                done === "focus" ? "Focus done — take a break" : "Break over — back to focus",
+                done === "focus" ? "5 minute break" : "25 minute focus"])
+        }
+    }
+
     // ── Tile model ──────────────────────────────────────────────────────────────
     // Built as a binding so the optional Tailscale tile appears only when the CLI
     // is present. Order is stable; the Grid reflows automatically.
@@ -224,12 +274,23 @@ Item {
         anchors { top: parent.top; left: parent.left; right: parent.right }
         spacing: 12
 
-        Text {
-            text: "Control Center"
-            color: Theme.fg
-            font.pixelSize: 14
-            font.bold: true
-            font.family: Theme.font
+        RowLayout {
+            width: parent.width
+            Text {
+                text: "Control Center"
+                color: Theme.fg
+                font.pixelSize: 14
+                font.bold: true
+                font.family: Theme.font
+                Layout.fillWidth: true
+            }
+            Text {
+                visible: root.weatherText !== ""
+                text: "  " + root.weatherText.replace("|", "  ")
+                color: Theme.gray
+                font.pixelSize: 11
+                font.family: Theme.font
+            }
         }
 
         // ── Toggle tiles ──────────────────────────────────────────────────────
@@ -394,6 +455,75 @@ Item {
                 root.nightTemp = Math.round(v)
                 if (root.nightActive) root.runNight(true)
             }
+        }
+
+        // ── Focus timer ───────────────────────────────────────────────────────
+        Rectangle {
+            width: parent.width
+            height: 56
+            radius: 10
+            color: Theme.bgAlt
+
+            RowLayout {
+                anchors { fill: parent; leftMargin: 14; rightMargin: 10 }
+                spacing: 10
+
+                Text {
+                    text: root.focusPhase === "focus" ? "󰈸" : "󰅶"
+                    color: root.focusPhase === "focus" ? Theme.accent : Theme.green
+                    font.pixelSize: 18
+                    font.family: Theme.font
+                }
+                ColumnLayout {
+                    spacing: 0
+                    Text {
+                        text: root.focusPhase === "focus" ? "Focus" : "Break"
+                        color: Theme.gray
+                        font.pixelSize: 10
+                        font.family: Theme.font
+                    }
+                    Text {
+                        text: root.fmtTime(root.focusRemaining)
+                        color: Theme.fgBright
+                        font.pixelSize: 18
+                        font.bold: true
+                        font.family: Theme.font
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                FocusBtn { glyph: "󰜉";                                onActivated: root.focusReset() }
+                FocusBtn { glyph: root.focusRunning ? "󰏤" : "󰐊"; accent: true; onActivated: root.focusToggle() }
+                FocusBtn { glyph: "󰒭";                                onActivated: root.focusSkip() }
+            }
+        }
+    }
+
+    // ── Small round timer button ────────────────────────────────────────────────
+    component FocusBtn: Rectangle {
+        id: fbtn
+        property string glyph: ""
+        property bool accent: false
+        signal activated()
+
+        width: 34; height: 34; radius: 8
+        color: fbArea.containsMouse ? Theme.borderStrong : (fbtn.accent ? Theme.accentBg : Theme.bgHard)
+        Behavior on color { ColorAnimation { duration: 80 } }
+
+        Text {
+            anchors.centerIn: parent
+            text: fbtn.glyph
+            color: fbtn.accent ? Theme.accent : Theme.gray
+            font.pixelSize: 14
+            font.family: Theme.font
+        }
+        MouseArea {
+            id: fbArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: fbtn.activated()
         }
     }
 }
