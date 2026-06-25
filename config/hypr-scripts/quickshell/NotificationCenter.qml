@@ -72,7 +72,7 @@ PanelWindow {
                         if (!root.model) return
                         // Close all notifications (iterate backwards to avoid index shifting)
                         for (let i = root.model.values.length - 1; i >= 0; i--) {
-                            root.model.values[i]?.close(NotificationCloseReason.Dismissed)
+                            root.model.values[i]?.dismiss()
                         }
                     }
                 }
@@ -197,7 +197,7 @@ PanelWindow {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: modelData.close(NotificationCloseReason.Dismissed)
+                                    onClicked: modelData.dismiss()
                                 }
                             }
                         }

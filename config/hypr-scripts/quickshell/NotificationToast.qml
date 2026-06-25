@@ -30,7 +30,7 @@ Rectangle {
     Timer {
         interval: notification.expireTimeout > 0 ? notification.expireTimeout : 6000
         running: !root.critical
-        onTriggered: notification.close(NotificationCloseReason.Expired)
+        onTriggered: notification.expire()
     }
 
     RowLayout {
@@ -119,7 +119,7 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: notification.close(NotificationCloseReason.Dismissed)
+                onClicked: notification.dismiss()
             }
         }
     }
