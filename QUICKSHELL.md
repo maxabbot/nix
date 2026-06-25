@@ -26,15 +26,17 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 ### Settings tabs (pages of `Settings.qml`)
 
-The tabbed `Settings` panel hosts these pages, in order: **Control · Wi-Fi · Bluetooth · Audio · Monitors · Wallpaper · Theme · Keyboard · Input · Battery · Drives · System · Nix**. Each is a plain `Item` (no window chrome). A tab = one entry in `Settings.qml`'s `tabs` array **plus** the matching page in its `StackLayout` (same order); the id must also appear in `Shell.qml`'s `settingsTabs`. Tabs needing a pre-scan hook into `qs_manager.sh` `PREP_TAB`.
+The tabbed `Settings` panel hosts these pages, in order: **Control · Wi-Fi · Bluetooth · KDE Connect · Audio · Monitors · Wallpaper · Theme · Keyboard · Input · Battery · Drives · System · Nix**. Each is a plain `Item` (no window chrome). A tab = one entry in `Settings.qml`'s `tabs` array **plus** the matching page in its `StackLayout` (same order); the id must also appear in `Shell.qml`'s `settingsTabs`. Tabs needing a pre-scan hook into `qs_manager.sh` `PREP_TAB`.
 
 **`ControlCenter.qml`** — Quick toggles grid + sliders. Tiles: Wi-Fi (`nmcli`), Bluetooth (`bluetoothctl`), Night Light, Do Not Disturb, Power Profile cycle (`powerprofilesctl`), Caffeine (toggles `hypridle`), Airplane (both radios), Mic mute (PipeWire source), Game Mode (`hyprctl` blur/anim), and Tailscale (only when the CLI is present). Brightness + night-light Warmth sliders. Night light is a manual override over the gammastep service, tracked by a runtime flag file. Polls state on open. Also carries a **weather** readout (`wttr.in`, IP-located, no key, cached 30 min) and a **focus/Pomodoro timer** (25/5, start·pause·reset·skip) whose state lives in this page so it keeps running while the panel is closed and notifies on each phase change.
 
-**`AudioMixer.qml`** — PipeWire audio page. Default sink/source volume + mute, output/input **device selectors** (sets the default via `preferredDefaultAudioSink/Source`), per-app stream volumes (`PwObjectTracker`), and an **EasyEffects** equalizer section (enable toggle, preset chips, open-GUI button).
+**`AudioMixer.qml`** — PipeWire audio page. Default sink/source volume + mute, output/input **device selectors** (sets the default via `preferredDefaultAudioSink/Source`), per-app stream volumes (`PwObjectTracker`), an **EasyEffects** equalizer section (enable toggle, preset chips, open-GUI button), and **per-app output routing** (sink chips per app via `pactl -f json` + `move-sink-input`; shown only with >1 sink).
 
 **`SysInfoPanel.qml`** — System stats page. CPU usage + package temp, memory, root disk, and GPU (`nvidia-smi`; row hidden when absent), each a thin progress bar polled every 2s while open. A **Fans** list shows live RPMs (`sensors -u`; section hidden when no fan reads > 0). Header button opens `btop` in kitty.
 
 **`NetworkPanel.qml`** — Wi-Fi page. Radio toggle, scanned network list (strongest AP per SSID, in-use first), click to connect/disconnect via `nmcli` — known networks connect directly, new secured ones get an inline password prompt; a failed connect deletes the half-made profile for clean retries. A **VPN / WireGuard** section lists NetworkManager `vpn`/`wireguard` connections with up/down toggles (hidden when none exist). `qs_manager.sh` kicks a hardware rescan on open (`PREP_TAB == network`); the list refreshes every 8s while visible.
+
+**`KDEConnectPanel.qml`** — KDE Connect page. Lists devices via `kdeconnect-cli --list-devices` (parsed to id/name/paired/reachable), with pair/unpair and ring ("find my phone"). Needs `programs.kdeconnect.enable` (daemon + firewall 1714-1764, set in `productivity.nix`); the cli DBus-activates the daemon. Shows a hint when the cli is absent or no devices are paired.
 
 **`BluetoothPanel.qml`** — Bluetooth page. Power toggle, device list via `bluetoothctl` (connect/disconnect, pair, remove), per-device battery %, and a best-effort codec/profile selector (`pactl set-card-profile` on the active bluez card). `qs_manager.sh` starts a scan on open (`PREP_TAB == bluetooth`) and tears it down on close.
 
@@ -69,8 +71,8 @@ quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 
 # Toggle the Settings panel on a given tab:
 ~/.config/hypr/scripts/qs_manager.sh toggle settings <tab>
-# Tabs: control, network, bluetooth, audio, monitors, wallpaper, theme,
-#       keyboard, input, battery, disks, sysinfo, nix
+# Tabs: control, network, bluetooth, kdeconnect, audio, monitors, wallpaper,
+#       theme, keyboard, input, battery, disks, sysinfo, nix
 # (A bare tab name as <name> also works — it maps to the matching Settings tab.)
 # Standalone pop-ups: notifications, keybinds, clipboard, screenshot, power
 # OSD (volume/brightness) is automatic — trigger via: qs_manager.sh osd <volume|brightness>

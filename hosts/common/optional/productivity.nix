@@ -59,6 +59,10 @@ in
     tumbler.enable = true;
   };
 
+  # KDE Connect — phone integration (daemon + firewall ports 1714-1764).
+  # Surfaced in the Quickshell Settings "KDE Connect" tab via kdeconnect-cli.
+  programs.kdeconnect.enable = true;
+
   programs.silentSDDM = {
     enable = true;
     theme = "gruvbox";

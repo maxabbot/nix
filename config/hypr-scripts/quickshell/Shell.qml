@@ -25,7 +25,7 @@ ShellRoot {
     property bool   dndEnabled:     false
     property bool   rebuildRunning: false
 
-    readonly property var settingsTabs: ["control", "network", "bluetooth", "audio", "monitors", "wallpaper", "theme", "keyboard", "input", "battery", "disks", "sysinfo", "nix"]
+    readonly property var settingsTabs: ["control", "network", "bluetooth", "kdeconnect", "audio", "monitors", "wallpaper", "theme", "keyboard", "input", "battery", "disks", "sysinfo", "nix"]
 
     // Click-off dismissal grace: a Waybar button press first breaks the focus
     // grab (closing the panel), then the button's toggle fires on release —

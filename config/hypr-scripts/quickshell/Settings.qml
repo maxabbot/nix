@@ -46,6 +46,7 @@ PanelWindow {
         { id: "control",   icon: "",  label: "Control"   },
         { id: "network",   icon: "",  label: "Wi-Fi"     },
         { id: "bluetooth", icon: "",  label: "Bluetooth" },
+        { id: "kdeconnect",icon: "󰄜",  label: "KDE Connect" },
         { id: "audio",     icon: "",  label: "Audio"     },
         { id: "monitors",  icon: "󰍹",  label: "Monitors"  },
         { id: "wallpaper", icon: "󰸉",  label: "Wallpaper" },
@@ -151,6 +152,7 @@ PanelWindow {
                 }
                 NetworkPanel { }
                 BluetoothPanel { }
+                KDEConnectPanel { }
                 AudioMixer { }
                 MonitorManager { }
                 WallpaperPicker { }

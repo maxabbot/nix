@@ -19,7 +19,56 @@ Item {
 
     // ── EQ state (polled on open) ───────────────────────────────────────────────
     property bool eqEnabled: false
-    onVisibleChanged: if (visible) pollEq.running = true
+    onVisibleChanged: if (visible) {
+        pollEq.running = true
+        pollSinks.running = true
+        pollInputs.running = true
+    }
+
+    // ── Per-app output routing (pactl JSON — robust, no Pipewire id mapping) ─────
+    property var sinkList:  []   // [{index, name, desc}]
+    property var appInputs: []   // [{index, app, sinkIndex}]
+
+    Process {
+        id: pollSinks
+        command: ["bash", "-c", "pactl -f json list sinks 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var a = JSON.parse(text), o = []
+                    for (var i = 0; i < a.length; i++)
+                        o.push({ index: a[i].index, name: a[i].name, desc: a[i].description || a[i].name })
+                    root.sinkList = o
+                } catch (e) { /* ignore transient parse errors */ }
+            }
+        }
+    }
+    Process {
+        id: pollInputs
+        command: ["bash", "-c", "pactl -f json list sink-inputs 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var a = JSON.parse(text), o = []
+                    for (var i = 0; i < a.length; i++) {
+                        var p = a[i].properties || {}
+                        o.push({
+                            index: a[i].index,
+                            app: p["application.name"] || p["media.name"] || "App",
+                            sinkIndex: a[i].sink
+                        })
+                    }
+                    root.appInputs = o
+                } catch (e) { /* ignore */ }
+            }
+        }
+    }
+    Process { id: moveProc; command: [] }
+    function moveInput(index, sinkName) {
+        moveProc.command = ["pactl", "move-sink-input", String(index), sinkName]
+        moveProc.running = true
+        Qt.callLater(() => pollInputs.running = true)
+    }
 
     Process {
         id: pollEq
@@ -360,6 +409,73 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: eqOpen.running = true
+                    }
+                }
+            }
+        }
+
+        // ── Per-app output routing (only useful with >1 sink) ───────────────────
+        Column {
+            width: parent.width
+            spacing: 8
+            visible: root.sinkList.length > 1 && root.appInputs.length > 0
+
+            Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+            Text {
+                text: "App output"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            Repeater {
+                model: root.appInputs
+
+                delegate: Column {
+                    id: appRow
+                    required property var modelData   // sink-input
+                    width: parent.width
+                    spacing: 4
+
+                    Text {
+                        text: appRow.modelData.app
+                        color: Theme.fgDim
+                        font.pixelSize: 11
+                        font.family: Theme.font
+                    }
+                    Flow {
+                        width: parent.width
+                        spacing: 6
+                        Repeater {
+                            model: root.sinkList
+                            delegate: Rectangle {
+                                required property var modelData   // sink
+                                readonly property bool active: appRow.modelData.sinkIndex === modelData.index
+                                width: sinkTxt.implicitWidth + 18
+                                height: 26
+                                radius: 6
+                                color: active ? Theme.accentBg
+                                     : (routeArea.containsMouse ? Theme.bgSoft : Theme.bgAlt)
+                                Behavior on color { ColorAnimation { duration: 80 } }
+                                Text {
+                                    id: sinkTxt
+                                    anchors.centerIn: parent
+                                    text: modelData.desc
+                                    color: active ? Theme.accent : Theme.gray
+                                    font.pixelSize: 10
+                                    font.family: Theme.font
+                                }
+                                MouseArea {
+                                    id: routeArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.moveInput(appRow.modelData.index, modelData.name)
+                                }
+                            }
+                        }
                     }
                 }
             }
