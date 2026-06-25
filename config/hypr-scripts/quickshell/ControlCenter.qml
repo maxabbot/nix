@@ -242,6 +242,7 @@ Item {
                 model: root.tiles
 
                 delegate: Rectangle {
+                    id: tile
                     required property var modelData
 
                     readonly property bool tileActive: {
@@ -306,19 +307,19 @@ Item {
                         spacing: 4
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: parent.parent.tileIcon
-                            color: parent.parent.tileActive ? Theme.accent : Theme.gray
+                            text: tile.tileIcon
+                            color: tile.tileActive ? Theme.accent : Theme.gray
                             font.pixelSize: 18
                             font.family: Theme.font
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: parent.parent.tileLabel
-                            color: parent.parent.tileActive ? Theme.fg : Theme.gray
+                            text: tile.tileLabel
+                            color: tile.tileActive ? Theme.fg : Theme.gray
                             font.pixelSize: 9
                             font.family: Theme.font
                             horizontalAlignment: Text.AlignHCenter
-                            width: parent.parent.width - 8
+                            width: tile.width - 8
                             elide: Text.ElideRight
                         }
                     }

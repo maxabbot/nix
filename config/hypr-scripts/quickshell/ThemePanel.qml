@@ -157,7 +157,7 @@ Item {
                         required property var modelData
                         width: 30; height: 30; radius: 15
                         color: modelData.accent
-                        border.width: Theme.accent.toString() === modelData.accent ? 3 : 0
+                        border.width: Qt.colorEqual(Theme.accent, modelData.accent) ? 3 : 0
                         border.color: Theme.fgBright
 
                         MouseArea {

@@ -102,6 +102,7 @@ Item {
 
     // ── Label + toggle switch ───────────────────────────────────────────────────
     component ToggleRow: RowLayout {
+        id: toggleRow
         property string label: ""
         property bool checked: false
         signal toggled(bool value)
@@ -109,7 +110,7 @@ Item {
         spacing: 8
 
         Text {
-            text: parent.label
+            text: toggleRow.label
             color: Theme.fgDim
             font.pixelSize: 12
             font.family: Theme.font
@@ -117,19 +118,19 @@ Item {
         }
         Rectangle {
             width: 44; height: 24; radius: 12
-            color: parent.checked ? Theme.accentBg : Theme.bgAlt
+            color: toggleRow.checked ? Theme.accentBg : Theme.bgAlt
             Behavior on color { ColorAnimation { duration: 100 } }
             Rectangle {
                 width: 18; height: 18; radius: 9
-                x: parent.parent.checked ? parent.width - width - 3 : 3
+                x: toggleRow.checked ? parent.width - width - 3 : 3
                 anchors.verticalCenter: parent.verticalCenter
-                color: parent.parent.checked ? Theme.accent : Theme.gray
+                color: toggleRow.checked ? Theme.accent : Theme.gray
                 Behavior on x { NumberAnimation { duration: 100 } }
             }
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: parent.parent.toggled(!parent.parent.checked)
+                onClicked: toggleRow.toggled(!toggleRow.checked)
             }
         }
     }
