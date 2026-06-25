@@ -132,6 +132,7 @@ in
     playerctl
     brightnessctl
     grimblast
+    hyprpicker # eyedropper colour picker (Super+Shift+P → color-picker.sh)
     pavucontrol
     pamixer
     pulseaudio

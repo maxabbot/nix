@@ -34,7 +34,7 @@ The tabbed `Settings` panel hosts these pages, in order: **Control · Wi-Fi · B
 
 **`SysInfoPanel.qml`** — System stats page. CPU usage + package temp, memory, root disk, and GPU (`nvidia-smi`; row hidden when absent), each a thin progress bar polled every 2s while open. Header button opens `btop` in kitty.
 
-**`NetworkPanel.qml`** — Wi-Fi page. Radio toggle, scanned network list (strongest AP per SSID, in-use first), click to connect/disconnect via `nmcli` — known networks connect directly, new secured ones get an inline password prompt; a failed connect deletes the half-made profile for clean retries. `qs_manager.sh` kicks a hardware rescan on open (`PREP_TAB == network`); the list refreshes every 8s while visible.
+**`NetworkPanel.qml`** — Wi-Fi page. Radio toggle, scanned network list (strongest AP per SSID, in-use first), click to connect/disconnect via `nmcli` — known networks connect directly, new secured ones get an inline password prompt; a failed connect deletes the half-made profile for clean retries. A **VPN / WireGuard** section lists NetworkManager `vpn`/`wireguard` connections with up/down toggles (hidden when none exist). `qs_manager.sh` kicks a hardware rescan on open (`PREP_TAB == network`); the list refreshes every 8s while visible.
 
 **`BluetoothPanel.qml`** — Bluetooth page. Power toggle, device list via `bluetoothctl` (connect/disconnect, pair, remove), per-device battery %, and a best-effort codec/profile selector (`pactl set-card-profile` on the active bluez card). `qs_manager.sh` starts a scan on open (`PREP_TAB == bluetooth`) and tears it down on close.
 

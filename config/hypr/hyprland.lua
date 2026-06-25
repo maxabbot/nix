@@ -222,6 +222,7 @@ hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_ma
 hl.bind(mainMod .. " + I",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle settings"),         { description = "System | Settings" })
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle clipboard"),        { description = "System | Clipboard history" })
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 
 -- Screenshots
 hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })

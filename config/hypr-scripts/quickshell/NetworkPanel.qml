@@ -18,6 +18,7 @@ Item {
     property string promptSsid:     ""   // SSID awaiting an inline password
     property string statusMsg:      ""
     property string connectingSsid: ""
+    property var    vpns:           []   // [{name, type, active}] — VPN/WireGuard
 
     property var _scanAccum: []
 
@@ -30,6 +31,7 @@ Item {
     function refresh() {
         pollRadio.running = true
         pollSaved.running = true
+        pollVpn.running = true
         root._scanAccum = []
         scanList.running = true
     }
@@ -57,6 +59,33 @@ Item {
             onRead: (line) => { if (line.trim() !== "") pollSaved.accum.push(line.trim()) }
         }
         onRunningChanged: { if (running) accum = []; else { root.savedSsids = accum; accum = [] } }
+    }
+
+    // VPN / WireGuard connections. ACTIVE and TYPE never contain ':'; the NAME
+    // may, so parse from the right and rejoin the remainder as the name.
+    Process {
+        id: pollVpn
+        command: ["bash", "-c", "nmcli -t -f NAME,TYPE,ACTIVE connection show 2>/dev/null"]
+        property var accum: []
+        stdout: SplitParser {
+            onRead: (line) => {
+                if (line.trim() === "") return
+                var p = line.split(":")
+                if (p.length < 3) return
+                var active = p[p.length - 1] === "yes"
+                var type   = p[p.length - 2]
+                if (type !== "vpn" && type !== "wireguard") return
+                var name   = p.slice(0, p.length - 2).join(":").replace(/\\:/g, ":")
+                pollVpn.accum.push({ name: name, type: type, active: active })
+            }
+        }
+        onRunningChanged: {
+            if (running) accum = []
+            else {
+                accum.sort((a, b) => (b.active - a.active) || a.name.localeCompare(b.name))
+                root.vpns = accum; accum = []
+            }
+        }
     }
 
     // SSID kept last so SSIDs containing ':' survive — split off the first three
@@ -100,6 +129,13 @@ Item {
     Process { id: setRadio;  command: [] }
     Process { id: connectP;  command: [] }
     Process { id: disconP;   command: [] }
+    Process { id: vpnAct;    command: [] }
+
+    function toggleVpn(name, active) {
+        vpnAct.command = ["nmcli", "connection", active ? "down" : "up", name]
+        vpnAct.running = true
+        Qt.callLater(root.refresh)
+    }
 
     function runSetRadio(on) {
         setRadio.command = ["nmcli", "radio", "wifi", on ? "on" : "off"]
@@ -329,6 +365,68 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // ── VPN / WireGuard ───────────────────────────────────────────────────
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 4
+            visible: root.vpns.length > 0
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
+
+            Text {
+                text: "VPN"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            Repeater {
+                model: root.vpns
+
+                delegate: Rectangle {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 36
+                    radius: 8
+                    color: modelData.active ? Theme.accentBg : Theme.bgAlt
+
+                    RowLayout {
+                        anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                        spacing: 8
+
+                        Text {
+                            text: modelData.type === "wireguard" ? "󰖂" : "󰦝"
+                            color: modelData.active ? Theme.accent : Theme.gray
+                            font.pixelSize: 14
+                            font.family: Theme.font
+                        }
+                        Text {
+                            text: modelData.name
+                            color: modelData.active ? Theme.fg : Theme.fgDim
+                            font.pixelSize: 12
+                            font.family: Theme.font
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            visible: modelData.active
+                            text: "On"
+                            color: Theme.accent
+                            font.pixelSize: 9
+                            font.family: Theme.font
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggleVpn(modelData.name, modelData.active)
                     }
                 }
             }
