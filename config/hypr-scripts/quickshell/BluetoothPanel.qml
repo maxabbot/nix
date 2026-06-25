@@ -6,6 +6,7 @@
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls.Basic
 
 Item {
     id: root
