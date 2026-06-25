@@ -127,7 +127,6 @@ in
     awww # wallpaper daemon — NOT "swww"
     wl-clipboard
     cliphist
-    wlogout
     nwg-look
     hyprlock
     playerctl
@@ -138,7 +137,6 @@ in
     pulseaudio
     easyeffects # PipeWire EQ / effects (driven from the Quickshell Audio tab)
     matugen # wallpaper → palette generation (Quickshell Theme tab)
-    swayosd
     hypridle
     thunar
     thunar-archive-plugin

@@ -24,6 +24,13 @@ if [[ "$ACTION" =~ ^[0-9]+$ ]]; then
     exit 0
 fi
 
+# FAST PATH: OSD trigger (volume/brightness keys spam this — keep it lean).
+# No-op if the shell isn't running; the keybind already applied the change.
+if [[ "$ACTION" == "osd" ]]; then
+    quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "osd" "$TARGET" "" >/dev/null 2>&1
+    exit 0
+fi
+
 # -----------------------------------------------------------------------------
 # SLOW PATH: Everything below only runs for non-workspace actions
 # -----------------------------------------------------------------------------

@@ -13,6 +13,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Notifications
+import Quickshell.Services.Pipewire
 import QtQuick
 
 ShellRoot {
@@ -46,6 +47,7 @@ ShellRoot {
         target: "main"
         function handleCommand(action: string, target: string, subtarget: string): void {
             if (action === "close") { root.activePanel = ""; return }
+            if (action === "osd") { root.osd(target); return }
 
             var tgt = target
             var tab = ""
@@ -74,6 +76,67 @@ ShellRoot {
                 root.activePanel = tgt
             }
         }
+    }
+
+    // ── On-screen display (volume / brightness) ────────────────────────────────
+    // Volume is observed passively from PipeWire (any change — keybind or panel —
+    // flashes the OSD). Brightness has no passive signal, so it's push-triggered
+    // by the `osd brightness` IPC call from the brightness keybinds.
+    property string osdKind:  ""    // "volume" | "brightness" | ""
+    property real   osdLevel: 0     // 0..1
+    property bool   osdMuted:  false
+    property bool   osdReady:  false // suppress the initial volume-bind event on startup
+
+    Timer { id: osdHideTimer;  interval: 1600; onTriggered: root.osdKind = "" }
+    Timer { id: osdReadyTimer; interval: 1000; running: true; onTriggered: root.osdReady = true }
+
+    function showOsd(kind, level, muted) {
+        root.osdKind  = kind
+        root.osdLevel = Math.max(0, Math.min(1, level))
+        root.osdMuted = muted === true
+        osdHideTimer.restart()
+    }
+
+    // Entry point for the `osd <kind>` IPC action.
+    function osd(kind) {
+        if (kind === "brightness") {
+            brightnessProbe.running = true
+        } else if (kind === "volume" && Pipewire.defaultAudioSink?.audio) {
+            showOsd("volume", Pipewire.defaultAudioSink.audio.volume,
+                    Pipewire.defaultAudioSink.audio.muted)
+        }
+    }
+
+    // Keep the default sink bound so its volume/mute changes fire globally.
+    PwObjectTracker { objects: [Pipewire.defaultAudioSink].filter(n => n) }
+
+    Connections {
+        target: Pipewire.defaultAudioSink?.audio ?? null
+        function onVolumeChanged() {
+            if (root.osdReady) root.showOsd("volume",
+                Pipewire.defaultAudioSink.audio.volume, Pipewire.defaultAudioSink.audio.muted)
+        }
+        function onMutedChanged() {
+            if (root.osdReady) root.showOsd("volume",
+                Pipewire.defaultAudioSink.audio.volume, Pipewire.defaultAudioSink.audio.muted)
+        }
+    }
+
+    Process {
+        id: brightnessProbe
+        command: ["bash", "-c", "brightnessctl -m | awk -F, '{print $4}' | tr -d '%'"]
+        stdout: SplitParser {
+            onRead: (line) => {
+                var p = parseInt(line.trim())
+                if (!isNaN(p)) root.showOsd("brightness", p / 100, false)
+            }
+        }
+    }
+
+    Osd {
+        kind:  root.osdKind
+        level: root.osdLevel
+        muted: root.osdMuted
     }
 
     // ── Notification server ────────────────────────────────────────────────────
@@ -175,6 +238,11 @@ ShellRoot {
             root.dismissedAt = Date.now()
             root.activePanel = ""
         }
+    }
+
+    PowerMenu {
+        visible: root.activePanel === "power"
+        onCloseRequested: root.activePanel = ""
     }
 
     ScreenshotOverlay {

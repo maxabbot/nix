@@ -8,7 +8,7 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 **`Shell.qml`** — Entry point. Owns all global state (`activePanel`, `dndEnabled`, `rebuildRunning`), the `IpcHandler` for `qs_manager.sh` commands, the `NotificationServer` (D-Bus `org.freedesktop.Notifications`), the transient toast window, and spawns one `Bar` per screen via `Variants`.
 
-**`Bar.qml`** — Bottom bar content (40px, full-width per screen). Left: workspace dots. Centre: media player. Right: keybinds, rebuild spinner, nix, monitors, wallpaper, notifications, control center, audio buttons. Emits `panelToggled(name)` up to Shell. (Power actions: `Super+Shift+E` → wlogout.) (App launching and clipboard history are handled by fuzzel — see `modules/home/apps.nix` and `config/hypr-scripts/clipboard-fuzzel.sh`.)
+**`Bar.qml`** — Bottom bar content (40px, full-width per screen). Left: workspace dots. Centre: media player. Right: keybinds, rebuild spinner, nix, monitors, wallpaper, notifications, control center, audio buttons. Emits `panelToggled(name)` up to Shell. (Power actions: `Super+Shift+E` → Quickshell `PowerMenu`.) (App launching and clipboard history are handled by fuzzel — see `modules/home/apps.nix` and `config/hypr-scripts/clipboard-fuzzel.sh`.)
 
 **`BarButton.qml`** — Shared icon button used by Bar. Supports `active` highlight, `badge` count, and tooltip.
 
@@ -18,7 +18,11 @@ Bottom bar + panel system replacing Waybar and swaync. Entry point: `config/hypr
 
 **`NotificationCenter.qml`** — Scrollable notification history (bottom-right, 390×500). Shows all current notifications with dismiss and clear-all. Fed the `NotificationServer`'s model from Shell.
 
-**`NotificationToast.qml`** — Transient top-right toast for incoming notifications. Used in the repeater inside Shell's toast `PanelWindow`.
+**`NotificationToast.qml`** — Transient top-right toast for incoming notifications. Used in the repeater inside Shell's toast `PanelWindow`. Dismiss/auto-expire call `notification.dismiss()` / `.expire()` (Quickshell's `Notification` has no `close()`).
+
+**`Osd.qml`** — Transient bottom-centre on-screen display for volume / brightness. Presentational; Shell drives `kind`/`level`/`muted` and the ~1.6s auto-hide. Volume is observed passively from PipeWire (any change flashes it); brightness is push-triggered by the `osd brightness` IPC call from the brightness keybinds.
+
+**`PowerMenu.qml`** — Fullscreen dimmed session overlay (replaces wlogout): Lock (`hyprlock`), Suspend, Logout (`uwsm stop`), Reboot, Shutdown. Esc or click-off dismisses; opened via `qs_manager.sh toggle power` (bound to `Super+Shift+E`).
 
 ### Settings tabs (pages of `Settings.qml`)
 
@@ -66,7 +70,8 @@ quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 # Tabs: control, network, bluetooth, audio, monitors, wallpaper, theme,
 #       keyboard, input, battery, sysinfo, nix
 # (A bare tab name as <name> also works — it maps to the matching Settings tab.)
-# Standalone pop-ups: notifications, keybinds, clipboard, screenshot
+# Standalone pop-ups: notifications, keybinds, clipboard, screenshot, power
+# OSD (volume/brightness) is automatic — trigger via: qs_manager.sh osd <volume|brightness>
 
 # Close all panels:
 ~/.config/hypr/scripts/qs_manager.sh close
