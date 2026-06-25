@@ -5,6 +5,7 @@
 // Esc closes; click-off handled by Shell.qml's focus grab.
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
@@ -25,6 +26,17 @@ PanelWindow {
 
     property string currentTab: "control"
     property bool dndEnabled: false
+
+    // Laptop-only tabs are hidden on desktops with no battery. Detected at
+    // startup so the Battery tab never shows on home-desktop / vm.
+    property bool hasBattery: false
+    Process {
+        id: detectBattery
+        command: ["bash", "-c", "ls -d /sys/class/power_supply/BAT* >/dev/null 2>&1 && echo yes || echo no"]
+        stdout: SplitParser { onRead: (line) => root.hasBattery = (line.trim() === "yes") }
+    }
+    Component.onCompleted: detectBattery.running = true
+
     signal closeRequested()
     signal dndToggled()
     signal rebuildStarted()
@@ -40,7 +52,7 @@ PanelWindow {
         { id: "theme",     icon: "󰏘",  label: "Theme"     },
         { id: "keyboard",  icon: "",  label: "Keyboard"  },
         { id: "input",     icon: "󰍽",  label: "Input"     },
-        { id: "battery",   icon: "󰁹",  label: "Battery"   },
+        { id: "battery",   icon: "󰁹",  label: "Battery",   laptopOnly: true },
         { id: "sysinfo",   icon: "󰍛",  label: "System"    },
         { id: "nix",       icon: "󱄅",  label: "Nix"       },
     ]
@@ -80,9 +92,12 @@ PanelWindow {
                         required property var modelData
 
                         readonly property bool tabActive: root.currentTab === modelData.id
+                        // Collapse laptop-only tabs (e.g. Battery) on desktops.
+                        readonly property bool tabAvail: !(modelData.laptopOnly === true) || root.hasBattery
 
+                        visible: tabAvail
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 36
+                        Layout.preferredHeight: tabAvail ? 36 : 0
                         radius: Theme.radiusButton
                         color: tabActive ? Theme.accentBg
                              : tabArea.containsMouse ? Theme.border : "transparent"

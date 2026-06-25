@@ -51,23 +51,30 @@ Item {
     // `sink: true` lists output devices (Audio/Sink) and rebinds the default sink;
     // `false` lists inputs (Audio/Source) and rebinds the default source.
     component DevicePicker: Column {
+        id: picker
         property bool sink: true
         width: parent ? parent.width : 0
         spacing: 4
 
+        // The actual list model — a plain array of matching PipeWire nodes.
+        // (A Repeater can't iterate a PwObjectTracker; that only *binds* nodes.)
+        readonly property var devices: (Pipewire.nodes?.values ?? []).filter(n =>
+            n && n.mediaClass === (picker.sink ? "Audio/Sink" : "Audio/Source"))
+
+        // Keep the listed nodes bound so description/name stay populated.
+        PwObjectTracker { objects: picker.devices }
+
         Repeater {
-            model: PwObjectTracker {
-                objects: (Pipewire.nodes?.values ?? []).filter(n =>
-                    n.mediaClass === (sink ? "Audio/Sink" : "Audio/Source"))
-            }
+            model: picker.devices
 
             delegate: Rectangle {
+                id: devRow
                 required property var modelData
-                readonly property bool isDefault: sink
+                readonly property bool isDefault: picker.sink
                     ? (Pipewire.defaultAudioSink?.id === modelData.id)
                     : (Pipewire.defaultAudioSource?.id === modelData.id)
 
-                width: parent ? parent.width : 0
+                width: picker.width
                 height: 26
                 radius: 6
                 color: isDefault
@@ -80,14 +87,14 @@ Item {
                     spacing: 6
 
                     Text {
-                        text: parent.parent.isDefault ? "" : ""
-                        color: parent.parent.isDefault ? Theme.accent : Theme.grayDim
+                        text: devRow.isDefault ? "" : ""
+                        color: devRow.isDefault ? Theme.accent : Theme.grayDim
                         font.pixelSize: 11
                         font.family: Theme.font
                     }
                     Text {
                         text: modelData.description ?? modelData.nickname ?? modelData.name ?? "?"
-                        color: parent.parent.isDefault ? Theme.fg : Theme.gray
+                        color: devRow.isDefault ? Theme.fg : Theme.gray
                         font.pixelSize: 11
                         font.family: Theme.font
                         Layout.fillWidth: true
@@ -101,8 +108,8 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (sink) Pipewire.preferredDefaultAudioSink = modelData
-                        else      Pipewire.preferredDefaultAudioSource = modelData
+                        if (picker.sink) Pipewire.preferredDefaultAudioSink = modelData
+                        else             Pipewire.preferredDefaultAudioSource = modelData
                     }
                 }
             }
@@ -361,9 +368,17 @@ Item {
         // ── Per-stream volumes ──────────────────────────────────────────────────
         // Shows output streams (apps playing audio)
         Column {
+            id: appsCol
             width: parent.width
             spacing: 6
             visible: streamRepeater.count > 0
+
+            // Output streams (apps producing sound). Plain array model; the
+            // tracker keeps each stream's audio sub-object live for the slider.
+            readonly property var streams: (Pipewire.nodes?.values ?? []).filter(n =>
+                n && n.mediaClass === "Stream/Output/Audio")
+
+            PwObjectTracker { objects: appsCol.streams }
 
             Rectangle { width: parent.width; height: 1; color: Theme.border }
 
@@ -377,12 +392,7 @@ Item {
 
             Repeater {
                 id: streamRepeater
-                // Filter to output audio streams (apps producing sound)
-                model: PwObjectTracker {
-                    objects: (Pipewire.nodes?.values ?? []).filter(n =>
-                        n.mediaClass === "Stream/Output/Audio" && n.isSink
-                    )
-                }
+                model: appsCol.streams
 
                 delegate: SliderRow {
                     required property var modelData
