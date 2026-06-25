@@ -18,12 +18,36 @@ Item {
     property bool hasGpu:   false
     property real gpu:      0
     property int  gpuTemp:  0
+    property var  fans:     []   // [{label, rpm}] from lm_sensors
 
-    onVisibleChanged: if (visible) poll.running = true
+    onVisibleChanged: if (visible) { poll.running = true; pollSensors.running = true }
     Timer {
         interval: 2000; repeat: true
         running: root.visible
-        onTriggered: if (!poll.running) poll.running = true
+        onTriggered: {
+            if (!poll.running) poll.running = true
+            if (!pollSensors.running) pollSensors.running = true
+        }
+    }
+
+    // Fan RPMs via lm_sensors. `sensors -u` is line-based (no jq needed); skip
+    // headers reading 0 so disconnected fan connectors don't clutter the list.
+    Process {
+        id: pollSensors
+        command: ["bash", "-c",
+            "command -v sensors >/dev/null 2>&1 && sensors -u 2>/dev/null | " +
+            "awk '/fan[0-9]+_input:/{name=$1; sub(/_input:/,\"\",name); rpm=int($2); if(rpm>0) print name, rpm}'"]
+        property var accum: []
+        stdout: SplitParser {
+            onRead: (line) => {
+                var p = line.trim().split(/\s+/)
+                if (p.length < 2) return
+                var rpm = parseInt(p[1])
+                if (isNaN(rpm)) return
+                pollSensors.accum.push({ label: p[0], rpm: rpm })
+            }
+        }
+        onRunningChanged: { if (running) accum = []; else { root.fans = accum; accum = [] } }
     }
 
     Process {
@@ -171,6 +195,45 @@ fi
             valueText: Math.round(root.gpu * 100) + "%   " + root.gpuTemp + "°C"
             frac: root.gpu
             barColor: Theme.green
+        }
+
+        // ── Fans ──────────────────────────────────────────────────────────────
+        Column {
+            width: parent.width
+            spacing: 6
+            visible: root.fans.length > 0
+
+            Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+            Text {
+                text: "Fans"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            Repeater {
+                model: root.fans
+
+                delegate: RowLayout {
+                    required property var modelData
+                    width: content.width
+                    Text {
+                        text: "󰈐 " + modelData.label
+                        color: Theme.fg
+                        font.pixelSize: 12
+                        font.family: Theme.font
+                        Layout.fillWidth: true
+                    }
+                    Text {
+                        text: modelData.rpm + " RPM"
+                        color: Theme.gray
+                        font.pixelSize: 11
+                        font.family: Theme.font
+                    }
+                }
+            }
         }
     }
 }

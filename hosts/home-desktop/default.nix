@@ -292,6 +292,11 @@
       '';
     };
 
+  # ── DDC/CI ───────────────────────────────────────────────────────────────────
+  # Loads i2c-dev and grants i2c-bus access (the "i2c" group / seat users) so the
+  # Quickshell Display tab can drive external-monitor brightness via ddcutil.
+  hardware.i2c.enable = true;
+
   boot = {
     # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ─────────────────────
     # Mainline it87 doesn't support this chip; the out-of-tree driver does.

@@ -133,6 +133,7 @@ in
     brightnessctl
     grimblast
     hyprpicker # eyedropper colour picker (Super+Shift+P → color-picker.sh)
+    ddcutil # external-monitor brightness over DDC/CI (Quickshell Display tab)
     pavucontrol
     pamixer
     pulseaudio

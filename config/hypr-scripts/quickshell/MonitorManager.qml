@@ -16,7 +16,69 @@ Item {
     property string selRes:     ""   // "2560x1440"
     property real   selRefresh: 0
 
+    // External-monitor brightness over DDC/CI (ddcutil). Empty for displays
+    // without DDC support (laptop eDP, some GPUs) — the section hides itself.
+    property var ddcDisplays: []     // [{bus, model, max, brightness}]
+
     Process { id: setMonitor; command: [] }
+
+    onVisibleChanged: if (visible) pollDdc.running = true
+
+    // Enumerate DDC displays and read each one's brightness (VCP feature 0x10)
+    // in a single pass. Slow (~1-2s) so it only runs when the tab opens.
+    Process {
+        id: pollDdc
+        command: ["bash", "-c",
+            "command -v ddcutil >/dev/null 2>&1 || exit 0; " +
+            "ddcutil detect --brief 2>/dev/null | awk '" +
+            "  /^Display/{b=\"\";m=\"\"} " +
+            "  /I2C bus/{n=$0; sub(/.*i2c-/,\"\",n); sub(/[^0-9].*/,\"\",n); b=n} " +
+            "  /Monitor:/{m=$0; sub(/.*Monitor:[ \\t]*/,\"\",m)} " +
+            "  b!=\"\"&&m!=\"\"{print b\"|\"m; b=\"\";m=\"\"}' | " +
+            "while IFS='|' read -r bus model; do " +
+            "  vcp=$(ddcutil --bus \"$bus\" getvcp 10 --brief 2>/dev/null); " +
+            "  cur=$(printf '%s' \"$vcp\" | awk '{print $4}'); " +
+            "  max=$(printf '%s' \"$vcp\" | awk '{print $5}'); " +
+            "  [ -z \"$cur\" ] && continue; " +
+            "  name=$(printf '%s' \"$model\" | awk -F: '{print ($2!=\"\"?$2:$1)}'); " +
+            "  echo \"$bus|$name|$cur|${max:-100}\"; " +
+            "done"]
+        property var accum: []
+        stdout: SplitParser {
+            onRead: (line) => {
+                if (line.trim() === "") return
+                var p = line.split("|")
+                if (p.length < 4) return
+                var max = parseInt(p[3]) || 100
+                var cur = parseInt(p[2]) || 0
+                pollDdc.accum.push({
+                    bus: parseInt(p[0]), model: (p[1] || ("Bus " + p[0])).trim(),
+                    max: max, brightness: cur / max
+                })
+            }
+        }
+        onRunningChanged: { if (running) accum = []; else { root.ddcDisplays = accum; accum = [] } }
+    }
+
+    // Debounced brightness write — dragging a slider fires continuously, but a
+    // ddcutil setvcp takes ~200ms, so coalesce to the last value.
+    property int _ddcBus: -1
+    property int _ddcVal: 0
+    Process { id: setDdc; command: [] }
+    Timer {
+        id: ddcDebounce
+        interval: 200
+        onTriggered: {
+            if (root._ddcBus < 0) return
+            setDdc.command = ["ddcutil", "--bus", String(root._ddcBus), "setvcp", "10", String(root._ddcVal)]
+            setDdc.running = true
+        }
+    }
+    function setDdcBrightness(bus, frac, max) {
+        root._ddcBus = bus
+        root._ddcVal = Math.round(Math.max(0, Math.min(1, frac)) * max)
+        ddcDebounce.restart()
+    }
 
     onSelectedMonitorChanged: {
         if (selectedMonitor) {
@@ -313,6 +375,38 @@ Item {
             font.pixelSize: 12
             font.family: Theme.font
             Layout.alignment: Qt.AlignHCenter
+        }
+
+        // ── External brightness (DDC/CI) ──────────────────────────────────
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 4
+            visible: root.ddcDisplays.length > 0
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
+
+            Text {
+                text: "Brightness"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            Repeater {
+                model: root.ddcDisplays
+
+                delegate: SliderRow {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    label: modelData.model
+                    value: modelData.brightness   // initial; drag overrides
+                    onMoved: (v) => {
+                        value = v
+                        root.setDdcBrightness(modelData.bus, v, modelData.max)
+                    }
+                }
+            }
         }
 
         Item { Layout.fillHeight: true }
