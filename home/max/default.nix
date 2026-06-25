@@ -15,6 +15,7 @@
     ./cli.nix
     ./desktop.nix
     ./packages.nix
+    ./terminal-toys.nix
     inputs.nix-index-database.homeModules.nix-index
   ];
 

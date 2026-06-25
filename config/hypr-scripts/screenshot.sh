@@ -333,14 +333,16 @@ if [ "$FULL_MODE" = true ] || [ -n "$GEOMETRY" ]; then
     [ -n "$GEOMETRY" ] && GRIM_CMD="grim -g \"$GEOMETRY\" -"
 
     if [ "$EDIT_MODE" = true ]; then
-        eval "$GRIM_CMD" | GSK_RENDERER=gl satty --filename - --output-filename "$FILENAME" --init-tool brush --copy-command wl-copy
+        eval "$GRIM_CMD" | GSK_RENDERER=gl satty --filename - --output-filename "$FILENAME" --init-tool brush --copy-command 'wl-copy --type image/png'
     else
-        eval "$GRIM_CMD" | tee "$FILENAME" | wl-copy
+        # tee to disk, then copy with an explicit MIME type so apps recognise it
+        # as an image (bare wl-copy offers PNG bytes as application/octet-stream).
+        eval "$GRIM_CMD" | tee "$FILENAME" | wl-copy --type image/png
     fi
 
     if [ -s "$FILENAME" ]; then
         (
-            ACTION=$(notify-send -a "Screenshot" -i "$FILENAME" -A "default=Open Folder" "Screenshot Saved" "File: Screenshot_$time.png\nFolder: $SAVE_DIR")
+            ACTION=$(notify-send -a "Screenshot" -i "$FILENAME" -h "string:image-path:$FILENAME" -A "default=Open Folder" "Screenshot Saved" "File: Screenshot_$time.png\nFolder: $SAVE_DIR")
             if [ "$ACTION" = "default" ]; then
                 if command -v nautilus &> /dev/null; then
                     nautilus "$SAVE_DIR"

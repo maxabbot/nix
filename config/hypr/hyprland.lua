@@ -153,6 +153,7 @@ hl.window_rule({ match = { title = "Picture-in-Picture" }, float = true })
 
 -- Opacity
 hl.window_rule({ match = { class = "kitty" },        opacity = "0.90 override 0.90 override" })
+hl.window_rule({ match = { class = "cava" },         opacity = "1.0 override 1.0 override" })
 hl.window_rule({ match = { class = "firefox" },      opacity = "1.0 override 1.0 override" })
 hl.window_rule({ match = { class = "chromium" },     opacity = "1.0 override 1.0 override" })
 hl.window_rule({ match = { class = "google-chrome" },opacity = "1.0 override 1.0 override" })
@@ -169,6 +170,8 @@ hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd(apps.terminal),             
 hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd("thunar"),                        { description = "Apps | Files" })
 hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd(apps.browser),                    { description = "Apps | Browser" })
 hl.bind(mainMod .. " + D",          hl.dsp.exec_cmd("fuzzel"),                        { description = "Apps | Launcher" })
+-- cava audio visualiser — opens on workspace 4 (spare/secondary monitor) without stealing focus
+hl.bind(mainMod .. " + SHIFT + C",  hl.dsp.exec_cmd("[workspace 4 silent] kitty --class cava -e cava"), { description = "Apps | Cava visualiser" })
 
 -- Window management
 hl.bind(mainMod .. " + Q",         hl.dsp.window.kill(),                                              { description = "Window | Close" })

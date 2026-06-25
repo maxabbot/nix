@@ -43,30 +43,69 @@ let
   portraitOutputs = map (s: lib.head (lib.splitString "," s)) (lib.filter isPortrait monitorStrings);
   hasPortrait = portraitOutputs != [ ];
 
-  sysinfo-script = pkgs.writeShellScript "waybar-sysinfo" ''
+  # CPU package temperature as JSON so the capsule can carry a threshold class
+  # (warning ≥70, critical ≥80). Thermal zone is matched by type rather than a
+  # fixed index, which drifts between kernels/hardware.
+  temp-script = pkgs.writeShellScript "waybar-temp" ''
     set -euo pipefail
-    read -r a1 t1 < <(awk '/^cpu /{print $2+$4, $2+$3+$4+$5+$6+$7+$8}' /proc/stat)
-    sleep 0.5
-    read -r a2 t2 < <(awk '/^cpu /{print $2+$4, $2+$3+$4+$5+$6+$7+$8}' /proc/stat)
-    cpu=$(( (a2-a1)*100/(t2-t1) ))
-    mem=$(awk '/MemTotal/{t=$2}/MemAvailable/{a=$2}END{printf "%d",100*(t-a)/t}' /proc/meminfo)
-    # Find the CPU package thermal zone by type rather than a fixed index,
-    # which drifts between kernels/hardware.
     temp_raw=0
     for z in /sys/class/thermal/thermal_zone*; do
       case "$(cat "$z/type" 2>/dev/null)" in
         x86_pkg_temp|k10temp|coretemp) temp_raw=$(cat "$z/temp" 2>/dev/null || echo 0); break ;;
       esac
     done
-    temp=$(( temp_raw / 1000 ))
-    echo "CPU ''${cpu}% MEM ''${mem}% ''${temp}°C"
+    t=$(( temp_raw / 1000 ))
+    cls=""
+    if   [ "$t" -ge 80 ]; then cls="critical"
+    elif [ "$t" -ge 70 ]; then cls="warning"
+    fi
+    printf '{"text":"󰔏 %s°","class":"%s","tooltip":"CPU package %s°C"}\n' "$t" "$cls" "$t"
   '';
 
+  # GPU utilisation with the same threshold logic (≥70 / ≥90); GPU temperature
+  # rides along in the tooltip.
   gpu-script = pkgs.writeShellScript "waybar-gpu" ''
     set -euo pipefail
-    usage=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo "?")
-    temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo "?")
-    echo "GPU ''${usage}% ''${temp}°C"
+    read -r usage temp < <(nvidia-smi --query-gpu=utilization.gpu,temperature.gpu \
+      --format=csv,noheader,nounits 2>/dev/null | tr -d ' ' | tr ',' ' ') || true
+    usage=''${usage:-?}
+    temp=''${temp:-?}
+    cls=""
+    if [ "$usage" != "?" ]; then
+      if   [ "$usage" -ge 90 ]; then cls="critical"
+      elif [ "$usage" -ge 70 ]; then cls="warning"
+      fi
+    fi
+    printf '{"text":"󰢮 %s","class":"%s","tooltip":"GPU %s%% · %s°C"}\n' "$usage" "$cls" "$usage" "$temp"
+  '';
+
+  # Mic indicator that stays hidden while idle+unmuted (waybar hides a custom
+  # module on empty output): red glyph when muted, green while a stream records.
+  mic-script = pkgs.writeShellScript "waybar-mic" ''
+    set -euo pipefail
+    if wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q MUTED; then
+      printf '{"text":"󰍭","class":"muted","tooltip":"Microphone muted"}\n'
+      exit 0
+    fi
+    # Real capture uses normal sample rates; UI peak/level meters run at the
+    # display refresh (60–144Hz), so only count streams at >=8000Hz as in-use.
+    hz_max=$(pactl list short source-outputs 2>/dev/null \
+      | grep -oE '[0-9]+Hz' | tr -dc '0-9\n' | sort -n | tail -1)
+    if [ "''${hz_max:-0}" -ge 8000 ]; then
+      printf '{"text":"󰍬","class":"active","tooltip":"Microphone in use"}\n'
+    else
+      printf '\n'
+    fi
+  '';
+
+  # Disk usage that only surfaces above 85% (amber), 95% (red); empty otherwise.
+  disk-script = pkgs.writeShellScript "waybar-disk" ''
+    set -euo pipefail
+    used=$(df --output=pcent / | tail -1 | tr -dc '0-9')
+    if [ "''${used:-0}" -lt 85 ]; then printf '\n'; exit 0; fi
+    cls="warning"
+    if [ "$used" -ge 95 ]; then cls="critical"; fi
+    printf '{"text":"󰋊 %s","class":"%s","tooltip":"Disk %s%% used"}\n' "$used" "$cls" "$used"
   '';
 
   # Bell + unread count. Quickshell's Shell.qml writes the count file and pokes
@@ -127,10 +166,10 @@ let
     };
 
     bluetooth = {
-      format = "BT";
+      format = "󰂯";
       format-disabled = "";
       format-off = "";
-      format-connected = "BT {device_alias}";
+      format-connected = "󰂱";
       tooltip-format = "{controller_alias}\t{controller_address}\n\n{num_connections} connected";
       tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}";
       tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
@@ -140,34 +179,63 @@ let
 
     clock = {
       timezone = osConfig.time.timeZone;
-      format = "{:%H:%M  %b %d}";
+      format = "󰥔 {:%H:%M}";
       tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-      format-alt = "{:%Y-%m-%d}";
+      format-alt = "󰃭 {:%a %d %b}";
     };
 
-    disk = {
-      interval = 30;
-      format = "DISK {percentage_used}%";
-      path = "/";
-      tooltip-format = "{used} / {total}";
+    cpu = {
+      interval = 2;
+      format = "󰻠 {usage}";
+      states = {
+        warning = 70;
+        critical = 90;
+      };
       on-click = "${qs} toggle settings sysinfo";
       on-click-right = "kitty -e btop";
     };
 
-    "custom/sysinfo" = {
-      exec = "${sysinfo-script}";
+    memory = {
       interval = 2;
-      tooltip = false;
+      format = "󰍛 {percentage}";
+      states = {
+        warning = 75;
+        critical = 90;
+      };
+      on-click = "${qs} toggle settings sysinfo";
+      on-click-right = "kitty -e btop";
+    };
+
+    "custom/temp" = {
+      exec = "${temp-script}";
+      return-type = "json";
+      interval = 2;
       on-click = "${qs} toggle settings sysinfo";
       on-click-right = "kitty -e btop";
     };
 
     "custom/gpu" = {
       exec = "${gpu-script}";
+      return-type = "json";
       interval = 2;
-      tooltip = false;
       on-click = "${qs} toggle settings sysinfo";
       on-click-right = "kitty -e btop";
+    };
+
+    "custom/disk" = {
+      exec = "${disk-script}";
+      return-type = "json";
+      interval = 30;
+      on-click = "${qs} toggle settings sysinfo";
+      on-click-right = "kitty -e btop";
+    };
+
+    "custom/mic" = {
+      exec = "${mic-script}";
+      return-type = "json";
+      interval = 2;
+      on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+      on-click-right = "${qs} toggle settings audio";
     };
 
     battery = {
@@ -190,32 +258,35 @@ let
     };
 
     network = {
-      format-wifi = "WiFi: {essid} ({signalStrength}%)";
-      format-ethernet = "ETH: {ipaddr}/{cidr}";
-      tooltip-format = "{ifname} via {gwaddr}";
-      format-linked = "{ifname} (No IP)";
-      format-disconnected = "Disconnected";
+      format-wifi = "󰖩 {signalStrength}";
+      format-ethernet = "󰈀";
+      format-linked = "󰈁";
+      format-disconnected = "󰖪";
+      tooltip-format-wifi = "{essid} ({signalStrength}%)\n{ifname} via {gwaddr}";
+      tooltip-format-ethernet = "{ifname}: {ipaddr}/{cidr}";
+      tooltip-format-linked = "{ifname} (no IP)";
+      tooltip-format-disconnected = "Disconnected";
       on-click = "${qs} toggle settings control";
       on-click-right = "nm-connection-editor";
     };
 
     pulseaudio = {
       scroll-step = 5;
-      format = "VOL {volume}%";
-      format-bluetooth = "BT {volume}%";
-      format-bluetooth-muted = "BT muted";
-      format-muted = "muted";
+      format = "{icon} {volume}";
+      format-bluetooth = "󰂯 {volume}";
+      format-bluetooth-muted = "󰂲";
+      format-muted = "󰝟";
+      format-icons = {
+        default = [
+          "󰕿"
+          "󰖀"
+          "󰕾"
+        ];
+        headphone = "󰋋";
+        headset = "󰋎";
+      };
       on-click = "${qs} toggle settings audio";
       on-click-right = "pavucontrol";
-    };
-
-    "pulseaudio#source" = {
-      format = "{format_source}";
-      format-source = "MIC {volume}%";
-      format-source-muted = "MIC muted";
-      on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-      on-click-right = "${qs} toggle settings audio";
-      scroll-step = 5;
     };
 
     mpris = {
@@ -272,27 +343,47 @@ let
       height = 34;
       spacing = 4;
 
+      # ── Capsule groups: related stats share one rounded background ───────────
+      "group/media" = {
+        orientation = "horizontal";
+        modules = [ "mpris" ];
+      };
+      "group/system" = {
+        orientation = "horizontal";
+        # Gate the GPU on the nvidia flag, not machineType — the VM is
+        # machineType "desktop" but has no GPU, so nvidia-smi would show "?".
+        modules = [
+          "cpu"
+          "memory"
+          "custom/temp"
+        ]
+        ++ lib.optional cfg.nvidia "custom/gpu";
+      };
+      "group/connectivity" = {
+        orientation = "horizontal";
+        modules = [
+          "custom/mic"
+          "pulseaudio"
+          "bluetooth"
+          "network"
+        ];
+      };
+
       "modules-left" = [
         "hyprland/workspaces"
         winModule
       ];
       "modules-center" = [ "clock" ];
       "modules-right" = [
-        "mpris"
-        "tray"
-        "idle_inhibitor"
-        "bluetooth"
-        "pulseaudio"
-        "pulseaudio#source"
-        "network"
-        "disk"
-        "custom/sysinfo"
+        "group/media"
+        "group/system"
+        "custom/disk"
+        "group/connectivity"
       ]
-      # Gate on the nvidia flag, not machineType — the VM is machineType
-      # "desktop" but has no GPU, so nvidia-smi would show "GPU ?% ?°C".
-      ++ lib.optional cfg.nvidia "custom/gpu"
       ++ lib.optional (machineType == "laptop") "battery"
       ++ [
+        "idle_inhibitor"
+        "tray"
         "custom/rebuild"
         "custom/keybinds"
         "custom/notifications"
@@ -348,6 +439,9 @@ in
       settings = [ mainBar ] ++ lib.optional hasPortrait slimBar;
 
       style = ''
+        /* Gruvbox Material Dark — bg0 #1d2021, bg_s #3c3836, fg #d4be98,
+           gray #928374, red #ea6962, orange #e78a4e, yellow #d8a657,
+           green #a9b665, aqua #89b482, blue #7daea3 */
         * {
           border: none;
           border-radius: 0;
@@ -357,54 +451,76 @@ in
         }
 
         window#waybar {
-          background: rgba(40, 40, 40, 0.9);
+          background: rgba(29, 32, 33, 0.92);
           color: #d4be98;
         }
 
         #window {
-          padding: 0 10px;
+          padding: 0 12px;
           color: #d4be98;
           font-weight: bold;
         }
 
+        /* ── Capsules: groups + standalone modules share one rounded bg ──────── */
+        #media,
+        #system,
+        #connectivity,
         #clock,
+        #custom-disk,
         #battery,
-        #custom-sysinfo,
-        #custom-gpu,
+        #idle_inhibitor,
         #custom-notifications,
         #custom-rebuild,
         #custom-keybinds,
-        #custom-settings,
-        #mpris,
-        #disk,
-        #network,
-        #pulseaudio,
-        #bluetooth,
-        #tray,
-        #idle_inhibitor {
-          padding: 0 10px;
-          margin: 5px 0px;
+        #custom-settings {
           background: #3c3836;
           border-radius: 8px;
+          margin: 5px 0;
+          padding: 0 10px;
         }
 
+        /* Group capsules let their children supply the inner horizontal spacing
+           so adjacent stats read as one unit. */
+        #media,
+        #system,
+        #connectivity {
+          padding: 0 4px;
+        }
+        #cpu,
+        #memory,
+        #custom-temp,
+        #custom-gpu,
+        #custom-mic,
+        #pulseaudio,
+        #bluetooth,
+        #network,
+        #mpris {
+          background: transparent;
+          padding: 0 7px;
+          color: #d4be98;
+        }
+
+        /* ── Workspace pills ─────────────────────────────────────────────────── */
         #workspaces {
-          margin: 5px 0px;
+          margin: 5px 0;
           background: #3c3836;
           border-radius: 8px;
+          padding: 0 2px;
         }
         #workspaces button {
+          min-width: 18px;
           padding: 0 8px;
-          color: #7c6f64;
+          margin: 3px 2px;
+          color: #928374;
           background: transparent;
-          border-radius: 8px;
+          border-radius: 6px;
         }
         #workspaces button.active {
-          color: #282828;
-          background: #d8a657;
+          color: #1d2021;
+          background: #e78a4e;
         }
         #workspaces button.urgent {
-          color: #282828;
+          color: #1d2021;
           background: #ea6962;
         }
         #workspaces button:hover {
@@ -412,14 +528,68 @@ in
           background: #504945;
         }
 
-        #clock {
+        /* ── Threshold states (neutral cream until they matter) ──────────────── */
+        #cpu.warning,
+        #memory.warning,
+        #custom-temp.warning,
+        #custom-gpu.warning,
+        #custom-disk.warning {
           color: #d8a657;
+        }
+        #cpu.critical,
+        #memory.critical,
+        #custom-temp.critical,
+        #custom-gpu.critical,
+        #custom-disk.critical {
+          color: #ea6962;
+        }
+        #custom-disk {
+          color: #d8a657;
+        }
+
+        /* ── Per-module accents ──────────────────────────────────────────────── */
+        #clock {
+          color: #7daea3;
           font-weight: bold;
         }
-        #battery {
+        #mpris {
           color: #a9b665;
         }
-        #battery.charging {
+        #pulseaudio {
+          color: #7daea3;
+        }
+        #pulseaudio.muted {
+          color: #928374;
+        }
+        #custom-mic.active {
+          color: #a9b665;
+        }
+        #custom-mic.muted {
+          color: #ea6962;
+        }
+        #network {
+          color: #89b482;
+        }
+        #network.disconnected {
+          color: #ea6962;
+        }
+        #network.linked {
+          color: #d8a657;
+        }
+        #bluetooth {
+          color: #7daea3;
+        }
+        #bluetooth.connected {
+          color: #89b482;
+        }
+        #idle_inhibitor {
+          color: #d4be98;
+        }
+        #idle_inhibitor.activated {
+          color: #a9b665;
+        }
+
+        #battery {
           color: #a9b665;
         }
         #battery.warning:not(.charging) {
@@ -429,24 +599,14 @@ in
           color: #ea6962;
           animation: blink 1s linear infinite;
         }
-        #custom-sysinfo {
-          color: #d3869b;
-        }
-        #custom-gpu {
-          color: #e78a4e;
-        }
-        #mpris {
-          color: #89b482;
-        }
+
         #custom-notifications {
           color: #d4be98;
         }
         #custom-notifications.has-notifs {
           color: #ea6962;
         }
-        #custom-keybinds {
-          color: #d4be98;
-        }
+        #custom-keybinds,
         #custom-settings {
           color: #d4be98;
         }
@@ -454,37 +614,7 @@ in
           color: #d8a657;
           animation: pulse 1.2s ease-in-out infinite;
         }
-        #disk {
-          color: #7daea3;
-        }
-        #network {
-          color: #89b482;
-        }
-        #network.disconnected {
-          color: #ea6962;
-        }
-        #pulseaudio {
-          color: #d8a657;
-        }
-        #pulseaudio.muted {
-          color: #7c6f64;
-        }
-        #pulseaudio.source {
-          color: #83a598;
-        }
-        #pulseaudio.source.source-muted {
-          color: #7c6f64;
-        }
-        #bluetooth {
-          color: #7daea3;
-        }
-        #bluetooth.disabled,
-        #bluetooth.off {
-          color: #7c6f64;
-        }
-        #bluetooth.connected {
-          color: #89b482;
-        }
+
         #tray {
           background: transparent;
         }
@@ -494,19 +624,12 @@ in
         #tray > .needs-attention {
           -gtk-icon-effect: highlight;
         }
-        #idle_inhibitor {
-          color: #d4be98;
-        }
-        #idle_inhibitor.activated {
-          color: #a9b665;
-        }
 
         @keyframes blink {
           to {
-            color: #282828;
+            color: #1d2021;
           }
         }
-
         @keyframes pulse {
           50% {
             color: #504945;

@@ -132,6 +132,10 @@
         zen = "zen-beta";
         chrome = "google-chrome-stable";
 
+        # Ambient / weather (no install — hits wttr.in)
+        wttr = "curl -s 'wttr.in/?F'";
+        weather = "curl -s 'wttr.in/?F'";
+        spt = "spotify_player";
       };
 
       initContent = ''
@@ -351,6 +355,20 @@
       enable = true;
       enableZshIntegration = true;
       options = [ "--cmd cd" ];
+    };
+
+    # ── atuin (SQLite-backed shell history, fuzzy Ctrl-R) ──────────────────────────
+    atuin = {
+      enable = true;
+      enableZshIntegration = true;
+      # Keep the existing up-arrow history-substring-search binding; atuin takes Ctrl-R.
+      flags = [ "--disable-up-arrow" ];
+      settings = {
+        style = "compact";
+        inline_height = 25;
+        show_preview = true;
+        update_check = false;
+      };
     };
 
     # ── tmux ───────────────────────────────────────────────────────────────────────
