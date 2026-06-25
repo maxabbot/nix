@@ -131,7 +131,11 @@ handle_wallpaper_prep() {
     ) </dev/null >/dev/null 2>&1 &
 }
 
-handle_network_prep() {
+handle_wifi_prep() {
+    (nmcli device wifi rescan) >/dev/null 2>&1 &
+}
+
+handle_bt_prep() {
     # Kill any previous scanner first — repeated toggles must not leak them
     if [ -f "$BT_PID_FILE" ]; then
         kill "$(cat "$BT_PID_FILE")" 2>/dev/null
@@ -139,7 +143,6 @@ handle_network_prep() {
     echo "" > "$BT_SCAN_LOG"
     { echo "scan on"; sleep infinity; } | stdbuf -oL bluetoothctl > "$BT_SCAN_LOG" 2>&1 &
     echo $! > "$BT_PID_FILE"
-    (nmcli device wifi rescan) >/dev/null 2>&1 &
 }
 
 # -----------------------------------------------------------------------------
@@ -147,13 +150,12 @@ handle_network_prep() {
 # -----------------------------------------------------------------------------
 if [[ "$ACTION" == "close" ]]; then
     quickshell -p "$SHELL_QML_PATH" ipc call main handleCommand "close" "" "" >/dev/null 2>&1
-    if [[ "$TARGET" == "network" || "$TARGET" == "all" || -z "$TARGET" ]]; then
-        if [ -f "$BT_PID_FILE" ]; then
-            kill "$(cat "$BT_PID_FILE")" 2>/dev/null
-            rm -f "$BT_PID_FILE"
-        fi
-        (bluetoothctl scan off > /dev/null 2>&1) &
+    # Always tear down a lingering Bluetooth scan (started by the Bluetooth tab).
+    if [ -f "$BT_PID_FILE" ]; then
+        kill "$(cat "$BT_PID_FILE")" 2>/dev/null
+        rm -f "$BT_PID_FILE"
     fi
+    (bluetoothctl scan off > /dev/null 2>&1) &
     exit 0
 fi
 
@@ -163,10 +165,11 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
     # inside Shell.qml's IPC handler.
     PREP_TAB="$TARGET"
     [[ "$TARGET" == "settings" ]] && PREP_TAB="$SUBTARGET"
-    [[ "$TARGET" == "network" ]] && PREP_TAB="control"
 
-    if [[ "$PREP_TAB" == "control" ]]; then
-        handle_network_prep
+    if [[ "$PREP_TAB" == "network" ]]; then
+        handle_wifi_prep
+    elif [[ "$PREP_TAB" == "bluetooth" ]]; then
+        handle_bt_prep
     elif [[ "$PREP_TAB" == "wallpaper" ]]; then
         handle_wallpaper_prep
     fi

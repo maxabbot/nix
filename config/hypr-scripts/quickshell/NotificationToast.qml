@@ -38,10 +38,11 @@ Rectangle {
         anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
         spacing: 10
 
-        // Preview thumbnail — screenshots set the image-path hint; clip to a
-        // rounded square. Hidden when the notification carries no image.
+        // Preview thumbnail — screenshots set the image-path hint, which
+        // Quickshell exposes via notification.image as a ready-to-use
+        // image://icon/<path> URL. Hidden when the notification has no image.
         Rectangle {
-            visible: preview.src !== ""
+            visible: root.notification.image !== ""
             Layout.preferredWidth: 52
             Layout.preferredHeight: 52
             Layout.alignment: Qt.AlignTop
@@ -50,11 +51,8 @@ Rectangle {
             clip: true
 
             Image {
-                id: preview
-                // Absolute paths need a file:// scheme; image:// URLs pass through.
-                readonly property string src: root.notification.image
                 anchors.fill: parent
-                source: src === "" ? "" : (src.charAt(0) === "/" ? "file://" + src : src)
+                source: root.notification.image
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: false

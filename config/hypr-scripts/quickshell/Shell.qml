@@ -24,7 +24,7 @@ ShellRoot {
     property bool   dndEnabled:     false
     property bool   rebuildRunning: false
 
-    readonly property var settingsTabs: ["control", "audio", "monitors", "wallpaper", "sysinfo", "nix"]
+    readonly property var settingsTabs: ["control", "network", "bluetooth", "audio", "monitors", "wallpaper", "theme", "keyboard", "input", "battery", "sysinfo", "nix"]
 
     // Click-off dismissal grace: a Waybar button press first breaks the focus
     // grab (closing the panel), then the button's toggle fires on release —
@@ -54,9 +54,6 @@ ShellRoot {
             } else if (root.settingsTabs.indexOf(target) >= 0) {
                 tgt = "settings"
                 tab = target
-            } else if (target === "network") {   // legacy target — Wi-Fi lives on the Control tab
-                tgt = "settings"
-                tab = "control"
             }
 
             if (tgt === "settings") {
@@ -89,6 +86,11 @@ ShellRoot {
         bodySupported: true
         imageSupported: true
         persistenceSupported: true
+
+        // Quickshell discards every incoming notification unless the handler
+        // marks it tracked — without this, trackedNotifications stays empty and
+        // no toast ever appears.
+        onNotification: notification => notification.tracked = true
     }
 
     // ── Waybar state bridge ────────────────────────────────────────────────────

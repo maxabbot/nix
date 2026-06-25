@@ -32,9 +32,15 @@ PanelWindow {
 
     readonly property var tabs: [
         { id: "control",   icon: "",  label: "Control"   },
+        { id: "network",   icon: "",  label: "Wi-Fi"     },
+        { id: "bluetooth", icon: "",  label: "Bluetooth" },
         { id: "audio",     icon: "",  label: "Audio"     },
         { id: "monitors",  icon: "󰍹",  label: "Monitors"  },
         { id: "wallpaper", icon: "󰸉",  label: "Wallpaper" },
+        { id: "theme",     icon: "󰏘",  label: "Theme"     },
+        { id: "keyboard",  icon: "",  label: "Keyboard"  },
+        { id: "input",     icon: "󰍽",  label: "Input"     },
+        { id: "battery",   icon: "󰁹",  label: "Battery"   },
         { id: "sysinfo",   icon: "󰍛",  label: "System"    },
         { id: "nix",       icon: "󱄅",  label: "Nix"       },
     ]
@@ -127,9 +133,15 @@ PanelWindow {
                     dndEnabled: root.dndEnabled
                     onDndToggled: root.dndToggled()
                 }
+                NetworkPanel { }
+                BluetoothPanel { }
                 AudioMixer { }
                 MonitorManager { }
                 WallpaperPicker { }
+                ThemePanel { }
+                KeyboardPanel { }
+                InputPanel { }
+                BatteryPanel { }
                 SysInfoPanel { }
                 NixPanel {
                     onRebuildStarted: root.rebuildStarted()

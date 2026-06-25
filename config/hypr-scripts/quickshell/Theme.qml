@@ -8,9 +8,31 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 
 Singleton {
     id: theme
+
+    // ── Optional palette override (Theme tab / matugen) ─────────────────────
+    // The Theme tab writes ~/.cache/quickshell/palette.json (e.g. generated from
+    // the wallpaper via matugen). A handful of high-impact tokens prefer it when
+    // present; everything falls back to the fixed Gruvbox Material palette, so a
+    // missing/empty file changes nothing. Read via a Process (no fatal errors on
+    // a missing file); ThemePanel calls reloadPalette() after writing.
+    property var palette: ({})
+    function reloadPalette() { paletteProc.running = true }
+
+    Process {
+        id: paletteProc
+        command: ["bash", "-c", "cat \"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell/palette.json\" 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { theme.palette = text ? JSON.parse(text) : ({}) }
+                catch (e) { theme.palette = ({}) }
+            }
+        }
+    }
+    Component.onCompleted: reloadPalette()
 
     // ── Helpers ─────────────────────────────────────────────────────────────
     // The QsScreen for the monitor that currently has focus, so bar-dropdown
@@ -30,12 +52,12 @@ Singleton {
 
     // ── Backgrounds (dark → light) ──────────────────────────────────────────
     readonly property color bgHard: "#1d2021"  // deepest — log/canvas/kbd wells
-    readonly property color bg:     "#282828"  // panel body
-    readonly property color bgAlt:  "#32302f"  // inputs, tiles, list rows
+    readonly property color bg:     palette.bg    ?? "#282828"  // panel body
+    readonly property color bgAlt:  palette.bgAlt ?? "#32302f"  // inputs, tiles, list rows
     readonly property color bgSoft: "#383432"  // hovered list row
 
     // ── Borders / separators / dark hovers ──────────────────────────────────
-    readonly property color border:       "#3c3836"
+    readonly property color border:       palette.border ?? "#3c3836"
     readonly property color borderStrong: "#504945"
 
     // ── Foreground text (dim → bright) ──────────────────────────────────────
@@ -43,13 +65,13 @@ Singleton {
     readonly property color gray:     "#928374"  // secondary text, muted icons
     readonly property color fgDim:    "#bdae93"  // body text
     readonly property color fgSoft:   "#d5c4a1"  // toast body
-    readonly property color fg:       "#d4be98"  // primary text & icons
+    readonly property color fg:       palette.fg ?? "#d4be98"  // primary text & icons
     readonly property color fgBright: "#ebdbb2"  // emphasised / bold text
 
     // ── Accent (aqua) and accent-tinted surfaces ────────────────────────────
-    readonly property color accent:        "#7daea3"
+    readonly property color accent:        palette.accent   ?? "#7daea3"
     readonly property color accentBright:  "#89b482"  // pressed slider handle
-    readonly property color accentBg:      "#2d4a52"  // active tile/button fill
+    readonly property color accentBg:      palette.accentBg ?? "#2d4a52"  // active tile/button fill
     readonly property color accentBgHover: "#3a5a62"  // active tile hovered
 
     // ── Status / syntax colours ─────────────────────────────────────────────

@@ -60,7 +60,8 @@ RowLayout {
     }
 
     Text {
-        text: Math.round(root.value * (root.unit === "%" ? 100 : root.to)) + root.unit
+        // "%" sliders carry a 0–1 fraction; other units carry an absolute value.
+        text: (root.unit === "%" ? Math.round(root.value * 100) : Math.round(root.value)) + root.unit
         color: Theme.fg
         font.pixelSize: 11
         font.family: Theme.font

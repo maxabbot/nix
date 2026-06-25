@@ -136,6 +136,8 @@ in
     pavucontrol
     pamixer
     pulseaudio
+    easyeffects # PipeWire EQ / effects (driven from the Quickshell Audio tab)
+    matugen # wallpaper → palette generation (Quickshell Theme tab)
     swayosd
     hypridle
     thunar
