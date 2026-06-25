@@ -53,6 +53,7 @@ PanelWindow {
         { id: "keyboard",  icon: "",  label: "Keyboard"  },
         { id: "input",     icon: "󰍽",  label: "Input"     },
         { id: "battery",   icon: "󰁹",  label: "Battery",   laptopOnly: true },
+        { id: "disks",     icon: "󰋊",  label: "Drives"    },
         { id: "sysinfo",   icon: "󰍛",  label: "System"    },
         { id: "nix",       icon: "󱄅",  label: "Nix"       },
     ]
@@ -157,6 +158,7 @@ PanelWindow {
                 KeyboardPanel { }
                 InputPanel { }
                 BatteryPanel { }
+                DiskPanel { }
                 SysInfoPanel { }
                 NixPanel {
                     onRebuildStarted: root.rebuildStarted()

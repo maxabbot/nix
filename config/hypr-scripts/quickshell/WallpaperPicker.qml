@@ -5,6 +5,7 @@
 // directory and displays them in a grid. Clicking a thumbnail applies the wallpaper.
 //
 // Video thumbnails are named 000_<original> — clicking them sets the mpvpaper source.
+import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
@@ -18,6 +19,19 @@ Item {
     property string thumbDir: ""
     property string srcDir: ""
     property string currentWallpaper: ""
+
+    // Target output for the next apply — "" means every monitor.
+    property string targetOutput: ""
+    readonly property bool multiMon: (Hyprland.monitors?.values.length ?? 0) > 1
+    readonly property var outputs: {
+        var l = ["All"]
+        if (Hyprland.monitors)
+            for (var i = 0; i < Hyprland.monitors.values.length; i++) {
+                var m = Hyprland.monitors.values[i]
+                if (m) l.push(m.name)
+            }
+        return l
+    }
 
     onVisibleChanged: {
         if (visible) {
@@ -76,15 +90,26 @@ Item {
 
     function applyWallpaper(srcName, isVideo) {
         var full = root.srcDir + "/" + srcName
+        var out = root.targetOutput
         if (isVideo) {
+            // mpvpaper output selector: '*' targets all monitors.
             applyProc.command = ["bash", "-c",
-                "pkill mpvpaper 2>/dev/null; mpvpaper -o 'no-audio loop' '*' '" + full + "' &"]
+                "pkill mpvpaper 2>/dev/null; mpvpaper -o 'no-audio loop' '" +
+                (out !== "" ? out : "*") + "' '" + full + "' &"]
         } else {
+            var outs = out !== "" ? "--outputs '" + out + "' " : ""
             applyProc.command = ["bash", "-c",
-                "awww img '" + full + "' --resize crop --transition-type wipe --transition-fps 60"]
+                "awww img " + outs + "'" + full + "' --resize crop --transition-type wipe --transition-fps 60"]
         }
         applyProc.running = true
-        root.currentWallpaper = srcName
+        // Only reflect "current" globally when applying to all outputs.
+        if (out === "") root.currentWallpaper = srcName
+    }
+
+    function applyRandom() {
+        if (thumbModel.count === 0) return
+        var m = thumbModel.get(Math.floor(Math.random() * thumbModel.count))
+        applyWallpaper(m.srcName, m.isVideo)
     }
 
     // ── UI ──────────────────────────────────────────────────────────────────────
@@ -109,6 +134,67 @@ Item {
                 font.family: Theme.font
                 elide: Text.ElideLeft
                 Layout.maximumWidth: 300
+            }
+        }
+
+        // Output selector (multi-monitor) + Random
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            Repeater {
+                model: root.multiMon ? root.outputs : []
+
+                delegate: Rectangle {
+                    required property var modelData
+                    readonly property bool sel:
+                        (modelData === "All" && root.targetOutput === "") || modelData === root.targetOutput
+
+                    implicitWidth: oLabel.implicitWidth + 16
+                    height: 26
+                    radius: 7
+                    color: sel ? Theme.accentBg : (oArea.containsMouse ? Theme.border : Theme.bgAlt)
+                    Behavior on color { ColorAnimation { duration: 80 } }
+
+                    Text {
+                        id: oLabel
+                        anchors.centerIn: parent
+                        text: modelData
+                        color: parent.sel ? Theme.accent : Theme.gray
+                        font.pixelSize: 10
+                        font.family: Theme.font
+                    }
+                    MouseArea {
+                        id: oArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.targetOutput = (modelData === "All" ? "" : modelData)
+                    }
+                }
+            }
+
+            Item { Layout.fillWidth: true }
+
+            Rectangle {
+                implicitWidth: randLabel.implicitWidth + 22
+                height: 26
+                radius: 7
+                color: randArea.containsMouse ? Theme.accentBgHover : Theme.accentBg
+                Behavior on color { ColorAnimation { duration: 80 } }
+                Row {
+                    anchors.centerIn: parent
+                    spacing: 5
+                    Text { text: "󰒲"; color: Theme.accent; font.pixelSize: 12; font.family: Theme.font }
+                    Text { id: randLabel; text: "Random"; color: Theme.fg; font.pixelSize: 11; font.family: Theme.font }
+                }
+                MouseArea {
+                    id: randArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.applyRandom()
+                }
             }
         }
 
