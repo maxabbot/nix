@@ -57,10 +57,15 @@
   # ── Bootloader ────────────────────────────────────────────────────────────────
   # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
   boot = {
-    # Portable USB drive: boot via the ESP fallback path (\EFI\BOOT\BOOTX64.EFI)
-    # instead of writing NVRAM entries on whatever machine it happens to be
+    # Portable USB drive: install to the ESP fallback path (\EFI\BOOT\BOOTX64.EFI)
+    # rather than writing NVRAM entries on whatever machine it happens to be
     # plugged into during a rebuild. With canTouchEfiVariables = false, Limine's
     # efiInstallAsRemovable defaults true, so it installs to that fallback path.
+    #
+    # Rebuilds therefore never touch NVRAM — so the firmware must be pointed at
+    # the fallback path by hand, once per machine. On the ThinkBook that's a
+    # manually created "NixOS Limine" entry (see efibootmgr note below); the
+    # generic firmware "USB HDD:" option also reaches it.
     loader.efi.canTouchEfiVariables = false;
     initrd.systemd.enable = true;
 
@@ -75,9 +80,11 @@
     '';
   };
 
-  # The ThinkBook's firmware can't enumerate this USB enclosure into its boot
-  # menu and may prune the "NixOS USB" NVRAM entry after booting without the
-  # drive attached; efibootmgr lets us re-pin the entry from the running system.
+  # The ThinkBook may prune the USB's NVRAM entry after booting without the drive
+  # attached, and rebuilds can't recreate it (canTouchEfiVariables = false), so
+  # efibootmgr lets us re-pin it from the running system:
+  #   sudo efibootmgr --create --disk /dev/sda --part 1 \
+  #     --label "NixOS Limine" --loader '\EFI\BOOT\BOOTX64.EFI'
   environment.systemPackages = [ pkgs.efibootmgr ];
 
   # ── Networking ───────────────────────────────────────────────────────────────
