@@ -103,7 +103,15 @@ Item {
         }
     }
 
-    Process { id: gcProcess; command: [] }
+    // nh clean user: prunes HM/user profile generations + result gcroots, then GCs
+    // the store — all without sudo (system generations are pruned by the weekly
+    // programs.nh.clean service). Output streams into the log view below.
+    Process {
+        id: gcProcess
+        command: []
+        stdout: SplitParser { onRead: (line) => root.appendLog(line, root.logColor(line)) }
+        stderr: SplitParser { onRead: (line) => root.appendLog(line, root.logColor(line)) }
+    }
 
     // ── UI ───────────────────────────────────────────────────────────────────────
     ColumnLayout {
@@ -243,7 +251,7 @@ Item {
                                 font.family: Theme.font
                             }
                             Text {
-                                text: gcProcess.running ? "Collecting…" : "Collect Garbage"
+                                text: gcProcess.running ? "Cleaning…" : "Clean Up (nh)"
                                 color: Theme.fg; font.pixelSize: 12
                                 font.family: Theme.font
                                 Layout.fillWidth: true
@@ -256,7 +264,8 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             enabled: !gcProcess.running
                             onClicked: {
-                                gcProcess.command = ["nix-collect-garbage"]
+                                logModel.clear()
+                                gcProcess.command = ["nh", "clean", "user", "--keep", "3", "--keep-since", "3d"]
                                 gcProcess.running = true
                             }
                         }
@@ -267,7 +276,12 @@ Item {
             // GC post-refresh
             Connections {
                 target: gcProcess
-                function onExited() { pollDisk.running = true; pollPaths.running = true }
+                function onExited(code, status) {
+                    root.appendLog(code === 0 ? "── Clean finished ──" : "── Clean failed (exit " + code + ") ──",
+                                   code === 0 ? Theme.green : Theme.red)
+                    pollDisk.running = true
+                    pollPaths.running = true
+                }
             }
         }
 

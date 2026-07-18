@@ -212,7 +212,6 @@ in
       btop
       delta
       libnotify
-      nh
 
       # Monitoring
       lm_sensors
@@ -261,10 +260,16 @@ in
     # rebuilds without a disk partition (works on the portable USB-booted hosts).
     zramSwap.enable = true;
 
-    nix.gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 14d";
+    # nh clean replaces nix.gc (the two conflict): unlike nix-collect-garbage it
+    # also prunes user/HM profile generations and stale result gcroots.
+    programs.nh = {
+      enable = true;
+      flake = "/etc/nixos";
+      clean = {
+        enable = true;
+        dates = "weekly";
+        extraArgs = "--keep 5 --keep-since 14d";
+      };
     };
   };
 }
