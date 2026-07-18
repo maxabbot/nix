@@ -14,6 +14,7 @@
     ../common/optional/google-chrome.nix
     ../common/optional/comms.nix
     ../common/optional/lan-mouse.nix
+    ../common/optional/limine.nix
   ];
 
   home-manager.backupFileExtension = "backup";
@@ -54,13 +55,24 @@
   };
 
   # ── Bootloader ────────────────────────────────────────────────────────────────
+  # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
   boot = {
-    loader.systemd-boot.enable = true;
     # Portable USB drive: boot via the ESP fallback path (\EFI\BOOT\BOOTX64.EFI)
     # instead of writing NVRAM entries on whatever machine it happens to be
-    # plugged into during a rebuild.
+    # plugged into during a rebuild. With canTouchEfiVariables = false, Limine's
+    # efiInstallAsRemovable defaults true, so it installs to that fallback path.
     loader.efi.canTouchEfiVariables = false;
     initrd.systemd.enable = true;
+
+    # Windows lives on the ThinkBook's internal NVMe, which has its own ESP —
+    # a different disk from the USB we boot Limine off, so `boot():` can't reach
+    # it. Target that ESP by its partition GUID (nvme0n1p1, the 260M EFI system
+    # partition). Update the guid() if the internal disk is ever repartitioned.
+    loader.limine.extraEntries = ''
+      /Windows
+          protocol: chainload
+          path: guid(27906f6e-7cb3-474f-be1e-dde5a6c2f113):/EFI/Microsoft/Boot/bootmgfw.efi
+    '';
   };
 
   # The ThinkBook's firmware can't enumerate this USB enclosure into its boot

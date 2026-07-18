@@ -49,7 +49,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
 | `lanzaboote.nix` | Secure Boot for systemd-boot hosts — import only after `sbctl` key enrollment |
 | `plymouth.nix` | Custom boot splash |
-| `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (home-desktop, vm; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`, not lanzaboote) |
+| `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (home-desktop, vm, work-laptop; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`, not lanzaboote. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
 
 ### Home Manager
 
