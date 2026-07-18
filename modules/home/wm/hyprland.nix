@@ -66,6 +66,14 @@ let
 
     ${lib.concatStringsSep "\n" workspaceRules}
 
+    -- Runtime layout saved from the Quickshell Monitors page — written by
+    -- config/hypr-scripts/monitor-layout.sh, not managed by Nix. Applied last
+    -- so it wins over the declarations above. loadfile returns nil when the
+    -- file is absent (the usual case), and pcall keeps a half-written or
+    -- hand-mangled file from taking the whole config down.
+    local savedLayout = loadfile("${config.home.homeDirectory}/.config/hypr/monitors-local.lua")
+    if savedLayout then pcall(savedLayout) end
+
     -- Consumed by hyprland.lua: cursor.default_monitor (spawn cursor on primary)
     return { primary = "${cfg.monitors.primaryName}" }
   '';
