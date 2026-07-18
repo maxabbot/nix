@@ -330,6 +330,14 @@
     # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
     loader.efi.canTouchEfiVariables = true;
 
+    # Windows boots off the same ESP (its disk has no ESP of its own). systemd-boot
+    # auto-detected it; Limine needs an explicit chainload entry.
+    loader.limine.extraEntries = ''
+      /Windows
+          protocol: chainload
+          path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
+    '';
+
     # btrfs "first mount" free-space-tree init creates a brief window where the
     # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
     initrd.systemd.services.initrd-find-nixos-closure.serviceConfig = {
