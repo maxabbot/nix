@@ -96,6 +96,11 @@
           email = "abbot.max.nz@gmail.com";
         };
         nvidia = false;
+        # Christchurch NZ — drives gammastep/night-light timing in desktop.nix.
+        location = {
+          latitude = -43.53;
+          longitude = 172.64;
+        };
         kanshi = {
           enable = false;
         };
@@ -180,10 +185,6 @@
               primary = "DP-3,2560x1440@165,3360x0,1";
               primaryName = "DP-3";
             };
-            location = {
-              latitude = -43.53;
-              longitude = 172.64;
-            };
             # work-laptop sits to the right of the desk; its keyboard/mouse are
             # shared via lan-mouse (see home/max/lan-mouse.nix). Swap position
             # to "left" here (and to "right" on work-laptop) if the laptop moves.
@@ -231,10 +232,6 @@
                 # laptopPosition defaults to "1600,1440" (centred below 2×2560 externals)
               };
             };
-            location = {
-              latitude = 51.5;
-              longitude = -0.1;
-            };
             lanMouse = {
               enable = true;
               peer = "home-desktop";
@@ -263,10 +260,6 @@
               secondary = null;
               primaryName = "Virtual-1";
             };
-            location = {
-              latitude = -43.53;
-              longitude = 172.64;
-            };
           };
         };
 
@@ -281,10 +274,6 @@
             monitors = {
               primary = null;
               secondary = null;
-            };
-            location = {
-              latitude = 0.0;
-              longitude = 0.0;
             };
           };
         };
