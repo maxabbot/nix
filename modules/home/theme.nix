@@ -1,0 +1,66 @@
+# modules/home/theme.nix — Supplementary theming on top of Stylix.
+# Stylix owns: GTK theme/font/cursor, Qt, base16 colours, pointer cursor.
+# We own: icon theme, dark-mode prefs, Wayland/Electron env vars, MIME apps.
+# Everything here is GUI-only, so the whole module is gated on a compositor
+# being configured — the headless `minimal` host skips it entirely.
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
+{
+  config = lib.mkIf (config.custom.hm.compositor != "none") {
+    # ── Icons (Stylix does not manage icon themes) ────────────────────────────────
+    gtk = {
+      enable = true;
+
+      iconTheme = {
+        name = "Papirus-Dark";
+        package = pkgs.papirus-icon-theme;
+      };
+
+      gtk3.extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+        gtk-decoration-layout = "close,minimize,maximize:";
+      };
+
+      gtk4.extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+      };
+    };
+
+    # ── Session variables ─────────────────────────────────────────────────────────
+    home.sessionVariables = {
+      QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+      QT_QPA_PLATFORM = "wayland;xcb";
+      QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+      GDK_SCALE = "1";
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
+      # MOZ_ENABLE_WAYLAND is set system-wide in productivity.nix
+      _JAVA_AWT_WM_NONREPARENTING = "1";
+    };
+
+    # ── XDG MIME defaults ─────────────────────────────────────────────────────────
+    xdg.mimeApps = {
+      enable = true;
+      defaultApplications = {
+        "text/plain" = [ "dev.zed.Zed.desktop" ];
+        "text/html" = [ "zen-beta.desktop" ];
+        "application/pdf" = [ "org.pwmt.zathura.desktop" ];
+        "image/png" = [ "imv.desktop" ];
+        "image/jpeg" = [ "imv.desktop" ];
+        "image/gif" = [ "imv.desktop" ];
+        "image/svg+xml" = [ "imv.desktop" ];
+        "video/mp4" = [ "mpv.desktop" ];
+        "video/x-matroska" = [ "mpv.desktop" ];
+        "video/webm" = [ "mpv.desktop" ];
+        "audio/mpeg" = [ "mpv.desktop" ];
+        "audio/flac" = [ "mpv.desktop" ];
+        "inode/directory" = [ "thunar.desktop" ];
+        "x-scheme-handler/http" = [ "zen-beta.desktop" ];
+        "x-scheme-handler/https" = [ "zen-beta.desktop" ];
+      };
+    };
+  };
+}

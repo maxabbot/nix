@@ -1,0 +1,13 @@
+# Nix build outputs
+result
+result-*
+
+# Nix flake lock backup
+flake.lock.bak
+
+# direnv
+.direnv
+
+# Local secrets / credentials — never commit
+github_pat
+*.iso

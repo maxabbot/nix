@@ -1,0 +1,762 @@
+// AudioMixer.qml — PipeWire audio page (embedded in Settings.qml — no window chrome).
+// Uses Quickshell.Services.Pipewire for native PipeWire access: default sink/source
+// volume + mute, device selection (set the default sink/source), per-app stream
+// volumes, plus an EasyEffects-backed equalizer section.
+import Quickshell.Io
+import Quickshell.Services.Pipewire
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls.Basic
+
+Item {
+    id: root
+
+    // The default sink/source must be bound before .audio/.ready populate —
+    // untracked nodes leave the Volume/Mic sliders stuck at 0 and read-only.
+    // (The per-app section already binds its streams via the Repeater model.)
+    PwObjectTracker {
+        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource].filter(n => n)
+    }
+
+    // ── EQ state (polled on open) ───────────────────────────────────────────────
+    property bool eqEnabled: false
+    onVisibleChanged: if (visible) {
+        pollEq.running = true
+        pollSinks.running = true
+        pollInputs.running = true
+        pollPw.running = true
+        pollLoop.running = true
+    }
+
+    // ── Per-app output routing (pactl JSON — robust, no Pipewire id mapping) ─────
+    property var sinkList:  []   // [{index, name, desc}]
+    property var appInputs: []   // [{index, app, sinkIndex}]
+
+    Process {
+        id: pollSinks
+        command: ["bash", "-c", "pactl -f json list sinks 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var a = JSON.parse(text), o = []
+                    for (var i = 0; i < a.length; i++)
+                        o.push({ index: a[i].index, name: a[i].name, desc: a[i].description || a[i].name })
+                    root.sinkList = o
+                } catch (e) { /* ignore transient parse errors */ }
+            }
+        }
+    }
+    Process {
+        id: pollInputs
+        command: ["bash", "-c", "pactl -f json list sink-inputs 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var a = JSON.parse(text), o = []
+                    for (var i = 0; i < a.length; i++) {
+                        var p = a[i].properties || {}
+                        o.push({
+                            index: a[i].index,
+                            app: p["application.name"] || p["media.name"] || "App",
+                            sinkIndex: a[i].sink
+                        })
+                    }
+                    root.appInputs = o
+                } catch (e) { /* ignore */ }
+            }
+        }
+    }
+    Process { id: moveProc; command: [] }
+    function moveInput(index, sinkName) {
+        moveProc.command = ["pactl", "move-sink-input", String(index), sinkName]
+        moveProc.running = true
+        Qt.callLater(() => pollInputs.running = true)
+    }
+
+    Process {
+        id: pollEq
+        command: ["bash", "-c", "pgrep -x easyeffects >/dev/null && echo on || echo off"]
+        stdout: SplitParser { onRead: (line) => root.eqEnabled = (line.trim() === "on") }
+    }
+
+    Process { id: eqProc;     command: [] }
+    Process { id: eqPreset;   command: [] }
+    Process { id: eqOpen;     command: ["easyeffects"] }
+
+    function runEq(on) {
+        eqProc.command = ["bash", "-c", on
+            ? "easyeffects --gapplication-service >/dev/null 2>&1 &"
+            : "easyeffects -q >/dev/null 2>&1 || pkill -x easyeffects"]
+        eqProc.running = true
+        root.eqEnabled = on
+    }
+    function loadPreset(name) {
+        // Best-effort: applies a named EasyEffects output preset if it exists.
+        eqPreset.command = ["bash", "-c",
+            "pgrep -x easyeffects >/dev/null || (easyeffects --gapplication-service >/dev/null 2>&1 &); "
+            + "sleep 0.3; easyeffects -l " + name + " >/dev/null 2>&1 || true"]
+        eqPreset.running = true
+        root.eqEnabled = true
+    }
+
+    // ── Advanced PipeWire: sample rate / buffer / mic monitor ───────────────────
+    // Rate & quantum are read/written via pw-metadata's "settings" node; a forced
+    // value of 0 means "follow the graph default" (Auto). The mic monitor is a
+    // pactl module-loopback from the default source to the default sink.
+    property int  pwRate:         0   // effective clock.rate
+    property int  pwForceRate:    0   // clock.force-rate (0 = Auto)
+    property int  pwQuantum:      0   // effective clock.quantum
+    property int  pwForceQuantum: 0   // clock.force-quantum (0 = Auto)
+    property bool loopback:       false
+
+    Process {
+        id: pollPw
+        // awk field-splits each "key:'…' value:'…'" line on the single quote,
+        // so $2 is the key and $4 the value; +0 coerces blanks to 0.
+        command: ["bash", "-c", `
+pw-metadata -n settings 2>/dev/null | awk -F"'" '
+  $2=="clock.rate"          {r=$4}
+  $2=="clock.force-rate"    {fr=$4}
+  $2=="clock.quantum"       {q=$4}
+  $2=="clock.force-quantum" {fq=$4}
+  END{print r+0, fr+0, q+0, fq+0}'
+`]
+        stdout: SplitParser {
+            onRead: (line) => {
+                var p = line.trim().split(/\s+/)
+                if (p.length < 4) return
+                root.pwRate         = parseInt(p[0]) || 0
+                root.pwForceRate    = parseInt(p[1]) || 0
+                root.pwQuantum      = parseInt(p[2]) || 0
+                root.pwForceQuantum = parseInt(p[3]) || 0
+            }
+        }
+    }
+
+    Process {
+        id: pollLoop
+        command: ["bash", "-c",
+            "pactl list short modules 2>/dev/null | grep -q module-loopback && echo on || echo off"]
+        stdout: SplitParser { onRead: (line) => root.loopback = (line.trim() === "on") }
+    }
+
+    Process { id: pwSet; command: [] }
+    function setForceRate(hz) {
+        pwSet.command = ["pw-metadata", "-n", "settings", "0", "clock.force-rate", String(hz)]
+        pwSet.running = true
+        root.pwForceRate = hz
+        Qt.callLater(() => pollPw.running = true)
+    }
+    function setForceQuantum(n) {
+        pwSet.command = ["pw-metadata", "-n", "settings", "0", "clock.force-quantum", String(n)]
+        pwSet.running = true
+        root.pwForceQuantum = n
+        Qt.callLater(() => pollPw.running = true)
+    }
+
+    Process { id: loopSet; command: [] }
+    function toggleLoopback() {
+        loopSet.command = ["bash", "-c", root.loopback
+            ? "pactl list short modules | awk '/module-loopback/{print $1}' | xargs -r -n1 pactl unload-module"
+            : "pactl load-module module-loopback source=@DEFAULT_SOURCE@ sink=@DEFAULT_SINK@ latency_msec=50"]
+        loopSet.running = true
+        root.loopback = !root.loopback
+        Qt.callLater(() => pollLoop.running = true)
+    }
+
+    // ── Reusable default-device picker ──────────────────────────────────────────
+    // `sink: true` lists output devices (Audio/Sink) and rebinds the default sink;
+    // `false` lists inputs (Audio/Source) and rebinds the default source.
+    component DevicePicker: Column {
+        id: picker
+        property bool sink: true
+        width: parent ? parent.width : 0
+        spacing: 4
+
+        // The actual list model — a plain array of matching PipeWire nodes.
+        // (A Repeater can't iterate a PwObjectTracker; that only *binds* nodes.)
+        readonly property var devices: (Pipewire.nodes?.values ?? []).filter(n =>
+            n && n.mediaClass === (picker.sink ? "Audio/Sink" : "Audio/Source"))
+
+        // Keep the listed nodes bound so description/name stay populated.
+        PwObjectTracker { objects: picker.devices }
+
+        Repeater {
+            model: picker.devices
+
+            delegate: Rectangle {
+                id: devRow
+                required property var modelData
+                readonly property bool isDefault: picker.sink
+                    ? (Pipewire.defaultAudioSink?.id === modelData.id)
+                    : (Pipewire.defaultAudioSource?.id === modelData.id)
+
+                width: picker.width
+                height: 26
+                radius: 6
+                color: isDefault
+                    ? Theme.accentBg
+                    : (devArea.containsMouse ? Theme.bgSoft : "transparent")
+                Behavior on color { ColorAnimation { duration: 80 } }
+
+                RowLayout {
+                    anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                    spacing: 6
+
+                    Text {
+                        text: devRow.isDefault ? "" : ""
+                        color: devRow.isDefault ? Theme.accent : Theme.grayDim
+                        font.pixelSize: 11
+                        font.family: Theme.font
+                    }
+                    Text {
+                        text: modelData.description ?? modelData.nickname ?? modelData.name ?? "?"
+                        color: devRow.isDefault ? Theme.fg : Theme.gray
+                        font.pixelSize: 11
+                        font.family: Theme.font
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+                }
+
+                MouseArea {
+                    id: devArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (picker.sink) Pipewire.preferredDefaultAudioSink = modelData
+                        else             Pipewire.preferredDefaultAudioSource = modelData
+                    }
+                }
+            }
+        }
+    }
+
+    ScrollView {
+        anchors.fill: parent
+        clip: true
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+    Column {
+        id: content
+        width: root.width
+        spacing: 14
+
+        // ── Header ───────────────────────────────────────────────────────────
+        Text {
+            text: "Audio"
+            color: Theme.fg
+            font.pixelSize: 14
+            font.bold: true
+            font.family: Theme.font
+        }
+
+        // ── Output (default sink) ─────────────────────────────────────────────
+        Column {
+            width: parent.width
+            spacing: 8
+
+            RowLayout {
+                width: parent.width
+
+                Text {
+                    text: ""
+                    color: Theme.accent
+                    font.pixelSize: 14
+                    font.family: Theme.font
+                }
+
+                Text {
+                    text: "Output"
+                    color: Theme.fg
+                    font.pixelSize: 12
+                    font.family: Theme.font
+                    Layout.fillWidth: true
+                    leftPadding: 8
+                }
+
+                // Mute toggle
+                Rectangle {
+                    width: 28; height: 28; radius: 7
+                    color: muteOutArea.containsMouse ? Theme.border : "transparent"
+                    Behavior on color { ColorAnimation { duration: 80 } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: (Pipewire.defaultAudioSink?.audio?.muted ?? false) ? "" : ""
+                        color: (Pipewire.defaultAudioSink?.audio?.muted ?? false) ? Theme.red : Theme.gray
+                        font.pixelSize: 13
+                        font.family: Theme.font
+                    }
+
+                    MouseArea {
+                        id: muteOutArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (Pipewire.defaultAudioSink?.ready && Pipewire.defaultAudioSink?.audio)
+                                Pipewire.defaultAudioSink.audio.muted = !Pipewire.defaultAudioSink.audio.muted
+                        }
+                    }
+                }
+            }
+
+            SliderRow {
+                width: parent.width
+                label: "Volume"
+                value: Pipewire.defaultAudioSink?.audio?.volume ?? 0
+                onMoved: (v) => {
+                    if (Pipewire.defaultAudioSink?.ready && Pipewire.defaultAudioSink?.audio)
+                        Pipewire.defaultAudioSink.audio.volume = v
+                }
+            }
+
+            DevicePicker { sink: true }
+        }
+
+        // Divider
+        Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+        // ── Input (default source) ─────────────────────────────────────────────
+        Column {
+            width: parent.width
+            spacing: 8
+
+            RowLayout {
+                width: parent.width
+
+                Text {
+                    text: ""
+                    color: Theme.purple
+                    font.pixelSize: 14
+                    font.family: Theme.font
+                }
+
+                Text {
+                    text: "Input"
+                    color: Theme.fg
+                    font.pixelSize: 12
+                    font.family: Theme.font
+                    Layout.fillWidth: true
+                    leftPadding: 8
+                }
+
+                // Mute microphone toggle
+                Rectangle {
+                    width: 28; height: 28; radius: 7
+                    color: muteInArea.containsMouse ? Theme.border : "transparent"
+                    Behavior on color { ColorAnimation { duration: 80 } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: (Pipewire.defaultAudioSource?.audio?.muted ?? false) ? "" : ""
+                        color: (Pipewire.defaultAudioSource?.audio?.muted ?? false) ? Theme.red : Theme.gray
+                        font.pixelSize: 13
+                        font.family: Theme.font
+                    }
+
+                    MouseArea {
+                        id: muteInArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (Pipewire.defaultAudioSource?.ready && Pipewire.defaultAudioSource?.audio)
+                                Pipewire.defaultAudioSource.audio.muted = !Pipewire.defaultAudioSource.audio.muted
+                        }
+                    }
+                }
+            }
+
+            SliderRow {
+                width: parent.width
+                label: "Mic"
+                value: Pipewire.defaultAudioSource?.audio?.volume ?? 0
+                onMoved: (v) => {
+                    if (Pipewire.defaultAudioSource?.ready && Pipewire.defaultAudioSource?.audio)
+                        Pipewire.defaultAudioSource.audio.volume = v
+                }
+            }
+
+            DevicePicker { sink: false }
+        }
+
+        // Divider
+        Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+        // ── Equalizer (EasyEffects) ─────────────────────────────────────────────
+        Column {
+            width: parent.width
+            spacing: 8
+
+            RowLayout {
+                width: parent.width
+
+                Text {
+                    text: "󰓃"
+                    color: Theme.yellow
+                    font.pixelSize: 14
+                    font.family: Theme.font
+                }
+                Text {
+                    text: "Equalizer"
+                    color: Theme.fg
+                    font.pixelSize: 12
+                    font.family: Theme.font
+                    Layout.fillWidth: true
+                    leftPadding: 8
+                }
+                // Enable / disable EasyEffects processing
+                Rectangle {
+                    width: 44; height: 24; radius: 12
+                    color: root.eqEnabled ? Theme.accentBg : Theme.bgAlt
+                    Behavior on color { ColorAnimation { duration: 100 } }
+
+                    Rectangle {
+                        width: 18; height: 18; radius: 9
+                        x: root.eqEnabled ? parent.width - width - 3 : 3
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: root.eqEnabled ? Theme.accent : Theme.gray
+                        Behavior on x { NumberAnimation { duration: 100 } }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.runEq(!root.eqEnabled)
+                    }
+                }
+            }
+
+            // Preset chips (best-effort — apply named EasyEffects output presets)
+            RowLayout {
+                width: parent.width
+                spacing: 6
+
+                Repeater {
+                    model: ["Flat", "Bass", "Vocal"]
+                    delegate: Rectangle {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        height: 26
+                        radius: 6
+                        color: presetArea.containsMouse ? Theme.bgSoft : Theme.bgAlt
+                        Behavior on color { ColorAnimation { duration: 80 } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData
+                            color: Theme.gray
+                            font.pixelSize: 11
+                            font.family: Theme.font
+                        }
+                        MouseArea {
+                            id: presetArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.loadPreset(modelData)
+                        }
+                    }
+                }
+
+                // Open the full EasyEffects GUI
+                Rectangle {
+                    Layout.preferredWidth: 36
+                    height: 26
+                    radius: 6
+                    color: openArea.containsMouse ? Theme.bgSoft : Theme.bgAlt
+                    Behavior on color { ColorAnimation { duration: 80 } }
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰍜"
+                        color: Theme.gray
+                        font.pixelSize: 13
+                        font.family: Theme.font
+                    }
+                    MouseArea {
+                        id: openArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: eqOpen.running = true
+                    }
+                }
+            }
+        }
+
+        // ── Per-app output routing (only useful with >1 sink) ───────────────────
+        Column {
+            width: parent.width
+            spacing: 8
+            visible: root.sinkList.length > 1 && root.appInputs.length > 0
+
+            Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+            Text {
+                text: "App output"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            Repeater {
+                model: root.appInputs
+
+                delegate: Column {
+                    id: appRow
+                    required property var modelData   // sink-input
+                    width: parent.width
+                    spacing: 4
+
+                    Text {
+                        text: appRow.modelData.app
+                        color: Theme.fgDim
+                        font.pixelSize: 11
+                        font.family: Theme.font
+                    }
+                    Flow {
+                        width: parent.width
+                        spacing: 6
+                        Repeater {
+                            model: root.sinkList
+                            delegate: Rectangle {
+                                required property var modelData   // sink
+                                readonly property bool active: appRow.modelData.sinkIndex === modelData.index
+                                width: sinkTxt.implicitWidth + 18
+                                height: 26
+                                radius: 6
+                                color: active ? Theme.accentBg
+                                     : (routeArea.containsMouse ? Theme.bgSoft : Theme.bgAlt)
+                                Behavior on color { ColorAnimation { duration: 80 } }
+                                Text {
+                                    id: sinkTxt
+                                    anchors.centerIn: parent
+                                    text: modelData.desc
+                                    color: active ? Theme.accent : Theme.gray
+                                    font.pixelSize: 10
+                                    font.family: Theme.font
+                                }
+                                MouseArea {
+                                    id: routeArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.moveInput(appRow.modelData.index, modelData.name)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Per-stream volumes ──────────────────────────────────────────────────
+        // Shows output streams (apps playing audio)
+        Column {
+            id: appsCol
+            width: parent.width
+            spacing: 6
+            visible: streamRepeater.count > 0
+
+            // Output streams (apps producing sound). Plain array model; the
+            // tracker keeps each stream's audio sub-object live for the slider.
+            readonly property var streams: (Pipewire.nodes?.values ?? []).filter(n =>
+                n && n.mediaClass === "Stream/Output/Audio")
+
+            PwObjectTracker { objects: appsCol.streams }
+
+            Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+            Text {
+                text: "Apps"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            Repeater {
+                id: streamRepeater
+                model: appsCol.streams
+
+                delegate: SliderRow {
+                    required property var modelData
+                    width: content.width
+                    label: (modelData.name?.length ?? 0) > 12 ? modelData.name.slice(0, 12) + "…" : (modelData.name ?? "")
+                    value: modelData.audio?.volume ?? 0
+                    onMoved: (v) => { if (modelData.ready && modelData.audio) modelData.audio.volume = v }
+                }
+            }
+        }
+
+        // ── Advanced (PipeWire) ─────────────────────────────────────────────────
+        Column {
+            width: parent.width
+            spacing: 8
+
+            Rectangle { width: parent.width; height: 1; color: Theme.border }
+
+            Text {
+                text: "Advanced"
+                color: Theme.gray
+                font.pixelSize: 11
+                font.bold: true
+                font.family: Theme.font
+            }
+
+            // Sample rate
+            RowLayout {
+                width: parent.width
+                spacing: 8
+                Text {
+                    text: "Sample rate"
+                    color: Theme.fgDim
+                    font.pixelSize: 11
+                    font.family: Theme.font
+                    Layout.fillWidth: true
+                }
+                Text {
+                    text: root.pwRate > 0
+                        ? (root.pwRate / 1000).toFixed(root.pwRate % 1000 ? 1 : 0) + " kHz"
+                        : ""
+                    color: Theme.gray
+                    font.pixelSize: 10
+                    font.family: Theme.font
+                }
+            }
+            Flow {
+                width: parent.width
+                spacing: 6
+                Repeater {
+                    model: [{ l: "Auto", v: 0 }, { l: "44.1k", v: 44100 }, { l: "48k", v: 48000 }, { l: "96k", v: 96000 }]
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool active: root.pwForceRate === modelData.v
+                        width: rTxt.implicitWidth + 20
+                        height: 26
+                        radius: 6
+                        color: active ? Theme.accentBg : (rArea.containsMouse ? Theme.bgSoft : Theme.bgAlt)
+                        Behavior on color { ColorAnimation { duration: 80 } }
+                        Text {
+                            id: rTxt
+                            anchors.centerIn: parent
+                            text: modelData.l
+                            color: active ? Theme.accent : Theme.gray
+                            font.pixelSize: 10
+                            font.family: Theme.font
+                        }
+                        MouseArea {
+                            id: rArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.setForceRate(modelData.v)
+                        }
+                    }
+                }
+            }
+
+            // Buffer (quantum) — smaller = lower latency, more CPU
+            RowLayout {
+                width: parent.width
+                spacing: 8
+                Text {
+                    text: "Buffer"
+                    color: Theme.fgDim
+                    font.pixelSize: 11
+                    font.family: Theme.font
+                    Layout.fillWidth: true
+                }
+                Text {
+                    text: root.pwQuantum > 0 && root.pwRate > 0
+                        ? root.pwQuantum + " · " + (1000 * root.pwQuantum / root.pwRate).toFixed(1) + " ms"
+                        : (root.pwQuantum > 0 ? String(root.pwQuantum) : "")
+                    color: Theme.gray
+                    font.pixelSize: 10
+                    font.family: Theme.font
+                }
+            }
+            Flow {
+                width: parent.width
+                spacing: 6
+                Repeater {
+                    model: [{ l: "Auto", v: 0 }, { l: "256", v: 256 }, { l: "512", v: 512 }, { l: "1024", v: 1024 }]
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool active: root.pwForceQuantum === modelData.v
+                        width: qTxt.implicitWidth + 20
+                        height: 26
+                        radius: 6
+                        color: active ? Theme.accentBg : (qArea.containsMouse ? Theme.bgSoft : Theme.bgAlt)
+                        Behavior on color { ColorAnimation { duration: 80 } }
+                        Text {
+                            id: qTxt
+                            anchors.centerIn: parent
+                            text: modelData.l
+                            color: active ? Theme.accent : Theme.gray
+                            font.pixelSize: 10
+                            font.family: Theme.font
+                        }
+                        MouseArea {
+                            id: qArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.setForceQuantum(modelData.v)
+                        }
+                    }
+                }
+            }
+
+            // Mic monitor (loopback) — hear your microphone through the output
+            RowLayout {
+                width: parent.width
+                spacing: 8
+                Text {
+                    text: "󰍬"
+                    color: root.loopback ? Theme.accent : Theme.gray
+                    font.pixelSize: 13
+                    font.family: Theme.font
+                }
+                ColumnLayout {
+                    spacing: 0
+                    Layout.fillWidth: true
+                    Text {
+                        text: "Mic monitor"
+                        color: Theme.fg
+                        font.pixelSize: 12
+                        font.family: Theme.font
+                    }
+                    Text {
+                        text: "Hear your microphone through the current output"
+                        color: Theme.grayDim
+                        font.pixelSize: 9
+                        font.family: Theme.font
+                    }
+                }
+                Rectangle {
+                    width: 44; height: 24; radius: 12
+                    color: root.loopback ? Theme.accentBg : Theme.bgAlt
+                    Behavior on color { ColorAnimation { duration: 100 } }
+                    Rectangle {
+                        width: 18; height: 18; radius: 9
+                        x: root.loopback ? parent.width - width - 3 : 3
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: root.loopback ? Theme.accent : Theme.gray
+                        Behavior on x { NumberAnimation { duration: 100 } }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggleLoopback()
+                    }
+                }
+            }
+        }
+    }
+    }
+}

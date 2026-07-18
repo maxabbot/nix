@@ -1,0 +1,142 @@
+/* shortcuts.css — Gruvbox Material Dark cheat-sheet, portrait 2160x3840.
+   Rendered by config/hypr-scripts/shortcuts-wallpaper.sh onto the rotated 4K. */
+
+:root {
+  --bg: @bg0@;
+  --bg1: @bgAlt@;
+  --bg2: @bg1@;
+  --fg: @fg@;
+  --muted: @grayBright@;
+  --yellow: @yellow@;
+  --aqua: @aqua@;
+  --blue: @blue@;
+  --green: @green@;
+  --purple: @purple@;
+  --orange: @orange@;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 2160px;
+  min-height: 3840px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 22px;
+  line-height: 1.45;
+  padding: 72px 80px;
+}
+
+.header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--bg2);
+}
+
+.cols {
+  display: flex;
+  gap: 88px;
+  align-items: flex-start;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+}
+
+.col-rule {
+  width: 2px;
+  background: var(--bg2);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+h1 {
+  font-size: 52px;
+  color: var(--yellow);
+  border-bottom: 3px solid var(--bg2);
+  padding-bottom: 16px;
+  margin-bottom: 10px;
+}
+
+.header p {
+  color: var(--muted);
+}
+
+h2 {
+  font-size: 30px;
+  color: var(--aqua);
+  margin: 28px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--bg2);
+}
+
+h3 {
+  font-size: 22px;
+  color: var(--blue);
+  margin: 18px 0 6px;
+}
+
+hr {
+  display: none;
+}
+
+p {
+  color: var(--muted);
+  margin: 8px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 14px;
+  break-inside: avoid;
+}
+
+th {
+  display: none;
+}
+
+td {
+  padding: 5px 12px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--bg1);
+}
+
+td:first-child {
+  color: var(--green);
+  font-weight: bold;
+  white-space: nowrap;
+  padding-right: 20px;
+}
+
+code {
+  background: var(--bg2);
+  color: var(--orange);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--bg1);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 8px 0;
+  break-inside: avoid;
+  white-space: pre-wrap;
+}
+
+pre code {
+  background: none;
+  color: var(--fg);
+  padding: 0;
+}
+
+strong {
+  color: var(--purple);
+}
