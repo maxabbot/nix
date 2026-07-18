@@ -20,6 +20,7 @@
     ../common/optional/gaming.nix
     ../common/optional/wine.nix
     ../common/optional/plymouth.nix
+    ../common/optional/limine.nix
   ];
 
   home-manager.backupFileExtension = "backup";
@@ -32,7 +33,7 @@
     sshKeys = [ ];
   };
 
-  boot.loader.systemd-boot.enable = true;
+  # Limine bootloader comes from ../common/optional/limine.nix.
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "vm";

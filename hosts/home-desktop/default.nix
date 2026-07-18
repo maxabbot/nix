@@ -24,6 +24,7 @@
     ../common/optional/gaming-streaming.nix
     ../common/optional/fan2go.nix
     ../common/optional/lan-mouse.nix
+    ../common/optional/limine.nix
   ];
 
   home-manager.backupFileExtension = "backup";
@@ -326,12 +327,8 @@
     kernelParams = [ "video=HDMI-A-1:e" ];
 
     # ── Bootloader ──────────────────────────────────────────────────────────────
-    loader = {
-      systemd-boot.enable = true;
-      # Cap the boot menu so old generations don't accumulate as stale entries.
-      systemd-boot.configurationLimit = 10;
-      efi.canTouchEfiVariables = true;
-    };
+    # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
+    loader.efi.canTouchEfiVariables = true;
 
     # btrfs "first mount" free-space-tree init creates a brief window where the
     # @nix subvolume is mounted but path lookups fail; retry instead of panicking.

@@ -83,6 +83,10 @@ in
     };
   };
 
+  # NixOS-level target: limine.nix themes the boot menu from the palette itself
+  # (custom wallpaper + saner terminal slot mapping than the Stylix target).
+  stylix.targets.limine.enable = false;
+
   home-manager.sharedModules = [
     {
       # HM-level stylix module has its own release check — silence it too

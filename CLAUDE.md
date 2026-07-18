@@ -47,8 +47,9 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `gaming-streaming.nix` | Apollo (Sunshine fork) + Moonlight for game streaming |
 | `fan2go.nix` | Moving-average fan control (home-desktop; replaces fancontrol) |
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
-| `lanzaboote.nix` | Secure Boot — import only after `sbctl` key enrollment |
+| `lanzaboote.nix` | Secure Boot for systemd-boot hosts — import only after `sbctl` key enrollment |
 | `plymouth.nix` | Custom boot splash |
+| `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (home-desktop, vm; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`, not lanzaboote) |
 
 ### Home Manager
 
