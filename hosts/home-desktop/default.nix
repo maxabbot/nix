@@ -41,6 +41,11 @@
     fancontrol.enable = false;
   };
 
+  # ── Nix builds ───────────────────────────────────────────────────────────────
+  # base.nix caps max-jobs at 1 for the RAM-constrained, swap-less hosts. This box
+  # has 62 GiB, so restore full build parallelism (one job per core).
+  nix.settings.max-jobs = "auto";
+
   # ── Steam gamescope session (SDDM "Steam" entry) ─────────────────────────────
   # gaming.nix enables gamescopeSession but leaves args empty, so gamescope
   # defaults to 720p @ 60 Hz and may render to the wrong connector — hence the

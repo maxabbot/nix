@@ -152,7 +152,8 @@
       "Bash(sudo ls -la /boot/EFI/)",
       "Bash(nixos-rebuild list-generations *)",
       "Bash(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system)",
-      "Bash(qs --version)"
+      "Bash(qs --version)",
+      "Bash(timedatectl status *)"
     ]
   }
 }

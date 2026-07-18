@@ -249,7 +249,17 @@ in
       ];
       auto-optimise-store = true;
       download-buffer-size = 268435456; # 256 MiB
+      # Cap concurrent builds. These hosts have limited RAM and no disk swap;
+      # unbounded parallelism (max-jobs = auto) lets several heavy C++ builds
+      # run at once and the kernel OOM-killer kills a build → rebuild fails.
+      # One job at a time keeps peak memory bounded (cores = 0 still lets that
+      # single build use every core). mkDefault so a roomier host can raise it.
+      max-jobs = lib.mkDefault 1;
     };
+
+    # Compressed RAM swap. Gives memory pressure somewhere to spill during large
+    # rebuilds without a disk partition (works on the portable USB-booted hosts).
+    zramSwap.enable = true;
 
     nix.gc = {
       automatic = true;
