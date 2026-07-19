@@ -62,7 +62,8 @@ jobs:
         run: sudo apt-get install -y shellcheck
 
       - name: Shellcheck scripts
-        run: git ls-files '*.sh' | xargs -r shellcheck
+        # tmux-sessionizer is a bash script without the .sh extension
+        run: git ls-files '*.sh' 'config/scripts/tmux-sessionizer' | xargs -r shellcheck
 
   lint:
     runs-on: ubuntu-latest

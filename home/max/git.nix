@@ -1,4 +1,7 @@
 { git, pkgs, ... }:
+let
+  palette = import ../../config/stylix/palette.nix;
+in
 {
   programs.git = {
     enable = true;
@@ -46,9 +49,11 @@
       side-by-side = true;
       line-numbers = true;
       syntax-theme = "gruvbox-dark";
+      # Dark diff-fill tints, hand-picked — the palette has no background-tint
+      # slots for added/removed lines.
       "plus-style" = "syntax \"#1e4920\"";
       "minus-style" = "syntax \"#4a1020\"";
-      "file-style" = "bold \"#89b4fa\"";
+      "file-style" = "bold \"${palette.blue}\"";
       "hunk-header-style" = "file line-number syntax";
     };
   };

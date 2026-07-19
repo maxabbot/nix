@@ -6,7 +6,7 @@ Comparing this repo against [Misterio77/nix-config](https://github.com/Misterio7
 
 ## Architecture / Module Pattern
 
-**This repo** uses import composition for everything except base system config. `hosts/common/optional/` holds 15+ standalone config files; hosts list what they need in `imports = [...]`. `modules/nixos/base.nix` is the only remaining option-flag module (timezone, username, power management). This matches the Misterio77 pattern.
+**This repo** uses import composition for everything except base system config. `hosts/common/optional/` holds 20+ standalone config files; hosts list what they need in `imports = [...]`. `modules/nixos/base.nix` is the only remaining option-flag module (timezone, username, power management). This matches the Misterio77 pattern.
 
 **Misterio77** uses import-based composition — `hosts/common/global/` (always loaded) + `hosts/common/optional/` (imported per-host). No option namespace at all; each feature is a standalone file that's either in the import list or isn't.
 
@@ -16,7 +16,7 @@ Comparing this repo against [Misterio77/nix-config](https://github.com/Misterio7
 
 ## Home Manager Structure
 
-**This repo**: `home/max/` split into `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `packages.nix`. Shared `git` args extracted into `sharedHmArgs` in `flake.nix` so per-host hmArgs only contain what differs.
+**This repo**: `home/max/` split into `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `packages.nix`, `terminal-toys.nix`, with shared modules in `modules/home/`. Shared `git` args extracted into `sharedHmArgs` in `flake.nix` so per-host hmArgs only contain what differs.
 
 **Misterio77**: `home/gabriel/features/cli/`, `features/desktop/hyprland/`, `features/games/`, etc. Per-host home files (`alcyone.nix`, `atlas.nix`) import only the features that host needs.
 
@@ -28,7 +28,7 @@ This repo's split is shallower than the references — features aren't composabl
 
 ## Secrets Management
 
-**This repo**: None. `signingkey = ""`, `sshKeys = []`, initial password hardcoded.
+**This repo**: None yet. `sshKeys = [ ]`, and the same `hashedPassword` is committed in every host file (rotate it once secrets land — see TODO.md). The old empty `signingkey` stub was removed as dead code.
 
 **Misterio77**: `sops-nix` — encrypted `secrets.yaml` per host, committed to git, decrypted at activation via age/GPG.
 
@@ -42,14 +42,14 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 
 | Feature | This repo | Misterio77 | fufexan |
 |---|---|---|---|
-| Secure boot | Ready (lanzaboote.nix, not yet enrolled) | lanzaboote | lanzaboote |
+| Secure boot | Ready (Limine `secureBoot` option, keys not yet enrolled) | lanzaboote | lanzaboote |
 | Secrets | No | sops-nix | agenix |
 | Impermanence | No | Yes (ephemeral btrfs root) | No |
 | Binary cache | No | Self-hosted (cache.m7.rs) | Cachix |
-| Hyprland config | Nix DSL | Nix DSL | Lua files |
+| Hyprland config | Lua files (+ Nix-generated fragments) | Nix DSL | Lua files |
 | Bar | waybar | waybar | Quickshell (QML) |
 | CI | GitHub Actions | Hydra (self-hosted) | GitHub Actions |
-| Git signing | Empty key | GPG | GPG |
+| Git signing | None yet | GPG | GPG |
 | Flake framework | Hand-rolled mkHost | Hand-rolled | flake-parts |
 | HM structure | Feature files | Feature directories | Category directories |
 | Module pattern | Import composition (+ base options) | Import composition | Import composition |
@@ -64,12 +64,12 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **Secrets management** (sops-nix or agenix) — unblocks real deployment; SSH keys, API tokens, hashed passwords all require this
 
 **When hardware is known:**
-- **GPG commit signing** — both references sign commits; `signingkey = ""` is a stub in `flake.nix`
+- **GPG commit signing** — both references sign commits; add a `signingkey` hmArg in `flake.nix` + `programs.gpg` in HM
 - **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); revisit for `work-laptop` once hardware is known
 
 **Only matters with multiple real hosts:**
 - **Tailscale** — both repos use it to mesh hosts; irrelevant until `minimal` is deployed somewhere
-- **Binary cache / Cachix** — worth it once custom derivations take time to build; pointless while `pkgs/` is empty
+- **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) and a waybar patch so far
 
 **Advanced / optional:**
 - **Impermanence** — ephemeral root forces explicit declaration of all persistent state; very clean but requires upfront planning
@@ -82,4 +82,4 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **`statix` + `deadnix` in CI** — `lint` job in `.github/workflows/ci.yml`
 - **Dev shell** — `nix develop` gives nixfmt, statix, deadnix, nil; defined in `flake.nix`
 - **Specialisations for `work-laptop`** — `powersave` boot entry in `hosts/work-laptop/default.nix`
-- **Secure boot** — `hosts/common/optional/lanzaboote.nix` ready; import after running `sbctl create-keys` + `sbctl enroll-keys`
+- **Secure boot** — Limine's `boot.loader.limine.secureBoot` ready; enable after running `sbctl create-keys` + `sbctl enroll-keys`

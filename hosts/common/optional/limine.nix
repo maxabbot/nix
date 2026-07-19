@@ -39,8 +39,26 @@ in
       graphicalTerminal = {
         foreground = c "fg";
         brightForeground = c "fgBrighter";
-        palette = colors [ "bg0" "red" "green" "yellow" "blue" "purple" "aqua" "grayBright" ];
-        brightPalette = colors [ "gray" "red" "green" "yellow" "blue" "purple" "aqua" "fg" ];
+        palette = colors [
+          "bg0"
+          "red"
+          "green"
+          "yellow"
+          "blue"
+          "purple"
+          "aqua"
+          "grayBright"
+        ];
+        brightPalette = colors [
+          "gray"
+          "red"
+          "green"
+          "yellow"
+          "blue"
+          "purple"
+          "aqua"
+          "fg"
+        ];
       };
     };
   };

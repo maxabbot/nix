@@ -203,6 +203,24 @@ in
     # syncthingtray's default command already passes --wait.
     xsession.preferStatusNotifierItems = true; # nm-applet --indicator (SNI)
 
+    # Polkit authentication agent — GUI privilege prompts (gparted, virt-manager,
+    # flatpak system installs). polkit_gnome's binary lives in libexec (never on
+    # PATH), so it must be referenced by store path; nothing else in the session
+    # provides an agent — without one, auth prompts silently never appear.
+    systemd.user.services.polkit-gnome-agent = {
+      Unit = {
+        Description = "polkit-gnome authentication agent";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
     services = {
       network-manager-applet.enable = true;
       syncthing.tray.enable = true;

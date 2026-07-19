@@ -45,7 +45,7 @@ nix run github:nix-community/nixos-anywhere -- \
   nixos@<ip>
 ```
 
-> Default disk is `/dev/nvme0n1` — check with `lsblk` and update `hosts/home-desktop/disk-config.nix` if needed.
+> home-desktop targets `/dev/nvme1n1` (the 1.8 TB NixOS disk) — `/dev/nvme0n1` is the **Windows** disk, don't touch it. Confirm with `lsblk` (match by size) before running; disko reformats whatever `hosts/<host>/disk-config.nix` points at.
 
 ---
 

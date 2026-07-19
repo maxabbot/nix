@@ -22,12 +22,11 @@ hl.on("hyprland.start", function()
     require("wallpaper")
     -- swaync replaced by Quickshell's NotificationServer (Shell.qml)
     hl.exec_cmd("playerctld")
-    hl.exec_cmd("/run/current-system/sw/libexec/polkit-gnome-authentication-agent-1")
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
-    -- nm-applet + syncthingtray are systemd user services
-    -- (modules/home/wm/hyprland.nix) — no sleep-racing the tray here.
-    hl.exec_cmd("gammastep")
+    -- nm-applet + syncthingtray + the polkit agent are systemd user services
+    -- (modules/home/wm/hyprland.nix); gammastep is one too (HM
+    -- services.gammastep) — exec'ing them here starts duplicates.
     hl.exec_cmd("quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml")
 end)
 

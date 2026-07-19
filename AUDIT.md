@@ -5,6 +5,13 @@ the Quickshell settings expansion + Waybar-first refactor).
 Previous audit (2026-06-10) is in git history; its findings were all remediated except
 the two carried forward below (S1, B-xorg).
 
+> **2026-07-18 update:** the history has since been squashed to a single init commit —
+> the branch and the 2026-06-10 audit referenced above no longer exist in git history.
+> Since this audit: `nix.gc` → `programs.nh.clean` (obsoleting the §3 note), Limine
+> replaced systemd-boot on the GUI hosts (lanzaboote input/file removed), and a
+> follow-up audit fixed accumulated doc drift plus two session bugs (missing polkit
+> agent, duplicate gammastep). S1 (secrets) and B-xorg remain open.
+
 Tooling results: `nix flake check --no-build` **passes** for all four hosts.
 `deadnix` clean. `shellcheck` clean on all scripts. `statix` reported four
 repeated-key warnings (fixed in this pass). `nix fmt` had drifted on two files

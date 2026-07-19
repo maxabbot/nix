@@ -4,13 +4,15 @@
 
   hardware.nvidia = {
     modesetting.enable = true;
-    powerManagement.enable = true;
-    powerManagement.finegrained = false;
-    # The kernel-suspend-notifier path (default on for open modules + driver
-    # >= 595) intermittently fails to restore VRAM on resume — green stale
-    # framebuffer even on the TTY. Force the systemd nvidia-suspend/resume
-    # services instead.
-    powerManagement.kernelSuspendNotifier = false;
+    powerManagement = {
+      enable = true;
+      finegrained = false;
+      # The kernel-suspend-notifier path (default on for open modules + driver
+      # >= 595) intermittently fails to restore VRAM on resume — green stale
+      # framebuffer even on the TTY. Force the systemd nvidia-suspend/resume
+      # services instead.
+      kernelSuspendNotifier = false;
+    };
     open = true;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;

@@ -1,5 +1,5 @@
 {
-  description = "NixOS system configuration — home-desktop / work-laptop / minimal";
+  description = "NixOS system configuration — home-desktop / work-laptop / vm / minimal";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -19,11 +19,6 @@
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

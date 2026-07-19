@@ -30,7 +30,7 @@ Panel/overlay layer for the Hyprland hosts: notification server (replaces swaync
 
 **`Settings.qml`** — Tabbed panel (top-right, drops from Waybar's ⚙ button, `Super+I`). Sidebar of tabs on the left, `StackLayout` of pages on the right. Waybar module clicks deep-link to a tab via `qs_manager.sh toggle settings <tab>`.
 
-Tabs, in order: **Control · Wi-Fi · Bluetooth · KDE Connect · Audio · Monitors · Wallpaper · Theme · Keyboard · Input · Battery (laptops) · Drives · System · Nix**. Each page is a plain `Item` (no window chrome). A tab = one entry in `Settings.qml`'s `tabs` array **plus** the matching page in its `StackLayout` (same order); the id must also appear in `Shell.qml`'s `settingsTabs`. Tabs needing a pre-scan hook into `qs_manager.sh` `PREP_TAB`.
+Tabs, in order: **Control · Wi-Fi · Bluetooth · KDE Connect · Audio · Monitors · Wallpaper · Keyboard · Input · Battery (laptops) · Drives · System · Nix**. Each page is a plain `Item` (no window chrome). A tab = one entry in `Settings.qml`'s `tabs` array **plus** the matching page in its `StackLayout` (same order); the id must also appear in `Shell.qml`'s `settingsTabs`. Tabs needing a pre-scan hook into `qs_manager.sh` `PREP_TAB`.
 
 **`ControlCenter.qml`** — Quick toggles grid + sliders. Tiles: Wi-Fi (`nmcli`), Bluetooth (`bluetoothctl`), Night Light, Do Not Disturb, Power Profile cycle (`powerprofilesctl`), Caffeine (toggles `hypridle`), Airplane (both radios), Mic mute (PipeWire source), Game Mode (`hyprctl` blur/anim), and Tailscale (only when the CLI is present). Brightness + night-light Warmth sliders. Night light is a manual override over the gammastep service, tracked by a runtime flag file. Polls state on open. Also carries a **weather** readout (`wttr.in`, IP-located, no key, cached 30 min) and a **focus/Pomodoro timer** (25/5, start·pause·reset·skip) whose state lives in this page so it keeps running while the panel is closed and notifies on each phase change.
 
@@ -63,14 +63,14 @@ Tabs, in order: **Control · Wi-Fi · Bluetooth · KDE Connect · Audio · Monit
 ## Launching
 
 ```bash
-# Auto-started on first panel toggle via qs_manager.sh zombie watchdog.
-# Manual launch:
+# Autostarted at login by hyprland.lua; qs_manager.sh's zombie watchdog
+# respawns it on the next panel toggle if it dies. Manual launch:
 quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml
 
 # Toggle the Settings panel on a given tab:
 ~/.config/hypr/scripts/qs_manager.sh toggle settings <tab>
 # Tabs: control, network, bluetooth, kdeconnect, audio, monitors, wallpaper,
-#       theme, keyboard, input, battery, disks, sysinfo, nix
+#       keyboard, input, battery, disks, sysinfo, nix
 # (A bare tab name as <name> also works — it maps to the matching Settings tab.)
 # Standalone pop-ups: notifications, keybinds, clipboard, screenshot, power, overview
 # OSD (volume/brightness) is automatic — trigger via: qs_manager.sh osd <volume|brightness>

@@ -25,8 +25,10 @@ nix --extra-experimental-features 'nix-command flakes' run github:nix-community/
 
 nixos-anywhere SSHs in, runs disko to partition/format (`hosts/home-desktop/disk-config.nix`), then installs NixOS.
 
-> **Check disk first:** on home-desktop, `nvme1n1` is the Windows drive — NixOS goes on `nvme0n1`.
-> Run `lsblk` on the live system and verify `hosts/home-desktop/disk-config.nix` targets the right disk.
+> **Check disk first:** on home-desktop NixOS lives on **`nvme1n1`** (the 1.8 TB disk, which
+> `hosts/home-desktop/disk-config.nix` targets) — **`nvme0n1` is the 477 GB Windows drive, do not
+> touch it.** NVMe names can swap between boots/firmware changes, so run `lsblk` on the live
+> system and match by **size** before letting disko loose.
 
 ---
 
@@ -38,7 +40,7 @@ nixsrch git  # verifies nix search works
 nvidia-smi   # desktop only
 ```
 
-See `TODO.md` section 8 for the full post-install checklist.
+See the post-install checklist in `TODO.md`.
 
 ---
 
@@ -68,16 +70,18 @@ nixos-anywhere completes but NixOS doesn't appear in the firmware boot menu. Com
 
 **Step 1 — one-time boot menu (no ISO needed)**
 
-On POST hit `F8`, `F11`, or `F12`. Look for `Linux Boot Manager` or an entry referencing `nvme0n1`. If it boots, go into BIOS and move it to the top permanently.
+On POST hit `F8`, `F11`, or `F12`. Look for `Limine` (or `Linux Boot Manager` on the systemd-boot `minimal` host) or an entry referencing the NixOS disk. If it boots, go into BIOS and move it to the top permanently.
 
 **Step 2 — re-register the EFI entry from the NixOS ISO**
 
-```bash
-lsblk   # confirm partition layout
+The GUI hosts boot Limine; its NVRAM entry is labelled `Limine` and points at `\EFI\limine\BOOTX64.EFI` (`minimal` still uses systemd-boot at `\EFI\systemd\systemd-bootx64.efi`):
 
-efibootmgr -c -d /dev/nvme0n1 -p 1 \
-  -L "Linux Boot Manager" \
-  -l '\EFI\systemd\systemd-bootx64.efi'
+```bash
+lsblk   # confirm which disk holds the ESP (home-desktop: nvme1n1p1)
+
+efibootmgr -c -d /dev/nvme1n1 -p 1 \
+  -L "Limine" \
+  -l '\EFI\limine\BOOTX64.EFI'
 
 efibootmgr -v   # verify entry appears
 reboot
@@ -88,9 +92,11 @@ reboot
 Some ASUS/MSI boards don't persist EFI variables written by the OS:
 
 ```bash
-mount /dev/nvme0n1p1 /mnt
+mount /dev/nvme1n1p1 /mnt
 mkdir -p /mnt/EFI/BOOT
-cp /mnt/EFI/systemd/systemd-bootx64.efi /mnt/EFI/BOOT/BOOTX64.EFI
+cp /mnt/EFI/limine/BOOTX64.EFI /mnt/EFI/BOOT/BOOTX64.EFI
 umount /mnt
 reboot
 ```
+
+(work-laptop's USB install already lives at the fallback path — `efiInstallAsRemovable` — see the efibootmgr note in `hosts/work-laptop/default.nix` to re-pin its NVRAM entry.)

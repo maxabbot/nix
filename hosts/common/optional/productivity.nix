@@ -78,31 +78,37 @@ in
     # mouse/keyboard correctly in VMs; kwin is GPU-heavy and breaks input.
     # kdePackages.breeze must be in extraPackages so breeze_cursors is findable
     # on disk — silentSDDM's module only ships its own propagatedBuildInputs.
-    displayManager.sddm.extraPackages = [ pkgs.kdePackages.breeze ];
-    displayManager.sddm.settings.Theme = {
-      CursorTheme = "breeze_cursors";
-      CursorSize = "24";
+    displayManager.sddm = {
+      extraPackages = [ pkgs.kdePackages.breeze ];
+      settings = {
+        Theme = {
+          CursorTheme = "breeze_cursors";
+          CursorSize = "24";
+        };
+        # ── Greeter cursor (the actual fix) ────────────────────────────────────
+        # The KWin greeter compositor draws the pointer, but SDDM starts it
+        # through sddm-helper, which RESETS the environment and injects ONLY the
+        # string in sddm.conf's [General] GreeterEnvironment. Neither the systemd
+        # unit's env nor sddm.extraPackages reaches KWin — so it can't find
+        # breeze_cursors and logs "Unable to load any cursor theme", drawing
+        # nothing. (kcminputrc below supplies the theme NAME; this supplies the
+        # search PATH to the files.)
+        # silentSDDM's module hardcodes GreeterEnvironment (QML2_IMPORT_PATH +
+        # QT_IM_MODULE), so mkForce over it, re-adding those two and appending
+        # the cursor vars. QML2_IMPORT_PATH uses the stable /run/current-system
+        # symlink.
+        General.GreeterEnvironment = lib.mkForce (
+          lib.concatStringsSep "," [
+            "QML2_IMPORT_PATH=/run/current-system/sw/share/sddm/themes/silent/components/"
+            "QT_IM_MODULE=qtvirtualkeyboard"
+            "XCURSOR_PATH=${pkgs.kdePackages.breeze}/share/icons"
+            "XCURSOR_THEME=breeze_cursors"
+            "XCURSOR_SIZE=24"
+            "KWIN_FORCE_SW_CURSOR=1"
+          ]
+        );
+      };
     };
-    # ── Greeter cursor (the actual fix) ────────────────────────────────────────
-    # The KWin greeter compositor draws the pointer, but SDDM starts it through
-    # sddm-helper, which RESETS the environment and injects ONLY the string in
-    # sddm.conf's [General] GreeterEnvironment. Neither the systemd unit's env
-    # nor sddm.extraPackages reaches KWin — so it can't find breeze_cursors and
-    # logs "Unable to load any cursor theme", drawing nothing. (kcminputrc below
-    # supplies the theme NAME; this supplies the search PATH to the files.)
-    # silentSDDM's module hardcodes GreeterEnvironment (QML2_IMPORT_PATH +
-    # QT_IM_MODULE), so mkForce over it, re-adding those two and appending the
-    # cursor vars. QML2_IMPORT_PATH uses the stable /run/current-system symlink.
-    displayManager.sddm.settings.General.GreeterEnvironment = lib.mkForce (
-      lib.concatStringsSep "," [
-        "QML2_IMPORT_PATH=/run/current-system/sw/share/sddm/themes/silent/components/"
-        "QT_IM_MODULE=qtvirtualkeyboard"
-        "XCURSOR_PATH=${pkgs.kdePackages.breeze}/share/icons"
-        "XCURSOR_THEME=breeze_cursors"
-        "XCURSOR_SIZE=24"
-        "KWIN_FORCE_SW_CURSOR=1"
-      ]
-    );
     # ── PipeWire audio stack ────────────────────────────────────────────────────
     pipewire = {
       enable = true;

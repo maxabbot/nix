@@ -119,13 +119,27 @@ in
     security.polkit.enable = true;
     security.rtkit.enable = true; # required by PipeWire real-time scheduling
 
-    programs.gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
-    };
+    programs = {
+      gnupg.agent = {
+        enable = true;
+        enableSSHSupport = true;
+      };
 
-    # ── Shell ──────────────────────────────────────────────────────────────────
-    programs.zsh.enable = true;
+      # ── Shell ────────────────────────────────────────────────────────────────
+      zsh.enable = true;
+
+      # nh clean replaces nix.gc (the two conflict): unlike nix-collect-garbage it
+      # also prunes user/HM profile generations and stale result gcroots.
+      nh = {
+        enable = true;
+        flake = "/etc/nixos";
+        clean = {
+          enable = true;
+          dates = "weekly";
+          extraArgs = "--keep 5 --keep-since 14d";
+        };
+      };
+    };
 
     # ── Primary user ───────────────────────────────────────────────────────────
     users.users.${cfg.username} = {
@@ -259,17 +273,5 @@ in
     # Compressed RAM swap. Gives memory pressure somewhere to spill during large
     # rebuilds without a disk partition (works on the portable USB-booted hosts).
     zramSwap.enable = true;
-
-    # nh clean replaces nix.gc (the two conflict): unlike nix-collect-garbage it
-    # also prunes user/HM profile generations and stale result gcroots.
-    programs.nh = {
-      enable = true;
-      flake = "/etc/nixos";
-      clean = {
-        enable = true;
-        dates = "weekly";
-        extraArgs = "--keep 5 --keep-since 14d";
-      };
-    };
   };
 }

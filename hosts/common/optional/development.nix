@@ -26,7 +26,7 @@
     cloc # count lines of code by language
     tig
     sqlite
-    yq
+    yq-go # mikefarah yq — the python `yq` wrapper would be a second, conflicting bin/yq
     uv
     quickemu
     quickgui

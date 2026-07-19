@@ -53,10 +53,14 @@
   # gaming.nix, whose vm host has no DP-3). Mirrors gaming-toggle.sh's -W/-H/-r.
   # --rt requests realtime scheduling for lower input latency.
   programs.steam.gamescopeSession.args = [
-    "-W" "2560"
-    "-H" "1440"
-    "-r" "165"
-    "-O" "DP-3"
+    "-W"
+    "2560"
+    "-H"
+    "1440"
+    "-r"
+    "165"
+    "-O"
+    "DP-3"
     "--rt"
   ];
 

@@ -73,7 +73,9 @@ in
         nixsrch = "nix search nixpkgs";
         nixshell = "nix shell nixpkgs#";
         nixtmp = "nix-shell -p";
-        gcclean = "sudo nix-collect-garbage -d && sudo nix store optimise";
+        # Same retention as base.nix's weekly programs.nh.clean timer — a raw
+        # nix-collect-garbage -d here would wipe every rollback generation.
+        gcclean = "nh clean all --keep 5 --keep-since 14d";
         flkupd = "nix flake update";
 
         # System management (systemd)

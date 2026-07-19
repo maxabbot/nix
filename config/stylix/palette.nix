@@ -7,21 +7,21 @@
 # gruvbox-material accent names. The base16 slot each value fills is noted
 # so the mapping in stylix.nix stays auditable.
 #
-# Not covered (hand-maintained copies — keep in sync when changing a colour):
-#   config/hypr-scripts/quickshell/Theme.qml   (QML-side single source)
-#   config/hypr/hyprlock.conf, config/hypr/shortcuts.css,
-#   config/hypr/hyprland.lua, config/fastfetch/config.jsonc
+# Plain-text configs (Theme.qml, hyprlock.conf, shortcuts.css, hyprland.lua)
+# are rendered from this palette at build time via palette-subst.nix — write
+# @name@ / @name-hex@ / @name-rgb@ placeholders there, never literal hex.
+# Only config/fastfetch/config.jsonc is untemplated (named ANSI colours).
 {
   # ── Backgrounds (dark → light) ─────────────────────────────────────────────
-  bg0Hard = "#1d2021"; #          hard background (waybar bar, active-pill text)
+  bg0Hard = "#1d2021"; # hard background (waybar bar, active-pill text)
   bg0 = "#282828"; # base00       default background
-  bgAlt = "#32302f"; #            soft background (inputs, tiles)
+  bgAlt = "#32302f"; # soft background (inputs, tiles)
   bg1 = "#3c3836"; # base01       status bar / capsule background
   bg2 = "#504945"; # base02       selection background
   bg3 = "#665c54"; # base03       mid background
-  bg4 = "#7c6f64"; #              lightest background / dimmest grey
+  bg4 = "#7c6f64"; # lightest background / dimmest grey
   gray = "#928374"; # base04      comments / dim foreground
-  grayBright = "#a89984"; #       brightest grey (muted text on soft bg)
+  grayBright = "#a89984"; # brightest grey (muted text on soft bg)
 
   # ── Foregrounds (default → light) ──────────────────────────────────────────
   fg = "#d4be98"; # base05        default foreground

@@ -26,7 +26,7 @@ in
   home.packages =
     with pkgs;
     [
-      yq-go
+      # yq comes from development.nix (yq-go, system-wide)
       gh
       mkcert
       httpie

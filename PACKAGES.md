@@ -26,7 +26,7 @@ A "what did I set up" reference. For keybinds see `docs/SHORTCUTS.md`, for struc
 - **just** — command/task runner (`justfile`); pairs with devshells
 - **watchexec** — run a command whenever files change
 - **tldr** — simplified man-page examples (`tealdeer` client)
-- **glow** — render markdown in the terminal
+- **glow** / **mdr** — render markdown in the terminal
 
 Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `g` (git). See `docs/SHORTCUTS.md`.
 
@@ -43,7 +43,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - **awww** — wallpaper daemon
 - **hyprlock** — lockscreen; triggered on idle (5 min) and suspend
 - **hypridle** — idle daemon; locks at 5 min, suspends at 15 min
-- **Gammastep** — night light; manual lat/long per host, 6500K day → 3500K night
+- **Gammastep** — night light; shared lat/long from `flake.nix` (Christchurch), 6500K day → 3500K night
 - **Quickshell notification centre** (`Super+N`) — replaces swaync
 - **cliphist** — clipboard history, browsed via the Quickshell clipboard panel (`Super+Shift+V`)
 - **Quickshell power menu** (`Super+Shift+E`) — replaces wlogout
@@ -68,14 +68,21 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 | mpv | Video player (vim keybinds, hardware decode) |
 | VLC | Media fallback |
 | Calibre | Ebook manager |
+| PDF Arranger | Reorder / merge PDF pages |
+| Master PDF Editor | PDF editing |
+| Rnote | Handwritten notes / annotation |
+| imv | Image viewer (MIME default for images) |
+| FreeTube | YouTube client |
 | Spotify | Music |
 | Stremio | Streaming |
 | qBittorrent | Torrents |
+| Cheese | Webcam |
 | Veracrypt | Encrypted volumes |
 | rclone | Cloud storage sync |
 | nvtop | GPU monitor |
 | OpenRGB | RGB lighting control |
 | btop | System monitor (Gruvbox, vim keys) |
+| glances | System monitor (all-in-one overview) |
 | fastfetch | System info |
 
 ---
@@ -102,17 +109,29 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - `ffmpeg`, `imagemagick`, `pandoc`
 - `quickemu` / `quickgui` — VM management without libvirt
 - Podman + Docker-compat aliases (`d ps`, `d images`, etc.)
-- kubectl, helm, opentofu, awscli2, azure-cli, google-cloud-sdk, doctl
+- kubectl, kubectx, helm, opentofu, awscli2, azure-cli, google-cloud-sdk, doctl
 - `granted` (`assume` — multi-account AWS role switching), `aws-sam-cli` (local Lambda/API GW), `awslogs` (tail CloudWatch), `localstack` (local AWS emulation), `steampipe` (query AWS as SQL)
 - `visidata` (TUI table explorer), `miller`/`mlr` (CSV/JSON reshaping), `dasel` (jq across formats), `qsv` (fast CSV ops)
-- DBeaver, Beekeeper Studio, mycli, litecli, DuckDB
+- DBeaver, Beekeeper Studio, mycli, litecli · DuckDB (home-desktop & vm only)
 - `gh` — GitHub CLI
 - `nix-tree`, `nix-diff`, `nixpkgs-review`, `nil` — Nix dev tools
 - `claude-code` — AI assistant CLI
 
 ---
 
-## Creative (home-desktop only)
+## Terminal toys
+
+- **cava** — audio visualiser, Gruvbox gradient (`Super+Shift+C` opens it on the spare monitor)
+- **spotify-player** — Spotify TUI (`spt`); Spotify Connect device "max-tui"
+- **ncspot** — lightweight ncurses Spotify client
+- **wego** — terminal weather forecast graphs (`wttr` alias hits wttr.in instead)
+- **chafa** — render images/video as terminal graphics
+- **harlequin** — SQL IDE in the terminal (DuckDB/SQLite/Postgres)
+- Games: `2048-in-terminal`, `nudoku` (sudoku), `tetris` (vitetris)
+
+---
+
+## Creative (home-desktop & vm)
 
 | App | Purpose |
 |-----|---------|
@@ -122,7 +141,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ---
 
-## Streaming & Content (home-desktop only)
+## Streaming & Content (home-desktop & vm; Apollo/Moonlight home-desktop only)
 
 | App | Purpose |
 |-----|---------|
@@ -136,7 +155,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ---
 
-## Gaming (home-desktop only)
+## Gaming (home-desktop & vm)
 
 - **Steam** — Proton GE pre-installed, Gamescope session available
 - **Gamemode** — CPU governor boost on game launch (renice 10)

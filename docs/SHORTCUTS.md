@@ -25,11 +25,13 @@ Gruvbox Material Dark · home-desktop
 | Super + Shift + ← ↑ ↓ → | Move window |
 | Super + Ctrl + ← ↑ ↓ → | Resize window |
 | **Workspaces** | |
-| Super + 1-9 | Switch workspace |
-| Super + Shift + 1-9 | Move window to workspace |
+| Super + 1-0 | Switch workspace (1–10) |
+| Super + Shift + 1-0 | Move window to workspace |
 | Super + Scroll | Next / prev workspace |
 | Super + S | Toggle scratchpad |
 | Super + Shift + S | Send to scratchpad |
+| Super + Grave | Dropdown terminal |
+| Super + Shift + Grave | btop panel |
 | **System** | |
 | Super + L | Lock screen |
 | Super + Shift + L | Suspend |

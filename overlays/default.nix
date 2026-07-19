@@ -5,7 +5,7 @@ final: prev: {
 
   # nixpkgs still ships 0.10.7; 1.0.0 adds frame-rate-independent smoothing and
   # better PipeWire error handling. Drop this override once nixpkgs catches up.
-  cava = prev.cava.overrideAttrs (old: rec {
+  cava = prev.cava.overrideAttrs (_old: rec {
     version = "1.0.0";
     src = final.fetchFromGitHub {
       owner = "karlstav";
