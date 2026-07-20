@@ -236,7 +236,9 @@ in
             before_sleep_cmd = "loginctl lock-session";
             # pidof guard here too: killing the live hyprlock on resume made
             # Hyprland flash its red "lockscreen died" fallback screen every wake.
-            after_sleep_cmd = "hyprctl dispatch dpms on; pidof hyprlock || hyprlock";
+            # wake-monitors.sh, not `hyprctl dispatch dpms on` — dispatch args are
+            # Lua, so the bare `on` is a parse error and the screens stay black.
+            after_sleep_cmd = "bash ~/.config/hypr/scripts/wake-monitors.sh; pidof hyprlock || hyprlock";
           };
           listener = [
             {
