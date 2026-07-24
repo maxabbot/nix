@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# autoclick — hold `g` to left-click at ~100 CPS, via theclicker.
+#
+#   -d <device>  keyboard to read the trigger key from. Defaults to the NuPhy's
+#                if01 interface — the plain "NuPhy Air75 V3" node (if00) does NOT
+#                emit the letter keys, so `g` is only seen on if01. Uses the
+#                stable /dev/input/by-id path (eventN renumbers across reboots).
+#                Override on other hosts:  autoclick "AT Translated"
+#   -l 34        bind LEFT autoclicker to keycode 34 (KEY_G)
+#   -H           hold mode: clicks only while the bind (g) is held down
+#   -c 10        10 ms between clicks ≈ 100 clicks/second
+#
+# The `g` key is NOT grabbed, so it still types/acts normally while held. Clicks
+# land wherever the real cursor is — position the pointer first, then hold g.
+# Ctrl+C to quit.
+set -euo pipefail
+device="${1:-/dev/input/by-id/usb-NuPhy_Air75_V3_NuPhy_Keybord_0720-if01-event-kbd}"
+exec theclicker run -d "$device" -l 34 -H -c 10

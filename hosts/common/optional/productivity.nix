@@ -199,6 +199,11 @@ in
     };
   };
 
+  # /dev/uinput for synthetic input (theclicker autoclicker emits clicks through a
+  # virtual device). TAG+="uaccess" grants the active-session user access; the
+  # primary user is also in the "input" group (base.nix) to read the keyboard.
+  hardware.uinput.enable = true;
+
   # ── Wayland session variables ─────────────────────────────────────────────────
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -254,6 +259,7 @@ in
     papirus-icon-theme
     yazi
     quickshell
+    theclicker # autoclicker CLI (x11/wayland, evdev/uinput); wrapped as `autoclick`
   ];
 
 }
