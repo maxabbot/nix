@@ -20,7 +20,9 @@ in
   boot.loader.limine = {
     enable = true;
     # Cap the boot menu so old generations don't accumulate as stale entries.
-    maxGenerations = 10;
+    # This only limits what the menu lists — generations still exist on disk
+    # until garbage-collected (`nh clean all`).
+    maxGenerations = 5;
 
     style = {
       wallpapers = [ ../../../config/limine/gruvbox-rainbow-nix.png ];
