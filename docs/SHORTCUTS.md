@@ -28,6 +28,7 @@ Gruvbox Material Dark · home-desktop
 | Super + 1-0 | Switch workspace (1–10) |
 | Super + Shift + 1-0 | Move window to workspace |
 | Super + Scroll | Next / prev workspace |
+| Super + Alt + ← → | Move workspace to monitor |
 | Super + S | Toggle scratchpad |
 | Super + Shift + S | Send to scratchpad |
 | Super + Grave | Dropdown terminal |
@@ -44,6 +45,7 @@ Gruvbox Material Dark · home-desktop
 | Super + Shift + P | Colour picker |
 | Super + Period | Emoji picker |
 | Super + Shift + G | Toggle gaming mode |
+| Super + Shift + T | Toggle TV output |
 | **Screenshots** | |
 | Print | Screenshot picker |
 

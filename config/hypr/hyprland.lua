@@ -28,6 +28,25 @@ hl.on("hyprland.start", function()
     -- (modules/home/wm/hyprland.nix); gammastep is one too (HM
     -- services.gammastep) — exec'ing them here starts duplicates.
     hl.exec_cmd("quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml")
+
+    -- Initial workspace placement for the shared dynamic pool: ws1→primary,
+    -- ws2→secondary. The tertiary output (TV) is deliberately left unseeded —
+    -- it stays "connected" while the TV is in standby, so anything placed there
+    -- lands on a screen that may not be visible (see the toggle bind below).
+    -- Workspaces stay unbound (freely movable afterwards); this just seeds the
+    -- starting layout, overriding Hyprland's per-monitor auto-assignment.
+    -- "Focus the workspace, then move the now-active workspace to the target
+    -- monitor" is order-independent: it works regardless of which monitor boot
+    -- happened to auto-place each ws on. Primary is done last so the cursor
+    -- ends up focused there.
+    local function place(monName, ws)
+        if monName and monName ~= "" then
+            hl.dispatch(hl.dsp.focus({ workspace = ws }))
+            hl.dispatch(hl.dsp.workspace.move({ monitor = monName }))
+        end
+    end
+    place(mon.secondary, 2)
+    place(mon.primary, 1)
 end)
 
 --------------------
@@ -242,6 +261,12 @@ end
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), { description = "Workspaces | Next" })
 hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }), { description = "Workspaces | Prev" })
 
+-- Move the current workspace (and everything on it) to the monitor left/right.
+-- Shared-pool workspaces are unbound, so they carry over and stay put there;
+-- focus follows the workspace. ("l"/"r" are direction monitor selectors.)
+hl.bind(mainMod .. " + ALT + left",  hl.dsp.workspace.move({ monitor = "l" }), { description = "Workspaces | Move to monitor left" })
+hl.bind(mainMod .. " + ALT + right", hl.dsp.workspace.move({ monitor = "r" }), { description = "Workspaces | Move to monitor right" })
+
 -- Scratchpad
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"),             { description = "Workspaces | Toggle scratchpad" })
 -- Toggle-move: windows already in a scratchpad go back to the monitor's
@@ -330,6 +355,37 @@ hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "System | Emoji picker" })
+
+-- Toggle the tertiary output (TV) on/off. A TV in standby usually keeps its
+-- HDMI link up — HPD stays asserted and the EDID readable — so the output
+-- stays "connected" and keeps holding workspaces on a screen you can't see.
+-- Disabling drops it entirely (its workspaces reflow onto the remaining
+-- monitors); re-enabling restores the Nix-configured geometry via monitors.lua.
+-- hl.get_monitors() omits disabled outputs, which is the state probe here.
+if mon.tertiary ~= "" then
+    hl.bind(mainMod .. " + SHIFT + T", function()
+        local enabled = false
+        for _, m in ipairs(hl.get_monitors()) do
+            if m.name == mon.tertiary then enabled = true end
+        end
+        -- Confirmation toast (Quickshell NotificationServer, as used by the
+        -- other hypr-scripts). The synchronous hint makes a repeated toggle
+        -- replace the previous toast instead of stacking.
+        local function toast(body)
+            hl.dispatch(hl.dsp.exec_cmd(
+                'notify-send -a Display -t 2000 '
+                .. '-h string:x-canonical-private-synchronous:tv-toggle '
+                .. '"TV output" "' .. body .. '"'))
+        end
+        if enabled then
+            hl.monitor({ output = mon.tertiary, disabled = true })
+            toast("Disabled — " .. mon.tertiary .. " released, workspaces moved")
+        else
+            mon.enable_tertiary()
+            toast("Enabled — " .. mon.tertiary)
+        end
+    end, { description = "System | Toggle TV output" })
+end
 
 -- Screenshots
 hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })

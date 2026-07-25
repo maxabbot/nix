@@ -255,9 +255,8 @@ let
       # "workspace e+1" syntax fails silently (see hyprland.lua binds).
       on-scroll-up = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e+1' })\"";
       on-scroll-down = "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e-1' })\"";
-      persistent-workspaces = {
-        "*" = 5;
-      };
+      # No persistent-workspaces: only occupied workspaces (plus the active
+      # one) render, so empty/blank workspaces stay hidden until used.
     };
 
     "${winModule}" = {

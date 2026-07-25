@@ -10,9 +10,10 @@ let
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
 
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
-  # into a Lua hl.monitor({}) call.
-  monitorToLua =
-    s:
+  # into a Lua hl.monitor({}) call. `extra` appends further spec fields
+  # verbatim (e.g. ", disabled = false" for the re-enable helper below).
+  monitorToLuaSpec =
+    extra: s:
     let
       parts = builtins.map lib.strings.trim (lib.splitString "," s);
       output = builtins.elemAt parts 0;
@@ -22,35 +23,20 @@ let
       hasTransform = builtins.length parts >= 6;
       transformVal = if hasTransform then builtins.elemAt parts 5 else "";
     in
-    ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale}${lib.optionalString hasTransform ", transform = ${transformVal}"} })'';
+    ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale}${lib.optionalString hasTransform ", transform = ${transformVal}"}${extra} })'';
 
-  # Generate hl.workspace_rule() lines for pinning workspaces to monitors
-  workspaceRules =
-    (lib.optionals (cfg.monitors.primaryName != "") [
-      ''hl.workspace_rule({ workspace = "1", monitor = "${cfg.monitors.primaryName}", default = true })''
-      ''hl.workspace_rule({ workspace = "2", monitor = "${cfg.monitors.primaryName}" })''
-      ''hl.workspace_rule({ workspace = "3", monitor = "${cfg.monitors.primaryName}" })''
-    ])
-    ++ (lib.optionals (cfg.monitors.secondary != null) (
-      let
-        secName = lib.head (lib.splitString "," cfg.monitors.secondary);
-      in
-      [
-        ''hl.workspace_rule({ workspace = "4", monitor = "${secName}", default = true })''
-        ''hl.workspace_rule({ workspace = "5", monitor = "${secName}" })''
-        ''hl.workspace_rule({ workspace = "6", monitor = "${secName}" })''
-      ]
-    ))
-    ++ (lib.optionals (cfg.monitors.tertiary != null) (
-      let
-        terName = lib.head (lib.splitString "," cfg.monitors.tertiary);
-      in
-      [
-        ''hl.workspace_rule({ workspace = "7", monitor = "${terName}", default = true })''
-        ''hl.workspace_rule({ workspace = "8", monitor = "${terName}" })''
-        ''hl.workspace_rule({ workspace = "9", monitor = "${terName}" })''
-      ]
-    ));
+  monitorToLua = monitorToLuaSpec "";
+
+  # Workspaces are intentionally NOT pinned to monitors: with no
+  # hl.workspace_rule() monitor binds, all 1–9 are a shared dynamic pool,
+  # freely movable between monitors. The *initial* placement (ws1→primary,
+  # ws2→secondary; the tertiary/TV output is deliberately left unseeded) is
+  # instead set once at startup in config/hypr/hyprland.lua's autostart, using
+  # the connector names exported by monitors.lua below.
+  secName =
+    if cfg.monitors.secondary != null then lib.head (lib.splitString "," cfg.monitors.secondary) else "";
+  terName =
+    if cfg.monitors.tertiary != null then lib.head (lib.splitString "," cfg.monitors.tertiary) else "";
 
   # The generated monitors.lua content
   monitorsLua = ''
@@ -64,8 +50,6 @@ let
       cfg.monitors.primary == null
     ) ''hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })''}
 
-    ${lib.concatStringsSep "\n" workspaceRules}
-
     -- Runtime layout saved from the Quickshell Monitors page — written by
     -- config/hypr-scripts/monitor-layout.sh, not managed by Nix. Applied last
     -- so it wins over the declarations above. loadfile returns nil when the
@@ -74,8 +58,28 @@ let
     local savedLayout = loadfile("${config.home.homeDirectory}/.config/hypr/monitors-local.lua")
     if savedLayout then pcall(savedLayout) end
 
-    -- Consumed by hyprland.lua: cursor.default_monitor (spawn cursor on primary)
-    return { primary = "${cfg.monitors.primaryName}" }
+    -- Re-apply the tertiary output with its configured geometry. Used by the
+    -- TV toggle keybind in hyprland.lua. `disabled = false` is required: the
+    -- flag is sticky, so re-sending the geometry alone will NOT bring a
+    -- disabled output back. No-op when the host has no tertiary monitor.
+    local function enable_tertiary()
+      ${
+        if cfg.monitors.tertiary != null then
+          monitorToLuaSpec ", disabled = false" cfg.monitors.tertiary
+        else
+          "-- (no tertiary monitor on this host)"
+      }
+    end
+
+    -- Consumed by hyprland.lua: cursor.default_monitor (spawn cursor on
+    -- primary) and the startup workspace placement (primary/secondary).
+    -- Absent monitors export "" so callers can skip them.
+    return {
+      primary = "${cfg.monitors.primaryName}",
+      secondary = "${secName}",
+      tertiary = "${terName}",
+      enable_tertiary = enable_tertiary,
+    }
   '';
 
   # The generated env.lua content — per-host env vars plus app choices.
