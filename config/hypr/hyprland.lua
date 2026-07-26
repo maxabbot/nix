@@ -49,6 +49,23 @@ hl.on("hyprland.start", function()
     place(mon.primary, 1)
 end)
 
+-- Tell XWayland which output is primary. Hyprland marks none, and X11 games
+-- pick their fullscreen mode from the RANDR primary — with none set they take
+-- the first output in the list (here DP-2, a 2160x3840 portrait panel), so the
+-- game renders at a portrait resolution and gets letterboxed/stretched into
+-- whatever window it actually got. Also re-asserted on layout changes: the flag
+-- doesn't survive outputs coming and going (the TV toggle bind, monitor wake).
+local function setXPrimary()
+    if mon.primary ~= "" then
+        hl.exec_cmd("xrandr --output " .. mon.primary .. " --primary")
+    end
+end
+
+hl.on("hyprland.start", setXPrimary)
+hl.on("monitor.added", setXPrimary)
+hl.on("monitor.removed", setXPrimary)
+hl.on("monitor.layout_changed", setXPrimary)
+
 --------------------
 ---- SETTINGS ------
 --------------------
@@ -156,7 +173,9 @@ hl.layer_rule({ match = { namespace = "quickshell" },             blur = true,  
 ---------------------
 
 -- Gaming — allow tearing
-hl.window_rule({ match = { class = "steam_app_" },                  immediate = true })
+-- Match strings are regexes matched against the WHOLE class, so a bare
+-- "steam_app_" prefix matches nothing — the ".*" is load-bearing.
+hl.window_rule({ match = { class = "steam_app_.*" },                immediate = true })
 hl.window_rule({ match = { class = "Minecraft" },                   immediate = true })
 -- gaming-toggle.sh runs `gamescope -- steam -bigpicture`; the window class is
 -- "gamescope", not "steam", so the Big Picture rule below never matches it.
@@ -173,12 +192,13 @@ hl.window_rule({ match = { class = "gamescope" },                   immediate = 
 -- time, which is also the only safe moment to do this: moving an already
 -- fullscreen window between monitors segfaults the compositor.
 --
--- Proton reports class "steam_app_<appid>" for the whole Steam library, so the
--- prefix covers it in one line; native ports set their own class and need an
--- entry each. To add one, run `hyprctl clients` while the game is open and copy
--- its class. Skipped on hosts with no fixed primary (work-laptop, kanshi-owned).
+-- Proton reports class "steam_app_<appid>" for the whole Steam library, so one
+-- pattern covers it; native ports set their own class and need an entry each.
+-- To add one, run `hyprctl clients` while the game is open and copy its class
+-- verbatim — these are whole-string regexes, so a prefix alone never matches.
+-- Skipped on hosts with no fixed primary (work-laptop, kanshi-owned).
 local gameClasses = {
-    "steam_app_", -- every Proton-launched Steam title
+    "steam_app_.*", -- every Proton-launched Steam title
     "gamescope", -- gaming-toggle.sh's Big Picture session
     "Minecraft",
     "TotalWarhammer3", -- native (Feral) build, not Proton

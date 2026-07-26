@@ -226,6 +226,7 @@ in
     hyprpicker # eyedropper colour picker (Super+Shift+P → color-picker.sh)
     bemoji # fuzzel emoji/glyph picker (Super+. → emoji-picker.sh)
     ddcutil # external-monitor brightness over DDC/CI (Quickshell Display tab)
+    xorg.xrandr # marks the XWayland primary output (hyprland.lua setXPrimary)
     smartmontools # smartctl — fixed-disk SMART health (smart-status service → Drives tab)
     pavucontrol
     pamixer
