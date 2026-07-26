@@ -166,6 +166,35 @@ hl.window_rule({ match = { class = "Minecraft" },                   immediate = 
 hl.window_rule({ match = { class = "gamescope" },                   fullscreen = true })
 hl.window_rule({ match = { class = "gamescope" },                   immediate = true })
 
+-- Games always open on the primary (landscape gaming) monitor. A new window
+-- otherwise lands on the focused monitor, so launching from a Steam window
+-- parked on the portrait secondary drops the game there — and a fullscreen game
+-- can't be dragged off afterwards. `monitor` is a static rule applied at open
+-- time, which is also the only safe moment to do this: moving an already
+-- fullscreen window between monitors segfaults the compositor.
+--
+-- Proton reports class "steam_app_<appid>" for the whole Steam library, so the
+-- prefix covers it in one line; native ports set their own class and need an
+-- entry each. To add one, run `hyprctl clients` while the game is open and copy
+-- its class. Skipped on hosts with no fixed primary (work-laptop, kanshi-owned).
+local gameClasses = {
+    "steam_app_", -- every Proton-launched Steam title
+    "gamescope", -- gaming-toggle.sh's Big Picture session
+    "Minecraft",
+    "TotalWarhammer3", -- native (Feral) build, not Proton
+}
+
+if mon.primary ~= "" then
+    for _, class in ipairs(gameClasses) do
+        hl.window_rule({ match = { class = class }, monitor = mon.primary })
+    end
+    -- Big Picture launched natively (not under gamescope) — see the rules below.
+    hl.window_rule({
+        match = { class = "steam", title = "Steam Big Picture Mode" },
+        monitor = mon.primary,
+    })
+end
+
 -- Launchers
 -- Big Picture launched natively by gaming-toggle.sh: fullscreen + immediate so
 -- Hyprland direct-scanouts it (no compositor vsync latency).
