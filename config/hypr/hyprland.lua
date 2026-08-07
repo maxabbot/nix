@@ -30,9 +30,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml")
 
     -- Initial workspace placement for the shared dynamic pool: ws1→primary,
-    -- ws2→secondary. The tertiary output (TV) is deliberately left unseeded —
-    -- it stays "connected" while the TV is in standby, so anything placed there
-    -- lands on a screen that may not be visible (see the toggle bind below).
+    -- ws2→secondary.
     -- Workspaces stay unbound (freely movable afterwards); this just seeds the
     -- starting layout, overriding Hyprland's per-monitor auto-assignment.
     -- "Focus the workspace, then move the now-active workspace to the target
@@ -54,7 +52,7 @@ end)
 -- the first output in the list (here DP-2, a 2160x3840 portrait panel), so the
 -- game renders at a portrait resolution and gets letterboxed/stretched into
 -- whatever window it actually got. Also re-asserted on layout changes: the flag
--- doesn't survive outputs coming and going (the TV toggle bind, monitor wake).
+-- doesn't survive outputs coming and going (monitor wake, hotplug).
 local function setXPrimary()
     if mon.primary ~= "" then
         hl.exec_cmd("xrandr --output " .. mon.primary .. " --primary")
@@ -404,37 +402,6 @@ hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "System | Emoji picker" })
-
--- Toggle the tertiary output (TV) on/off. A TV in standby usually keeps its
--- HDMI link up — HPD stays asserted and the EDID readable — so the output
--- stays "connected" and keeps holding workspaces on a screen you can't see.
--- Disabling drops it entirely (its workspaces reflow onto the remaining
--- monitors); re-enabling restores the Nix-configured geometry via monitors.lua.
--- hl.get_monitors() omits disabled outputs, which is the state probe here.
-if mon.tertiary ~= "" then
-    hl.bind(mainMod .. " + SHIFT + T", function()
-        local enabled = false
-        for _, m in ipairs(hl.get_monitors()) do
-            if m.name == mon.tertiary then enabled = true end
-        end
-        -- Confirmation toast (Quickshell NotificationServer, as used by the
-        -- other hypr-scripts). The synchronous hint makes a repeated toggle
-        -- replace the previous toast instead of stacking.
-        local function toast(body)
-            hl.dispatch(hl.dsp.exec_cmd(
-                'notify-send -a Display -t 2000 '
-                .. '-h string:x-canonical-private-synchronous:tv-toggle '
-                .. '"TV output" "' .. body .. '"'))
-        end
-        if enabled then
-            hl.monitor({ output = mon.tertiary, disabled = true })
-            toast("Disabled — " .. mon.tertiary .. " released, workspaces moved")
-        else
-            mon.enable_tertiary()
-            toast("Enabled — " .. mon.tertiary)
-        end
-    end, { description = "System | Toggle TV output" })
-end
 
 -- Screenshots
 hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })

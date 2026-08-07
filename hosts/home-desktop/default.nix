@@ -72,18 +72,8 @@
     displayManager.sddm.wayland.compositor = "kwin";
 
     # ── Audio ──────────────────────────────────────────────────────────────────
-    # Route NVIDIA HDMI audio to the TV (HDMI 3 = Philips FTV); without this,
-    # WirePlumber picks hdmi-stereo (HDMI 0 = U27B35 monitor).
     # Default sink is the Built-in analog line out for general apps (waybar etc).
     pipewire.wireplumber.extraConfig = {
-      "10-nvidia-tv-audio" = {
-        "monitor.alsa.rules" = [
-          {
-            matches = [ { "device.name" = "alsa_card.pci-0000_01_00.1"; } ];
-            actions.update-props."device.profile" = "output:hdmi-stereo-extra2";
-          }
-        ];
-      };
       # Make the onboard analog line-out the default sink. WirePlumber picks the
       # highest-priority node as the auto-default, so raise analog above the
       # NVIDIA HDMI outputs. NOTE: a *manually* chosen default (pavucontrol or the
@@ -210,47 +200,6 @@
                 vrrPolicy = "Never";
                 wideColorGamut = false;
               }
-              {
-                # HDMI-A-1 — Philips FTV 4K TV (3840x2160 @ 30 Hz), index 2
-                allowDdcCi = true;
-                allowSdrSoftwareBrightness = true;
-                autoBrightnessCurve = [
-                  0
-                  0
-                  0
-                  0
-                  0
-                  0
-                ];
-                autoRotation = "InTabletMode";
-                automaticBrightness = false;
-                brightness = 1;
-                colorPowerTradeoff = "PreferEfficiency";
-                colorProfileSource = "sRGB";
-                connectorName = "HDMI-A-1";
-                detectedDdcCi = false;
-                edidHash = "273be949ec959ea226fcebc0e1240bb0";
-                edidIdentifier = "PHL 2947 16843009 10 2022 0";
-                edrPolicy = "always";
-                highDynamicRange = false;
-                iccProfilePath = "";
-                maxBitsPerColor = 0;
-                mode = {
-                  height = 2160;
-                  refreshRate = 60000;
-                  width = 3840;
-                };
-                overscan = 0;
-                rgbRange = "Automatic";
-                scale = 2;
-                sdrBrightness = 200;
-                sdrGamutWideness = 0;
-                sharpness = 0;
-                transform = "Normal";
-                uuid = "";
-                vrrPolicy = "Never";
-                wideColorGamut = false;
-              }
             ];
           }
           {
@@ -259,16 +208,6 @@
               {
                 lidClosed = false;
                 outputs = [
-                  {
-                    enabled = false; # TV — off during SDDM
-                    outputIndex = 2;
-                    position = {
-                      x = 0;
-                      y = 0;
-                    };
-                    priority = 0;
-                    replicationSource = "";
-                  }
                   {
                     enabled = false; # DP-2 — off during SDDM
                     outputIndex = 0;
@@ -324,15 +263,6 @@
     # resume at a black screen. Per-DIMM RAM temps aren't used for anything here
     # (fan2go reads coretemp + it8628 only), so drop the module.
     blacklistedKernelModules = [ "spd5118" ];
-
-    # ── HDMI hotplug flap guard (Philips FTV on HDMI-A-1) ──────────────────────
-    # The TV drops the HDMI link entirely when powered off (not just idle), so the
-    # kernel sees the connector removed→added repeatedly. Every event makes Hyprland
-    # re-scan and re-apply the whole layout, which blinks the *other* screens on/off.
-    # Force the connector permanently "on" (DRM_FORCE_ON) so the kernel stops probing
-    # it — the output stays usable, and the Hyprland monitor line already pins a fixed
-    # mode (3840x2160@60, see flake.nix) so there's no mode-guessing when the TV is off.
-    kernelParams = [ "video=HDMI-A-1:e" ];
 
     # ── Bootloader ──────────────────────────────────────────────────────────────
     # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.

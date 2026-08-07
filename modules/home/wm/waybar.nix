@@ -28,7 +28,6 @@ let
   monitorStrings = lib.filter (m: m != null) [
     cfg.monitors.primary
     cfg.monitors.secondary
-    cfg.monitors.tertiary
   ];
   isPortrait =
     s:

@@ -177,8 +177,7 @@ ShellRoot {
         anchors { top: true; right: true }
         // Follow the focused monitor (as NotificationCenter does). Without this
         // the panel lands on Quickshell's default screen — which can be an
-        // output you aren't looking at, e.g. the TV that a toast is announcing
-        // has just been disabled.
+        // output you aren't looking at.
         screen: Theme.focusedScreen()
         margins { top: 8; right: 8 }
         implicitWidth: 390

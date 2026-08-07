@@ -1,31 +1,14 @@
 #!/bin/bash
 # Gaming mode toggle for Hyprland
-# Prompts for a target monitor (main panel / TV — TV only when it's powered on),
-# then kills waybar/notifications, disables blur+animations, blanks the other
-# screens (DPMS off), and launches Steam Big Picture in gamescope fullscreen on
-# the chosen monitor.
+# Kills waybar/notifications, disables blur+animations, blanks the other screens
+# (DPMS off), and launches Steam Big Picture in gamescope fullscreen on the main
+# gaming panel.
 # Run again to restore the normal desktop session (screens back on).
 
 GAMING_STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprland-gaming-mode"
 
 # home-desktop connectors.
 MAIN_MON="DP-3"      # AOC 1440p @ 165
-TV_MON="HDMI-A-1"    # Philips FTV 4K @ 60
-
-# Is the TV actually on? It has no DDC/CI and its connector is force-on
-# (video=HDMI-A-1:e), so DRM and hyprland always report it connected. The
-# HDMI-audio ELD still tracks real HPD, so key off monitor_present on the pin
-# whose EDID names the Philips TV.
-tv_is_on() {
-    local eld
-    for eld in /proc/asound/card*/eld#*; do
-        [ -f "$eld" ] || continue
-        if grep -q "Philips" "$eld" && grep -q "^monitor_present[[:space:]]*1" "$eld"; then
-            return 0
-        fi
-    done
-    return 1
-}
 
 # "W H R" (rounded refresh) for a connector, from hyprland's live mode.
 mon_mode() {
@@ -93,24 +76,7 @@ if [ -f "$GAMING_STATE_FILE" ]; then
     disown
 else
     # Enter gaming mode
-
-    # Pick the target monitor first — before tearing anything down — so that
-    # cancelling the picker is a clean no-op. Always offer the main panel; offer
-    # the TV only when it's powered on.
-    labels=("Main panel — 1440p @ 165")
-    mons=("$MAIN_MON")
-    if tv_is_on; then
-        labels+=("TV — 4K @ 60")
-        mons+=("$TV_MON")
-    fi
-
-    if [ "${#mons[@]}" -gt 1 ]; then
-        idx=$(printf '%s\n' "${labels[@]}" | fuzzel --dmenu --index --prompt "Game on › ")
-        [ -z "$idx" ] && exit 0            # cancelled — stay in desktop mode
-        target="${mons[$idx]}"
-    else
-        target="$MAIN_MON"
-    fi
+    target="$MAIN_MON"
 
     touch "$GAMING_STATE_FILE"
 
