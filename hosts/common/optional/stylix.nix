@@ -10,9 +10,17 @@ in
 {
   imports = [ inputs.stylix.nixosModules.stylix ];
 
-  # stylix's kmscon module sets services.kmscon.config which was removed in
-  # NixOS 26.05 (renamed to extraConfig). Disable the module entirely.
-  disabledModules = [ "${inputs.stylix}/modules/kmscon/nixos.nix" ];
+  # Stylix master tracks nixpkgs-unstable option paths, which the stable 26.05
+  # modules don't have; disabling the target isn't enough, since the module
+  # system rejects definitions for unknown options even under `mkIf false`.
+  # Drop both offending modules outright — neither feature is used here.
+  #   kmscon:  services.kmscon.config      → renamed to extraConfig in 26.05
+  #   regreet: programs.regreet            → moved to services.displayManager.regreet
+  #            in unstable (we use SDDM anyway)
+  disabledModules = [
+    "${inputs.stylix}/modules/kmscon/nixos.nix"
+    "${inputs.stylix}/modules/regreet/nixos.nix"
+  ];
 
   stylix = {
     enable = true;
