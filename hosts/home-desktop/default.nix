@@ -101,11 +101,32 @@
     #
     # Logitech Bolt receiver (mouse) — strip its USB wakeup so a nudged mouse
     # can't resume the machine from suspend; waking is keyboard/power-button only.
-    udev.extraRules = ''
-      KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", GROUP="input"
-      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c548", ATTR{power/wakeup}="disabled"
-    '';
+    udev = {
+      extraRules = ''
+        KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", GROUP="input"
+        ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c548", ATTR{power/wakeup}="disabled"
+      '';
+
+      # Vial (splitkb Aurora Sofle v2, 8d1d:ec32) — hidraw access for the
+      # vial.rocks WebHID configurator. Unlike the NuPhy rule above this needs
+      # TAG+="uaccess", so it can't live in extraRules (99-local.rules runs too
+      # late); ship it as a package so the filename sorts before
+      # 73-seat-late.rules. The serial match is Vial's magic prefix, common to
+      # every Vial-enabled board, so this covers future ones too.
+      packages = [
+        (pkgs.writeTextFile {
+          name = "vial-udev-rules";
+          destination = "/etc/udev/rules.d/59-vial.rules";
+          text = ''
+            KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users", TAG+="uaccess", TAG+="udev-acl"
+          '';
+        })
+      ];
+    };
   };
+
+  # QMK udev rules (bootloader/DFU access for flashing the Sofle).
+  hardware.keyboard.qmk.enable = true;
 
   # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────
   # Activation runs on every boot before SDDM starts. chmod 444 prevents KWin
