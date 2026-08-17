@@ -214,14 +214,27 @@ in
             before_sleep_cmd = "loginctl lock-session";
             # pidof guard here too: killing the live hyprlock on resume made
             # Hyprland flash its red "lockscreen died" fallback screen every wake.
-            # wake-monitors.sh, not `hyprctl dispatch dpms on` — dispatch args are
-            # Lua, so the bare `on` is a parse error and the screens stay black.
-            after_sleep_cmd = "bash ~/.config/hypr/scripts/wake-monitors.sh; pidof hyprlock || hyprlock";
+            # dpms.sh, not `hyprctl dispatch dpms on` — dispatch args are Lua, so
+            # the bare `on` is a parse error and the screens stay black.
+            after_sleep_cmd = "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
           };
           listener = [
             {
               timeout = 300;
               on-timeout = "loginctl lock-session";
+            }
+            # Blank the screens shortly after the lock rather than leaving them
+            # lit until the 15-minute suspend. 30s of grace after hyprlock
+            # appears, so the screen doesn't die out from under you mid-password.
+            #
+            # `idle-off`, not `off`: it no-ops while gaming mode owns the DPMS
+            # state, and it leaves wake-on-input armed so a keypress lights them
+            # back up. on-resume is the belt-and-braces path for the case where
+            # something (a manual blank, gaming mode's exit) left that disarmed.
+            {
+              timeout = 330;
+              on-timeout = "bash ~/.config/hypr/scripts/dpms.sh idle-off";
+              on-resume = "bash ~/.config/hypr/scripts/dpms.sh idle-on";
             }
             {
               timeout = 900;

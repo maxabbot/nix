@@ -19,7 +19,10 @@ PanelWindow {
     anchors { top: true; right: true }
     margins { top: Theme.panelGapTop; right: 12 }
     implicitWidth: 780
-    implicitHeight: 620
+    // Sized by the tallest page (Monitors: map + mode/scale/orientation chips +
+    // DDC brightness + the layout-persistence row). None of the pages scroll,
+    // so content past this is simply cut off the bottom.
+    implicitHeight: 680
     color: "transparent"
 
     WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None

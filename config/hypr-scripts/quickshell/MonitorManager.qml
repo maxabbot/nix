@@ -1,8 +1,9 @@
 // MonitorManager.qml — Display layout page (embedded in Settings.qml — no window chrome).
 // Shows a scaled visual representation of connected monitors using Hyprland.monitors.
 // Clicking a monitor selects it; the detail pane changes resolution, refresh,
-// scale, orientation, position and mirroring. Monitors can also be dragged
-// around the map, snapping to their neighbours' edges.
+// scale, orientation, position and mirroring, and blanks/wakes it (DPMS, via
+// dpms.sh). Monitors can also be dragged around the map, snapping to their
+// neighbours' edges.
 //
 // Everything applies through `hyprctl eval` (see applyMonitor — the Lua parser
 // this config uses rejects `hyprctl keyword`), which is session-only. "Save
@@ -83,10 +84,16 @@ Item {
     }
     Timer { id: statusFade; interval: 4000; onTriggered: root.layoutStatus = "" }
 
+    // `exec bash <script>`, not `exec <script>`: the scripts land in the store
+    // as 0444 (the hypr-scripts derivation copies source permissions, and only
+    // gaming-toggle.sh / qs_manager.sh carry the execute bit in git), so running
+    // one directly dies with "Permission denied" — exit 126, silently, since
+    // nothing here surfaced the exit code. Every other caller in the config
+    // already goes through `bash`.
     function runLayout(verb) {
         layoutAction.verb = verb
         layoutAction.command = ["bash", "-c",
-            "exec \"$HOME/.config/hypr/scripts/monitor-layout.sh\" \"$1\"", "bash", verb]
+            "exec bash \"$HOME/.config/hypr/scripts/monitor-layout.sh\" \"$1\"", "bash", verb]
         layoutAction.running = true
     }
 
@@ -207,6 +214,43 @@ Item {
         root.modes.filter(m => m.res === root.selRes).sort((a, b) => b.refresh - a.refresh)
 
     function transformOf(m) { return m?.lastIpcObject?.transform ?? 0 }
+
+    // ── DPMS ────────────────────────────────────────────────────────────────
+    // dpms.sh owns the awkward parts: the dispatch ignores its state arg and
+    // only toggles, and blanking has to disarm mouse/key wake-on-input or the
+    // next pointer twitch undoes it. Read the status back off the raw IPC
+    // object — Hyprland.monitors exposes width/scale/etc. as properties but
+    // not this one.
+    function dpmsOn(m) { return m?.lastIpcObject?.dpmsStatus ?? true }
+
+    readonly property bool anyBlanked: {
+        var vals = Hyprland.monitors?.values ?? []
+        for (var i = 0; i < vals.length; i++)
+            if (vals[i] && !root.dpmsOn(vals[i])) return true
+        return false
+    }
+
+    Process {
+        id: setDpms
+        command: []
+        // dpms.sh only returns after its own 0.4s settle, so the state is
+        // already live by the time this fires — no extra delay needed.
+        onRunningChanged: {
+            if (running) return
+            // A silently-swallowed exit code is what hid the 0444 bug above;
+            // don't repeat that.
+            if (exitCode !== 0) console.warn("dpms.sh toggle failed, exit " + exitCode)
+            Hyprland.refreshMonitors()
+        }
+    }
+
+    // `exec bash <script>` for the same 0444 reason as runLayout above.
+    function toggleDpms(m) {
+        if (!m) return
+        setDpms.command = ["bash", "-c",
+            "exec bash \"$HOME/.config/hypr/scripts/dpms.sh\" toggle \"$1\"", "bash", m.name]
+        setDpms.running = true
+    }
 
     function monitorByName(n) {
         var vals = Hyprland.monitors?.values ?? []
@@ -401,6 +445,7 @@ Item {
                         readonly property var lsz: root.logicalSize(modelData)
                         readonly property bool isSelected:
                             root.selectedMonitor?.name === modelData.name
+                        readonly property bool blanked: !root.dpmsOn(modelData)
 
                         // While dragging, x/y follow the pointer instead of the
                         // IPC position — the binding takes over again on drop,
@@ -415,7 +460,9 @@ Item {
                         height: lsz.h * root.previewScale
 
                         z: dragging ? 1 : 0
-                        opacity: dragging ? 0.85 : 1
+                        // A blanked screen is still draggable and configurable,
+                        // just dimmed — the map should show why it looks dead.
+                        opacity: dragging ? 0.85 : (blanked ? 0.45 : 1)
 
                         radius: 4
                         color: isSelected ? Theme.accentBg : Theme.bgAlt
@@ -438,7 +485,8 @@ Item {
                             }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.width + "×" + modelData.height
+                                text: tile.blanked ? "blanked"
+                                                   : modelData.width + "×" + modelData.height
                                 color: Theme.grayDim
                                 font.pixelSize: 8
                                 font.family: Theme.font
@@ -494,26 +542,48 @@ Item {
             spacing: 10
             visible: root.selectedMonitor !== null
 
-            Column {
-                spacing: 2
+            // Blank/Wake rides in the header row rather than getting a section
+            // of its own: the panel is a fixed 620px and the Monitors page is
+            // the tallest of them, so a whole extra labelled block pushed the
+            // Save-layout row off the bottom.
+            RowLayout {
                 Layout.fillWidth: true
+                spacing: 8
 
-                Text {
-                    text: root.selectedMonitor?.name ?? ""
-                    color: Theme.accent
-                    font.pixelSize: 13
-                    font.bold: true
-                    font.family: Theme.font
+                Column {
+                    spacing: 2
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: root.selectedMonitor?.name ?? ""
+                        color: Theme.accent
+                        font.pixelSize: 13
+                        font.bold: true
+                        font.family: Theme.font
+                    }
+                    Text {
+                        text: (root.selectedMonitor?.width ?? 0) + "×" +
+                              (root.selectedMonitor?.height ?? 0) + " @ " +
+                              Math.round(root.selectedMonitor?.refreshRate ?? 0) + " Hz  ·  " +
+                              "scale " + (root.selectedMonitor?.scale ?? 1) + "  ·  " +
+                              "(" + (root.selectedMonitor?.x ?? 0) + ", " + (root.selectedMonitor?.y ?? 0) + ")"
+                        color: Theme.gray
+                        font.pixelSize: 11
+                        font.family: Theme.font
+                    }
                 }
-                Text {
-                    text: (root.selectedMonitor?.width ?? 0) + "×" +
-                          (root.selectedMonitor?.height ?? 0) + " @ " +
-                          Math.round(root.selectedMonitor?.refreshRate ?? 0) + " Hz  ·  " +
-                          "scale " + (root.selectedMonitor?.scale ?? 1) + "  ·  " +
-                          "(" + (root.selectedMonitor?.x ?? 0) + ", " + (root.selectedMonitor?.y ?? 0) + ")"
-                    color: Theme.gray
-                    font.pixelSize: 11
-                    font.family: Theme.font
+
+                // DPMS only — the output keeps its workspaces and its place in
+                // the layout. Note a display that stays blanked long enough to
+                // reach standby may drop its link and disappear from the map
+                // entirely; Super + Shift + D reloads it back.
+                ModeChip {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: implicitWidth
+                    Layout.preferredHeight: implicitHeight
+                    label: root.dpmsOn(root.selectedMonitor) ? "Blank" : "Wake"
+                    selected: !root.dpmsOn(root.selectedMonitor)
+                    onClicked: root.toggleDpms(root.selectedMonitor)
                 }
             }
 
@@ -774,12 +844,17 @@ Item {
                 Layout.fillWidth: true
                 spacing: 8
 
+                // The wake hint takes priority while anything is dark: blanking
+                // disarms wake-on-input by design, so the keybind is the only
+                // way back if you blanked the screen you were looking at.
                 Text {
                     Layout.fillWidth: true
                     text: root.layoutStatus !== "" ? root.layoutStatus
+                        : root.anyBlanked ? "Super + Shift + D wakes every screen"
                         : root.hasSavedLayout ? "Saved layout active — overrides the Nix defaults"
                         : "Changes apply to this session only"
-                    color: root.layoutStatus !== "" ? Theme.green : Theme.grayDim
+                    color: root.layoutStatus !== "" ? Theme.green
+                         : root.anyBlanked ? Theme.accent : Theme.grayDim
                     font.pixelSize: 10
                     font.family: Theme.font
                     elide: Text.ElideRight
@@ -806,7 +881,10 @@ Item {
         signal clicked()
 
         implicitWidth: chipLabel.implicitWidth + 16
-        height: 26
+        // implicitHeight, not height: Flow leaves children to size themselves
+        // (height falls back to implicitHeight), but a RowLayout drives height
+        // directly and would fight a hard binding — the header row uses one.
+        implicitHeight: 26
         radius: 6
         color: selected ? Theme.accentBg : (chipArea.containsMouse ? Theme.border : Theme.bgAlt)
         Behavior on color { ColorAnimation { duration: 80 } }

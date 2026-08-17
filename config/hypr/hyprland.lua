@@ -402,6 +402,11 @@ hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "System | Emoji picker" })
+-- Escape hatch for the Monitors page's Blank chip and the idle DPMS listener:
+-- both disarm wake-on-input, so blanking the screen you're looking at otherwise
+-- leaves no way back. locked = true so it still fires over hyprlock, which is
+-- exactly when the screens are most likely to be dark.
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/dpms.sh on"),                            { locked = true, description = "System | Wake all screens" })
 
 -- Screenshots
 hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })

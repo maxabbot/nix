@@ -16,38 +16,18 @@ mon_mode() {
         '.[] | select(.name==$n) | "\(.width) \(.height) \(.refreshRate|round)"'
 }
 
-# Drive monitors to a DPMS state. $1 = on|off ; remaining args = monitor names.
-#
-# The hl.dsp.dpms dispatch IGNORES its state arg and simply TOGGLES on every
-# call (verified: repeated "off" flips false→true→false). So we can't set an
-# absolute state blindly — read each monitor's current dpmsStatus and toggle
-# ONLY when it differs from what we want. This is idempotent and, critically,
-# never toggles a monitor that's already correct — the old blind "on for every
-# monitor" on exit toggled the never-blanked target screen *off* (black main).
-# `hyprctl dispatch dpms ...` also fails outright under the Lua config parser,
-# hence the hl.dsp.dpms{...} form.
-dpms_set() {
-    local want="$1"; shift
-    local m cur
-    for m in "$@"; do
-        cur=$(hyprctl monitors all -j | jq -r --arg n "$m" \
-            '.[] | select(.name==$n) | .dpmsStatus')
-        if { [ "$want" = "on" ]  && [ "$cur" = "false" ]; } \
-        || { [ "$want" = "off" ] && [ "$cur" = "true"  ]; }; then
-            hyprctl dispatch "hl.dsp.dpms{monitor=\"$m\", state=\"toggle\"}" >/dev/null 2>&1
-            sleep 0.4
-        fi
-    done
-}
+# DPMS goes through dpms.sh, which owns the toggle-only dispatch quirk and the
+# wake-on-input arming — see its header. `hold-off` is the right verb here: it
+# disarms mouse_move/key_press_enables_dpms before blanking, or a mouse twitch
+# during a game would light the other screens straight back up.
+DPMS="$HOME/.config/hypr/scripts/dpms.sh"
 
 if [ -f "$GAMING_STATE_FILE" ]; then
     # Exit gaming mode
     rm "$GAMING_STATE_FILE"
 
-    # Re-arm DPMS-on-input first, then wake every screen that's currently off.
-    hyprctl eval 'hl.config({ misc = { mouse_move_enables_dpms = true, key_press_enables_dpms = true } })'
-    mapfile -t all_mons < <(hyprctl monitors all -j | jq -r '.[].name')
-    dpms_set on "${all_mons[@]}"
+    # Wake every screen that's currently off, which also re-arms DPMS-on-input.
+    bash "$DPMS" on
 
     # Restore compositor effects. `hyprctl keyword` doesn't work with the Lua
     # config parser ("keyword can't work with non-legacy parsers") — use eval
@@ -85,9 +65,8 @@ else
     pkill -f "quickshell.*Shell.qml" 2>/dev/null || true
 
     # Disable compositor effects for performance (eval, not keyword — see above).
-    # Also disarm DPMS-on-input, or a mouse move / key press would wake the
-    # screens we blank below (this host sets both enables = true).
-    hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } }, animations = { enabled = false }, misc = { mouse_move_enables_dpms = false, key_press_enables_dpms = false } })'
+    # DPMS-on-input is disarmed by the hold-off below, not here.
+    hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } }, animations = { enabled = false } })'
 
     # Open gamescope on the chosen monitor: focus it first so the new gamescope
     # window (class "gamescope") lands there, then the fullscreen+immediate
@@ -96,10 +75,12 @@ else
     # under the Lua config parser.
     hyprctl dispatch "hl.dsp.focus{monitor=\"$target\"}" >/dev/null 2>&1
 
-    # Blank every screen except the gaming monitor.
+    # Blank every screen except the gaming monitor, and keep them blanked.
     mapfile -t other_mons < <(hyprctl monitors all -j | jq -r --arg t "$target" \
         '.[] | select(.name!=$t) | .name')
-    dpms_set off "${other_mons[@]}"
+    if [ ${#other_mons[@]} -gt 0 ]; then
+        bash "$DPMS" hold-off "${other_mons[@]}"
+    fi
 
     # Gamescope wraps BPM for direct GPU rendering; size/refresh come from the
     # chosen monitor's live mode.

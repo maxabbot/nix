@@ -44,6 +44,7 @@ Gruvbox Material Dark · home-desktop
 | Super + O | Audio output switcher |
 | Super + Shift + P | Colour picker |
 | Super + Period | Emoji picker |
+| Super + Shift + D | Wake all screens |
 | Super + Shift + G | Toggle gaming mode |
 | **Screenshots** | |
 | Print | Screenshot picker |
