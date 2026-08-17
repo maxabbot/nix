@@ -1,6 +1,8 @@
 # Hyprland Shortcuts
 
-Gruvbox Material Dark · home-desktop
+Gruvbox Material Dark · @host@
+
+¹ laptop hosts only · ² multi-monitor only
 
 ## Window Manager
 
@@ -11,7 +13,7 @@ Gruvbox Material Dark · home-desktop
 | Super + E | Files (thunar) |
 | Super + B | Browser (zen) |
 | Super + D | Launcher (fuzzel) |
-| Super + Shift + C | Cava visualiser (spare monitor) |
+| Super + Shift + C | Cava visualiser ² |
 | **Windows** | |
 | Super + Q | Close window |
 | Super + Shift + Q | Exit Hyprland |
@@ -20,6 +22,8 @@ Gruvbox Material Dark · home-desktop
 | Super + Space | Toggle float |
 | Super + P | Pseudo tile |
 | Super + J | Toggle split |
+| Super + Drag | Move window |
+| Super + Right-drag | Resize window |
 | **Focus** | |
 | Super + ← ↑ ↓ → | Focus direction |
 | Super + Shift + ← ↑ ↓ → | Move window |
@@ -28,7 +32,7 @@ Gruvbox Material Dark · home-desktop
 | Super + 1-0 | Switch workspace (1–10) |
 | Super + Shift + 1-0 | Move window to workspace |
 | Super + Scroll | Next / prev workspace |
-| Super + Alt + ← → | Move workspace to monitor |
+| Super + Alt + ← → | Move workspace to monitor ² |
 | Super + S | Toggle scratchpad |
 | Super + Shift + S | Send to scratchpad |
 | Super + Grave | Dropdown terminal |
@@ -90,5 +94,16 @@ Gruvbox Material Dark · home-desktop
 | XF86AudioPlay | Play / pause |
 | XF86AudioNext | Next track |
 | XF86AudioPrev | Prev track |
-| XF86MonBrightnessUp | Brightness up |
-| XF86MonBrightnessDown | Brightness down |
+| XF86MonBrightnessUp | Brightness up ¹ |
+| XF86MonBrightnessDown | Brightness down ¹ |
+
+## Power & Idle
+
+| Trigger | Action |
+|---|---|
+| Idle 5 min | Lock screen |
+| Idle 5½ min | Screens blank |
+| Idle 15 min | Suspend |
+| Before suspend | Lock screen |
+| Lid close | Suspend ¹ |
+| Super + Shift + D | Wake all screens |

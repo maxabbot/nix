@@ -2,6 +2,7 @@
 {
   lib,
   config,
+  osConfig,
   pkgs,
   ...
 }:
@@ -31,7 +32,10 @@ let
   # config/hypr/hyprland.lua's autostart, using the connector names exported
   # by monitors.lua below.
   secName =
-    if cfg.monitors.secondary != null then lib.head (lib.splitString "," cfg.monitors.secondary) else "";
+    if cfg.monitors.secondary != null then
+      lib.head (lib.splitString "," cfg.monitors.secondary)
+    else
+      "";
 
   # The generated monitors.lua content
   monitorsLua = ''
@@ -60,6 +64,11 @@ let
       secondary = "${secName}",
     }
   '';
+
+  # The cheat sheet is one shared document; only the subtitle is per-host.
+  shortcutsMd = builtins.replaceStrings [ "@host@" ] [ osConfig.networking.hostName ] (
+    builtins.readFile ../../../docs/SHORTCUTS.md
+  );
 
   # The generated env.lua content — per-host env vars plus app choices.
   # Returns a table that hyprland.lua's keybinds consume via require("env").
@@ -171,7 +180,9 @@ in
       # ── Wallpaper — deployed to ~/.config/hypr/wallpaper.png, set by awww ─────
       "hypr/wallpaper.png".source = ../../../config/sddm/leaves-wall.png;
       # ── Shortcuts cheat-sheet source + style (rendered onto the 2nd monitor) ─
-      "hypr/shortcuts.md".source = ../../../docs/SHORTCUTS.md;
+      # @host@ is substituted so the subtitle names the machine the sheet is
+      # actually deployed on, rather than whichever host it was written for.
+      "hypr/shortcuts.md".text = shortcutsMd;
       "hypr/shortcuts.css".text = renderTheme ../../../config/hypr/shortcuts.css;
     };
 
