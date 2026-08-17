@@ -1,5 +1,5 @@
 {
-  description = "NixOS system configuration — home-desktop / work-laptop / vm / minimal";
+  description = "NixOS system configuration — home-desktop / framework / work-laptop / vm / minimal";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -179,15 +179,69 @@
               primary = "DP-3,2560x1440@165,1440x1120,1";
               primaryName = "DP-3";
             };
-            # work-laptop sits to the right of the desk; its keyboard/mouse are
+            # The laptop sits to the right of the desk; its keyboard/mouse are
             # shared via lan-mouse (see home/max/lan-mouse.nix). Swap position
-            # to "left" here (and to "right" on work-laptop) if the laptop moves.
+            # to "left" here (and to "right" on the laptop) if it moves.
             lanMouse = {
               enable = true;
-              peer = "work-laptop";
+              peer = "framework";
               position = "right";
               # ips = [ "192.168.x.x" ]; # set if the router doesn't resolve hostnames
               # activateOnStartup = true; # flip once the link is confirmed working
+            };
+          };
+        };
+
+        # Framework Laptop 13 Pro (Core Ultra X7 358H, Panther Lake / Arc Xe3) —
+        # personal + work daily driver. Replaces work-laptop as the machine
+        # paired with home-desktop over lan-mouse.
+        framework = mkHost {
+          hostName = "framework";
+          machineType = "laptop";
+          modules = [
+            ./hosts/framework
+            disko.nixosModules.disko
+            # Panther Lake (Core Ultra series 3) Framework 13 support: EC kmod,
+            # framework-tool, fwupd, fprintd, acpilight, power kernel params.
+            nixos-hardware.nixosModules.framework-intel-core-ultra-series3
+          ];
+          hmArgs = {
+            machineType = "laptop";
+            compositor = "hyprland";
+            # 2.8K 120 Hz internal panel at 2x — the static Hyprland declaration
+            # matches kanshi's "undocked" profile below, so there's no scale flash
+            # while kanshi starts. Confirm the connector and modes on first boot
+            # with `wlr-randr` (the panel is eDP-1 on every Framework 13 so far).
+            monitors = {
+              primary = "eDP-1,2880x1920@120,0x0,2";
+              primaryName = "eDP-1";
+              secondary = null;
+            };
+            # Kanshi manages the docked/undocked layout automatically. The docked
+            # profile only activates once both external connectors are filled in.
+            kanshi = {
+              enable = true;
+              internal = {
+                output = "eDP-1";
+                mode = "2880x1920@120";
+                scale = 2.0;
+              };
+              docked = {
+                left = null; # TODO: replace with connector name from wlr-randr
+                right = null; # TODO: replace with connector name from wlr-randr
+              };
+            };
+            lanMouse = {
+              enable = true;
+              peer = "home-desktop";
+              position = "left";
+              # TODO: the router doesn't resolve DHCP hostnames, so home-desktop's
+              # address has to be pinned here once confirmed (`ip -4 addr` on the
+              # desktop, then give it a DHCP reservation to keep it stable).
+              # work-laptop pins 192.168.0.235 for the same peer, but its comment
+              # calls that a wlo1 lease — i.e. possibly the laptop's own address —
+              # so re-check rather than copying it.
+              # ips = [ "192.168.x.x" ];
             };
           };
         };

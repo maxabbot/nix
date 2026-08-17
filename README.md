@@ -7,7 +7,8 @@ Declarative, reproducible NixOS workstations using **Nix Flakes** and **Home Man
 | Host | Profile | Compositor | Features |
 |------|---------|------------|----------|
 | `home-desktop` | Gaming workstation (i7-13700K, RTX 40-series) | Hyprland | full stack |
-| `work-laptop`  | Dev laptop | Hyprland | dev + productivity + TLP |
+| `framework`    | Framework 13 Pro (Core Ultra X7 358H, Arc Xe3) | Hyprland | full stack minus NVIDIA/CUDA; LUKS root |
+| `work-laptop`  | Dev laptop (ThinkBook, portable USB SSD) | Hyprland | dev + productivity + TLP |
 | `vm`           | home-desktop stack in a QEMU/virtio VM | Hyprland | no NVIDIA/CUDA/fancontrol |
 | `minimal`      | Headless / server | — | base only |
 
@@ -17,6 +18,7 @@ Declarative, reproducible NixOS workstations using **Nix Flakes** and **Home Man
 flake.nix                        # inputs, mkHost helper, devShells
 hosts/
   home-desktop/                  # RTX 40-series gaming workstation
+  framework/                     # Framework 13 Pro (Panther Lake, LUKS + btrfs)
   work-laptop/                   # Dev laptop (TLP, powersave specialisation)
   vm/                            # home-desktop stack in a QEMU/virtio VM
   minimal/                       # Headless base

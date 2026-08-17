@@ -30,6 +30,25 @@ nixos-anywhere SSHs in, runs disko to partition/format (`hosts/home-desktop/disk
 > touch it.** NVMe names can swap between boots/firmware changes, so run `lsblk` on the live
 > system and match by **size** before letting disko loose.
 
+### `framework` — encrypted root
+
+`hosts/framework/disk-config.nix` wraps the btrfs root in LUKS2 (`askPassword = true`), so
+disko prompts for a passphrase on the target while partitioning. nixos-anywhere runs disko over
+SSH, so drive the install from a terminal you can type into — the prompt appears in the
+nixos-anywhere output, not on the laptop's screen.
+
+Before the first `nixos-rebuild`, replace the placeholder
+`hosts/framework/hardware-configuration.nix` with the real scan:
+
+```bash
+sudo nixos-generate-config --no-filesystems --show-hardware-config
+```
+
+Keep the `nixpkgs.hostPlatform` line and drop anything `nixos-hardware`'s
+`framework-intel-core-ultra-series3` module already sets. Every boot then prompts for the LUKS
+passphrase from the systemd initrd; there is no swap partition, so the machine suspends but
+cannot hibernate.
+
 ---
 
 ## After install
