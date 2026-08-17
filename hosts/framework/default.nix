@@ -37,14 +37,70 @@
   # powerManagement is left at base.nix's default (power-profiles-daemon) rather
   # than work-laptop's TLP: the Quickshell control centre drives profiles through
   # `powerprofilesctl`, which only exists with power-profiles-daemon, and
-  # nixos-hardware's laptop module already backs off TLP when ppd is on. Swap to
-  # `powerManagement = "tlp";` (and copy work-laptop's settings block) if battery
-  # life turns out to need the finer-grained knobs.
+  # nixos-hardware's laptop module already backs off TLP when ppd is on. The
+  # powersave specialisation below is where TLP's finer-grained knobs live, for
+  # the days that need them.
   custom.base = {
     enable = true;
     username = "max";
     hashedPassword = "$y$j9T$2U13TXbQqrmp.PD068E0E.$1uJPVe1dF1C0KhlXbn.iMg2qthRxOdp.9s/h6GG6YC6";
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
+  };
+
+  # ── Specialisations ───────────────────────────────────────────────────────────
+  # Boot menu shows a "powersave" entry for aggressive battery conservation —
+  # same idea as work-laptop's, but this host defaults to power-profiles-daemon,
+  # so the specialisation has to swap the daemon out rather than just retune it.
+  # Setting custom.base.powerManagement flips both services at once (base.nix
+  # derives `power-profiles-daemon.enable` and `tlp.enable` from it).
+  #
+  # Trade-off worth knowing before picking this entry: with ppd gone, the
+  # Quickshell control centre's profile toggle stops working — it shells out to
+  # `powerprofilesctl`, which no longer exists. Power management becomes purely
+  # declarative until you reboot into the default generation.
+  specialisation.powersave.configuration = {
+    system.nixos.tags = [ "powersave" ];
+
+    custom.base.powerManagement = "tlp";
+
+    services.tlp.settings = {
+      # Treat AC like battery — the point of this entry is minimum draw, not
+      # "fast when plugged in".
+      TLP_DEFAULT_MODE = "BAT";
+      CPU_SCALING_GOVERNOR_ON_AC = "powersave";
+      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "power";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
+      # No turbo. On Panther Lake this is the single biggest lever: boost states
+      # dominate package power under bursty desktop load.
+      CPU_BOOST_ON_AC = 0;
+      CPU_BOOST_ON_BAT = 0;
+      CPU_HWP_DYN_BOOST_ON_AC = 0;
+      CPU_HWP_DYN_BOOST_ON_BAT = 0;
+
+      # ACPI platform profile — the firmware's own thermal/power envelope,
+      # below anything the governor can reach on its own.
+      PLATFORM_PROFILE_ON_AC = "low-power";
+      PLATFORM_PROFILE_ON_BAT = "low-power";
+
+      # Runtime PM for PCIe devices, wifi power saving, and deeper ASPM.
+      RUNTIME_PM_ON_AC = "auto";
+      RUNTIME_PM_ON_BAT = "auto";
+      PCIE_ASPM_ON_AC = "powersupersave";
+      PCIE_ASPM_ON_BAT = "powersupersave";
+      WIFI_PWR_ON_AC = 5;
+      WIFI_PWR_ON_BAT = 5;
+
+      # Audio codec sleeps after 1s idle. Left at 0 (no controller powersave)
+      # because Framework's TRRS jack pops on codec wake — the headphone-noise
+      # udev rule from nixos-hardware exists for the same reason.
+      SOUND_POWER_SAVE_ON_AC = 1;
+      SOUND_POWER_SAVE_ON_BAT = 1;
+      SOUND_POWER_SAVE_CONTROLLER = "N";
+
+      NMI_WATCHDOG = 0;
+    };
   };
 
   # ── Nix builds ───────────────────────────────────────────────────────────────

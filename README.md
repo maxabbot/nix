@@ -18,7 +18,7 @@ Declarative, reproducible NixOS workstations using **Nix Flakes** and **Home Man
 flake.nix                        # inputs, mkHost helper, devShells
 hosts/
   home-desktop/                  # RTX 40-series gaming workstation
-  framework/                     # Framework 13 Pro (Panther Lake, LUKS + btrfs)
+  framework/                     # Framework 13 Pro (Panther Lake, LUKS + btrfs, powersave specialisation)
   work-laptop/                   # Dev laptop (TLP, powersave specialisation)
   vm/                            # home-desktop stack in a QEMU/virtio VM
   minimal/                       # Headless base

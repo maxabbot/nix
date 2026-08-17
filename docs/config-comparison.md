@@ -81,5 +81,5 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **`nix-index` + `comma`** — `nix-index-database` flake input; `, <pkg>` to run anything; configured in `home/max/packages.nix`
 - **`statix` + `deadnix` in CI** — `lint` job in `.github/workflows/ci.yml`
 - **Dev shell** — `nix develop` gives nixfmt, statix, deadnix, nil; defined in `flake.nix`
-- **Specialisations for `work-laptop`** — `powersave` boot entry in `hosts/work-laptop/default.nix`
+- **Specialisations on the laptops** — `powersave` boot entry in `hosts/work-laptop/default.nix` and `hosts/framework/default.nix` (the latter also swaps power-profiles-daemon out for TLP, since that's its default)
 - **Secure boot** — Limine's `boot.loader.limine.secureBoot` ready; enable after running `sbctl create-keys` + `sbctl enroll-keys`
