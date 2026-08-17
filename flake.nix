@@ -182,9 +182,14 @@
             # The laptop sits to the right of the desk; its keyboard/mouse are
             # shared via lan-mouse (see home/max/lan-mouse.nix). Swap position
             # to "left" here (and to "right" on the laptop) if it moves.
+            #
+            # TODO: still points at work-laptop. The framework host is configured
+            # for the other end of this link but isn't installed yet, so leaving
+            # it here would break a working pairing for an unresolvable hostname.
+            # Change peer to "framework" (and set ips below) once it's on the LAN.
             lanMouse = {
               enable = true;
-              peer = "framework";
+              peer = "work-laptop";
               position = "right";
               # ips = [ "192.168.x.x" ]; # set if the router doesn't resolve hostnames
               # activateOnStartup = true; # flip once the link is confirmed working
@@ -193,8 +198,9 @@
         };
 
         # Framework Laptop 13 Pro (Core Ultra X7 358H, Panther Lake / Arc Xe3) —
-        # personal + work daily driver. Replaces work-laptop as the machine
-        # paired with home-desktop over lan-mouse.
+        # personal + work daily driver. Takes over from work-laptop as the machine
+        # paired with home-desktop over lan-mouse, but only once it's installed:
+        # home-desktop's end of that link still points at work-laptop.
         framework = mkHost {
           hostName = "framework";
           machineType = "laptop";
@@ -231,6 +237,9 @@
                 right = null; # TODO: replace with connector name from wlr-randr
               };
             };
+            # One-sided until the machine exists: home-desktop still peers with
+            # work-laptop, so flip that end over at the same time as first
+            # install or the link only works in one direction.
             lanMouse = {
               enable = true;
               peer = "home-desktop";

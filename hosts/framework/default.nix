@@ -73,15 +73,43 @@
     # Intel PCI IDs, which silently disables hardware decode.
     sessionVariables.LIBVA_DRIVER_NAME = "iHD";
 
+    # Host-specific tools only. brightnessctl, ddcutil and smartmontools already
+    # come from productivity.nix, and nixos-hardware supplies the Framework's own
+    # firmware/EC tooling (framework-tool, fw-ectool, fwupd) — don't restate any
+    # of them here.
     systemPackages = with pkgs; [
       # Moonlight client — streams games from home-desktop's Apollo host.
       # gaming-streaming.nix is deliberately NOT imported: it also enables the
       # Apollo *server*, which belongs on the desktop, not here.
       moonlight-qt
-      # VA-API sanity check: `vainfo` should report the iHD driver.
-      libva-utils
+
+      # ── iGPU diagnostics ────────────────────────────────────────────────────
+      # There's no nvidia-smi on this machine, so these are the only window into
+      # what the Xe3 is doing.
+      intel-gpu-tools # intel_gpu_top — per-engine iGPU utilisation
+      libva-utils # vainfo — should report the iHD driver
+
+      # ── Battery / thermals ──────────────────────────────────────────────────
+      # `sudo powertop --calibrate` once, then `powertop` to find what's keeping
+      # the package out of its deep C-states.
+      powertop
+      # smartctl doesn't surface NVMe thermal-throttle counters or the Framework
+      # SSD's power-state table; `nvme smart-log /dev/nvme0` does.
+      nvme-cli
+
+      # ── Secure Boot ─────────────────────────────────────────────────────────
+      # Needed for the `sbctl create-keys` / `sbctl enroll-keys` steps referenced
+      # in the boot block below, before Limine's secureBoot can be switched on.
+      sbctl
     ];
   };
+
+  # ── Speakers ─────────────────────────────────────────────────────────────────
+  # nixos-hardware ships `hardware.framework.laptop13.audioEnhancement` (a
+  # PipeWire filter chain: bass extension, loudness compensation, EQ). Left OFF
+  # deliberately — upstream tuned it for the classic Framework 13 chassis and
+  # says the Pro's speakers need different values, so enabling it here would
+  # apply the wrong EQ curve. Revisit if a Pro profile lands upstream.
 
   # ── Fingerprint reader ───────────────────────────────────────────────────────
   # services.fprintd comes from nixos-hardware. Enrol once per finger with
