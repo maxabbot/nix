@@ -1,20 +1,19 @@
 #!/bin/bash
 # Gaming mode toggle for Hyprland
-# Kills waybar/notifications, disables blur+animations, blanks the other screens
-# (DPMS off), and launches Steam Big Picture in gamescope fullscreen on the main
-# gaming panel.
+# Kills waybar/notifications, disables blur+animations, and blanks the other
+# screens (DPMS off) so only the main gaming panel is lit.
 # Run again to restore the normal desktop session (screens back on).
+#
+# It deliberately launches nothing. This used to wrap Steam Big Picture in
+# gamescope, which broke more than it fixed — and because the toggle owned the
+# launch, leaving gaming mode had to pkill steam/gamescope/lutris, which killed
+# whatever was actually running. Start games however you like; this only sets
+# the desktop up around them and puts it back afterwards.
 
 GAMING_STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprland-gaming-mode"
 
 # home-desktop connectors.
 MAIN_MON="DP-3"      # AOC 1440p @ 165
-
-# "W H R" (rounded refresh) for a connector, from hyprland's live mode.
-mon_mode() {
-    hyprctl monitors -j | jq -r --arg n "$1" \
-        '.[] | select(.name==$n) | "\(.width) \(.height) \(.refreshRate|round)"'
-}
 
 # DPMS goes through dpms.sh, which owns the toggle-only dispatch quirk and the
 # wake-on-input arming — see its header. `hold-off` is the right verb here: it
@@ -34,19 +33,14 @@ if [ -f "$GAMING_STATE_FILE" ]; then
     # with a partial hl.config, which merges into the running config.
     hyprctl eval 'hl.config({ decoration = { blur = { enabled = true } }, animations = { enabled = true } })'
 
-    # Re-apply wallpapers. The gamescope/DPMS cycle drops awww's per-output
-    # images, so the desktop comes back with a blank/leaves DP-2 and the
-    # portrait shortcuts cheat-sheet gone. Mirror the startup wallpaper.lua:
-    # leaves on every output, then override the rotated DP-2 with the cheat-sheet
-    # (backgrounded — it re-renders via headless Chrome and shouldn't block exit).
+    # Re-apply wallpapers. The DPMS cycle drops awww's per-output images, so the
+    # desktop comes back with a blank DP-2 and the portrait shortcuts cheat-sheet
+    # gone. Mirror the startup wallpaper.lua: leaves on every output, then
+    # override the rotated DP-2 with the cheat-sheet (backgrounded — it
+    # re-renders via headless Chrome and shouldn't block exit).
     awww img ~/.config/hypr/wallpaper.png --resize crop --transition-type wipe --transition-fps 60
     bash ~/.config/hypr/scripts/shortcuts-wallpaper.sh DP-2 &
     disown
-
-    # Kill game launchers
-    pkill -x lutris 2>/dev/null || true
-    pkill -x gamescope 2>/dev/null || true
-    pkill -x steam 2>/dev/null || true
 
     # Restore bar and notifications. Waybar is a systemd user service
     # (programs.waybar.systemd.enable) — manage it through systemctl, not a
@@ -68,11 +62,10 @@ else
     # DPMS-on-input is disarmed by the hold-off below, not here.
     hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } }, animations = { enabled = false } })'
 
-    # Open gamescope on the chosen monitor: focus it first so the new gamescope
-    # window (class "gamescope") lands there, then the fullscreen+immediate
-    # window rule in hyprland.lua direct-scanouts it to that one display.
-    # hl.dsp.focus{monitor=...} — plain `hyprctl dispatch focusmonitor` fails
-    # under the Lua config parser.
+    # Park focus on the gaming panel before the others go dark, so a game
+    # launched from here opens on it and the cursor isn't stranded on a
+    # blanked output. hl.dsp.focus{monitor=...} — plain `hyprctl dispatch
+    # focusmonitor` fails under the Lua config parser.
     hyprctl dispatch "hl.dsp.focus{monitor=\"$target\"}" >/dev/null 2>&1
 
     # Blank every screen except the gaming monitor, and keep them blanked.
@@ -81,10 +74,4 @@ else
     if [ ${#other_mons[@]} -gt 0 ]; then
         bash "$DPMS" hold-off "${other_mons[@]}"
     fi
-
-    # Gamescope wraps BPM for direct GPU rendering; size/refresh come from the
-    # chosen monitor's live mode.
-    read -r GS_W GS_H GS_R < <(mon_mode "$target") || true
-    gamescope -W "${GS_W:-2560}" -H "${GS_H:-1440}" -r "${GS_R:-165}" --rt -f -e -- steam -bigpicture &
-    disown
 fi

@@ -175,8 +175,9 @@ hl.layer_rule({ match = { namespace = "quickshell" },             blur = true,  
 -- "steam_app_" prefix matches nothing — the ".*" is load-bearing.
 hl.window_rule({ match = { class = "steam_app_.*" },                immediate = true })
 hl.window_rule({ match = { class = "Minecraft" },                   immediate = true })
--- gaming-toggle.sh runs `gamescope -- steam -bigpicture`; the window class is
--- "gamescope", not "steam", so the Big Picture rule below never matches it.
+-- A gamescope-wrapped session (`gamescope -- steam -bigpicture`, run by hand)
+-- reports class "gamescope", not "steam", so the Big Picture rule below never
+-- matches it.
 -- Without fullscreen it stays a tiled window that Hyprland composites every
 -- frame at vsync (major input lag). fullscreen + immediate lets Hyprland
 -- direct-scanout the gamescope buffer straight to the display, near-native.
@@ -197,7 +198,7 @@ hl.window_rule({ match = { class = "gamescope" },                   immediate = 
 -- Skipped on hosts with no fixed primary (work-laptop, kanshi-owned).
 local gameClasses = {
     "steam_app_.*", -- every Proton-launched Steam title
-    "gamescope", -- gaming-toggle.sh's Big Picture session
+    "gamescope", -- anything run inside a gamescope session
     "Minecraft",
     "TotalWarhammer3", -- native (Feral) build, not Proton
 }
@@ -214,8 +215,8 @@ if mon.primary ~= "" then
 end
 
 -- Launchers
--- Big Picture launched natively by gaming-toggle.sh: fullscreen + immediate so
--- Hyprland direct-scanouts it (no compositor vsync latency).
+-- Big Picture launched natively (no gamescope wrapper): fullscreen + immediate
+-- so Hyprland direct-scanouts it (no compositor vsync latency).
 hl.window_rule({ match = { class = "steam",   title = "Steam Big Picture Mode" }, fullscreen = true })
 hl.window_rule({ match = { class = "steam",   title = "Steam Big Picture Mode" }, immediate = true })
 -- Steam dropdown menus are empty-title XWayland popups; without this they
