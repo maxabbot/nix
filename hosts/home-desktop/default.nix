@@ -50,7 +50,7 @@
   # defaults to 720p @ 60 Hz and may render to the wrong connector — hence the
   # off resolution and lag on this 1440p/165 Hz panel. Pin the DP-3 gaming mode
   # (this is host-specific, which is why it lives here and not in shared
-  # gaming.nix, whose vm host has no DP-3). Mirrors gaming-toggle.sh's -W/-H/-r.
+  # gaming.nix, whose vm host has no DP-3). Matches DP-3's native mode.
   # --rt requests realtime scheduling for lower input latency.
   programs.steam.gamescopeSession.args = [
     "-W"

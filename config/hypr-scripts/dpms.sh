@@ -32,13 +32,13 @@
 #   hold-off [mon...]  disarm wake-on-input, then blank — the manual path
 #   toggle <mon>       hold-off if that monitor is on, on if it is off
 #   idle-off/idle-on   off/on for every monitor, but a no-op while gaming mode
-#                      owns the DPMS state (see gaming-toggle.sh)
+#                      is on (see gaming-toggle.sh)
 #
 # Super + Shift + D is bound to `dpms.sh on` as the escape hatch: it is the way
 # back after blanking the screen you were looking at.
 set -euo pipefail
 
-# Set by gaming-toggle.sh for as long as gaming mode holds its own blanking.
+# Set by gaming-toggle.sh for as long as gaming mode is on.
 GAMING_STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprland-gaming-mode"
 
 # `monitors all` rather than `monitors`: the plain form is fine for dpms-off
@@ -194,8 +194,9 @@ toggle)
     fi
     ;;
 idle-off)
-    # Gaming mode already blanked the non-gaming screens and disarmed
-    # wake-on-input; stomping that would black out the game's own monitor.
+    # In gaming mode the gaming panel is the only output left (the others are
+    # disabled outright, not blanked), and a controller-only game feeds the idle
+    # timer no input — blanking here would black out the game itself.
     if [ -f "$GAMING_STATE_FILE" ]; then exit 0; fi
     dpms_set off "${targets[@]}"
     ;;
