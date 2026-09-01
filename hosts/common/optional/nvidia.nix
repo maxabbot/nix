@@ -34,6 +34,13 @@
   };
 
   boot = {
+    # NVIDIA 595.71.05 (newest in nixpkgs, incl. beta) fails to build against
+    # kernel 7.2: nvidia/os-interface.c calls strncpy without <string.h>, which
+    # 7.2 no longer pulls in implicitly. Pin 7.1 — the last kernel the open
+    # modules compile on — overriding base.nix's linuxPackages_latest. Drop this
+    # once nixpkgs ships a driver that builds on 7.2+.
+    kernelPackages = pkgs.linuxPackages_7_1;
+
     kernelParams = [
       "nvidia-drm.modeset=1"
       "nvidia-drm.fbdev=1"
