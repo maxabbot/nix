@@ -10,6 +10,38 @@ let
   cfg = config.custom.hm;
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
 
+  # Hold the resume path until the GPU is back, then wake the outputs.
+  #
+  # logind emits PrepareForSleep(false) as soon as systemd-suspend.service
+  # finishes, and nvidia-resume.service — which restores the preserved VRAM
+  # allocations — is only ordered After= that same unit, so it has not even
+  # started when hypridle acts on the signal. Waking and re-rendering inside
+  # that window can wedge a hyprlock that survived the suspend: its resource
+  # gatherer stops completing, it commits no further frames, and
+  # ext-session-lock then obliges the compositor to paint black. Screens lit,
+  # nothing on them, no crash to show for it, and after_sleep_cmd's pidof guard
+  # keeps the wedged instance rather than replacing it (seen 2026-09-03 16:25;
+  # the identical resume 70 minutes earlier was fine, hence a race).
+  #
+  # Two phases, because the job is still queued when the signal lands: up to 1 s
+  # for it to reach "activating", then up to 10 s for it to leave. Both are
+  # capped so a stuck unit can never strand the session on a black screen.
+  #
+  # `systemctl is-active` cannot express this — a Type=oneshot unit stays
+  # "activating" for the whole of its ExecStart and never becomes "active", so
+  # is-active returns non-zero throughout and the wait would be a no-op.
+  # LoadState gates the whole thing at runtime instead of in Nix, so the
+  # non-NVIDIA hosts skip it in one systemctl call and nothing here has to
+  # duplicate the conditions under which NixOS emits the unit.
+  waitForNvidiaResume =
+    let
+      state = "\"$(systemctl show -p ActiveState --value nvidia-resume.service)\"";
+    in
+    "if [ \"$(systemctl show -p LoadState --value nvidia-resume.service)\" = loaded ]; then "
+    + "i=0; while [ $i -lt 10 ] && [ ${state} != activating ]; do i=$((i+1)); sleep 0.1; done; "
+    + "i=0; while [ $i -lt 100 ] && [ ${state} = activating ]; do i=$((i+1)); sleep 0.1; done; "
+    + "fi; ";
+
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
   # into a Lua hl.monitor({}) call.
   monitorToLua =
@@ -227,7 +259,10 @@ in
             # Hyprland flash its red "lockscreen died" fallback screen every wake.
             # dpms.sh, not `hyprctl dispatch dpms on` — dispatch args are Lua, so
             # the bare `on` is a parse error and the screens stay black.
-            after_sleep_cmd = "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
+            #
+            # waitForNvidiaResume is the ordering fix — see the comment on it.
+            after_sleep_cmd =
+              waitForNvidiaResume + "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
           };
           listener = [
             {
