@@ -27,7 +27,11 @@ hl.on("hyprland.start", function()
     -- nm-applet + syncthingtray + the polkit agent are systemd user services
     -- (modules/home/wm/hyprland.nix); gammastep is one too (HM
     -- services.gammastep) — exec'ing them here starts duplicates.
-    hl.exec_cmd("quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml")
+    -- The shell itself is NOT exec'd here: it is one of four switchable
+    -- shells (own / noctalia / dms / caelestia), each a systemd user unit
+    -- guarded by Conflicts= so only one ever runs. shell-restore.service
+    -- starts whichever was last selected. See
+    -- modules/home/wm/shell-switcher.nix and the SUPER+ALT binds below.
 
     -- Initial workspace placement for the shared dynamic pool: ws1→primary,
     -- ws2→secondary.
@@ -403,6 +407,17 @@ hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "System | Emoji picker" })
+
+-- Desktop shell switcher. The four shells are mutually exclusive systemd user
+-- units (Conflicts=), so these just name a target and let systemd swap them.
+-- Note the panel binds above (Power/Notifications/Overview/Settings/Clipboard)
+-- talk to *this config's* Shell.qml IPC — under noctalia/dms they are
+-- no-ops, and you drive those shells with their own built-in keybinds.
+local shellSwitch = "bash ~/.config/hypr/scripts/shell-switch.sh "
+hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd(shellSwitch .. "cycle"),          { description = "System | Shell: cycle" })
+hl.bind(mainMod .. " + ALT + 1", hl.dsp.exec_cmd(shellSwitch .. "set own"),        { description = "System | Shell: own (Quickshell + Waybar)" })
+hl.bind(mainMod .. " + ALT + 2", hl.dsp.exec_cmd(shellSwitch .. "set noctalia"),   { description = "System | Shell: Noctalia" })
+hl.bind(mainMod .. " + ALT + 3", hl.dsp.exec_cmd(shellSwitch .. "set dms"),        { description = "System | Shell: DMS" })
 -- Escape hatch for the Monitors page's Blank chip and the idle DPMS listener:
 -- both disarm wake-on-input, so blanking the screen you're looking at otherwise
 -- leaves no way back. locked = true so it still fires over hyprlock, which is

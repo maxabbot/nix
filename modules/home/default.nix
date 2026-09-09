@@ -9,5 +9,6 @@
     ./wm/hyprland.nix
     ./wm/waybar.nix
     ./wm/kanshi.nix
+    ./wm/shell-switcher.nix
   ];
 }

@@ -588,7 +588,14 @@ in
         ];
       });
       systemd.enable = true;
-      systemd.targets = [ "graphical-session.target" ];
+      # Waybar is the bar of ONE of four switchable shells, so it must not
+      # autostart with the session — shell-own.service pulls it in via Wants=
+      # instead (modules/home/wm/shell-switcher.nix). Emptying this clears the
+      # graphical-session.target entries HM would add, but HM also hardcodes
+      # tray.target into PartOf/WantedBy, and tray.target IS active here
+      # (nm-applet and syncthingtray both Require= it) — so the Install section
+      # has to be force-cleared below as well, or waybar starts anyway.
+      systemd.targets = [ ];
 
       settings = [ mainBar ] ++ lib.optional hasPortrait slimBar;
 
@@ -818,5 +825,14 @@ in
     # exist, and modules occasionally fail to attach (the weather module dropped
     # off the main bar this way). Hold start briefly so the outputs settle first.
     systemd.user.services.waybar.Service.ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+
+    # Bind waybar's lifecycle to the own-shell unit: started by its Wants=,
+    # stopped whenever another shell wins the Conflicts= race. Both forced,
+    # because HM's waybar module sets these unconditionally (tray.target).
+    systemd.user.services.waybar.Unit.PartOf = lib.mkForce [
+      "graphical-session.target"
+      "shell-own.service"
+    ];
+    systemd.user.services.waybar.Install.WantedBy = lib.mkForce [ ];
   };
 }

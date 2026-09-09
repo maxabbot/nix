@@ -80,12 +80,12 @@ if [ -f "$GAMING_STATE_FILE" ]; then
         disown
     fi
 
-    # Restore bar and notifications. Waybar is a systemd user service
-    # (programs.waybar.systemd.enable) — manage it through systemctl, not a
-    # raw `waybar &`, or the unit is left failed and the process unmanaged.
-    systemctl --user start waybar.service
-    quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml >/dev/null 2>&1 &
-    disown
+    # Restore whichever shell was selected before gaming mode — not
+    # unconditionally this config's own one, since the shell is switchable
+    # (shell-switch.sh / modules/home/wm/shell-switcher.nix). Waybar comes back
+    # with it via shell-own.service's Wants=, and stays down for the other
+    # three, which bring their own bars.
+    bash ~/.config/hypr/scripts/shell-switch.sh restore
 else
     # Enter gaming mode
 
@@ -103,9 +103,10 @@ else
 
     touch "$GAMING_STATE_FILE"
 
-    # Kill distractions (waybar via its systemd unit, see exit branch)
-    systemctl --user stop waybar.service
-    pkill -f "quickshell.*Shell.qml" 2>/dev/null || true
+    # Kill distractions: stop the active shell's unit rather than pkill'ing
+    # Shell.qml, which would miss noctalia/dms/caelestia entirely. Waybar is
+    # PartOf=shell-own.service so it goes down with it.
+    systemctl --user stop "$(bash ~/.config/hypr/scripts/shell-switch.sh unit)"
 
     # Disable compositor effects for performance (eval, not keyword — see above).
     hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } }, animations = { enabled = false } })'

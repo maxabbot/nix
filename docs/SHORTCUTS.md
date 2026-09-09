@@ -50,6 +50,11 @@ Gruvbox Material Dark · @host@
 | Super + Period | Emoji picker |
 | Super + Shift + D | Wake all screens |
 | Super + Shift + G | Toggle gaming mode |
+| **Desktop shell** | |
+| Super + Alt + S | Cycle shell |
+| Super + Alt + 1 | Shell: own (Quickshell + Waybar) |
+| Super + Alt + 2 | Shell: Noctalia |
+| Super + Alt + 3 | Shell: DMS |
 | **Screenshots** | |
 | Print | Screenshot picker |
 
