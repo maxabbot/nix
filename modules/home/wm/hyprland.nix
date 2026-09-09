@@ -42,6 +42,11 @@ let
     + "i=0; while [ $i -lt 100 ] && [ ${state} = activating ]; do i=$((i+1)); sleep 0.1; done; "
     + "fi; ";
 
+  # Snapshot the session across a resume into a file that survives the reboot.
+  # setsid + backgrounded: it samples for 30s, and the wake must not wait on it.
+  # stderr is left attached so hypridle journals it if the probe itself breaks.
+  resumeProbe = "setsid bash ~/.config/hypr/scripts/resume-probe.sh </dev/null >/dev/null & ";
+
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
   # into a Lua hl.monitor({}) call.
   monitorToLua =
@@ -261,8 +266,15 @@ in
             # the bare `on` is a parse error and the screens stay black.
             #
             # waitForNvidiaResume is the ordering fix — see the comment on it.
+            #
+            # resumeProbe runs first and detached, so it brackets the whole
+            # window (the nvidia wait included) without delaying the wake by the
+            # 30s it spends sampling. See the script header for why a resume
+            # that comes back lit-but-blank currently leaves no evidence behind.
             after_sleep_cmd =
-              waitForNvidiaResume + "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
+              resumeProbe
+              + waitForNvidiaResume
+              + "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
           };
           listener = [
             {

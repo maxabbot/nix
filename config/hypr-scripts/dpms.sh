@@ -41,6 +41,18 @@ set -euo pipefail
 # Set by gaming-toggle.sh for as long as gaming mode is on.
 GAMING_STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprland-gaming-mode"
 
+# Every hyprctl below is deliberately silenced, which meant that for a long time
+# this script's decisions left no trace anywhere — and "it decided to do nothing"
+# looks identical to "it never ran". Establishing which of those happened on the
+# 2026-09-09 resume took a chain of inference off hyprlock's debug log. So: one
+# line per decision, into the same file resume-probe.sh writes, giving a single
+# chronological timeline to read the two against each other.
+TRACE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/hypr/resume-probe.log"
+trace() {
+    { mkdir -p "${TRACE_LOG%/*}" && printf '%s dpms.sh[%s] %s\n' \
+        "$(date +%H:%M:%S)" "$$" "$*" >>"$TRACE_LOG"; } 2>/dev/null || true
+}
+
 # `monitors all` rather than `monitors`: the plain form is fine for dpms-off
 # outputs but drops disabled ones, and we want a stable view either way.
 all_monitors() {
@@ -74,10 +86,13 @@ dpms_set() {
         cur=$(dpms_status "$m")
         if { [ "$want" = "on" ]  && [ "$cur" = "false" ]; } \
         || { [ "$want" = "off" ] && [ "$cur" = "true"  ]; }; then
+            trace "  toggle $m: want=$want cur=$cur -> APPLIED"
             hyprctl dispatch "hl.dsp.dpms{monitor=\"$m\", state=\"toggle\"}" >/dev/null 2>&1 || true
             # Hyprland applies asynchronously; back-to-back toggles across
             # several outputs otherwise race and land on the wrong states.
             sleep 0.4
+        else
+            trace "  toggle $m: want=$want cur=${cur:-<absent>} -> SKIPPED (already correct)"
         fi
     done
 }
@@ -124,6 +139,7 @@ wake() {
         sleep 2
     fi
     if [ -n "$(missing_outputs)" ]; then
+        trace "  missing outputs [$(missing_outputs | tr '\n' ' ')] -> hyprctl reload"
         hyprctl reload >/dev/null 2>&1 || true
         sleep 1.5
         # Whatever came back may still be blanked.
@@ -131,6 +147,8 @@ wake() {
         if [ ${#back[@]} -gt 0 ]; then
             dpms_set on "${back[@]}"
         fi
+    else
+        trace "  no missing outputs, no reload"
     fi
 
     any_blanked || set_input_wake true
@@ -163,6 +181,11 @@ if [ ${#args[@]} -eq 0 ]; then
 else
     targets=("${args[@]}")
 fi
+
+trace "invoked: verb=${verb:-<none>} targets=[${targets[*]-}] state=[$(
+    hyprctl monitors all -j 2>/dev/null \
+        | jq -rj '.[] | "\(.name):dpms=\(.dpmsStatus) "' 2>/dev/null
+)]"
 
 case "$verb" in
 on)
