@@ -303,15 +303,15 @@ in
           truncation_symbol = "…/";
           substitutions = {
             "Documents" = "󰈙 ";
-            "Downloads" = " ";
+            "Downloads" = "󰉍 ";
             "Music" = "󰝚 ";
-            "Pictures" = " ";
+            "Pictures" = "󰉏 ";
             "Projects" = "󰲋 ";
-            ".config" = " ";
+            ".config" = "󰒓 ";
           };
         };
         git_branch = {
-          symbol = "";
+          symbol = "";
           style = "bg:${palette.bg2} fg:${palette.green}";
           format = "[ $symbol $branch ]($style)";
         };
@@ -330,27 +330,27 @@ in
           deleted = "✘";
         };
         python = {
-          symbol = "";
+          symbol = "";
           style = "bg:${palette.bg3} fg:${palette.yellow}";
           format = "[ $symbol ($version) ]($style)";
         };
         nodejs = {
-          symbol = "";
+          symbol = "";
           style = "bg:${palette.bg3} fg:${palette.green}";
           format = "[ $symbol ($version) ]($style)";
         };
         rust = {
-          symbol = "";
+          symbol = "";
           style = "bg:${palette.bg3} fg:${palette.orange}";
           format = "[ $symbol ($version) ]($style)";
         };
         golang = {
-          symbol = "";
+          symbol = "";
           style = "bg:${palette.bg3} fg:${palette.aqua}";
           format = "[ $symbol ($version) ]($style)";
         };
         java = {
-          symbol = "";
+          symbol = "";
           style = "bg:${palette.bg3} fg:${palette.red}";
           format = "[ $symbol ($version) ]($style)";
         };
