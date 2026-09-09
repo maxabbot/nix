@@ -1,0 +1,39 @@
+{
+  "name": "Gruvbox Material",
+  "dark": {
+    "name": "Gruvbox Material",
+    "primary": "@yellow@",
+    "primaryText": "@bg0@",
+    "primaryContainer": "@bg2@",
+    "secondary": "@blue@",
+    "surface": "@bg0@",
+    "surfaceText": "@fg@",
+    "surfaceVariant": "@bg1@",
+    "surfaceVariantText": "@fgBright@",
+    "surfaceTint": "@yellow@",
+    "background": "@bg0@",
+    "backgroundText": "@fg@",
+    "outline": "@bg3@",
+    "surfaceContainer": "@bgAlt@",
+    "surfaceContainerHigh": "@bg1@",
+    "surfaceContainerHighest": "@bg2@"
+  },
+  "light": {
+    "name": "Gruvbox Material",
+    "primary": "@yellow@",
+    "primaryText": "@bg0@",
+    "primaryContainer": "@bg2@",
+    "secondary": "@blue@",
+    "surface": "@bg0@",
+    "surfaceText": "@fg@",
+    "surfaceVariant": "@bg1@",
+    "surfaceVariantText": "@fgBright@",
+    "surfaceTint": "@yellow@",
+    "background": "@bg0@",
+    "backgroundText": "@fg@",
+    "outline": "@bg3@",
+    "surfaceContainer": "@bgAlt@",
+    "surfaceContainerHigh": "@bg1@",
+    "surfaceContainerHighest": "@bg2@"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "dark": {
+    "mPrimary": "@yellow@",
+    "mOnPrimary": "@bg0@",
+    "mSecondary": "@blue@",
+    "mOnSecondary": "@bg0@",
+    "mTertiary": "@green@",
+    "mOnTertiary": "@bg0@",
+    "mError": "@red@",
+    "mOnError": "@bg0@",
+    "mSurface": "@bg0@",
+    "mOnSurface": "@fg@",
+    "mSurfaceVariant": "@bg1@",
+    "mOnSurfaceVariant": "@fgBright@",
+    "mOutline": "@bg3@",
+    "mShadow": "@bg0Hard@",
+    "mHover": "@blue@",
+    "mOnHover": "@bg0@",
+    "terminal": {
+      "normal": {
+        "black": "@bg0@",
+        "red": "@red@",
+        "green": "@green@",
+        "yellow": "@yellow@",
+        "blue": "@blue@",
+        "magenta": "@purple@",
+        "cyan": "@aqua@",
+        "white": "@grayBright@"
+      },
+      "bright": {
+        "black": "@gray@",
+        "red": "@red@",
+        "green": "@green@",
+        "yellow": "@yellow@",
+        "blue": "@blue@",
+        "magenta": "@purple@",
+        "cyan": "@aqua@",
+        "white": "@fgBrighter@"
+      },
+      "foreground": "@fg@",
+      "background": "@bg0@",
+      "selectionFg": "@fg@",
+      "selectionBg": "@bg2@",
+      "cursorText": "@bg0@",
+      "cursor": "@fg@"
+    }
+  },
+  "light": {
+    "mPrimary": "@yellow@",
+    "mOnPrimary": "@bg0@",
+    "mSecondary": "@blue@",
+    "mOnSecondary": "@bg0@",
+    "mTertiary": "@green@",
+    "mOnTertiary": "@bg0@",
+    "mError": "@red@",
+    "mOnError": "@bg0@",
+    "mSurface": "@bg0@",
+    "mOnSurface": "@fg@",
+    "mSurfaceVariant": "@bg1@",
+    "mOnSurfaceVariant": "@fgBright@",
+    "mOutline": "@bg3@",
+    "mShadow": "@bg0Hard@",
+    "mHover": "@blue@",
+    "mOnHover": "@bg0@",
+    "terminal": {
+      "normal": {
+        "black": "@bg0@",
+        "red": "@red@",
+        "green": "@green@",
+        "yellow": "@yellow@",
+        "blue": "@blue@",
+        "magenta": "@purple@",
+        "cyan": "@aqua@",
+        "white": "@grayBright@"
+      },
+      "bright": {
+        "black": "@gray@",
+        "red": "@red@",
+        "green": "@green@",
+        "yellow": "@yellow@",
+        "blue": "@blue@",
+        "magenta": "@purple@",
+        "cyan": "@aqua@",
+        "white": "@fgBrighter@"
+      },
+      "foreground": "@fg@",
+      "background": "@bg0@",
+      "selectionFg": "@fg@",
+      "selectionBg": "@bg2@",
+      "cursorText": "@bg0@",
+      "cursor": "@fg@"
+    }
+  }
+}

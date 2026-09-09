@@ -13,6 +13,11 @@
 # SUPER+ALT+S in config/hypr/hyprland.lua. The choice is recorded under
 # $XDG_STATE_HOME/hypr/active-shell and re-applied at login by
 # shell-restore.service.
+#
+# Both third-party shells are themed from config/stylix/palette.nix like every
+# other app here, via their own custom-scheme mechanisms (see "Theming" below),
+# and Noctalia's built-in wallpaper is switched off so awww stays the single
+# wallpaper owner.
 {
   lib,
   config,
@@ -21,6 +26,8 @@
 }:
 let
   cfg = config.custom.hm;
+
+  renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
 
   scriptsDir = "${config.home.homeDirectory}/.config/hypr/scripts";
   # Deployed 0444 (see hyprland.nix), so invoke through bash rather than
@@ -216,6 +223,52 @@ in
       noctalia-shell
       dms-shell
     ];
+
+    # ── Theming ───────────────────────────────────────────────────────────────
+    # Both shells read a user-supplied scheme file that they never write back
+    # to, so unlike their settings.json these can be plain store symlinks
+    # rendered from palette.nix.
+    #
+    # Noctalia scans its scheme dir with `find -mindepth 2`, so the JSON has to
+    # sit in a subdirectory of its own — colorschemes/<name>/<name>.json — and
+    # the scheme's display name is that basename.
+    xdg.configFile."noctalia/colorschemes/Gruvbox-Material/Gruvbox-Material.json".text =
+      renderTheme ../../../config/noctalia/Gruvbox-Material.json;
+    xdg.configFile."DankMaterialShell/gruvbox-material.json".text =
+      renderTheme ../../../config/dms/gruvbox-material.json;
+
+    # Pointing each shell AT its scheme has to be done differently: settings.json
+    # is owned and rewritten by the shell itself, so it can't be a store symlink
+    # (Noctalia would lose every setting it tries to save). Merge just the keys
+    # we care about instead, leaving everything else as the user left it, and
+    # create a partial file when the shell has never run — both use Quickshell's
+    # Store, which loads JSON over its property defaults, so partial is fine.
+    home.activation.shellThemeSettings =
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        merge_settings() {
+          local file="$1" filter="$2" dir
+          dir="$(dirname "$file")"
+          $DRY_RUN_CMD mkdir -p "$dir"
+          if [ -s "$file" ]; then
+            $DRY_RUN_CMD ${pkgs.jq}/bin/jq "$filter" "$file" > "$file.hm-tmp"               && $DRY_RUN_CMD mv "$file.hm-tmp" "$file"
+          else
+            $DRY_RUN_CMD ${pkgs.jq}/bin/jq -n "$filter" > "$file"
+          fi
+        }
+
+        # Noctalia: use our scheme, stop deriving colours from the wallpaper,
+        # and stop drawing a wallpaper at all — awww already owns that layer,
+        # and Noctalia stacks its own on top rather than replacing it.
+        merge_settings "${config.xdg.configHome}/noctalia/settings.json"           '.colorSchemes.predefinedScheme = "Gruvbox-Material"
+           | .colorSchemes.useWallpaperColors = false
+           | .wallpaper.enabled = false'
+
+        # DMS: currentThemeName drives Theme.switchTheme(), and the literal
+        # "custom" is what makes it read customThemeFile.
+        merge_settings "${config.xdg.configHome}/DankMaterialShell/settings.json"           '.currentThemeName = "custom"
+           | .currentThemeCategory = "custom"
+           | .customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json"'
+      '';
 
     systemd.user.services =
       lib.mapAttrs' (name: shell: {
