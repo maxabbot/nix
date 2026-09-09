@@ -381,4 +381,10 @@ in
       ];
     };
   };
+
+  # ── nano (console fallback) ────────────────────────────────────────────────────
+  # Desktop-style keys via `set modernbindings`, so ^C/^X/^V mean the same thing
+  # here as in kitty and the GUI editors. nano prefers ~/.nanorc when it exists —
+  # this only takes effect while that file is absent.
+  xdg.configFile."nano/nanorc".source = ../../config/nano/nanorc;
 }

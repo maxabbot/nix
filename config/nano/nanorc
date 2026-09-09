@@ -1,0 +1,12 @@
+# config/nano/nanorc — deployed to ~/.config/nano/nanorc (modules/home/editor.nix).
+#
+# nano is the console fallback editor; modernbindings swaps the ^K/^U/^O legacy
+# keys for the desktop set (^C copy, ^X cut, ^V paste, ^Z undo, ^S save, ^Q quit),
+# matching kitty, Zed and every GUI app. Suspend moves to ^T under this scheme.
+set modernbindings
+
+set linenumbers
+set softwrap
+set tabstospaces
+set tabsize 2
+set constantshow

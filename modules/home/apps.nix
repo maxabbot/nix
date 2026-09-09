@@ -56,6 +56,15 @@ in
       };
 
       keybindings = {
+        # Desktop-style clipboard keys, so kitty matches every GUI app.
+        # copy_and_clear_or_interrupt copies when there is a selection (and drops
+        # it, so a stale highlight can't swallow a second Ctrl+C) and sends SIGINT
+        # otherwise. Ctrl+V costs zsh's quoted-insert and tmux's copy-mode
+        # rectangle-toggle (C-v) — kitty eats the key before either sees it.
+        # Ctrl+Shift+C/V keep working.
+        "ctrl+c" = "copy_and_clear_or_interrupt";
+        "ctrl+v" = "paste_from_clipboard";
+
         "ctrl+shift+t" = "new_tab_with_cwd";
         "ctrl+shift+l" = "next_tab";
         "ctrl+shift+h" = "prev_tab";
