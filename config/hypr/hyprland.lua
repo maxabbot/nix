@@ -399,14 +399,19 @@ end
 -- System
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"),                                                          { description = "System | Lock" })
 hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"),                                                 { description = "System | Suspend" })
-hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle power"),                  { description = "System | Power menu" })
-hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle notifications"),         { description = "System | Notifications" })
-hl.bind(mainMod .. " + Tab",       hl.dsp.exec_cmd("~/.config/hypr/scripts/qs_manager.sh toggle overview"),              { description = "System | Workspace overview" })
-hl.bind(mainMod .. " + I",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle settings"),         { description = "System | Settings" })
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle clipboard"),        { description = "System | Clipboard history" })
+hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh power"),                  { description = "System | Power menu" })
+hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh notifications"),         { description = "System | Notifications" })
+hl.bind(mainMod .. " + Tab",       hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh overview"),              { description = "System | Workspace overview" })
+hl.bind(mainMod .. " + I",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh settings"),         { description = "System | Settings" })
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh clipboard"),        { description = "System | Clipboard history" })
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "System | Emoji picker" })
+
+-- The panel binds above go through shell-ipc.sh, which routes each action to
+-- whichever shell is active: Noctalia's and DMS's own panels when they are up,
+-- this config's when it is — falling back to ours for the three Noctalia has
+-- no counterpart for (overview, screenshot, cheat sheet).
 
 -- Desktop shell switcher. The four shells are mutually exclusive systemd user
 -- units (Conflicts=), so these just name a target and let systemd swap them.
@@ -425,7 +430,7 @@ hl.bind(mainMod .. " + ALT + 3", hl.dsp.exec_cmd(shellSwitch .. "set dms"),     
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/dpms.sh on"),                            { locked = true, description = "System | Wake all screens" })
 
 -- Screenshots
-hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/qs_manager.sh toggle screenshot"), { description = "Screenshots | Open picker" })
+hl.bind("Print", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh screenshot"), { description = "Screenshots | Open picker" })
 
 -- Volume (wpctl applies the change; the Quickshell OSD reacts passively to it)
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ -l 1.0"), { locked = true, description = "Media | Volume up" })

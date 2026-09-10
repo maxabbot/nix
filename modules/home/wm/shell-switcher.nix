@@ -318,6 +318,7 @@ let
       Type = "simple";
       Environment = [ "QS_UTILITY_MODE=1" ];
       ExecStart = "${pkgs.quickshell}/bin/quickshell -p ${scriptsDir}/quickshell/Shell.qml";
+      SuccessExitStatus = "143 SIGTERM";
       Restart = "on-failure";
       RestartSec = 2;
       Slice = "session.slice";
@@ -340,8 +341,10 @@ let
     Service = {
       Type = "simple";
       ExecStart = shell.exec;
-      # A stop triggered by Conflicts= is a clean SIGTERM, not a failure, so
-      # this does not fight the switcher — it only covers a shell crashing.
+      # dms exits 143 on SIGTERM rather than dying by signal, so without this
+      # every Conflicts-driven swap leaves the unit in `failed` — which then
+      # hides a genuine crash. Restart still covers the real thing.
+      SuccessExitStatus = "143 SIGTERM";
       Restart = "on-failure";
       RestartSec = 2;
       Slice = "session.slice";
