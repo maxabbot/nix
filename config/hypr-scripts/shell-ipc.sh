@@ -13,9 +13,9 @@
 #
 #   shell-ipc.sh <power|notifications|overview|settings|control|clipboard|screenshot|keybinds|wallpaper>
 #
-# wallpaper always opens this config's own picker: it is awww-backed, so it
-# works under every shell, and Noctalia greys its own pickers out once its
-# wallpaper layer is disabled.
+# wallpaper opens each shell's own picker like everything else. Both
+# third-party shells hand their picks to awww (noctalia-wallpaper-hook.sh,
+# dms-wallpaper-bridge.sh), so awww stays the only wallpaper layer.
 #
 # Anything else is passed straight through to qs_manager.sh, which is what the
 # per-tab waybar buttons (settings audio, settings monitors, …) rely on.
@@ -42,8 +42,9 @@ case "$(bash "$SCRIPTS_DIR/shell-switch.sh" current)" in
             settings)      noctalia-shell ipc call settings toggle ;;
             control)       noctalia-shell ipc call controlCenter toggle ;;
             clipboard)     noctalia-shell ipc call launcher clipboard ;;
+            wallpaper)     noctalia-shell ipc call wallpaper toggle ;;
             # Noctalia ships no exposé, screenshot tool or cheat sheet at all.
-            overview | screenshot | keybinds | wallpaper) own "$ACTION" ;;
+            overview | screenshot | keybinds) own "$ACTION" ;;
             *) own "$ACTION" "$@" ;;
         esac
         ;;
@@ -58,7 +59,7 @@ case "$(bash "$SCRIPTS_DIR/shell-switch.sh" current)" in
             keybinds)      dms ipc hypr toggleBinds ;;
             # No screenshot IPC target; the CLI is the interface.
             screenshot)    dms screenshot region ;;
-            wallpaper)     own "$ACTION" ;;
+            wallpaper)     dms ipc dankdash wallpaper ;;
             *) own "$ACTION" "$@" ;;
         esac
         ;;

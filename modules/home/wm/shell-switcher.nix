@@ -16,8 +16,8 @@
 #
 # Both third-party shells are themed from config/stylix/palette.nix like every
 # other app here, via their own custom-scheme mechanisms (see "Theming" below),
-# and Noctalia's built-in wallpaper is switched off so awww stays the single
-# wallpaper owner.
+# and both hand their wallpaper picks to awww so it stays the single wallpaper
+# owner.
 {
   lib,
   config,
@@ -52,7 +52,9 @@ let
   #
   # Window targets go through hl.get_window(): passing the address as a bare
   # string is accepted but does nothing (see the hyprland-lua-dispatch notes).
-  luaDispatch =
+  # patchQml also carries one patch that isn't about dispatch: Noctalia's
+  # wallpaper layer, at the end of its list.
+  patchQml =
     pkg: subs:
     pkg.overrideAttrs (old: {
       postInstall = (old.postInstall or "") + lib.concatMapStrings (s: ''
@@ -61,7 +63,7 @@ let
       '') subs;
     });
 
-  noctalia-shell = luaDispatch pkgs.noctalia-shell (
+  noctalia-shell = patchQml pkgs.noctalia-shell (
     let
       f = "share/noctalia-shell/Services/Compositor/HyprlandService.qml";
     in
@@ -93,10 +95,20 @@ let
         from = "Hyprland.dispatch(`killwindow address:0x\${window.id}`);";
         to = "Hyprland.dispatch(`hl.dsp.window.kill({ window = hl.get_window(\"address:0x\${window.id}\") })`);";
       }
+      {
+        # Not a dispatch fix. Background.qml draws the noctalia-wallpaper-*
+        # layer, which stacks over awww rather than replacing it. Disabling it
+        # at build time lets wallpaper.enabled stay on — every Noctalia picker
+        # binds `enabled` to that flag — while noctalia-wallpaper-hook.sh hands
+        # the picks to awww.
+        file = "share/noctalia-shell/Modules/Background/Background.qml";
+        from = "active: modelData && Settings.data.wallpaper.enabled && (!PowerProfileService.noctaliaPerformanceMode || !Settings.data.noctaliaPerformance.disableWallpaper)";
+        to = "active: false";
+      }
     ]
   );
 
-  dms-shell = luaDispatch pkgs.dms-shell (
+  dms-shell = patchQml pkgs.dms-shell (
     let
       bar = "share/quickshell/dms/Modules/DankBar/DankBarContent.qml";
       sw = "share/quickshell/dms/Modules/DankBar/Widgets/WorkspaceSwitcher.qml";
@@ -242,7 +254,12 @@ let
     };
     colorSchemes.predefinedScheme = "Gruvbox-Material";
     colorSchemes.useWallpaperColors = false;
-    wallpaper.enabled = false;
+    # On so Noctalia's pickers work; its layer is patched off above and the hook
+    # hands picks to awww, which stays the only wallpaper layer.
+    wallpaper.enabled = true;
+    hooks.enabled = true;
+    # Noctalia substitutes $1/$2 (path, screen) into the string itself.
+    hooks.wallpaperChange = ''bash ~/.config/hypr/scripts/noctalia-wallpaper-hook.sh "$1" "$2"'';
     # Waybar's custom/weather hits wttr.in with no location and lets it
     # geolocate by IP, so auto-locate is the faithful mirror — and it keeps a
     # home address out of a public repo. Set location.name to a city here to

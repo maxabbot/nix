@@ -213,11 +213,17 @@ source changed. Store files all have mtime 1970, so `-nt` can't see an edit;
 it stamps the resolved store paths of `shortcuts.md` and `.css` instead, which
 a `nixup` repoints. A cache hit is ~0.06s against a headless-Chrome render.
 
-**Noctalia** stacked its own layer on top of awww's rather than replacing it,
-so `wallpaper.enabled` is off and `useWallpaperColors` with it. That also greys
-out Noctalia's pickers (they bind `enabled` to the same flag), so under
-Noctalia the own WallpaperPicker — awww-backed, running as the utility
-instance — is the picker.
+**Noctalia** stacked its own layer (`noctalia-wallpaper-*`, drawn by
+`Background.qml`) on top of awww's rather than replacing it. That layer is
+patched off at build time instead of switching `wallpaper.enabled` off, because
+every Noctalia picker — bar, control centre, settings, and the `wallpaper`
+IPC target — binds `enabled` to that flag and would be greyed out. With it on,
+`hooks.wallpaperChange` runs `noctalia-wallpaper-hook.sh` once per screen,
+which applies the pick through awww: it skips Noctalia's bundled default and
+anything already on screen, handles `solid://` colours, and leaves portrait
+outputs alone while `setWallpaperOnAllMonitors` is on. Noctalia's cache restore
+doesn't emit a change, so starting it never touches the wallpaper.
+`useWallpaperColors` stays off so the palette scheme isn't overridden.
 
 **DMS** gets `screenPreferences.wallpaper = []`, exactly what its "Disable
 Built-in Wallpapers" toggle writes, so a pick can never draw over awww. Its
@@ -261,6 +267,10 @@ creation, so removing the image isn't undone by the next `nixup`.
 (matugen output), and background blur unsupported on Hyprland.
 
 ## Known-untested
+
+`dms ipc dankdash wallpaper`, behind the wallpaper key under DMS. Its IPC
+handler is created unconditionally (`DMSShell.qml`), and picks reach awww via
+the bridge, but the call itself hasn't been exercised with DMS running.
 
 `hl.dsp.exit()`, DMS's log-out path. Correct by the API's shape, but verifying
 it costs the session.
