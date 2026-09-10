@@ -249,10 +249,12 @@ the name, so the file tracks whatever is actually up.
 - `accountsservice` — not enabled. Only feeds DMS the user's avatar and display
   name.
 
-**No wallpaper directory.** `~/Pictures/Wallpapers` doesn't exist and
-`WALLPAPER_DIR` isn't set, so the own WallpaperPicker has nothing to list under
-any shell, and Noctalia logs a failed scan. The only wallpaper is the repo's
-leaves image.
+**Wallpaper directory.** `~/Pictures/Wallpapers` is what every picker
+defaults to — the own WallpaperPicker's `$WALLPAPER_DIR` fallback and Noctalia's
+`wallpaper.directory` — and it didn't exist, so they all listed nothing. An
+activation in `hyprland.nix` now creates it and seeds a real copy of the leaves
+(not a symlink: the thumbnail scan uses `find -type f`). It only seeds on first
+creation, so removing the image isn't undone by the next `nixup`.
 
 **Harmless log noise:** DMS failing to register as polkit agent
 (polkit-gnome already is), `$SWAYSOCK`/`$I3SOCK` unset, no `dms-colors.json`

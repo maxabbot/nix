@@ -223,6 +223,21 @@ in
       "hypr/shortcuts.css".text = renderTheme ../../../config/hypr/shortcuts.css;
     };
 
+    # ── Wallpaper directory ──────────────────────────────────────────────────
+    # Every picker defaults here — the own WallpaperPicker (qs_manager.sh's
+    # $WALLPAPER_DIR fallback) and Noctalia's wallpaper.directory — and it didn't
+    # exist, so they all listed nothing. Seeded with a real copy of the leaves,
+    # not an HM symlink: the thumbnail scan uses `find -type f`, which skips
+    # symlinks. Only seeded when the directory is first created, so deleting the
+    # image later isn't undone by the next nixup.
+    home.activation.wallpaperDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      dir="${config.home.homeDirectory}/Pictures/Wallpapers"
+      if [ ! -d "$dir" ]; then
+        $DRY_RUN_CMD mkdir -p "$dir"
+        $DRY_RUN_CMD install -m 0644 ${../../../config/sddm/leaves-wall.png} "$dir/leaves-wall.png"
+      fi
+    '';
+
     # ── Tray applets — systemd user services instead of sleep-raced exec-once ─
     # Both HM services bind to tray.target (declared by HM's wayland module).
     # nm-applet (SNI mode) re-registers once the quickshell tray appears;
