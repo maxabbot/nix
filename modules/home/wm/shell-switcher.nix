@@ -262,6 +262,13 @@ let
       useAutoLocation = true;
       weatherEnabled = true;
       showWeather = true;
+      # Waybar and Noctalia (labelMode "index") number their workspaces; DMS
+      # ships unlabelled dots.
+      showWorkspaceIndex = true;
+      # Exactly what DMS's "Disable Built-in Wallpapers" toggle writes: no screen
+      # renders its own wallpaper layer, so a pick can't stack over awww.
+      # dms-wallpaper-bridge forwards picks to awww instead.
+      screenPreferences.wallpaper = [ ];
       customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json";
     };
     bars = {
@@ -308,7 +315,12 @@ let
       # --session is upstream's own systemd invocation: stays in the
       # foreground and expects to be session-managed.
       exec = "${dms-shell}/bin/dms run --session";
-      wants = [ "shell-utility.service" ];
+      wants = [
+        "shell-utility.service"
+        # Watch for wallpaper picks, and apply any existing one once at start.
+        "dms-wallpaper-bridge.path"
+        "dms-wallpaper-bridge.service"
+      ];
     };
   };
 
@@ -393,6 +405,17 @@ in
     # store symlink (Noctalia would lose every setting it saves, silently — it
     # uses a FileView/JsonAdapter with printErrors:false and has no read-only
     # handling). Merge in only the keys we declare and leave the rest alone.
+    systemd.user.paths.dms-wallpaper-bridge = {
+      Unit = {
+        Description = "Watch DMS session state for wallpaper picks";
+        PartOf = [ "shell-dms.service" ];
+      };
+      Path = {
+        PathChanged = "${config.xdg.stateHome}/DankMaterialShell/session.json";
+        Unit = "dms-wallpaper-bridge.service";
+      };
+    };
+
     home.activation.shellSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       apply() {
         local file="$1" decl="$2" prog="$3"
@@ -456,6 +479,26 @@ in
       }) shells
       // {
         shell-utility = utilityUnit;
+
+        # Applies wallpapers picked in DMS through awww; see the script header.
+        dms-wallpaper-bridge = {
+          Unit.Description = "Apply DMS wallpaper picks through awww";
+          Service = {
+            Type = "oneshot";
+            Environment = [
+              "PORTRAIT_OUTPUTS=${lib.concatStringsSep "," outputs.portraitOutputs}"
+              # A user unit doesn't inherit the login shell's PATH.
+              "PATH=${
+                lib.makeBinPath [
+                  pkgs.jq
+                  pkgs.coreutils
+                  pkgs.gnugrep
+                ]
+              }:/run/current-system/sw/bin:${config.home.profileDirectory}/bin"
+            ];
+            ExecStart = "${pkgs.bash}/bin/bash ${scriptsDir}/dms-wallpaper-bridge.sh";
+          };
+        };
 
         # Re-applies the recorded choice at login, so a switch survives logout.
         # The script uses `systemctl --user --no-block start`: a blocking start

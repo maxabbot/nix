@@ -25,6 +25,18 @@ done
 
 mkdir -p "$CACHE"
 
+# Reuse the last render when neither source has changed. Every Nix store file
+# carries mtime 1970, so -nt/-ot can't see an edit — but the resolved store
+# paths can: a nixup that touches shortcuts.md or the palette-rendered .css
+# repoints the symlink. Makes hotplug redress (wallpaper-redress.sh) and login
+# a single awww call instead of a headless Chrome run.
+STAMP="$PNG.src"
+want_stamp=$(readlink -f "$SRC" "$CSS")
+if [[ -s "$PNG" && -f "$STAMP" && "$(cat "$STAMP")" == "$want_stamp" ]]; then
+  exec awww img "$PNG" --outputs "$OUTPUT" --resize crop \
+    --transition-type wipe --transition-fps 60
+fi
+
 # Split markdown at the first ## heading that should start the right column.
 # Left column: Window Manager + Tmux. Right column: everything from ## Zsh on.
 # The path goes in via the environment — never interpolate shell strings into
@@ -76,6 +88,8 @@ google-chrome-stable \
   --user-data-dir="$CACHE/chrome-shot" \
   --window-size=2160,3840 \
   --screenshot="$PNG" "file://$HTML" >/dev/null 2>&1
+
+printf '%s\n' "$want_stamp" >"$STAMP"
 
 # Image is already 2160x3840, so crop is an exact 1:1 fit on the rotated output.
 awww img "$PNG" --outputs "$OUTPUT" --resize crop \

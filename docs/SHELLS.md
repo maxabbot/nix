@@ -162,6 +162,9 @@ transparency, corners) alongside its widget arrays. The merge rewrites the
 widget lists in place and clones bar 0 for the portrait output, so styling
 survives. Verified idempotent.
 
+DMS ships `showWorkspaceIndex = false` — unlabelled dots — while waybar and
+Noctalia (`labelMode: "index"`) number their workspaces, so it is declared on.
+
 Noctalia's `bar.monitors` defaults to `[]` on a fresh install, which renders no
 bar at all and looks like a silent failure — it is declared here for that
 reason.
@@ -192,11 +195,36 @@ enables theirs over IPC after a switch (`idleInhibitor enable` /
 
 ## Wallpaper
 
-`awww` is the single wallpaper owner. Noctalia stacked its own layer on top of
-awww's rather than replacing it, so `wallpaper.enabled` is off, and
-`useWallpaperColors` with it — otherwise the scheme above gets overridden by
-colours derived from whatever is on screen. DMS needed no such fix: its
-wallpaper layer resolves to `""` and draws nothing unless one is configured.
+`awww` is the single wallpaper owner. Every output gets the leaves at login
+from the generated `wallpaper.lua`, then `shortcuts-wallpaper.sh` renders
+`SHORTCUTS.md` into a cheat-sheet over the rotated secondary.
+
+**Hotplug.** awww re-attaches a returning output with the last image set for
+*all* outputs — the leaves — so unplugging the portrait monitor used to drop
+the cheat-sheet for the rest of the session. A `monitor.added` handler in
+`hyprland.lua` runs `wallpaper-redress.sh`, which checks which image the output
+is actually displaying (it isn't bare, it's wrong) and only acts on rotated
+outputs. The handler lives at top level rather than in `wallpaper.lua`, which
+is only required inside `hyprland.start` and so wouldn't survive a reload.
+
+**Render cache.** `shortcuts-wallpaper.sh` reuses its last PNG when neither
+source changed. Store files all have mtime 1970, so `-nt` can't see an edit;
+it stamps the resolved store paths of `shortcuts.md` and `.css` instead, which
+a `nixup` repoints. A cache hit is ~0.06s against a headless-Chrome render.
+
+**Noctalia** stacked its own layer on top of awww's rather than replacing it,
+so `wallpaper.enabled` is off and `useWallpaperColors` with it. That also greys
+out Noctalia's pickers (they bind `enabled` to the same flag), so under
+Noctalia the own WallpaperPicker — awww-backed, running as the utility
+instance — is the picker.
+
+**DMS** gets `screenPreferences.wallpaper = []`, exactly what its "Disable
+Built-in Wallpapers" toggle writes, so a pick can never draw over awww. Its
+picker still works: `dms-wallpaper-bridge.path` watches DMS's `session.json`
+and `dms-wallpaper-bridge.sh` applies the pick through awww. A global pick
+skips portrait outputs to keep the cheat-sheet; a per-monitor pick is honoured
+as given. The dedupe stamp lives in `$XDG_RUNTIME_DIR` so a pick re-applies
+once after login instead of losing to the leaves.
 
 ## Known-untested
 

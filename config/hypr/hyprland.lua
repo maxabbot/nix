@@ -68,6 +68,18 @@ hl.on("monitor.added", setXPrimary)
 hl.on("monitor.removed", setXPrimary)
 hl.on("monitor.layout_changed", setXPrimary)
 
+-- awww re-attaches a hotplugged output with the leaves, which silently drops the
+-- cheat-sheet from the portrait secondary. Put it back when a monitor returns.
+-- Registered here rather than in the generated wallpaper.lua, which is only
+-- required from inside hyprland.start and so wouldn't survive a config reload.
+-- The script checks the output's transform itself, so a landscape secondary on
+-- another host is left alone.
+hl.on("monitor.added", function()
+    if mon.secondary ~= "" then
+        hl.exec_cmd("bash ~/.config/hypr/scripts/wallpaper-redress.sh " .. mon.secondary)
+    end
+end)
+
 --------------------
 ---- SETTINGS ------
 --------------------
