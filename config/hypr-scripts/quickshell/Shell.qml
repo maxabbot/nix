@@ -20,6 +20,14 @@ ShellRoot {
     id: root
 
     // ── Global state ───────────────────────────────────────────────────────────
+    // Utility mode: this shell runs *alongside* Noctalia or DMS purely for the
+    // panels they have no counterpart for (Nix, Monitors, KDEConnect, Input,
+    // and on Noctalia also screenshots, the cheat sheet and the overview).
+    // The active shell owns the notification daemon, the OSD and the bar, so
+    // those three are switched off here to avoid fighting it. Set by
+    // shell-utility.service — see modules/home/wm/shell-switcher.nix.
+    readonly property bool utilityMode: (Quickshell.env("QS_UTILITY_MODE") ?? "") !== ""
+
     property string activePanel:    ""
     property string settingsTab:    "control"
     property bool   dndEnabled:     false
@@ -91,6 +99,7 @@ ShellRoot {
     Timer { id: osdReadyTimer; interval: 1000; running: true; onTriggered: root.osdReady = true }
 
     function showOsd(kind, level, muted) {
+        if (root.utilityMode) return   // the active shell draws its own OSD
         root.osdKind  = kind
         root.osdLevel = Math.max(0, Math.min(1, level))
         root.osdMuted = muted === true
@@ -141,27 +150,40 @@ ShellRoot {
 
     // ── Notification server ────────────────────────────────────────────────────
     // Registers as org.freedesktop.Notifications on the session D-Bus.
-    // Remove swaync from autostart — only one daemon may run at a time.
-    NotificationServer {
-        id: notifServer
-        keepOnReload: true
-        actionsSupported: true
-        bodySupported: true
-        imageSupported: true
-        persistenceSupported: true
+    // Remove swaync from autostart — only one daemon may run at a time, which
+    // is also why this sits behind a Loader: in utility mode Noctalia or DMS
+    // already holds the name and a second server would just lose the race.
+    readonly property var notifServer: notifLoader.item
 
-        // Quickshell discards every incoming notification unless the handler
-        // marks it tracked — without this, trackedNotifications stays empty and
-        // no toast ever appears.
-        onNotification: notification => notification.tracked = true
+    Loader {
+        id: notifLoader
+        sourceComponent: root.utilityMode ? null : notifServerComponent
+    }
+
+    Component {
+        id: notifServerComponent
+
+        NotificationServer {
+            keepOnReload: true
+            actionsSupported: true
+            bodySupported: true
+            imageSupported: true
+            persistenceSupported: true
+
+            // Quickshell discards every incoming notification unless the handler
+            // marks it tracked — without this, trackedNotifications stays empty
+            // and no toast ever appears.
+            onNotification: notification => notification.tracked = true
+        }
     }
 
     // ── Waybar state bridge ────────────────────────────────────────────────────
     // Event-driven: write state files and poke waybar's custom modules
     // (custom/notifications, custom/rebuild use "signal": 8, "interval": "once").
-    readonly property int notifCount: notifServer.trackedNotifications?.values.length ?? 0
+    readonly property int notifCount: notifServer?.trackedNotifications?.values.length ?? 0
 
     function syncWaybar() {
+        if (root.utilityMode) return   // waybar only runs under the own shell
         Quickshell.execDetached(["bash", "-c",
             "d=\"${XDG_RUNTIME_DIR:-/tmp}/quickshell\"; mkdir -p \"$d\"; " +
             "printf '%d' " + notifCount + " > \"$d/notif-count\"; " +
@@ -192,7 +214,7 @@ ShellRoot {
             spacing: 6
 
             Repeater {
-                model: notifServer.trackedNotifications
+                model: notifServer?.trackedNotifications ?? null
                 delegate: NotificationToast {
                     required property var modelData
                     notification: modelData
@@ -206,7 +228,7 @@ ShellRoot {
     NotificationCenter {
         id: notifCenter
         visible: root.activePanel === "notifications"
-        model: notifServer.trackedNotifications
+        model: notifServer?.trackedNotifications ?? null
         onCloseRequested: root.activePanel = ""
     }
 

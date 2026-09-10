@@ -43,14 +43,17 @@ MANIFEST="$THUMB_DIR/.manifest"
 # Only runs on slow path — not on every workspace switch
 # -----------------------------------------------------------------------------
 
-# Only resurrect when this config's own shell is the selected one. Under
-# noctalia/dms/caelestia these panels aren't the active UI, and relaunching
-# Shell.qml would stack a second shell underneath the running one (and fight
-# it for org.freedesktop.Notifications). Go through systemd so the instance
-# stays managed by shell-own.service rather than being orphaned here.
-if [[ "$(bash "$(dirname "${BASH_SOURCE[0]}")/shell-switch.sh" current)" == "own" ]]; then
-    if ! pgrep -f "quickshell.*Shell.qml" >/dev/null; then
+# These panels run either as the whole desktop (shell-own.service) or beside
+# noctalia/dms as shell-utility.service — the same Shell.qml with the
+# notification server, OSD and waybar bridge switched off, so it doesn't fight
+# the active shell for org.freedesktop.Notifications. Resurrect whichever fits
+# the selected shell, via systemd so the instance stays managed rather than
+# being orphaned here.
+if ! pgrep -f "quickshell.*Shell.qml" >/dev/null; then
+    if [[ "$(bash "$(dirname "${BASH_SOURCE[0]}")/shell-switch.sh" current)" == "own" ]]; then
         systemctl --user --no-block start shell-own.service
+    else
+        systemctl --user --no-block start shell-utility.service
     fi
 fi
 

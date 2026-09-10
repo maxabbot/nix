@@ -54,6 +54,30 @@ Extras neither of these replaces, but which the third-party shells add: an app
 launcher, a lock screen and a dock (both), plus a notepad, printer tab and
 window-rules editor (DMS).
 
+## Utility mode — keeping the own panels under the other shells
+
+The only thing that makes `Shell.qml` exclusive is
+`org.freedesktop.Notifications`; the panels themselves collide with nothing. So
+it runs *alongside* Noctalia and DMS as `shell-utility.service` — the same QML
+with `QS_UTILITY_MODE=1`, which skips the notification server (behind a
+`Loader`), the OSD and the waybar bridge. Every panel keeps working, so
+`SUPER+I/N/Tab/Shift+V/Print` behave the same under all three shells.
+
+```
+own      → shell-own.service      (+ waybar)
+noctalia → shell-noctalia.service (+ shell-utility.service)
+dms      → shell-dms.service      (+ shell-utility.service)
+```
+
+It `Conflicts` with `shell-own.service` rather than joining the three-way web,
+so exactly one `Shell.qml` runs at a time — `qs_manager.sh` addresses it by
+config path, and a second instance would make that IPC ambiguous. The zombie
+watchdog in that script starts whichever of the two fits the selected shell.
+
+This recovers `NixPanel`, `MonitorManager`, `KDEConnectPanel` and `InputPanel`
+everywhere, plus `ScreenshotOverlay`, `KeybindCheatSheet` and
+`WorkspaceOverview` under Noctalia.
+
 ## This config's incompatibilities
 
 Three things about this setup that these shells do not expect.
@@ -141,6 +165,14 @@ survives. Verified idempotent.
 Noctalia's `bar.monitors` defaults to `[]` on a fresh install, which renders no
 bar at all and looks like a silent failure — it is declared here for that
 reason.
+
+Weather needs a location in both, and neither ships one — Noctalia logs
+"Cannot fetch weather without coordinates" and stays blank. Waybar's
+`custom/weather` calls `wttr.in` with no location at all and lets it geolocate
+by IP, so auto-locate is the faithful mirror (`location.autoLocate` /
+`useAutoLocation`), and it keeps a home address out of a public repo. Set
+Noctalia's `location.name` to a city in `shell-switcher.nix` to pin it instead;
+DMS caches resolved coordinates into its own SessionData.
 
 ## Wallpaper
 

@@ -234,12 +234,25 @@ let
     colorSchemes.predefinedScheme = "Gruvbox-Material";
     colorSchemes.useWallpaperColors = false;
     wallpaper.enabled = false;
+    # Waybar's custom/weather hits wttr.in with no location and lets it
+    # geolocate by IP, so auto-locate is the faithful mirror — and it keeps a
+    # home address out of a public repo. Set location.name to a city here to
+    # pin it instead; without either, Noctalia logs "Cannot fetch weather
+    # without coordinates" and the widget stays blank.
+    location.autoLocate = true;
+    location.weatherEnabled = true;
+    location.useFahrenheit = false;
   };
 
   dmsDeclared = {
     settings = {
       currentThemeName = "custom";
       currentThemeCategory = "custom";
+      # As above: DMS resolves and caches the coordinates into its own
+      # SessionData once auto-location is on.
+      useAutoLocation = true;
+      weatherEnabled = true;
+      showWeather = true;
       customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json";
     };
     bars = {
@@ -273,14 +286,41 @@ let
     noctalia = {
       description = "Desktop shell: Noctalia";
       exec = "${noctalia-shell}/bin/noctalia-shell";
-      wants = [ ];
+      wants = [ "shell-utility.service" ];
     };
     dms = {
       description = "Desktop shell: DankMaterialShell";
       # --session is upstream's own systemd invocation: stays in the
       # foreground and expects to be session-managed.
       exec = "${dms-shell}/bin/dms run --session";
-      wants = [ ];
+      wants = [ "shell-utility.service" ];
+    };
+  };
+
+  # Same Shell.qml as shell-own.service, run alongside Noctalia/DMS so their
+  # missing panels (Nix, Monitors, KDEConnect, Input — plus screenshots, the
+  # cheat sheet and the overview under Noctalia) stay on their keybinds.
+  # QS_UTILITY_MODE makes it skip the notification server, the OSD and the
+  # waybar bridge, which are the only parts that would fight the active shell.
+  #
+  # It Conflicts with shell-own.service rather than joining the three-way web:
+  # exactly one Shell.qml may run, because qs_manager.sh addresses it by config
+  # path and a second instance would make that IPC ambiguous.
+  utilityUnit = {
+    Unit = {
+      Description = "Own Quickshell panels, alongside a third-party shell";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      Requisite = [ "graphical-session.target" ];
+      Conflicts = [ "shell-own.service" ];
+    };
+    Service = {
+      Type = "simple";
+      Environment = [ "QS_UTILITY_MODE=1" ];
+      ExecStart = "${pkgs.quickshell}/bin/quickshell -p ${scriptsDir}/quickshell/Shell.qml";
+      Restart = "on-failure";
+      RestartSec = 2;
+      Slice = "session.slice";
     };
   };
 
@@ -293,7 +333,8 @@ let
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       Requisite = [ "graphical-session.target" ];
-      Conflicts = lib.filter (u: u != unitName name) allUnits;
+      Conflicts = lib.filter (u: u != unitName name) allUnits
+        ++ lib.optional (name == "own") "shell-utility.service";
       Wants = shell.wants;
     };
     Service = {
@@ -389,6 +430,8 @@ in
         value = mkShellUnit name shell;
       }) shells
       // {
+        shell-utility = utilityUnit;
+
         # Re-applies the recorded choice at login, so a switch survives logout.
         # The script uses `systemctl --user --no-block start`: a blocking start
         # from inside a unit this same manager is running would deadlock.
