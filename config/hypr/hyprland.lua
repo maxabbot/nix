@@ -416,6 +416,7 @@ hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 hl.bind(mainMod .. " + Tab",       hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh overview"),              { description = "System | Workspace overview" })
 hl.bind(mainMod .. " + I",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh settings"),         { description = "System | Settings" })
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh clipboard"),        { description = "System | Clipboard history" })
+hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/shell-ipc.sh wallpaper"),         { description = "System | Wallpaper picker" })
 hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "System | Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "System | Colour picker" })
 hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "System | Emoji picker" })

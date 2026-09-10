@@ -45,6 +45,7 @@ Gruvbox Material Dark · @host@
 | Super + N | Toggle notifications |
 | Super + Tab | Workspace overview |
 | Super + Shift + V | Clipboard history |
+| Super + W | Wallpaper picker |
 | Super + O | Audio output switcher |
 | Super + Shift + P | Colour picker |
 | Super + Period | Emoji picker |
