@@ -415,6 +415,11 @@ in
                  | .barConfigs |= map(
                      if .id == "portrait"
                      then ( .name             = "Portrait"
+                          # Without this the portrait bar falls back onto the
+                          # only remaining screen whenever DP-2 is unplugged
+                          # (DankBar.qml:168), stacking two bars on DP-3. The
+                          # fallback is right for the main bar, not a second one.
+                          | .showOnLastDisplay = false
                           | .screenPreferences = $d.bars.portraitScreens
                           | .leftWidgets       = $d.bars.pLeft
                           | .centerWidgets     = $d.bars.pCenter
