@@ -22,12 +22,16 @@
   lib,
   config,
   pkgs,
+  machineType,
   ...
 }:
 let
   cfg = config.custom.hm;
 
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
+  outputs = import ./outputs.nix { inherit lib; } cfg;
+
+  isLaptop = machineType == "laptop";
 
   scriptsDir = "${config.home.homeDirectory}/.config/hypr/scripts";
   # Deployed 0444 (see hyprland.nix), so invoke through bash rather than
@@ -170,6 +174,94 @@ let
     ]
   );
 
+  # ── Bar layouts, mirroring modules/home/wm/waybar.nix ───────────────────────
+  # Waybar's main bar is  workspaces/scratchpad/window | clock/weather |
+  # mpris, {cpu,mem,temp,gpu}, disk, {recording,camera,mic,audio,bt,net},
+  # battery, idle-inhibitor, tray, rebuild, keybinds, notifications, settings —
+  # and a trimmed portrait bar. Neither shell has every counterpart:
+  #   • no scratchpad, rebuild (NixPanel) or keybinds widget in either
+  #   • Noctalia has no weather widget; DMS has no volume/network/bluetooth bar
+  #     widgets at all (they live behind its control centre button)
+  #   • DMS folds camera+mic into one privacyIndicator; recording has no home
+  # Declaring these means per-widget tweaks made in a shell's own GUI are
+  # overwritten on the next nixup — the arrays are replaced, not merged.
+  noctaliaSettings = {
+    bar = {
+      # Fresh installs ship an empty monitor list and render no bar at all.
+      monitors = outputs.allOutputs;
+      position = "top";
+      widgets = {
+        left = [ { id = "Workspace"; } { id = "ActiveWindow"; } ];
+        center = [
+          {
+            id = "Clock";
+            formatHorizontal = "HH:mm";
+            formatVertical = "HH mm";
+            tooltipFormat = "HH:mm ddd, MMM dd";
+          }
+        ];
+        right = [
+          { id = "MediaMini"; }
+          { id = "SystemMonitor"; }
+          { id = "Microphone"; }
+          { id = "Volume"; }
+          { id = "Bluetooth"; }
+          { id = "Network"; }
+        ]
+        ++ lib.optional isLaptop { id = "Battery"; }
+        ++ [
+          { id = "KeepAwake"; }
+          { id = "Tray"; }
+          { id = "NotificationHistory"; }
+          { id = "Settings"; }
+        ];
+      };
+      # Same trim as waybar's slimBar: workspaces, clock, audio, net, the rest cut.
+      screenOverrides = map (name: {
+        inherit name;
+        widgets = {
+          left = [ { id = "Workspace"; } ];
+          center = [ { id = "Clock"; formatVertical = "HH mm"; } ];
+          right = [
+            { id = "Volume"; }
+            { id = "Network"; }
+            { id = "NotificationHistory"; }
+            { id = "Settings"; }
+          ];
+        };
+      }) outputs.portraitOutputs;
+    };
+    colorSchemes.predefinedScheme = "Gruvbox-Material";
+    colorSchemes.useWallpaperColors = false;
+    wallpaper.enabled = false;
+  };
+
+  dmsDeclared = {
+    settings = {
+      currentThemeName = "custom";
+      currentThemeCategory = "custom";
+      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json";
+    };
+    bars = {
+      # "all" when there is nothing to split, so single-output hosts still show a bar.
+      mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
+      portraitScreens = outputs.portraitOutputs;
+      left = [ "workspaceSwitcher" "focusedWindow" ];
+      center = [ "clock" "weather" ];
+      right = [ "music" "cpuUsage" "memUsage" "cpuTemp" ]
+        ++ lib.optional cfg.nvidia "gpuTemp"
+        ++ [ "diskUsage" "privacyIndicator" ]
+        ++ lib.optional isLaptop "battery"
+        ++ [ "idleInhibitor" "systemTray" "notificationButton" "controlCenterButton" ];
+      pLeft = [ "workspaceSwitcher" ];
+      pCenter = [ "clock" ];
+      pRight = [ "notificationButton" "controlCenterButton" ];
+    };
+  };
+
+  noctaliaDecl = pkgs.writeText "noctalia-declared.json" (builtins.toJSON noctaliaSettings);
+  dmsDecl = pkgs.writeText "dms-declared.json" (builtins.toJSON dmsDeclared);
+
   shells = {
     own = {
       description = "Desktop shell: this config's Quickshell panels + Waybar";
@@ -237,38 +329,59 @@ in
     xdg.configFile."DankMaterialShell/gruvbox-material.json".text =
       renderTheme ../../../config/dms/gruvbox-material.json;
 
-    # Pointing each shell AT its scheme has to be done differently: settings.json
-    # is owned and rewritten by the shell itself, so it can't be a store symlink
-    # (Noctalia would lose every setting it tries to save). Merge just the keys
-    # we care about instead, leaving everything else as the user left it, and
-    # create a partial file when the shell has never run — both use Quickshell's
-    # Store, which loads JSON over its property defaults, so partial is fine.
-    home.activation.shellThemeSettings =
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        merge_settings() {
-          local file="$1" filter="$2" dir
-          dir="$(dirname "$file")"
-          $DRY_RUN_CMD mkdir -p "$dir"
-          if [ -s "$file" ]; then
-            $DRY_RUN_CMD ${pkgs.jq}/bin/jq "$filter" "$file" > "$file.hm-tmp"               && $DRY_RUN_CMD mv "$file.hm-tmp" "$file"
-          else
-            $DRY_RUN_CMD ${pkgs.jq}/bin/jq -n "$filter" > "$file"
-          fi
-        }
+    # Pointing each shell AT its scheme and layout has to be done differently:
+    # settings.json is owned and rewritten by the shell itself, so it can't be a
+    # store symlink (Noctalia would lose every setting it saves, silently — it
+    # uses a FileView/JsonAdapter with printErrors:false and has no read-only
+    # handling). Merge in only the keys we declare and leave the rest alone.
+    home.activation.shellSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      apply() {
+        local file="$1" decl="$2" prog="$3"
+        $DRY_RUN_CMD mkdir -p "$(dirname "$file")"
+        # Both shells load JSON over their Store property defaults, so seeding
+        # an empty object is enough when the shell has never run.
+        [ -s "$file" ] || $DRY_RUN_CMD sh -c "echo '{}' > '$file'"
+        $DRY_RUN_CMD ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
+          > "$file.hm-tmp" && $DRY_RUN_CMD mv "$file.hm-tmp" "$file"
+      }
 
-        # Noctalia: use our scheme, stop deriving colours from the wallpaper,
-        # and stop drawing a wallpaper at all — awww already owns that layer,
-        # and Noctalia stacks its own on top rather than replacing it.
-        merge_settings "${config.xdg.configHome}/noctalia/settings.json"           '.colorSchemes.predefinedScheme = "Gruvbox-Material"
-           | .colorSchemes.useWallpaperColors = false
-           | .wallpaper.enabled = false'
+      # Noctalia: a plain recursive merge. Objects merge, arrays are replaced —
+      # which is exactly right for widget lists.
+      apply "${config.xdg.configHome}/noctalia/settings.json" \
+        ${noctaliaDecl} \
+        '. * $d'
 
-        # DMS: currentThemeName drives Theme.switchTheme(), and the literal
-        # "custom" is what makes it read customThemeFile.
-        merge_settings "${config.xdg.configHome}/DankMaterialShell/settings.json"           '.currentThemeName = "custom"
-           | .currentThemeCategory = "custom"
-           | .customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json"'
-      '';
+      # DMS: the theme keys merge the same way, but its bars can't — a barConfig
+      # carries styling (spacing, transparency, corners…) alongside its widget
+      # arrays, and replacing the array wholesale would discard all of it. So
+      # rewrite the widget lists in place, and clone bar 0 for the portrait
+      # output rather than authoring a second bar from scratch.
+      apply "${config.xdg.configHome}/DankMaterialShell/settings.json" \
+        ${dmsDecl} \
+        '($d.settings) as $s
+         | . * $s
+         | if ((.barConfigs | type) == "array") and ((.barConfigs | length) > 0)
+           then
+             (.barConfigs[0] |= (
+                 .screenPreferences = $d.bars.mainScreens
+               | .leftWidgets       = $d.bars.left
+               | .centerWidgets     = $d.bars.center
+               | .rightWidgets      = $d.bars.right))
+             | if ($d.bars.portraitScreens | length) > 0
+               then
+                 (if any(.barConfigs[]; .id == "portrait")
+                  then . else .barConfigs += [.barConfigs[0] | .id = "portrait"] end)
+                 | .barConfigs |= map(
+                     if .id == "portrait"
+                     then ( .name             = "Portrait"
+                          | .screenPreferences = $d.bars.portraitScreens
+                          | .leftWidgets       = $d.bars.pLeft
+                          | .centerWidgets     = $d.bars.pCenter
+                          | .rightWidgets      = $d.bars.pRight )
+                     else . end)
+               else . end
+           else . end'
+    '';
 
     systemd.user.services =
       lib.mapAttrs' (name: shell: {

@@ -23,25 +23,10 @@ let
   qs = "bash ~/.config/hypr/scripts/qs_manager.sh";
 
   # ── Portrait outputs ────────────────────────────────────────────────────────
-  # Monitor strings look like "DP-2,3840x2160@60,1920x0,1.5,transform,1";
-  # transform 1/3 = 90°/270° rotation → portrait.
-  monitorStrings = lib.filter (m: m != null) [
-    cfg.monitors.primary
-    cfg.monitors.secondary
-  ];
-  isPortrait =
-    s:
-    let
-      parts = lib.splitString "," s;
-    in
-    builtins.length parts >= 6
-    && builtins.elemAt parts 4 == "transform"
-    && lib.elem (builtins.elemAt parts 5) [
-      "1"
-      "3"
-    ];
-  portraitOutputs = map (s: lib.head (lib.splitString "," s)) (lib.filter isPortrait monitorStrings);
-  hasPortrait = portraitOutputs != [ ];
+  # Shared with shell-switcher.nix so the mirrored Noctalia/DMS bars trim the
+  # same output this one does.
+  outputs = import ./outputs.nix { inherit lib; } cfg;
+  inherit (outputs) portraitOutputs hasPortrait;
 
   # CPU temperature as JSON so the capsule can carry a threshold class
   # (warning ≥70, critical ≥80). Shows the *average* of the per-core coretemp
