@@ -368,6 +368,9 @@ let
     Service = {
       Type = "simple";
       ExecStart = shell.exec;
+      # Record the running shell and switch caffeine on from the unit itself, so
+      # both hold however it was started (see `started` in shell-switch.sh).
+      ExecStartPost = "${switch} started ${name}";
       # dms exits 143 on SIGTERM rather than dying by signal, so without this
       # every Conflicts-driven swap leaves the unit in `failed` — which then
       # hides a genuine crash. Restart still covers the real thing.
@@ -385,6 +388,9 @@ in
     home.packages = [
       noctalia-shell
       dms-shell
+      # DMS's CPU/memory/temperature/disk widgets and its process list all read
+      # from dgop, which dms-shell doesn't depend on; without it they're blank.
+      pkgs.dgop
     ];
 
     # ── Theming ───────────────────────────────────────────────────────────────

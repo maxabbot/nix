@@ -17,6 +17,7 @@
 #   shell-switch.sh current   # print the recorded shell name
 #   shell-switch.sh unit      # print the systemd unit of the recorded shell
 #   shell-switch.sh restore   # start the recorded shell (login, gaming-mode exit)
+#   shell-switch.sh started <name>  # unit ExecStartPost: record it, caffeine on
 
 set -euo pipefail
 
@@ -58,8 +59,8 @@ announce() {
 
 # Caffeine on by default. Waybar's idle_inhibitor has start-activated for the
 # own shell, but neither third-party shell persists its toggle, so flip theirs
-# over IPC once they are up. Backgrounded and retried: the start above is
-# --no-block, so the shell is not listening yet.
+# over IPC once they are up. Backgrounded and retried: it runs from the unit's
+# ExecStartPost, the moment the process is spawned and before it is listening.
 caffeine_on() {
     local target=$1
     [[ "$target" == "own" ]] && return 0
@@ -74,6 +75,22 @@ caffeine_on() {
             sleep 0.5
         done
     ) >/dev/null 2>&1 &
+}
+
+# Called from every shell unit's ExecStartPost, so the record follows systemd
+# however the shell was started — a keybind, shell-restore, gaming-toggle, or a
+# bare `systemctl --user restart`. Before this, starting a unit directly left
+# the file naming the previous shell, so shell-ipc.sh routed keys to a shell
+# that wasn't running and caffeine never came on.
+started() {
+    local name=$1
+    if ! is_known "$name"; then
+        printf 'shell-switch: unknown shell %q\n' "$name" >&2
+        exit 1
+    fi
+    mkdir -p "$STATE_DIR"
+    printf '%s\n' "$name" >"$STATE_FILE"
+    caffeine_on "$name"
 }
 
 set_shell() {
@@ -91,7 +108,6 @@ set_shell() {
     # --no-block: `restore` runs from inside a unit this same user manager
     # is starting, and a blocking start there would deadlock on its own job.
     systemctl --user --no-block start "$(unit_for "$want")"
-    caffeine_on "$want"
     announce "$want"
 }
 
@@ -109,12 +125,10 @@ case "${1:-}" in
     cycle)   cycle ;;
     current) current ;;
     unit)    unit_for "$(current)" ;;
-    restore)
-        systemctl --user --no-block start "$(unit_for "$(current)")"
-        caffeine_on "$(current)"
-        ;;
+    restore) systemctl --user --no-block start "$(unit_for "$(current)")" ;;
+    started) started "${2:?shell-switch: started needs a shell name}" ;;
     *)
-        printf 'usage: shell-switch.sh {set <%s>|cycle|current|unit|restore}\n' \
+        printf 'usage: shell-switch.sh {set <%s>|cycle|current|unit|restore|started <name>}\n' \
             "$(IFS='|'; echo "${SHELLS[*]}")" >&2
         exit 1
         ;;

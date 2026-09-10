@@ -188,10 +188,11 @@ the name, so `0` is fully transparent and `widgetTransparency = 1` keeps the
 pills.
 
 The idle inhibitor starts on. Waybar has `start-activated` natively, but
-neither third-party shell persists its toggle at all, so `shell-switch.sh`
-enables theirs over IPC after a switch (`idleInhibitor enable` /
-`inhibit enable`), backgrounded and retried since the unit start is
-`--no-block` and the shell is not listening yet.
+neither third-party shell persists its toggle at all, so each shell unit's
+`ExecStartPost` runs `shell-switch.sh started <name>`, which enables theirs over
+IPC (`idleInhibitor enable` / `inhibit enable`) — backgrounded and retried,
+since the process isn't listening the moment it's spawned. Doing it from the
+unit rather than the switcher means it holds however the shell was started.
 
 ## Wallpaper
 
@@ -225,6 +226,37 @@ and `dms-wallpaper-bridge.sh` applies the pick through awww. A global pick
 skips portrait outputs to keep the cheat-sheet; a per-monitor pick is honoured
 as given. The dedupe stamp lives in `$XDG_RUNTIME_DIR` so a pick re-applies
 once after login instead of losing to the leaves.
+
+## Known issues
+
+**Recorded shell follows systemd.** `shell-ipc.sh` routes keys by the recorded
+shell, and that record used to be written only by the switcher — so starting a
+unit any other way (`systemctl --user restart shell-dms.service`, or
+`shell-restore` after a `nixup`) left it naming the previous shell. Keys then
+went to a shell that wasn't running: Print opened the own screenshot panel
+under DMS, and caffeine never came on. The same `ExecStartPost` now records
+the name, so the file tracks whatever is actually up.
+
+**Optional DMS dependencies** (`dms doctor`):
+
+- `dgop` — installed. DMS's CPU, memory, temperature and disk widgets and its
+  process list read from it; `dms-shell` doesn't depend on it, so without it
+  they're blank.
+- `matugen` — deliberately absent. DMS ships its matugen templates switched on
+  for kitty, Hyprland, Qt5ct/Qt6ct, GTK, Firefox, Zen and more; installed, it
+  would try to write generated themes over configs `palette.nix` and Stylix
+  already own.
+- `accountsservice` — not enabled. Only feeds DMS the user's avatar and display
+  name.
+
+**No wallpaper directory.** `~/Pictures/Wallpapers` doesn't exist and
+`WALLPAPER_DIR` isn't set, so the own WallpaperPicker has nothing to list under
+any shell, and Noctalia logs a failed scan. The only wallpaper is the repo's
+leaves image.
+
+**Harmless log noise:** DMS failing to register as polkit agent
+(polkit-gnome already is), `$SWAYSOCK`/`$I3SOCK` unset, no `dms-colors.json`
+(matugen output), and background blur unsupported on Hyprland.
 
 ## Known-untested
 
