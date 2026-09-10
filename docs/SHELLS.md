@@ -243,6 +243,15 @@ went to a shell that wasn't running: Print opened the own screenshot panel
 under DMS, and caffeine never came on. The same `ExecStartPost` now records
 the name, so the file tracks whatever is actually up.
 
+**DMS opened bar popouts on the wrong monitor.** An upstream bug in
+`DMSShellIPC.qml`'s `getPreferredBar`: the `break` meant to stop at the bar on
+the focused screen only leaves the inner loop over screens, so the outer loop
+over bar configs carries on and the last bar with the widget wins. DMS's stock
+single bar hides it; the separate portrait bar declared here made
+`dankdash wallpaper` (`SUPER+W`), `dash open/toggle` and
+`control-center open/toggle` all land on DP-2. Patched at build time to
+`return` instead.
+
 **Optional DMS dependencies** (`dms doctor`):
 
 - `dgop` — installed. DMS's CPU, memory, temperature and disk widgets and its
@@ -267,10 +276,6 @@ creation, so removing the image isn't undone by the next `nixup`.
 (matugen output), and background blur unsupported on Hyprland.
 
 ## Known-untested
-
-`dms ipc dankdash wallpaper`, behind the wallpaper key under DMS. Its IPC
-handler is created unconditionally (`DMSShell.qml`), and picks reach awww via
-the bridge, but the call itself hasn't been exercised with DMS running.
 
 `hl.dsp.exit()`, DMS's log-out path. Correct by the API's shape, but verifying
 it costs the session.

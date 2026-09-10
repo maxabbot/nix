@@ -52,8 +52,8 @@ let
   #
   # Window targets go through hl.get_window(): passing the address as a bare
   # string is accepted but does nothing (see the hyprland-lua-dispatch notes).
-  # patchQml also carries one patch that isn't about dispatch: Noctalia's
-  # wallpaper layer, at the end of its list.
+  # patchQml also carries two patches that aren't about dispatch, each at the
+  # end of its list: Noctalia's wallpaper layer, and DMS's bar picker.
   patchQml =
     pkg: subs:
     pkg.overrideAttrs (old: {
@@ -176,6 +176,18 @@ let
         file = "share/quickshell/dms/Services/SessionService.qml";
         from = ''Hyprland.dispatch("exit");'';
         to = ''Hyprland.dispatch("hl.dsp.exit()");'';
+      }
+      {
+        # Not a dispatch fix — an upstream bug. getPreferredBar is meant to pick
+        # the bar on the focused screen, but its `break` only leaves the inner
+        # loop over screens; the outer loop over bar configs carries on and the
+        # last bar with the widget wins. With DMS's stock single bar that's
+        # harmless. With the separate portrait bar declared below it sent
+        # dankdash wallpaper, dash open/toggle and control-center open/toggle
+        # to DP-2 regardless of focus. Returning instead leaves both loops.
+        file = "share/quickshell/dms/DMSShellIPC.qml";
+        from = "if (onFocusedScreen)\n                        break;";
+        to = "if (onFocusedScreen)\n                        return currentBar;";
       }
       # Deliberately NOT rewritten: `dpms off` / `dpms on` in
       # Services/CompositorService.qml. hl.dsp.dpms ignores its state argument
