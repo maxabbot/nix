@@ -190,6 +190,15 @@ let
       # Fresh installs ship an empty monitor list and render no bar at all.
       monitors = outputs.allOutputs;
       position = "top";
+      # Transparent bar with opaque capsules, matching waybar (whose
+      # window#waybar is already `background: transparent`). Migration35.qml
+      # shows the pairing: the old bar.transparent=true became
+      # backgroundOpacity=0 *plus* useSeparateOpacity=true — without the
+      # second flag the capsules fade with the bar.
+      backgroundOpacity = 0;
+      useSeparateOpacity = true;
+      showCapsule = true;
+      capsuleOpacity = 1;
       widgets = {
         left = [ { id = "Workspace"; } { id = "ActiveWindow"; } ];
         center = [
@@ -266,6 +275,12 @@ let
         ++ [ "diskUsage" "privacyIndicator" ]
         ++ lib.optional isLaptop "battery"
         ++ [ "idleInhibitor" "systemTray" "notificationButton" "controlCenterButton" ];
+      # DankBarWindow.qml reads barConfig.transparency straight into the
+      # background alpha despite the name, so 0 is fully transparent and
+      # widgetTransparency 1 keeps the widget pills opaque. Already the
+      # shipped default; declared so it survives a reset.
+      barAlpha = 0;
+      widgetAlpha = 1;
       pLeft = [ "workspaceSwitcher" ];
       pCenter = [ "clock" ];
       pRight = [ "notificationButton" "controlCenterButton" ];
@@ -407,7 +422,9 @@ in
          | if ((.barConfigs | type) == "array") and ((.barConfigs | length) > 0)
            then
              (.barConfigs[0] |= (
-                 .screenPreferences = $d.bars.mainScreens
+                 .transparency       = $d.bars.barAlpha
+               | .widgetTransparency = $d.bars.widgetAlpha
+               | .screenPreferences = $d.bars.mainScreens
                | .leftWidgets       = $d.bars.left
                | .centerWidgets     = $d.bars.center
                | .rightWidgets      = $d.bars.right))

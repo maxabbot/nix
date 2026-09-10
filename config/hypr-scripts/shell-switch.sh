@@ -56,6 +56,26 @@ announce() {
     hyprctl notify -1 2000 "0" "Shell → $1" >/dev/null 2>&1 || true
 }
 
+# Caffeine on by default. Waybar's idle_inhibitor has start-activated for the
+# own shell, but neither third-party shell persists its toggle, so flip theirs
+# over IPC once they are up. Backgrounded and retried: the start above is
+# --no-block, so the shell is not listening yet.
+caffeine_on() {
+    local target=$1
+    [[ "$target" == "own" ]] && return 0
+
+    (
+        for _ in $(seq 20); do
+            case "$target" in
+                noctalia) noctalia-shell ipc call idleInhibitor enable ;;
+                dms)      dms ipc inhibit enable ;;
+                *)        exit 0 ;;
+            esac >/dev/null 2>&1 && exit 0
+            sleep 0.5
+        done
+    ) >/dev/null 2>&1 &
+}
+
 set_shell() {
     local want=$1
     if ! is_known "$want"; then
@@ -71,6 +91,7 @@ set_shell() {
     # --no-block: `restore` runs from inside a unit this same user manager
     # is starting, and a blocking start there would deadlock on its own job.
     systemctl --user --no-block start "$(unit_for "$want")"
+    caffeine_on "$want"
     announce "$want"
 }
 
@@ -88,7 +109,10 @@ case "${1:-}" in
     cycle)   cycle ;;
     current) current ;;
     unit)    unit_for "$(current)" ;;
-    restore) systemctl --user --no-block start "$(unit_for "$(current)")" ;;
+    restore)
+        systemctl --user --no-block start "$(unit_for "$(current)")"
+        caffeine_on "$(current)"
+        ;;
     *)
         printf 'usage: shell-switch.sh {set <%s>|cycle|current|unit|restore}\n' \
             "$(IFS='|'; echo "${SHELLS[*]}")" >&2

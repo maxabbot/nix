@@ -174,6 +174,22 @@ by IP, so auto-locate is the faithful mirror (`location.autoLocate` /
 Noctalia's `location.name` to a city in `shell-switcher.nix` to pin it instead;
 DMS caches resolved coordinates into its own SessionData.
 
+## Bar transparency and caffeine
+
+All three run a transparent bar with opaque widget capsules. Waybar's
+`window#waybar` was already `background: transparent`; Noctalia needs
+`backgroundOpacity = 0` **and** `useSeparateOpacity = true` (Migration35.qml
+shows the pairing — without the second flag the capsules fade with the bar);
+DMS reads `barConfig.transparency` straight into the background alpha despite
+the name, so `0` is fully transparent and `widgetTransparency = 1` keeps the
+pills.
+
+The idle inhibitor starts on. Waybar has `start-activated` natively, but
+neither third-party shell persists its toggle at all, so `shell-switch.sh`
+enables theirs over IPC after a switch (`idleInhibitor enable` /
+`inhibit enable`), backgrounded and retried since the unit start is
+`--no-block` and the shell is not listening yet.
+
 ## Wallpaper
 
 `awww` is the single wallpaper owner. Noctalia stacked its own layer on top of

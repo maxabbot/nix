@@ -266,6 +266,9 @@ let
     };
 
     idle_inhibitor = {
+      # Caffeine on by default. Noctalia and DMS persist no equivalent, so
+      # shell-switch.sh enables theirs over IPC after a switch instead.
+      start-activated = true;
       format = "{icon}";
       format-icons = {
         activated = "󰅶"; # filled coffee cup — staying awake
