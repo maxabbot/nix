@@ -24,6 +24,7 @@
     ../common/optional/gaming-streaming.nix
     ../common/optional/fan2go.nix
     ../common/optional/lan-mouse.nix
+    ../common/optional/tailscale.nix
     ../common/optional/limine.nix
   ];
 
