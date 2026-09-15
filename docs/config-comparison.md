@@ -68,7 +68,7 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); revisit for `work-laptop` once hardware is known
 
 **Only matters with multiple real hosts:**
-- **Tailscale** — both repos use it to mesh hosts; irrelevant until `minimal` is deployed somewhere
+- **Tailscale** — both repos use it to mesh hosts; low value while every host is a desktop/laptop on the same LAN (servers live in a separate repo)
 - **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) and a waybar patch so far
 
 **Advanced / optional:**

@@ -1,6 +1,6 @@
 # modules/home/editor.nix — Zed (primary) and VSCode (backup) configuration.
 # Both editors are GUI apps, gated on a compositor being configured so the
-# headless `minimal` host gets neither (nano stays for console editing).
+# a compositor-less config gets neither (nano stays for console editing).
 {
   pkgs,
   lib,

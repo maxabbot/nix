@@ -6,7 +6,7 @@
 
 ### Hardware configuration
 
-`minimal` and `framework` still have placeholder `hardware-configuration.nix` files (work-laptop's is real — ThinkBook via the portable USB SSD). Replace on first install:
+`framework` still has a placeholder `hardware-configuration.nix` (work-laptop's is real — ThinkBook via the portable USB SSD). Replace on first install:
 
 ```bash
 sudo nixos-generate-config --root /mnt

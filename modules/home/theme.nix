@@ -2,7 +2,7 @@
 # Stylix owns: GTK theme/font/cursor, Qt, base16 colours, pointer cursor.
 # We own: icon theme, dark-mode prefs, Wayland/Electron env vars, MIME apps.
 # Everything here is GUI-only, so the whole module is gated on a compositor
-# being configured — the headless `minimal` host skips it entirely.
+# being configured.
 {
   lib,
   config,

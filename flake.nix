@@ -1,5 +1,5 @@
 {
-  description = "NixOS system configuration — home-desktop / framework / work-laptop / vm / minimal";
+  description = "NixOS system configuration — home-desktop / framework / work-laptop / vm";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -316,21 +316,6 @@
               primary = "Virtual-1,1920x1080@60,0x0,1";
               secondary = null;
               primaryName = "Virtual-1";
-            };
-          };
-        };
-
-        # Minimal — base packages only, headless (no compositor)
-        minimal = mkHost {
-          hostName = "minimal";
-          machineType = "server";
-          modules = [ ./hosts/minimal ];
-          hmArgs = {
-            machineType = "server";
-            compositor = "none";
-            monitors = {
-              primary = null;
-              secondary = null;
             };
           };
         };

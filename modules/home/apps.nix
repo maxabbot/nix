@@ -1,7 +1,7 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
 # GUI apps (kitty, mpv, zathura, fuzzel, hyprlock config, freetube) are
 # gated on a compositor being configured; CLI tools (btop, fastfetch, mise,
-# tmux-sessionizer) apply everywhere including the headless `minimal` host.
+# tmux-sessionizer) apply everywhere.
 {
   lib,
   config,

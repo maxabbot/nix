@@ -1,6 +1,4 @@
 {
-  lib,
-  machineType,
   location,
   ...
 }:
@@ -23,7 +21,7 @@
     };
   };
 
-  services.gammastep = lib.mkIf (machineType != "server") {
+  services.gammastep = {
     enable = true;
     provider = "manual";
     inherit (location) latitude longitude;

@@ -4,7 +4,7 @@
 
 NixOS workstation configuration using **Nix Flakes** and **Home Manager**. Declarative, reproducible, fully idempotent.
 
-Five hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `framework` (Framework 13 Pro, Core Ultra X7 358H / Arc Xe3 — home-desktop's stack minus NVIDIA/CUDA/fancontrol, LUKS-encrypted root, `nixos-hardware` platform module), `work-laptop` (Hyprland, TLP, no GPU), `vm` (home-desktop stack in a QEMU/virtio VM — no NVIDIA/CUDA/fancontrol), `minimal` (headless, no compositor).
+Four hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `framework` (Framework 13 Pro, Core Ultra X7 358H / Arc Xe3 — home-desktop's stack minus NVIDIA/CUDA/fancontrol, LUKS-encrypted root, `nixos-hardware` platform module), `work-laptop` (Hyprland, TLP, no GPU), `vm` (home-desktop stack in a QEMU/virtio VM — no NVIDIA/CUDA/fancontrol). All are desktops/laptops; servers live in a separate repo.
 
 ## Key Conventions
 
@@ -16,7 +16,7 @@ Two patterns in use:
 
 2. **Import composition** (`hosts/common/optional/`) — pure config files, no options. Hosts simply import the ones they need. Each file is self-contained: it declares packages, services, and options directly.
 
-The `hyprland` NixOS module is enabled inside `hosts/common/optional/productivity.nix`. The shared HM modules (`modules/home/`) are imported unconditionally from `home/max/default.nix`; GUI pieces gate themselves on `custom.hm.compositor != "none"`, which is how `minimal` stays GUI-free.
+The `hyprland` NixOS module is enabled inside `hosts/common/optional/productivity.nix`. The shared HM modules (`modules/home/`) are imported unconditionally from `home/max/default.nix`; GUI pieces gate themselves on `custom.hm.compositor != "none"` (the option's default).
 
 ### Option hierarchy (base module only)
 
@@ -56,7 +56,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 - `mkHost` passes `hmArgs` to `home-manager.extraSpecialArgs`. **Do not** add `extraSpecialArgs` inside a host's `default.nix` — this conflicts with `mkHost` and is a recurring footgun.
 - Shared args (git name/email) live in `sharedHmArgs` in `flake.nix`; per-host args override via `sharedHmArgs // hmArgs`.
 - `home/max/` is split into feature files: `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `packages.nix`, `terminal-toys.nix`.
-- Setting `compositor = "none"` (`minimal` host) skips Hyprland and Waybar entirely via `mkIf`.
+- Setting `compositor = "none"` skips Hyprland and Waybar entirely via `mkIf`.
 
 ### Rebuild
 

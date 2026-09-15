@@ -1,6 +1,6 @@
 # Waybar
 
-Status bar for the Hyprland hosts, themed Gruvbox Material Dark. Defined entirely in `modules/home/wm/waybar.nix` (Home Manager `programs.waybar`). Loaded only when `custom.hm.compositor == "hyprland"`, so the `minimal` host stays bar-free. Waybar is the **only** bar — Quickshell (`QUICKSHELL.md`) provides the panels/overlays its modules open, not a bar of its own.
+Status bar for the Hyprland hosts, themed Gruvbox Material Dark. Defined entirely in `modules/home/wm/waybar.nix` (Home Manager `programs.waybar`). Loaded only when `custom.hm.compositor == "hyprland"`. Waybar is the **only** bar — Quickshell (`QUICKSHELL.md`) provides the panels/overlays its modules open, not a bar of its own.
 
 ## Build notes
 

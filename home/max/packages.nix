@@ -57,7 +57,7 @@ in
       glow # render markdown in the terminal
       mdr # render markdown in the terminal (alt to glow)
     ]
-    # GUI-only apps — skipped on the headless `minimal` host
+    # GUI-only apps — skipped when no compositor is configured
     ++ lib.optionals gui [
       v4l-utils
       cheese

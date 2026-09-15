@@ -89,11 +89,11 @@ nixos-anywhere completes but NixOS doesn't appear in the firmware boot menu. Com
 
 **Step 1 — one-time boot menu (no ISO needed)**
 
-On POST hit `F8`, `F11`, or `F12`. Look for `Limine` (or `Linux Boot Manager` on the systemd-boot `minimal` host) or an entry referencing the NixOS disk. If it boots, go into BIOS and move it to the top permanently.
+On POST hit `F8`, `F11`, or `F12`. Look for `Limine` or an entry referencing the NixOS disk. If it boots, go into BIOS and move it to the top permanently.
 
 **Step 2 — re-register the EFI entry from the NixOS ISO**
 
-The GUI hosts boot Limine; its NVRAM entry is labelled `Limine` and points at `\EFI\limine\BOOTX64.EFI` (`minimal` still uses systemd-boot at `\EFI\systemd\systemd-bootx64.efi`):
+The GUI hosts boot Limine; its NVRAM entry is labelled `Limine` and points at `\EFI\limine\BOOTX64.EFI`:
 
 ```bash
 lsblk   # confirm which disk holds the ESP (home-desktop: nvme1n1p1)
