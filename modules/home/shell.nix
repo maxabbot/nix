@@ -29,8 +29,10 @@ in
       historySubstringSearch.enable = true;
 
       sessionVariables = {
-        EDITOR = "zed --wait";
-        VISUAL = "zed --wait";
+        # The real binary — `zed` is only a shell alias, which git and friends
+        # can't see when they exec $EDITOR directly.
+        EDITOR = "zeditor --wait";
+        VISUAL = "zeditor --wait";
         LANG = "en_US.UTF-8";
         LC_ALL = "en_US.UTF-8";
         ARCHFLAGS = "-arch x86_64";
