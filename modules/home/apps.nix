@@ -56,14 +56,13 @@ in
       };
 
       keybindings = {
-        # Desktop-style clipboard keys, so kitty matches every GUI app.
         # copy_and_clear_or_interrupt copies when there is a selection (and drops
         # it, so a stale highlight can't swallow a second Ctrl+C) and sends SIGINT
-        # otherwise. Ctrl+V costs zsh's quoted-insert and tmux's copy-mode
-        # rectangle-toggle (C-v) — kitty eats the key before either sees it.
-        # Ctrl+Shift+C/V keep working.
+        # otherwise.
+        #
+        # Ctrl+V is not here on purpose — it needs a conditional map, see
+        # extraConfig below.
         "ctrl+c" = "copy_and_clear_or_interrupt";
-        "ctrl+v" = "paste_from_clipboard";
 
         "ctrl+shift+t" = "new_tab_with_cwd";
         "ctrl+shift+l" = "next_tab";
@@ -72,6 +71,20 @@ in
         "ctrl+alt+t" = "new_window_with_cwd";
         "ctrl+shift+enter" = "new_window_with_cwd";
       };
+
+      # Ctrl+V has to mean two different things depending on what is running, and
+      # `keybindings` above is an attrset so it cannot hold one trigger twice.
+      # kitty resolves a trigger to the LAST applicable definition, and a
+      # --when-focus-on entry is only applicable while the focused window matches,
+      # so the plain map is the fallback and the conditional one wins when the
+      # `in_claude` user var is set (the `claude` wrapper in shell.nix sets it for
+      # the duration of the run). `no_op` compiles to an empty definition, which
+      # kitty reports as unconsumed, so the key reaches the program instead.
+      # Order matters: the conditional map must come second.
+      extraConfig = ''
+        map ctrl+v paste_from_clipboard
+        map --when-focus-on=var:in_claude ctrl+v no_op
+      '';
     };
 
     # ── btop ───────────────────────────────────────────────────────────────────────

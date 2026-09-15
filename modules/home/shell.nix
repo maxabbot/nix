@@ -248,6 +248,21 @@ in
           fi
         }
 
+        # Claude Code binds Ctrl+V to its clipboard image paste, but kitty maps the
+        # same key to paste_from_clipboard and a kitty `map` consumes the key before
+        # any byte reaches the pty. apps.nix therefore carries a conditional map that
+        # steps aside while the `in_claude` kitty user var is set; this wrapper owns
+        # the var's lifetime. OSC 1337 SetUserVar takes a base64 value (MQ== is "1");
+        # the same sequence with no `=value` unsets it.
+        claude() {
+          local rc
+          [[ -n ''${KITTY_WINDOW_ID-} ]] && printf '\e]1337;SetUserVar=in_claude=MQ==\a'
+          command claude "$@"
+          rc=$?
+          [[ -n ''${KITTY_WINDOW_ID-} ]] && printf '\e]1337;SetUserVar=in_claude\a'
+          return $rc
+        }
+
         copypath() { print -n "''${1:-$PWD}" | wl-copy && echo "Copied: ''${1:-$PWD}"; }
         copyfile() { wl-copy < "$1" && echo "Copied: $1"; }
 
