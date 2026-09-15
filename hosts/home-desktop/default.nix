@@ -285,6 +285,12 @@
     # (fan2go reads coretemp + it8628 only), so drop the module.
     blacklistedKernelModules = [ "spd5118" ];
 
+    # ── aarch64 emulation ───────────────────────────────────────────────────────
+    # Registers qemu-user as a binfmt_misc handler (and adds aarch64-linux to
+    # nix's extra-platforms) so this box can build the Raspberry Pi's aarch64
+    # SD image locally.
+    binfmt.emulatedSystems = [ "aarch64-linux" ];
+
     # ── Bootloader ──────────────────────────────────────────────────────────────
     # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
     loader.efi.canTouchEfiVariables = true;
