@@ -28,7 +28,25 @@
       "WebFetch(domain:wiki.hypr.land)",
       "WebFetch(domain:stylix.danth.me)",
       "WebFetch(domain:nix-community.github.io)",
-      "mcp__mcp-server-brave-search__brave_web_search"
+      "Bash(shellcheck *)",
+      "Bash(statix check *)",
+      "Bash(deadnix *)",
+      "Bash(qmllint *)",
+      "Bash(command -v *)",
+      "Bash(systemctl --user status *)",
+      "Bash(systemctl --user show *)",
+      "Bash(systemctl --user is-active *)",
+      "Bash(systemctl --user list-units *)",
+      "Bash(systemctl is-active *)",
+      "Bash(nixos-rebuild list-generations *)",
+      "Bash(wpctl get-volume *)",
+      "Bash(lsblk *)",
+      "Bash(findmnt *)",
+      "Bash(efibootmgr)",
+      "Bash(waybar --version)",
+      "Bash(qs --version)",
+      "Bash(timedatectl status *)",
+      "Read(//run/user/1000/**)"
     ]
   }
 }

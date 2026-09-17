@@ -11,3 +11,6 @@ flake.lock.bak
 # Local secrets / credentials — never commit
 github_pat
 *.iso
+
+# Claude Code per-machine permission approvals
+.claude/settings.local.json
