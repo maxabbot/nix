@@ -52,8 +52,8 @@ let
   #
   # Window targets go through hl.get_window(): passing the address as a bare
   # string is accepted but does nothing (see the hyprland-lua-dispatch notes).
-  # patchQml also carries two patches that aren't about dispatch, each at the
-  # end of its list: Noctalia's wallpaper layer, and DMS's bar picker.
+  # patchQml also carries patches that aren't about dispatch, at the end of each
+  # list: Noctalia's wallpaper layer, DMS's bar picker and its caffeine icons.
   patchQml =
     pkg: subs:
     pkg.overrideAttrs (old: {
@@ -108,7 +108,7 @@ let
     ]
   );
 
-  dms-shell = patchQml pkgs.dms-shell (
+  dms-shell = (patchQml pkgs.dms-shell (
     let
       bar = "share/quickshell/dms/Modules/DankBar/DankBarContent.qml";
       sw = "share/quickshell/dms/Modules/DankBar/Widgets/WorkspaceSwitcher.qml";
@@ -196,7 +196,112 @@ let
       # per-monitor dpmsStatus dance in config/hypr-scripts/wake-monitors.sh.
       # Hypridle owns screen blanking here anyway.
     ]
-  );
+    # Not a dispatch fix: coffee icons for the idle inhibitor ("caffeine")
+    # instead of upstream's motion sensor. `coffee` (steaming mug) = keeping
+    # awake, `local_cafe` (plain cup) = idle allowed. --replace-fail swaps
+    # every occurrence, so DragDropGrid's two call sites are covered.
+    ++ map (file: {
+      inherit file;
+      from = ''SessionService.idleInhibited ? "motion_sensor_active" : "motion_sensor_idle"'';
+      to = ''SessionService.idleInhibited ? "coffee" : "local_cafe"'';
+    }) [
+      "share/quickshell/dms/Modules/DankBar/Widgets/IdleInhibitor.qml"
+      "share/quickshell/dms/Modules/OSD/IdleInhibitorOSD.qml"
+      "share/quickshell/dms/Modules/ControlCenter/Components/DragDropGrid.qml"
+    ]
+    ++ map (file: {
+      inherit file;
+      from = ''"icon": "motion_sensor_active",'';
+      to = ''"icon": "coffee",'';
+    }) [
+      "share/quickshell/dms/Modules/ControlCenter/Models/WidgetModel.qml"
+      "share/quickshell/dms/Modules/Settings/WidgetsTab.qml"
+    ]
+    # Not a dispatch fix: Noctalia-style hover tooltips on the bar. DMS only
+    # has bar tooltips for vertical bars, and only on disk/focused-app. BasePill
+    # (every bar widget's base) gains a tooltipText property and an instance
+    # of config/dms/BarPillTooltip.qml, installed below; each widget then gets
+    # a tooltipText binding inserted after its `id: root`. Empty = no tooltip.
+    ++ [
+      {
+        file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
+        from = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n";
+        to = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n    property string tooltipText: \"\"\n";
+      }
+      {
+        file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
+        from = "    property bool _blurRegistered: false";
+        to = "    BarPillTooltip {\n        pill: root\n    }\n\n    property bool _blurRegistered: false";
+      }
+      {
+        # The CPU pill only subscribes to dgop's cpu module; load average
+        # comes from the system module.
+        file = "share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml";
+        from = ''Ref(["cpu"]);'';
+        to = ''Ref(["cpu", "system"]);'';
+      }
+    ]
+    ++ lib.mapAttrsToList
+      (widget: body: {
+        file = "share/quickshell/dms/Modules/DankBar/Widgets/${widget}.qml";
+        from = "BasePill {\n    id: root\n";
+        to =
+          "BasePill {\n    id: root\n\n"
+          + lib.concatMapStringsSep "\n" (l: lib.optionalString (l != "") "    ${l}") (
+            lib.splitString "\n" body
+          );
+      })
+      {
+        CpuMonitor = ''
+          tooltipText: "CPU " + Math.round(DgopService.cpuUsage) + "% · " + (DgopService.cpuFrequency / 1000).toFixed(1) + " GHz" + (DgopService.loadAverage ? "\nLoad " + DgopService.loadAverage.split(" ").join(" · ") : "")
+        '';
+        RamMonitor = ''
+          tooltipText: "Memory " + (DgopService.usedMemoryMB / 1024).toFixed(1) + " / " + (DgopService.totalMemoryMB / 1024).toFixed(1) + " GiB (" + Math.round(DgopService.memoryUsage) + "%)" + (DgopService.totalSwapKB > 0 ? "\nSwap " + (DgopService.usedSwapKB / 1048576).toFixed(1) + " / " + (DgopService.totalSwapKB / 1048576).toFixed(1) + " GiB" : "")
+        '';
+        CpuTemperature = ''
+          tooltipText: (DgopService.cpuTemperature > 0 ? "CPU temperature " + Math.round(DgopService.cpuTemperature) + "°C" : "CPU temperature unavailable") + (DgopService.cpuModel ? "\n" + DgopService.cpuModel : "")
+        '';
+        GpuTemperature = ''
+          tooltipText: displayTemp > 0 ? "GPU temperature " + Math.round(displayTemp) + "°C" : "GPU temperature\nEnable the GPU under Processes → System"
+        '';
+        Clock = ''
+          tooltipText: Qt.formatDate(tooltipClock.date, "dddd d MMMM yyyy")
+
+          SystemClock {
+              id: tooltipClock
+              precision: SystemClock.Minutes
+          }
+        '';
+        Weather = ''
+          tooltipText: {
+              const w = WeatherService.weather;
+              if (!w.available)
+                  return "";
+              const today = w.forecast && w.forecast.length > 0 ? w.forecast[0] : null;
+              let s = WeatherService.getWeatherCondition(w.wCode) + " · " + WeatherService.formatTemp(w.temp) + ", feels like " + WeatherService.formatTemp(w.feelsLike);
+              if (today)
+                  s += "\nHigh " + WeatherService.formatTemp(today.tempMax) + " · low " + WeatherService.formatTemp(today.tempMin) + " · rain " + today.precipitationProbability + "%";
+              s += "\nHumidity " + w.humidity + "% · wind " + WeatherService.formatSpeed(w.wind);
+              if (w.city)
+                  s += "\n" + w.city;
+              return s;
+          }
+        '';
+        IdleInhibitor = ''
+          tooltipText: SessionService.idleInhibited ? "Keeping awake\nClick to allow idle" : "Idle allowed\nClick to keep awake"
+        '';
+        # Upstream's own disk tooltip still handles vertical bars.
+        DiskUsage = ''
+          tooltipText: !isVerticalOrientation && selectedMount ? (selectedMount.mount === "/" ? "Disk" : selectedMount.mount) + " · " + selectedMount.used + " of " + selectedMount.size + " used (" + selectedMount.percent + ")\n" + selectedMount.avail + " free" : ""
+        '';
+      }
+  )).overrideAttrs (old: {
+    postInstall = old.postInstall + ''
+      chmod u+w "$out/share/quickshell/dms/Widgets"
+      install -Dm444 ${../../../config/dms/BarPillTooltip.qml} \
+        "$out/share/quickshell/dms/Widgets/BarPillTooltip.qml"
+    '';
+  });
 
   # ── Bar layouts, mirroring modules/home/wm/waybar.nix ───────────────────────
   # Waybar's main bar is  workspaces/scratchpad/window | clock/weather |
