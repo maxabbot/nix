@@ -16,6 +16,7 @@
     ../common/optional/google-chrome.nix
     ../common/optional/comms.nix
     ../common/optional/lan-mouse.nix
+    ../common/optional/logitech.nix
     ../common/optional/limine.nix
   ];
 

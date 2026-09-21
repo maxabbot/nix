@@ -44,4 +44,15 @@ _: {
     enable = true;
     enableGraphical = true;
   };
+
+  # Strip the Bolt receiver's USB wakeup so a nudged trackball can't resume the
+  # machine from suspend — waking stays keyboard/power-button only. Lives here
+  # rather than in a host file because it is a property of the receiver, so it
+  # should follow the receiver to whichever machine it is plugged into.
+  #
+  # extraRules (99-local.rules) is late in the sequence, which is fine: unlike
+  # the uaccess tagging above, setting power/wakeup has no ordering constraint.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c548", ATTR{power/wakeup}="disabled"
+  '';
 }

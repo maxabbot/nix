@@ -101,12 +101,12 @@
     # "input" (base.nix). TAG+="uaccess" won't work here: extraRules lands in
     # 99-local.rules, after 73-seat-late.rules has already processed the tag.
     #
-    # Logitech Bolt receiver (mouse) — strip its USB wakeup so a nudged mouse
-    # can't resume the machine from suspend; waking is keyboard/power-button only.
+    # The Bolt receiver's wakeup rule used to live here too; it moved to
+    # hosts/common/optional/logitech.nix so it follows the receiver rather than
+    # this host.
     udev = {
       extraRules = ''
         KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", GROUP="input"
-        ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c548", ATTR{power/wakeup}="disabled"
       '';
 
       # Vial (splitkb Aurora Sofle v2, 8d1d:ec32) — hidraw access for the
