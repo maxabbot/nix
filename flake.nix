@@ -262,6 +262,12 @@
           modules = [
             ./hosts/work-laptop
             disko.nixosModules.disko
+            # Meteor Lake (Core Ultra 7 155U) iGPU support: i915 in initrd for
+            # early KMS, intel-media-driver, intel-compute-runtime, vpl-gpu-rt.
+            # There is no ThinkBook board module upstream, and meteor-lake is not
+            # exported as a named nixosModules output — hence the path import
+            # rather than the `nixos-hardware.nixosModules.*` form used above.
+            (nixos-hardware + "/common/cpu/intel/meteor-lake")
           ];
           hmArgs = {
             machineType = "laptop";

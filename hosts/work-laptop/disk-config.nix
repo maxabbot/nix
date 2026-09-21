@@ -5,6 +5,10 @@
 #
 # Verify your disk name with `lsblk` on the live ISO before running.
 # Default assumes /dev/sda — change `device` if different (e.g. /dev/nvme0n1).
+#
+# No swap partition: swap is a 16G swapfile on the root subvolume, declared in
+# hardware-configuration.nix. Kept out of the partition table deliberately so it
+# can be resized on a live system instead of only at disko install time.
 _: {
   disko.devices = {
     # The disk name determines the GPT partlabels (disk-usbssd-*) that boot

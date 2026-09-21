@@ -4,7 +4,7 @@
 
 NixOS workstation configuration using **Nix Flakes** and **Home Manager**. Declarative, reproducible, fully idempotent.
 
-Four hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `framework` (Framework 13 Pro, Core Ultra X7 358H / Arc Xe3 — home-desktop's stack minus NVIDIA/CUDA/fancontrol, LUKS-encrypted root, `nixos-hardware` platform module), `work-laptop` (Hyprland, TLP, no GPU), `vm` (home-desktop stack in a QEMU/virtio VM — no NVIDIA/CUDA/fancontrol). All are desktops/laptops; servers live in a separate repo.
+Four hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `framework` (Framework 13 Pro, Core Ultra X7 358H / Arc Xe3 — home-desktop's stack minus NVIDIA/CUDA/fancontrol, LUKS-encrypted root, `nixos-hardware` platform module), `work-laptop` (ThinkBook 14 2-in-1 G4 IML, Core Ultra 7 155U / Meteor Lake, Intel iGPU only, 16 GB RAM, NixOS on an external USB SSD with Windows left on the internal NVMe), `vm` (home-desktop stack in a QEMU/virtio VM — no NVIDIA/CUDA/fancontrol). All are desktops/laptops; servers live in a separate repo.
 
 ## Key Conventions
 

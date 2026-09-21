@@ -63,9 +63,9 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 **High priority:**
 - **Secrets management** (sops-nix or agenix) — unblocks real deployment; SSH keys, API tokens, hashed passwords all require this
 
-**When hardware is known:**
+**Per-host polish:**
 - **GPG commit signing** — both references sign commits; add a `signingkey` hmArg in `flake.nix` + `programs.gpg` in HM
-- **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); revisit for `work-laptop` once hardware is known
+- **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); `framework` and `work-laptop` both use one. There is no ThinkBook board module upstream, so `work-laptop` imports `common/cpu/intel/meteor-lake` by path (it isn't a named `nixosModules` output) for its Meteor Lake iGPU stack
 
 **Only matters with multiple real hosts:**
 - **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) and a waybar patch so far
