@@ -387,7 +387,73 @@ let
     location.useFahrenheit = false;
   };
 
+  # DMS's own default barConfigs[0], copied verbatim from dms-shell 1.4.6's
+  # Common/settings/SettingsSpec.js. Only used to seed a settings.json that has
+  # no barConfigs yet — see the activation script below.
+  #
+  # It has to be the *complete* object, not just the keys we override:
+  # SettingsStore.js `parse` assigns `root[k] = raw` wholesale and barConfigs has
+  # no coerce, so any key missing from the seed stays undefined rather than
+  # falling back to the spec default. An undefined `enabled` in particular means
+  # SettingsData's `barConfigs.filter(cfg => cfg.enabled)` drops the bar and
+  # nothing renders at all.
+  #
+  # Re-check this against SettingsSpec.js when bumping dms-shell: keys added
+  # upstream after 1.4.6 would land undefined on a first-run seed.
+  dmsDefaultBar = {
+    id = "default";
+    name = "Main Bar";
+    enabled = true;
+    position = 0;
+    screenPreferences = [ "all" ];
+    showOnLastDisplay = true;
+    leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
+    centerWidgets = [ "music" "clock" "weather" ];
+    rightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "battery" "controlCenterButton" ];
+    spacing = 4;
+    innerPadding = 4;
+    bottomGap = 0;
+    transparency = 1.0;
+    widgetTransparency = 1.0;
+    squareCorners = false;
+    noBackground = false;
+    maximizeWidgetIcons = false;
+    maximizeWidgetText = false;
+    removeWidgetPadding = false;
+    widgetPadding = 8;
+    gothCornersEnabled = false;
+    gothCornerRadiusOverride = false;
+    gothCornerRadiusValue = 12;
+    borderEnabled = false;
+    borderColor = "surfaceText";
+    borderOpacity = 1.0;
+    borderThickness = 1;
+    widgetOutlineEnabled = false;
+    widgetOutlineColor = "primary";
+    widgetOutlineOpacity = 1.0;
+    widgetOutlineThickness = 1;
+    fontScale = 1.0;
+    iconScale = 1.0;
+    autoHide = false;
+    autoHideDelay = 250;
+    showOnWindowsOpen = false;
+    openOnOverview = false;
+    visible = true;
+    popupGapsAuto = true;
+    popupGapsManual = 4;
+    maximizeDetection = true;
+    scrollEnabled = true;
+    scrollXBehavior = "column";
+    scrollYBehavior = "workspace";
+    shadowIntensity = 0;
+    shadowOpacity = 60;
+    shadowColorMode = "text";
+    shadowCustomColor = "#000000";
+    clickThrough = false;
+  };
+
   dmsDeclared = {
+    barDefault = dmsDefaultBar;
     settings = {
       currentThemeName = "custom";
       currentThemeCategory = "custom";
@@ -582,33 +648,37 @@ in
         ${dmsDecl} \
         '($d.settings) as $s
          | . * $s
+         # barConfigs is written by DMS itself, not by the empty-object seed in
+         # apply(), so on a machine where DMS has never run there was nothing
+         # here to rewrite: the bar came up with stock widgets and DMSs own
+         # transparency 1.0, i.e. opaque. Seed the default entry DMS would have
+         # written so the overrides below always land on a complete barConfig.
          | if ((.barConfigs | type) == "array") and ((.barConfigs | length) > 0)
+           then . else .barConfigs = [ $d.barDefault ] end
+         | (.barConfigs[0] |= (
+               .transparency       = $d.bars.barAlpha
+             | .widgetTransparency = $d.bars.widgetAlpha
+             | .screenPreferences = $d.bars.mainScreens
+             | .leftWidgets       = $d.bars.left
+             | .centerWidgets     = $d.bars.center
+             | .rightWidgets      = $d.bars.right))
+         | if ($d.bars.portraitScreens | length) > 0
            then
-             (.barConfigs[0] |= (
-                 .transparency       = $d.bars.barAlpha
-               | .widgetTransparency = $d.bars.widgetAlpha
-               | .screenPreferences = $d.bars.mainScreens
-               | .leftWidgets       = $d.bars.left
-               | .centerWidgets     = $d.bars.center
-               | .rightWidgets      = $d.bars.right))
-             | if ($d.bars.portraitScreens | length) > 0
-               then
-                 (if any(.barConfigs[]; .id == "portrait")
-                  then . else .barConfigs += [.barConfigs[0] | .id = "portrait"] end)
-                 | .barConfigs |= map(
-                     if .id == "portrait"
-                     then ( .name             = "Portrait"
-                          # Without this the portrait bar falls back onto the
-                          # only remaining screen whenever DP-2 is unplugged
-                          # (DankBar.qml:168), stacking two bars on DP-3. The
-                          # fallback is right for the main bar, not a second one.
-                          | .showOnLastDisplay = false
-                          | .screenPreferences = $d.bars.portraitScreens
-                          | .leftWidgets       = $d.bars.pLeft
-                          | .centerWidgets     = $d.bars.pCenter
-                          | .rightWidgets      = $d.bars.pRight )
-                     else . end)
-               else . end
+             (if any(.barConfigs[]; .id == "portrait")
+              then . else .barConfigs += [.barConfigs[0] | .id = "portrait"] end)
+             | .barConfigs |= map(
+                 if .id == "portrait"
+                 then ( .name             = "Portrait"
+                      # Without this the portrait bar falls back onto the
+                      # only remaining screen whenever DP-2 is unplugged
+                      # (DankBar.qml:168), stacking two bars on DP-3. The
+                      # fallback is right for the main bar, not a second one.
+                      | .showOnLastDisplay = false
+                      | .screenPreferences = $d.bars.portraitScreens
+                      | .leftWidgets       = $d.bars.pLeft
+                      | .centerWidgets     = $d.bars.pCenter
+                      | .rightWidgets      = $d.bars.pRight )
+                 else . end)
            else . end'
     '';
 
