@@ -127,6 +127,12 @@
     };
   };
 
+  # ── Fonts ────────────────────────────────────────────────────────────────────
+  # Microsoft core fonts (Georgia, Times New Roman, Arial, …) — the CV build's
+  # Puppeteer render expects Georgia. Merges with base.nix's fonts.packages;
+  # unfree is already allowed flake-wide.
+  fonts.packages = [ pkgs.corefonts ];
+
   # QMK udev rules (bootloader/DFU access for flashing the Sofle).
   hardware.keyboard.qmk.enable = true;
 
