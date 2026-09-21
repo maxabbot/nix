@@ -15,6 +15,20 @@ final: prev: {
     };
   });
 
+  # 26.05 ships Solaar 1.1.19, whose `solaar config` CLI dies on teardown under
+  # PyGObject 3.56 — Gio.Application.run raises "Unable to marshal str as an
+  # array". The setting does reach the device, but the crash pre-empts the save to
+  # ~/.config/solaar/config.yaml, so every CLI change silently reverts the next
+  # time the daemon restarts (and the CLI exits 1 even when it worked). 1.1.20
+  # carries the one-line fix, "Wrap argv in list for Gio.Application.run"; that
+  # bump landed on master just after the 26.05 branch cut and was never
+  # backported, so no flake update will reach it. Drop once nixpkgs catches up.
+  #
+  # logitech-udev-rules is `solaar.udev` resolved against the final package set,
+  # so the rules follow this override instead of drifting to the old version.
+  # pkgs.unstable is added by a later overlay in flake.nix, hence `final`.
+  solaar = final.unstable.solaar;
+
   # Upstream code-industry.net only hosts the newest tarball, so nixpkgs' pinned
   # 5.9.98 now 404s. Bump to whatever they currently publish; drop once nixpkgs
   # catches up. x86_64 only — every host here is.

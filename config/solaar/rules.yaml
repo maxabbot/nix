@@ -1,38 +1,52 @@
-%YAML 1.3
 # Solaar rule engine — button remaps for the MX Ergo S.
 #
-# Format: one YAML *document* per rule (Solaar parses this with safe_load_all),
-# each document a list of components — conditions first, then actions. Solaar's
-# own GUI editor writes the same shape, so anything here round-trips.
+# Format: one YAML *document* per rule (Solaar parses with safe_load_all), each
+# document a list of components — conditions first, then actions.
 #
-# ─ Before a rule here does anything ─────────────────────────────────────────
-# A rule only fires on a key that has been *diverted* to Solaar. That lives in
-# ~/.config/solaar/config.yaml, which Solaar owns and rewrites, so it can't be
-# declared alongside this file. Divert a key once in the GUI: select MX Ergo S,
-# find the button under "Key/Button Diversion", set it to "Diverted". Today all
-# six divertable keys are at 0 (not diverted), so nothing below is live yet.
+# ─ Never leave an empty document ────────────────────────────────────────────
+# A document that parses to null — an orphaned `---` / `...` pair, e.g. a rule
+# whose body you commented out but whose markers you left behind — makes
+# Rule() raise inside diversion._load_rule_config. A bare `except` there swallows
+# it and returns NO user rules at all, logging the failure and nothing else. One
+# stray marker pair silently kills every rule below. Comment or uncomment a rule
+# together with its markers, always.
+#
+# ─ A rule only fires on a *diverted* key ────────────────────────────────────
+# Diversion lives in ~/.config/solaar/config.yaml, which Solaar owns and rewrites,
+# so it can't be declared next to this file. Set it once, per button, either in
+# the GUI (MX Ergo S → "Key/Button Diversion") or from the CLI:
+#     solaar config "MX Ergo S" divert-keys "DPI Switch" Diverted
+# Diversion *suppresses the button's normal function* — a diverted key with no
+# matching rule below does nothing at all. Only divert what you remap.
 #
 # ─ Wayland limits ───────────────────────────────────────────────────────────
-# Solaar warns at startup: "rules cannot access modifier keys in Wayland,
-# accessing process only works on GNOME". On Hyprland that means Modifiers,
-# Process and Active conditions are unusable. Key conditions and KeyPress
-# actions do work — KeyPress goes out through the uinput device that shows up
-# as "solaar-keyboard" in `hyprctl devices`.
+# Solaar warns at startup that rules can't read modifier keys on Wayland and that
+# process detection is GNOME-only, so the Modifiers, Process and Active
+# conditions are unusable here. Key/Setting conditions and KeyPress/Set actions
+# work — KeyPress leaves via the uinput device listed as "solaar-keyboard" in
+# `hyprctl devices`.
 #
-# The Ergo S exposes these divertable controls (from `solaar show`):
-#   Middle Button, Back Button, Forward Button, Left Tilt, Right Tilt,
-#   DPI Switch, Virtual Gesture Button
-# Left and Right Click are not divertable.
+# ─ Divertable controls on this device (from `solaar show`) ──────────────────
+#   Middle Button, Back Button, Forward Button, Left Tilt, Right Tilt, DPI Switch
+# Left Click and Right Click are not divertable.
+
+# ── DPI toggle on the DPI Switch button ─────────────────────────────────────
+# Two rules rather than one, because Set has no toggle form for a choice-valued
+# setting (ChoicesValidator.acceptable takes exactly one concrete value). The
+# pair can't ping-pong within a single press: Set.evaluate returns None, and the
+# parent _evaluate halts the whole chain on a None from a sibling rule, so once
+# the first rule fires the second is never reached.
 #
-# Examples below are commented out — uncomment one, divert its key, then
-# `systemctl --user restart solaar`.
+# 1800 is the device's out-of-the-box value; 800 is the precision setting. Valid
+# values are 100..4000 in steps of 50 — change both rules together, and keep them
+# each other's mirror or the toggle latches at one end.
 ---
-# Left Tilt → previous workspace
-# - Key: [Left Tilt, pressed]
-# - KeyPress: [Super_L, Control_L, Left]
+- Key: [DPI Switch, pressed]
+- Setting: [null, dpi, 1800]
+- Set: [null, dpi, 800]
 ...
 ---
-# Right Tilt → next workspace
-# - Key: [Right Tilt, pressed]
-# - KeyPress: [Super_L, Control_L, Right]
+- Key: [DPI Switch, pressed]
+- Setting: [null, dpi, 800]
+- Set: [null, dpi, 1800]
 ...

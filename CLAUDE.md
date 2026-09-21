@@ -47,7 +47,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `gaming-streaming.nix` | Apollo (Sunshine fork) + Moonlight for game streaming |
 | `fan2go.nix` | Moving-average fan control (home-desktop; replaces fancontrol) |
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
-| `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); tray unit in `modules/home/wm/hyprland.nix` |
+| `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared) |
 | `tailscale.nix` | Tailscale client (home-desktop; reaches the Tailscale-only services in the servers repo) + systemd-resolved for MagicDNS. Log in once with `sudo tailscale up --operator=max` |
 | `plymouth.nix` | Custom boot splash |
 | `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (home-desktop, vm, work-laptop; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
