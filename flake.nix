@@ -175,8 +175,8 @@
               # DP-2: 4K portrait monitor (left); 90° rotation + 1.5x scale → logical 1440x2560
               secondary = "DP-2,3840x2160@60,0x0,1.5,transform,1";
               # DP-3: primary 1440p gaming monitor (right), placed past DP-2's 1440 logical
-              # width. y = 2560 - 1440 = 1120 so the two panels' bottom edges line up.
-              primary = "DP-3,2560x1440@165,1440x1120,1";
+              # width. y = 0 so the two panels' top edges line up.
+              primary = "DP-3,2560x1440@165,1440x0,1";
               primaryName = "DP-3";
             };
             # The laptop sits to the right of the desk; its keyboard/mouse are
