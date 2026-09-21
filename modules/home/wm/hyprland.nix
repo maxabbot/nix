@@ -262,6 +262,48 @@ in
       Install.WantedBy = [ "graphical-session.target" ];
     };
 
+    # Solaar tray — Logitech Unifying/Bolt device manager (MX Ergo S). Only on
+    # hosts importing hosts/common/optional/logitech.nix; elsewhere the mkIf
+    # discards the definition unevaluated, so solaar stays out of their closure.
+    #
+    # It has to be resident, not launched on demand: Solaar re-applies its stored
+    # per-device settings (button remaps, pointer speed, rules) each time a device
+    # wakes or re-pairs, and does nothing at all while it isn't running. `-w hide`
+    # starts it into the tray rather than popping the window open at every login,
+    # so it needs tray.target the same way the applets below do.
+    #
+    # --restart-on-wake-up: this box suspends on the 900s hypridle timer, and
+    # Solaar routinely loses the receiver across a resume — after which it stops
+    # re-applying anything, silently. Upstream still labels the flag experimental;
+    # if it turns out to restart in a loop, this is the first thing to drop.
+    systemd.user.services.solaar = lib.mkIf osConfig.hardware.logitech.wireless.enableGraphical {
+      Unit = {
+        Description = "Solaar Logitech device manager (tray)";
+        Requires = [ "tray.target" ];
+        After = [
+          "graphical-session.target"
+          "tray.target"
+        ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = "${pkgs.solaar}/bin/solaar --window=hide --restart-on-wake-up";
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
+    # Solaar rule engine — see the file header for the diversion step each rule
+    # needs and for what Wayland rules out. Only rules.yaml is declared: the
+    # sibling config.yaml holds per-device state Solaar rewrites itself (DPI,
+    # battery, which keys are diverted), so a read-only symlink there would just
+    # fight the daemon. Declaring this file does mean Solaar's GUI rule editor
+    # can't save over it — edit it here and rebuild instead.
+    xdg.configFile."solaar/rules.yaml" = lib.mkIf osConfig.hardware.logitech.wireless.enableGraphical {
+      source = ../../../config/solaar/rules.yaml;
+    };
+
     services = {
       network-manager-applet.enable = true;
       syncthing.tray.enable = true;

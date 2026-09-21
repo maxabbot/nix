@@ -1,0 +1,38 @@
+%YAML 1.3
+# Solaar rule engine — button remaps for the MX Ergo S.
+#
+# Format: one YAML *document* per rule (Solaar parses this with safe_load_all),
+# each document a list of components — conditions first, then actions. Solaar's
+# own GUI editor writes the same shape, so anything here round-trips.
+#
+# ─ Before a rule here does anything ─────────────────────────────────────────
+# A rule only fires on a key that has been *diverted* to Solaar. That lives in
+# ~/.config/solaar/config.yaml, which Solaar owns and rewrites, so it can't be
+# declared alongside this file. Divert a key once in the GUI: select MX Ergo S,
+# find the button under "Key/Button Diversion", set it to "Diverted". Today all
+# six divertable keys are at 0 (not diverted), so nothing below is live yet.
+#
+# ─ Wayland limits ───────────────────────────────────────────────────────────
+# Solaar warns at startup: "rules cannot access modifier keys in Wayland,
+# accessing process only works on GNOME". On Hyprland that means Modifiers,
+# Process and Active conditions are unusable. Key conditions and KeyPress
+# actions do work — KeyPress goes out through the uinput device that shows up
+# as "solaar-keyboard" in `hyprctl devices`.
+#
+# The Ergo S exposes these divertable controls (from `solaar show`):
+#   Middle Button, Back Button, Forward Button, Left Tilt, Right Tilt,
+#   DPI Switch, Virtual Gesture Button
+# Left and Right Click are not divertable.
+#
+# Examples below are commented out — uncomment one, divert its key, then
+# `systemctl --user restart solaar`.
+---
+# Left Tilt → previous workspace
+# - Key: [Left Tilt, pressed]
+# - KeyPress: [Super_L, Control_L, Left]
+...
+---
+# Right Tilt → next workspace
+# - Key: [Right Tilt, pressed]
+# - KeyPress: [Super_L, Control_L, Right]
+...
