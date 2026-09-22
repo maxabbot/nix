@@ -37,4 +37,16 @@
   blue = "#7daea3"; # base0D
   purple = "#d3869b"; # base0E
   brown = "#bd6f3e"; # base0F
+
+  # ── Derived surfaces ───────────────────────────────────────────────────────
+  # Tinted blends with no base16 slot and no gruvbox-material name of their own:
+  # hover states and accent/status-tinted fills that sit between two of the
+  # slots above. They live here anyway so Theme.qml can stay free of literal
+  # hex; stylix.nix maps base16 by explicit name, so these are never picked up
+  # as part of the scheme.
+  bgHover = "#383432"; # bg0→bgAlt, hovered list row
+  accentBg = "#2d4a52"; # blue-tinted fill, active tile/button
+  accentBgHover = "#3a5a62"; # accentBg, hovered
+  redDark = "#6b2a2a"; # red on a dark ground, critical toast fill
+  toastBg = "#2d3b3b"; # aqua-tinted fill, default-urgency toast
 }

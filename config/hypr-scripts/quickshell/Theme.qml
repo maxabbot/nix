@@ -33,7 +33,7 @@ Singleton {
     readonly property color bgHard: "@bg0Hard@"  // deepest — log/canvas/kbd wells
     readonly property color bg:     "@bg0@"  // panel body
     readonly property color bgAlt:  "@bgAlt@"  // inputs, tiles, list rows
-    readonly property color bgSoft: "#383432"  // hovered list row
+    readonly property color bgSoft: "@bgHover@"  // hovered list row
 
     // ── Borders / separators / dark hovers ──────────────────────────────────
     readonly property color border:       "@bg1@"
@@ -42,25 +42,25 @@ Singleton {
     // ── Foreground text (dim → bright) ──────────────────────────────────────
     readonly property color grayDim:  "@bg3@"  // placeholders, counts
     readonly property color gray:     "@gray@"  // secondary text, muted icons
-    readonly property color fgDim:    "#bdae93"  // body text
-    readonly property color fgSoft:   "#d5c4a1"  // toast body
+    readonly property color fgDim:    "@grayBright@"  // body text
+    readonly property color fgSoft:   "@fgBright@"  // toast body
     readonly property color fg:       "@fg@"  // primary text & icons
-    readonly property color fgBright: "#ebdbb2"  // emphasised / bold text
+    readonly property color fgBright: "@fgBrighter@"  // emphasised / bold text
 
     // ── Accent (aqua) and accent-tinted surfaces ────────────────────────────
     readonly property color accent:        "@blue@"
     readonly property color accentBright:  "@aqua@"  // pressed slider handle
-    readonly property color accentBg:      "#2d4a52"  // active tile/button fill
-    readonly property color accentBgHover: "#3a5a62"  // active tile hovered
+    readonly property color accentBg:      "@accentBg@"  // active tile/button fill
+    readonly property color accentBgHover: "@accentBgHover@"  // active tile hovered
 
     // ── Status / syntax colours ─────────────────────────────────────────────
     readonly property color green:   "@green@"
     readonly property color yellow:  "@yellow@"
     readonly property color orange:  "@orange@"  // scratchpad identity (matches hyprland border)
     readonly property color red:     "@red@"
-    readonly property color redDark: "#6b2a2a"
+    readonly property color redDark: "@redDark@"
     readonly property color purple:  "@purple@"
-    readonly property color toastBg: "#2d3b3b"  // default-urgency toast fill
+    readonly property color toastBg: "@toastBg@"  // default-urgency toast fill
 
     // ── Translucent surfaces ────────────────────────────────────────────────
     readonly property color bgFloat: "#cc@bg0-hex@"  // bg0 at 80% — overlay badge
