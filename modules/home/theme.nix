@@ -1,24 +1,20 @@
 # modules/home/theme.nix — Supplementary theming on top of Stylix.
-# Stylix owns: GTK theme/font/cursor, Qt, base16 colours, pointer cursor.
-# We own: icon theme, dark-mode prefs, Wayland/Electron env vars, MIME apps.
+# Stylix owns: GTK theme/font/cursor, Qt, base16 colours, pointer cursor, and
+# the icon theme (stylix.icons in hosts/common/optional/stylix.nix — it feeds
+# both the GTK setting and qt5ct/qt6ct's icon_theme, which a hand-rolled
+# gtk.iconTheme here could not reach).
+# We own: dark-mode prefs, Wayland/Electron env vars, MIME apps.
 # Everything here is GUI-only, so the whole module is gated on a compositor
 # being configured.
 {
   lib,
   config,
-  pkgs,
   ...
 }:
 {
   config = lib.mkIf (config.custom.hm.compositor != "none") {
-    # ── Icons (Stylix does not manage icon themes) ────────────────────────────────
     gtk = {
       enable = true;
-
-      iconTheme = {
-        name = "Papirus-Dark";
-        package = pkgs.papirus-icon-theme;
-      };
 
       gtk3.extraConfig = {
         gtk-application-prefer-dark-theme = 1;

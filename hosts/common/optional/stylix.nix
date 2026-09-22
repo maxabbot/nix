@@ -89,6 +89,23 @@ in
       name = "Bibata-Modern-Classic";
       size = 24;
     };
+
+    # Stylix does manage icon themes (modules/gtk and modules/qt both consume
+    # this), so let it — setting the theme here is what puts icon_theme into
+    # qt5ct.conf/qt6ct.conf, which nothing else was doing.
+    #
+    # Qt without an icon theme falls back to bare hicolor, and that breaks tray
+    # icons asymmetrically: whichever items name an icon hicolor happens to
+    # carry still render, and the rest come up as the missing-icon placeholder.
+    # Solaar was the one that showed it — it reports IconName "battery-100",
+    # which only Papirus provides — while nm-applet, blueman and Apollo happened
+    # to survive because their names also exist in hicolor.
+    icons = {
+      enable = true;
+      package = pkgs.papirus-icon-theme;
+      dark = "Papirus-Dark";
+      light = "Papirus-Light";
+    };
   };
 
   # NixOS-level target: limine.nix themes the boot menu from the palette itself
