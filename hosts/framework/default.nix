@@ -1,7 +1,8 @@
 # hosts/framework/default.nix — Framework Laptop 13 Pro (Intel Core Ultra X7 358H,
 # Panther Lake, Arc Xe3 iGPU). Personal + work machine: the home-desktop feature
 # set minus the things that only make sense on a desktop with a discrete GPU
-# (nvidia, cuda, fan2go, the Apollo streaming *host*).
+# (nvidia, cuda, fan2go, the Apollo streaming *host* — it gets moonlight.nix,
+# the client half, instead).
 #
 # Platform support — kernel params, the Framework EC kmod, framework-tool, fwupd,
 # fprintd, acpilight, the headphone-noise and Ethernet-card udev rules — comes
@@ -29,6 +30,7 @@
     ../common/optional/wine.nix
     ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
+    ../common/optional/moonlight.nix
     ../common/optional/tailscale.nix
     ../common/optional/limine.nix
   ];
@@ -136,10 +138,9 @@
     # firmware/EC tooling (framework-tool, fw-ectool, fwupd) — don't restate any
     # of them here.
     systemPackages = with pkgs; [
-      # Moonlight client — streams games from home-desktop's Apollo host.
-      # gaming-streaming.nix is deliberately NOT imported: it also enables the
-      # Apollo *server*, which belongs on the desktop, not here.
-      moonlight-qt
+      # Moonlight (streams games from home-desktop's Apollo host) now comes from
+      # ../common/optional/moonlight.nix, imported above — gaming-streaming.nix
+      # stays out, since it also enables the Apollo *server*.
 
       # ── iGPU diagnostics ────────────────────────────────────────────────────
       # There's no nvidia-smi on this machine, so these are the only window into

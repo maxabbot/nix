@@ -44,7 +44,8 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `cuda.nix` | CUDA / cuDNN stack |
 | `gaming.nix` | Steam, Gamemode, Gamescope, Mangohud, controllers |
 | `wine.nix` | Wine (WoW64 staging), winetricks, DXVK |
-| `gaming-streaming.nix` | Apollo (Sunshine fork) + Moonlight for game streaming |
+| `gaming-streaming.nix` | Apollo (Sunshine fork) — the streaming *host*; imports `moonlight.nix` so a host is also a client. Desktop-only: `capSysAdmin` + `openFirewall` |
+| `moonlight.nix` | Moonlight — the streaming *client* alone, no service and no firewall hole (framework) |
 | `fan2go.nix` | Moving-average fan control (home-desktop; replaces fancontrol) |
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
 | `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); also owns the Bolt receiver's wakeup-disable udev rule, so it follows the receiver between machines. Tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared). Pairing and key diversion are per-machine device state — see the file header |
