@@ -316,7 +316,13 @@ let
   # overwritten on the next nixup — the arrays are replaced, not merged.
   noctaliaSettings = {
     bar = {
-      # Fresh installs ship an empty monitor list and render no bar at all.
+      # Empty means every screen, not none: each consumer tests
+      # `monitors.length === 0 || monitors.includes(screen.name)` (Bar.qml,
+      # MainScreen.qml, AllScreens.qml, BarBackground.qml,
+      # CurrentScreenDetector.qml). So hosts that leave custom.hm.monitors null
+      # — work-laptop, where kanshi owns the layout — still get a bar; naming
+      # the outputs here only matters where a portrait screen has to be told
+      # apart from a landscape one.
       monitors = outputs.allOutputs;
       position = "top";
       # Transparent bar with opaque capsules, matching waybar (whose
