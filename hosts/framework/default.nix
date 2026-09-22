@@ -28,6 +28,8 @@
     ../common/optional/gaming.nix
     ../common/optional/wine.nix
     ../common/optional/lan-mouse.nix
+    ../common/optional/logitech.nix
+    ../common/optional/tailscale.nix
     ../common/optional/limine.nix
   ];
 

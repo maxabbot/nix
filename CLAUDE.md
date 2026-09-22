@@ -4,7 +4,7 @@
 
 NixOS workstation configuration using **Nix Flakes** and **Home Manager**. Declarative, reproducible, fully idempotent.
 
-Four hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `framework` (Framework 13 Pro, Core Ultra X7 358H / Arc Xe3 — home-desktop's stack minus NVIDIA/CUDA/fancontrol, LUKS-encrypted root, `nixos-hardware` platform module), `work-laptop` (ThinkBook 14 2-in-1 G4 IML, Core Ultra 7 155U / Meteor Lake, Intel iGPU only, 16 GB RAM, NixOS on an external USB SSD with Windows left on the internal NVMe), `vm` (home-desktop stack in a QEMU/virtio VM — no NVIDIA/CUDA/fancontrol). All are desktops/laptops; servers live in a separate repo.
+Four hosts: `home-desktop` (RTX 40-series, Hyprland, gaming), `framework` (Framework 13 Pro, Core Ultra X7 358H / Arc Xe3 — home-desktop's stack minus NVIDIA/CUDA/fan2go and the Apollo streaming host, LUKS-encrypted root, `nixos-hardware` platform module), `work-laptop` (ThinkBook 14 2-in-1 G4 IML, Core Ultra 7 155U / Meteor Lake, Intel iGPU only, 16 GB RAM, NixOS on an external USB SSD with Windows left on the internal NVMe), `vm` (home-desktop stack in a QEMU/virtio VM — no NVIDIA/CUDA/fan2go, and none of the physical-peripheral or network-identity modules: lan-mouse, logitech, tailscale, gaming-streaming). All are desktops/laptops; servers live in a separate repo.
 
 ## Key Conventions
 
@@ -47,10 +47,10 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `gaming-streaming.nix` | Apollo (Sunshine fork) + Moonlight for game streaming |
 | `fan2go.nix` | Moving-average fan control (home-desktop; replaces fancontrol) |
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
-| `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared) |
-| `tailscale.nix` | Tailscale client (home-desktop; reaches the Tailscale-only services in the servers repo) + systemd-resolved for MagicDNS. Log in once with `sudo tailscale up --operator=max` |
-| `plymouth.nix` | Custom boot splash |
-| `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (home-desktop, vm, work-laptop; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
+| `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); also owns the Bolt receiver's wakeup-disable udev rule, so it follows the receiver between machines. Tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared). Pairing and key diversion are per-machine device state — see the file header |
+| `tailscale.nix` | Tailscale client (reaches the Tailscale-only services in the servers repo) + systemd-resolved for MagicDNS. Log in once per machine with `sudo tailscale up --operator=max` |
+| `plymouth.nix` | Custom boot splash (vm only — see TODO.md; probably leftover from testing) |
+| `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (all four hosts; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
 
 ### Home Manager
 
