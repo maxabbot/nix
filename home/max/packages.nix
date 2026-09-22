@@ -65,8 +65,6 @@ in
       stremio-linux-shell
       qbittorrent
       # `autoclick` — hold g → 100 CPS left-click via theclicker (productivity.nix)
-      (pkgs.writeShellScriptBin "autoclick" (
-        builtins.readFile ../../config/scripts/autoclick
-      ))
+      (pkgs.writeShellScriptBin "autoclick" (builtins.readFile ../../config/scripts/autoclick))
     ];
 }

@@ -57,10 +57,12 @@ let
   patchQml =
     pkg: subs:
     pkg.overrideAttrs (old: {
-      postInstall = (old.postInstall or "") + lib.concatMapStrings (s: ''
-        substituteInPlace "$out/${s.file}" \
-          --replace-fail ${lib.escapeShellArg s.from} ${lib.escapeShellArg s.to}
-      '') subs;
+      postInstall =
+        (old.postInstall or "")
+        + lib.concatMapStrings (s: ''
+          substituteInPlace "$out/${s.file}" \
+            --replace-fail ${lib.escapeShellArg s.from} ${lib.escapeShellArg s.to}
+        '') subs;
     });
 
   noctalia-shell = patchQml pkgs.noctalia-shell (
@@ -108,200 +110,209 @@ let
     ]
   );
 
-  dms-shell = (patchQml pkgs.dms-shell (
-    let
-      bar = "share/quickshell/dms/Modules/DankBar/DankBarContent.qml";
-      sw = "share/quickshell/dms/Modules/DankBar/Widgets/WorkspaceSwitcher.qml";
-      ov = "share/quickshell/dms/Modules/WorkspaceOverlays/OverviewWidget.qml";
-      hov = "share/quickshell/dms/Modules/WorkspaceOverlays/HyprlandOverview.qml";
-    in
-    [
-      {
-        file = bar;
-        from = "Hyprland.dispatch(`workspace \${realWorkspaces[nextIndex].id}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${realWorkspaces[nextIndex].id} })`);";
-      }
-      {
-        file = sw;
-        from = "Hyprland.dispatch(`workspace \${data.id}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${data.id} })`);";
-      }
-      {
-        file = sw;
-        from = "Hyprland.dispatch(`workspace \${realWorkspaces[nextIndex].id}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${realWorkspaces[nextIndex].id} })`);";
-      }
-      {
-        file = sw;
-        from = "Hyprland.dispatch(`workspace \${modelData.id}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${modelData.id} })`);";
-      }
-      {
-        # Two identical call sites in this file; both are rewritten.
-        file = sw;
-        from = "Hyprland.dispatch(`focuswindow address:\${winId}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:\${winId}\") })`);";
-      }
-      {
-        file = ov;
-        from = "Hyprland.dispatch(`workspace \${workspaceValue}`)";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${workspaceValue} })`)";
-      }
-      {
-        # Drag a window onto another workspace in the overview. "silent" =
-        # don't follow it, hence follow = false.
-        file = ov;
-        from = "Hyprland.dispatch(`movetoworkspacesilent \${targetWorkspace},address:\${windowData?.address}`)";
-        to = "Hyprland.dispatch(`hl.dsp.window.move({ window = hl.get_window(\"address:\${windowData?.address}\"), workspace = \${targetWorkspace}, follow = false })`)";
-      }
-      {
-        file = ov;
-        from = "Hyprland.dispatch(`focuswindow address:\${windowData.address}`)";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:\${windowData.address}\") })`)";
-      }
-      {
-        file = ov;
-        from = "Hyprland.dispatch(`closewindow address:\${windowData.address}`)";
-        to = "Hyprland.dispatch(`hl.dsp.window.close({ window = hl.get_window(\"address:\${windowData.address}\") })`)";
-      }
-      {
-        file = hov;
-        from = ''Hyprland.dispatch("workspace " + targetId)'';
-        to = ''Hyprland.dispatch("hl.dsp.focus({ workspace = " + targetId + " })")'';
-      }
-      {
-        # Power menu's log-out. Correct by the API's shape, but the only
-        # substitution here not verified by running it — testing costs the
-        # session.
-        file = "share/quickshell/dms/Services/SessionService.qml";
-        from = ''Hyprland.dispatch("exit");'';
-        to = ''Hyprland.dispatch("hl.dsp.exit()");'';
-      }
-      {
-        # Not a dispatch fix — an upstream bug. getPreferredBar is meant to pick
-        # the bar on the focused screen, but its `break` only leaves the inner
-        # loop over screens; the outer loop over bar configs carries on and the
-        # last bar with the widget wins. With DMS's stock single bar that's
-        # harmless. With the separate portrait bar declared below it sent
-        # dankdash wallpaper, dash open/toggle and control-center open/toggle
-        # to DP-2 regardless of focus. Returning instead leaves both loops.
-        file = "share/quickshell/dms/DMSShellIPC.qml";
-        from = "if (onFocusedScreen)\n                        break;";
-        to = "if (onFocusedScreen)\n                        return currentBar;";
-      }
-      # Deliberately NOT rewritten: `dpms off` / `dpms on` in
-      # Services/CompositorService.qml. hl.dsp.dpms ignores its state argument
-      # and just toggles, so a literal translation would make DMS's idle
-      # handling worse than the current no-op — an absolute "on" needs the
-      # per-monitor dpmsStatus dance in config/hypr-scripts/wake-monitors.sh.
-      # Hypridle owns screen blanking here anyway.
-    ]
-    # Not a dispatch fix: coffee icons for the idle inhibitor ("caffeine")
-    # instead of upstream's motion sensor. `coffee` (steaming mug) = keeping
-    # awake, `local_cafe` (plain cup) = idle allowed. --replace-fail swaps
-    # every occurrence, so DragDropGrid's two call sites are covered.
-    ++ map (file: {
-      inherit file;
-      from = ''SessionService.idleInhibited ? "motion_sensor_active" : "motion_sensor_idle"'';
-      to = ''SessionService.idleInhibited ? "coffee" : "local_cafe"'';
-    }) [
-      "share/quickshell/dms/Modules/DankBar/Widgets/IdleInhibitor.qml"
-      "share/quickshell/dms/Modules/OSD/IdleInhibitorOSD.qml"
-      "share/quickshell/dms/Modules/ControlCenter/Components/DragDropGrid.qml"
-    ]
-    ++ map (file: {
-      inherit file;
-      from = ''"icon": "motion_sensor_active",'';
-      to = ''"icon": "coffee",'';
-    }) [
-      "share/quickshell/dms/Modules/ControlCenter/Models/WidgetModel.qml"
-      "share/quickshell/dms/Modules/Settings/WidgetsTab.qml"
-    ]
-    # Not a dispatch fix: Noctalia-style hover tooltips on the bar. DMS only
-    # has bar tooltips for vertical bars, and only on disk/focused-app. BasePill
-    # (every bar widget's base) gains a tooltipText property and an instance
-    # of config/dms/BarPillTooltip.qml, installed below; each widget then gets
-    # a tooltipText binding inserted after its `id: root`. Empty = no tooltip.
-    ++ [
-      {
-        file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
-        from = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n";
-        to = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n    property string tooltipText: \"\"\n";
-      }
-      {
-        file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
-        from = "    property bool _blurRegistered: false";
-        to = "    BarPillTooltip {\n        pill: root\n    }\n\n    property bool _blurRegistered: false";
-      }
-      {
-        # The CPU pill only subscribes to dgop's cpu module; load average
-        # comes from the system module.
-        file = "share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml";
-        from = ''Ref(["cpu"]);'';
-        to = ''Ref(["cpu", "system"]);'';
-      }
-    ]
-    ++ lib.mapAttrsToList
-      (widget: body: {
-        file = "share/quickshell/dms/Modules/DankBar/Widgets/${widget}.qml";
-        from = "BasePill {\n    id: root\n";
-        to =
-          "BasePill {\n    id: root\n\n"
-          + lib.concatMapStringsSep "\n" (l: lib.optionalString (l != "") "    ${l}") (
-            lib.splitString "\n" body
-          );
-      })
-      {
-        CpuMonitor = ''
-          tooltipText: "CPU " + Math.round(DgopService.cpuUsage) + "% · " + (DgopService.cpuFrequency / 1000).toFixed(1) + " GHz" + (DgopService.loadAverage ? "\nLoad " + DgopService.loadAverage.split(" ").join(" · ") : "")
-        '';
-        RamMonitor = ''
-          tooltipText: "Memory " + (DgopService.usedMemoryMB / 1024).toFixed(1) + " / " + (DgopService.totalMemoryMB / 1024).toFixed(1) + " GiB (" + Math.round(DgopService.memoryUsage) + "%)" + (DgopService.totalSwapKB > 0 ? "\nSwap " + (DgopService.usedSwapKB / 1048576).toFixed(1) + " / " + (DgopService.totalSwapKB / 1048576).toFixed(1) + " GiB" : "")
-        '';
-        CpuTemperature = ''
-          tooltipText: (DgopService.cpuTemperature > 0 ? "CPU temperature " + Math.round(DgopService.cpuTemperature) + "°C" : "CPU temperature unavailable") + (DgopService.cpuModel ? "\n" + DgopService.cpuModel : "")
-        '';
-        GpuTemperature = ''
-          tooltipText: displayTemp > 0 ? "GPU temperature " + Math.round(displayTemp) + "°C" : "GPU temperature\nEnable the GPU under Processes → System"
-        '';
-        Clock = ''
-          tooltipText: Qt.formatDate(tooltipClock.date, "dddd d MMMM yyyy")
+  dms-shell =
+    (patchQml pkgs.dms-shell (
+      let
+        bar = "share/quickshell/dms/Modules/DankBar/DankBarContent.qml";
+        sw = "share/quickshell/dms/Modules/DankBar/Widgets/WorkspaceSwitcher.qml";
+        ov = "share/quickshell/dms/Modules/WorkspaceOverlays/OverviewWidget.qml";
+        hov = "share/quickshell/dms/Modules/WorkspaceOverlays/HyprlandOverview.qml";
+      in
+      [
+        {
+          file = bar;
+          from = "Hyprland.dispatch(`workspace \${realWorkspaces[nextIndex].id}`);";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${realWorkspaces[nextIndex].id} })`);";
+        }
+        {
+          file = sw;
+          from = "Hyprland.dispatch(`workspace \${data.id}`);";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${data.id} })`);";
+        }
+        {
+          file = sw;
+          from = "Hyprland.dispatch(`workspace \${realWorkspaces[nextIndex].id}`);";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${realWorkspaces[nextIndex].id} })`);";
+        }
+        {
+          file = sw;
+          from = "Hyprland.dispatch(`workspace \${modelData.id}`);";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${modelData.id} })`);";
+        }
+        {
+          # Two identical call sites in this file; both are rewritten.
+          file = sw;
+          from = "Hyprland.dispatch(`focuswindow address:\${winId}`);";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:\${winId}\") })`);";
+        }
+        {
+          file = ov;
+          from = "Hyprland.dispatch(`workspace \${workspaceValue}`)";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${workspaceValue} })`)";
+        }
+        {
+          # Drag a window onto another workspace in the overview. "silent" =
+          # don't follow it, hence follow = false.
+          file = ov;
+          from = "Hyprland.dispatch(`movetoworkspacesilent \${targetWorkspace},address:\${windowData?.address}`)";
+          to = "Hyprland.dispatch(`hl.dsp.window.move({ window = hl.get_window(\"address:\${windowData?.address}\"), workspace = \${targetWorkspace}, follow = false })`)";
+        }
+        {
+          file = ov;
+          from = "Hyprland.dispatch(`focuswindow address:\${windowData.address}`)";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:\${windowData.address}\") })`)";
+        }
+        {
+          file = ov;
+          from = "Hyprland.dispatch(`closewindow address:\${windowData.address}`)";
+          to = "Hyprland.dispatch(`hl.dsp.window.close({ window = hl.get_window(\"address:\${windowData.address}\") })`)";
+        }
+        {
+          file = hov;
+          from = ''Hyprland.dispatch("workspace " + targetId)'';
+          to = ''Hyprland.dispatch("hl.dsp.focus({ workspace = " + targetId + " })")'';
+        }
+        {
+          # Power menu's log-out. Correct by the API's shape, but the only
+          # substitution here not verified by running it — testing costs the
+          # session.
+          file = "share/quickshell/dms/Services/SessionService.qml";
+          from = ''Hyprland.dispatch("exit");'';
+          to = ''Hyprland.dispatch("hl.dsp.exit()");'';
+        }
+        {
+          # Not a dispatch fix — an upstream bug. getPreferredBar is meant to pick
+          # the bar on the focused screen, but its `break` only leaves the inner
+          # loop over screens; the outer loop over bar configs carries on and the
+          # last bar with the widget wins. With DMS's stock single bar that's
+          # harmless. With the separate portrait bar declared below it sent
+          # dankdash wallpaper, dash open/toggle and control-center open/toggle
+          # to DP-2 regardless of focus. Returning instead leaves both loops.
+          file = "share/quickshell/dms/DMSShellIPC.qml";
+          from = "if (onFocusedScreen)\n                        break;";
+          to = "if (onFocusedScreen)\n                        return currentBar;";
+        }
+        # Deliberately NOT rewritten: `dpms off` / `dpms on` in
+        # Services/CompositorService.qml. hl.dsp.dpms ignores its state argument
+        # and just toggles, so a literal translation would make DMS's idle
+        # handling worse than the current no-op — an absolute "on" needs the
+        # per-monitor dpmsStatus dance in config/hypr-scripts/wake-monitors.sh.
+        # Hypridle owns screen blanking here anyway.
+      ]
+      # Not a dispatch fix: coffee icons for the idle inhibitor ("caffeine")
+      # instead of upstream's motion sensor. `coffee` (steaming mug) = keeping
+      # awake, `local_cafe` (plain cup) = idle allowed. --replace-fail swaps
+      # every occurrence, so DragDropGrid's two call sites are covered.
+      ++
+        map
+          (file: {
+            inherit file;
+            from = ''SessionService.idleInhibited ? "motion_sensor_active" : "motion_sensor_idle"'';
+            to = ''SessionService.idleInhibited ? "coffee" : "local_cafe"'';
+          })
+          [
+            "share/quickshell/dms/Modules/DankBar/Widgets/IdleInhibitor.qml"
+            "share/quickshell/dms/Modules/OSD/IdleInhibitorOSD.qml"
+            "share/quickshell/dms/Modules/ControlCenter/Components/DragDropGrid.qml"
+          ]
+      ++
+        map
+          (file: {
+            inherit file;
+            from = ''"icon": "motion_sensor_active",'';
+            to = ''"icon": "coffee",'';
+          })
+          [
+            "share/quickshell/dms/Modules/ControlCenter/Models/WidgetModel.qml"
+            "share/quickshell/dms/Modules/Settings/WidgetsTab.qml"
+          ]
+      # Not a dispatch fix: Noctalia-style hover tooltips on the bar. DMS only
+      # has bar tooltips for vertical bars, and only on disk/focused-app. BasePill
+      # (every bar widget's base) gains a tooltipText property and an instance
+      # of config/dms/BarPillTooltip.qml, installed below; each widget then gets
+      # a tooltipText binding inserted after its `id: root`. Empty = no tooltip.
+      ++ [
+        {
+          file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
+          from = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n";
+          to = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n    property string tooltipText: \"\"\n";
+        }
+        {
+          file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
+          from = "    property bool _blurRegistered: false";
+          to = "    BarPillTooltip {\n        pill: root\n    }\n\n    property bool _blurRegistered: false";
+        }
+        {
+          # The CPU pill only subscribes to dgop's cpu module; load average
+          # comes from the system module.
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml";
+          from = ''Ref(["cpu"]);'';
+          to = ''Ref(["cpu", "system"]);'';
+        }
+      ]
+      ++
+        lib.mapAttrsToList
+          (widget: body: {
+            file = "share/quickshell/dms/Modules/DankBar/Widgets/${widget}.qml";
+            from = "BasePill {\n    id: root\n";
+            to =
+              "BasePill {\n    id: root\n\n"
+              + lib.concatMapStringsSep "\n" (l: lib.optionalString (l != "") "    ${l}") (
+                lib.splitString "\n" body
+              );
+          })
+          {
+            CpuMonitor = ''
+              tooltipText: "CPU " + Math.round(DgopService.cpuUsage) + "% · " + (DgopService.cpuFrequency / 1000).toFixed(1) + " GHz" + (DgopService.loadAverage ? "\nLoad " + DgopService.loadAverage.split(" ").join(" · ") : "")
+            '';
+            RamMonitor = ''
+              tooltipText: "Memory " + (DgopService.usedMemoryMB / 1024).toFixed(1) + " / " + (DgopService.totalMemoryMB / 1024).toFixed(1) + " GiB (" + Math.round(DgopService.memoryUsage) + "%)" + (DgopService.totalSwapKB > 0 ? "\nSwap " + (DgopService.usedSwapKB / 1048576).toFixed(1) + " / " + (DgopService.totalSwapKB / 1048576).toFixed(1) + " GiB" : "")
+            '';
+            CpuTemperature = ''
+              tooltipText: (DgopService.cpuTemperature > 0 ? "CPU temperature " + Math.round(DgopService.cpuTemperature) + "°C" : "CPU temperature unavailable") + (DgopService.cpuModel ? "\n" + DgopService.cpuModel : "")
+            '';
+            GpuTemperature = ''
+              tooltipText: displayTemp > 0 ? "GPU temperature " + Math.round(displayTemp) + "°C" : "GPU temperature\nEnable the GPU under Processes → System"
+            '';
+            Clock = ''
+              tooltipText: Qt.formatDate(tooltipClock.date, "dddd d MMMM yyyy")
 
-          SystemClock {
-              id: tooltipClock
-              precision: SystemClock.Minutes
+              SystemClock {
+                  id: tooltipClock
+                  precision: SystemClock.Minutes
+              }
+            '';
+            Weather = ''
+              tooltipText: {
+                  const w = WeatherService.weather;
+                  if (!w.available)
+                      return "";
+                  const today = w.forecast && w.forecast.length > 0 ? w.forecast[0] : null;
+                  let s = WeatherService.getWeatherCondition(w.wCode) + " · " + WeatherService.formatTemp(w.temp) + ", feels like " + WeatherService.formatTemp(w.feelsLike);
+                  if (today)
+                      s += "\nHigh " + WeatherService.formatTemp(today.tempMax) + " · low " + WeatherService.formatTemp(today.tempMin) + " · rain " + today.precipitationProbability + "%";
+                  s += "\nHumidity " + w.humidity + "% · wind " + WeatherService.formatSpeed(w.wind);
+                  if (w.city)
+                      s += "\n" + w.city;
+                  return s;
+              }
+            '';
+            IdleInhibitor = ''
+              tooltipText: SessionService.idleInhibited ? "Keeping awake\nClick to allow idle" : "Idle allowed\nClick to keep awake"
+            '';
+            # Upstream's own disk tooltip still handles vertical bars.
+            DiskUsage = ''
+              tooltipText: !isVerticalOrientation && selectedMount ? (selectedMount.mount === "/" ? "Disk" : selectedMount.mount) + " · " + selectedMount.used + " of " + selectedMount.size + " used (" + selectedMount.percent + ")\n" + selectedMount.avail + " free" : ""
+            '';
           }
+    )).overrideAttrs
+      (old: {
+        postInstall = old.postInstall + ''
+          chmod u+w "$out/share/quickshell/dms/Widgets"
+          install -Dm444 ${../../../config/dms/BarPillTooltip.qml} \
+            "$out/share/quickshell/dms/Widgets/BarPillTooltip.qml"
         '';
-        Weather = ''
-          tooltipText: {
-              const w = WeatherService.weather;
-              if (!w.available)
-                  return "";
-              const today = w.forecast && w.forecast.length > 0 ? w.forecast[0] : null;
-              let s = WeatherService.getWeatherCondition(w.wCode) + " · " + WeatherService.formatTemp(w.temp) + ", feels like " + WeatherService.formatTemp(w.feelsLike);
-              if (today)
-                  s += "\nHigh " + WeatherService.formatTemp(today.tempMax) + " · low " + WeatherService.formatTemp(today.tempMin) + " · rain " + today.precipitationProbability + "%";
-              s += "\nHumidity " + w.humidity + "% · wind " + WeatherService.formatSpeed(w.wind);
-              if (w.city)
-                  s += "\n" + w.city;
-              return s;
-          }
-        '';
-        IdleInhibitor = ''
-          tooltipText: SessionService.idleInhibited ? "Keeping awake\nClick to allow idle" : "Idle allowed\nClick to keep awake"
-        '';
-        # Upstream's own disk tooltip still handles vertical bars.
-        DiskUsage = ''
-          tooltipText: !isVerticalOrientation && selectedMount ? (selectedMount.mount === "/" ? "Disk" : selectedMount.mount) + " · " + selectedMount.used + " of " + selectedMount.size + " used (" + selectedMount.percent + ")\n" + selectedMount.avail + " free" : ""
-        '';
-      }
-  )).overrideAttrs (old: {
-    postInstall = old.postInstall + ''
-      chmod u+w "$out/share/quickshell/dms/Widgets"
-      install -Dm444 ${../../../config/dms/BarPillTooltip.qml} \
-        "$out/share/quickshell/dms/Widgets/BarPillTooltip.qml"
-    '';
-  });
+      });
 
   # ── Bar layouts, mirroring modules/home/wm/waybar.nix ───────────────────────
   # Waybar's main bar is  workspaces/scratchpad/window | clock/weather |
@@ -335,7 +346,10 @@ let
       showCapsule = true;
       capsuleOpacity = 1;
       widgets = {
-        left = [ { id = "Workspace"; } { id = "ActiveWindow"; } ];
+        left = [
+          { id = "Workspace"; }
+          { id = "ActiveWindow"; }
+        ];
         center = [
           {
             id = "Clock";
@@ -365,7 +379,12 @@ let
         inherit name;
         widgets = {
           left = [ { id = "Workspace"; } ];
-          center = [ { id = "Clock"; formatVertical = "HH mm"; } ];
+          center = [
+            {
+              id = "Clock";
+              formatVertical = "HH mm";
+            }
+          ];
           right = [
             { id = "Volume"; }
             { id = "Network"; }
@@ -413,9 +432,25 @@ let
     position = 0;
     screenPreferences = [ "all" ];
     showOnLastDisplay = true;
-    leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
-    centerWidgets = [ "music" "clock" "weather" ];
-    rightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "battery" "controlCenterButton" ];
+    leftWidgets = [
+      "launcherButton"
+      "workspaceSwitcher"
+      "focusedWindow"
+    ];
+    centerWidgets = [
+      "music"
+      "clock"
+      "weather"
+    ];
+    rightWidgets = [
+      "systemTray"
+      "clipboard"
+      "cpuUsage"
+      "memUsage"
+      "notificationButton"
+      "battery"
+      "controlCenterButton"
+    ];
     spacing = 4;
     innerPadding = 4;
     bottomGap = 0;
@@ -481,13 +516,32 @@ let
       # "all" when there is nothing to split, so single-output hosts still show a bar.
       mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
       portraitScreens = outputs.portraitOutputs;
-      left = [ "workspaceSwitcher" "focusedWindow" ];
-      center = [ "clock" "weather" ];
-      right = [ "music" "cpuUsage" "memUsage" "cpuTemp" ]
-        ++ lib.optional cfg.nvidia "gpuTemp"
-        ++ [ "diskUsage" "privacyIndicator" ]
-        ++ lib.optional isLaptop "battery"
-        ++ [ "idleInhibitor" "systemTray" "notificationButton" "controlCenterButton" ];
+      left = [
+        "workspaceSwitcher"
+        "focusedWindow"
+      ];
+      center = [
+        "clock"
+        "weather"
+      ];
+      right = [
+        "music"
+        "cpuUsage"
+        "memUsage"
+        "cpuTemp"
+      ]
+      ++ lib.optional cfg.nvidia "gpuTemp"
+      ++ [
+        "diskUsage"
+        "privacyIndicator"
+      ]
+      ++ lib.optional isLaptop "battery"
+      ++ [
+        "idleInhibitor"
+        "systemTray"
+        "notificationButton"
+        "controlCenterButton"
+      ];
       # DankBarWindow.qml reads barConfig.transparency straight into the
       # background alpha despite the name, so 0 is fully transparent and
       # widgetTransparency 1 keeps the widget pills opaque. Already the
@@ -496,7 +550,10 @@ let
       widgetAlpha = 1;
       pLeft = [ "workspaceSwitcher" ];
       pCenter = [ "clock" ];
-      pRight = [ "notificationButton" "controlCenterButton" ];
+      pRight = [
+        "notificationButton"
+        "controlCenterButton"
+      ];
     };
   };
 
@@ -567,8 +624,8 @@ let
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       Requisite = [ "graphical-session.target" ];
-      Conflicts = lib.filter (u: u != unitName name) allUnits
-        ++ lib.optional (name == "own") "shell-utility.service";
+      Conflicts =
+        lib.filter (u: u != unitName name) allUnits ++ lib.optional (name == "own") "shell-utility.service";
       Wants = shell.wants;
     };
     Service = {
