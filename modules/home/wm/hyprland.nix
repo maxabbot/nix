@@ -47,6 +47,27 @@ let
   # stderr is left attached so hypridle journals it if the probe itself breaks.
   resumeProbe = "setsid bash ~/.config/hypr/scripts/resume-probe.sh </dev/null >/dev/null & ";
 
+  # Blank both outputs before the machine goes down — an experiment against the
+  # lit-but-black resume (see the semsurf notes; instrumentation in
+  # resume-probe.sh). Every probe-captured failure so far was a *manual* suspend
+  # with the screens still lit, and the one clean resume was the 900s idle path,
+  # where idle-off had already blanked them 30s earlier. The theory: a DPMS-off
+  # output has its CRTC torn down, so nothing is scanning out and no explicit-sync
+  # fence is mid-wait when the GPU sleeps — and the wake has to build a full
+  # modeset from scratch rather than restore state that did not survive.
+  #
+  # hold-off, not off: it disarms misc.{mouse_move,key_press}_enables_dpms first,
+  # so a stray input event in the second between blanking and suspend entry can't
+  # light the screens back up and undo the whole point. dpms.sh on re-arms input
+  # wake on the far side once nothing is left blanked.
+  #
+  # The sleep gives hyprlock time to come up first: it renders on frame callbacks,
+  # which a blanked output stops delivering, and a half-initialised lock screen on
+  # resume would be a worse bug than the one being chased. On the idle path this
+  # is a no-op anyway — idle-off blanked them at 330s and every dpms.sh verb only
+  # toggles what actually differs.
+  blankBeforeSleep = "loginctl lock-session; sleep 1; bash ~/.config/hypr/scripts/dpms.sh hold-off";
+
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
   # into a Lua hl.monitor({}) call.
   monitorToLua =
@@ -316,7 +337,7 @@ in
             # pidof guard: don't spawn a second hyprlock if one is already up
             # (lock at 5min then loginctl lock-session at suspend = duplicate = crash).
             lock_cmd = "pidof hyprlock || hyprlock";
-            before_sleep_cmd = "loginctl lock-session";
+            before_sleep_cmd = blankBeforeSleep;
             # pidof guard here too: killing the live hyprlock on resume made
             # Hyprland flash its red "lockscreen died" fallback screen every wake.
             # dpms.sh, not `hyprctl dispatch dpms on` — dispatch args are Lua, so
