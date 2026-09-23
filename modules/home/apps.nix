@@ -182,6 +182,29 @@ in
     # Colours are managed by Stylix; only layout/behaviour settings live here.
     fuzzel = lib.mkIf gui {
       enable = true;
+      # Pin every launch to the focused output. Without --output fuzzel doesn't
+      # know its monitor until the surface maps, so with mixed scales (the
+      # portrait DP-2 at 1.5 beside DP-3 at 1.0) it guesses scale 1, draws its
+      # first frame at that size, then resizes once Hyprland reports 1.5 — the
+      # same jump the laptop showed. Wrapping the binary covers the Super+D
+      # bind, the hypr-scripts pickers and bemoji alike.
+      package = pkgs.symlinkJoin {
+        name = "fuzzel-focused-output";
+        paths = [ pkgs.fuzzel ];
+        postBuild = ''
+          rm "$out/bin/fuzzel"
+          cp ${
+            pkgs.writeShellScript "fuzzel" ''
+              for arg in "$@"; do
+                case "$arg" in -o | --output | --output=*) exec ${lib.getExe pkgs.fuzzel} "$@" ;; esac
+              done
+              out=$(hyprctl monitors -j 2>/dev/null | ${lib.getExe pkgs.jq} -r '.[] | select(.focused) | .name' 2>/dev/null)
+              exec ${lib.getExe pkgs.fuzzel} ''${out:+--output "$out"} "$@"
+            ''
+          } "$out/bin/fuzzel"
+        '';
+        inherit (pkgs.fuzzel) meta;
+      };
       settings = {
         main = {
           # Not "auto": with every output at scale 1 that sizes text from each
