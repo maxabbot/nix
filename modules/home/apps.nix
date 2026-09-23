@@ -5,6 +5,7 @@
 {
   lib,
   config,
+  osConfig,
   pkgs,
   ...
 }:
@@ -114,6 +115,46 @@ in
       };
     };
 
+    # ── MangoHud ───────────────────────────────────────────────────────────────────
+    # Only where gaming.nix is imported (it enables Steam). The layout is the one
+    # Goverlay had written to MangoHud.conf; colours, font and background come
+    # from Stylix's mangohud target, so Goverlay's own colour choices are gone.
+    # Goverlay can no longer save here — the file is a store symlink now.
+    mangohud = lib.mkIf (gui && osConfig.programs.steam.enable) {
+      enable = true;
+      settings = {
+        legacy_layout = 0;
+        round_corners = 8;
+        position = "top-left";
+        table_columns = 3;
+        # Stylix sizes from fonts.sizes.applications × 1.333; 18 × 1.333 keeps
+        # the 24 px Goverlay had.
+        font_size = lib.mkForce 18;
+        font_size_text = lib.mkForce 18;
+        gpu_text = "GPU";
+        gpu_stats = true;
+        gpu_core_clock = true;
+        gpu_mem_clock = true;
+        gpu_temp = true;
+        gpu_power = true;
+        cpu_text = "CPU";
+        cpu_stats = true;
+        cpu_mhz = true;
+        cpu_temp = true;
+        cpu_power = true;
+        vram = true;
+        ram = true;
+        battery = true;
+        fps = true;
+        frame_timing = true;
+        fps_limit_method = "late";
+        fps_limit = 0;
+        log_duration = 30;
+        autostart_log = 0;
+        log_interval = 100;
+      };
+    };
+
     # ── bat ── configured in home/max/cli.nix (theme + pager) ──────────────────────
 
     # ── mpv ────────────────────────────────────────────────────────────────────────
@@ -193,15 +234,13 @@ in
         paths = [ pkgs.fuzzel ];
         postBuild = ''
           rm "$out/bin/fuzzel"
-          cp ${
-            pkgs.writeShellScript "fuzzel" ''
-              for arg in "$@"; do
-                case "$arg" in -o | --output | --output=*) exec ${lib.getExe pkgs.fuzzel} "$@" ;; esac
-              done
-              out=$(hyprctl monitors -j 2>/dev/null | ${lib.getExe pkgs.jq} -r '.[] | select(.focused) | .name' 2>/dev/null)
-              exec ${lib.getExe pkgs.fuzzel} ''${out:+--output "$out"} "$@"
-            ''
-          } "$out/bin/fuzzel"
+          cp ${pkgs.writeShellScript "fuzzel" ''
+            for arg in "$@"; do
+              case "$arg" in -o | --output | --output=*) exec ${lib.getExe pkgs.fuzzel} "$@" ;; esac
+            done
+            out=$(hyprctl monitors -j 2>/dev/null | ${lib.getExe pkgs.jq} -r '.[] | select(.focused) | .name' 2>/dev/null)
+            exec ${lib.getExe pkgs.fuzzel} ''${out:+--output "$out"} "$@"
+          ''} "$out/bin/fuzzel"
         '';
         inherit (pkgs.fuzzel) meta;
       };

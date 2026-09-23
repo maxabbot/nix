@@ -286,30 +286,28 @@ in
         "$schema" = "https://starship.rs/config-schema.json";
 
         format = lib.concatStrings [
-          "[](${palette.bg0})"
           "$os"
           "$username"
-          "[](bg:${palette.bg1} fg:${palette.bg0})"
+          "[](fg:${palette.bg1})"
           "$directory"
-          "[](fg:${palette.bg1} bg:${palette.bg2})"
+          "[](fg:${palette.bg1} bg:${palette.bg2})"
           "$git_branch"
           "$git_status"
-          "[](fg:${palette.bg2} bg:${palette.bg3})"
+          "[](fg:${palette.bg2} bg:${palette.bg3})"
           "$python$nodejs$rust$golang$java"
-          "[](fg:${palette.bg3} bg:${palette.bg0})"
+          "[](fg:${palette.bg3})"
           "$time"
-          "[ ](fg:${palette.bg0})"
           "\n$character"
         ];
 
         os = {
           disabled = false;
-          style = "bg:${palette.bg0} fg:${palette.purple}";
+          style = "fg:${palette.purple}";
         };
         username = {
           show_always = true;
-          style_user = "bg:${palette.bg0} fg:${palette.fg}";
-          style_root = "bg:${palette.bg0} fg:${palette.red}";
+          style_user = "fg:${palette.fg}";
+          style_root = "fg:${palette.red}";
           format = "[$user ]($style)";
           disabled = false;
         };
@@ -374,7 +372,7 @@ in
         time = {
           disabled = false;
           time_format = "%H:%M";
-          style = "bg:${palette.bg0} fg:${palette.bg4}";
+          style = "fg:${palette.bg4}";
           format = "[ 󰥔 $time ]($style)";
         };
         character = {
@@ -399,6 +397,15 @@ in
       ];
     };
 
+    # ── yazi (TUI file manager) ────────────────────────────────────────────────────
+    # Managed here rather than as a system package so Stylix's yazi target
+    # themes it. `y` is the cd-on-exit wrapper (yazi's own recommended name).
+    yazi = {
+      enable = true;
+      enableZshIntegration = true;
+      shellWrapperName = "y";
+    };
+
     # ── zoxide (better cd) ─────────────────────────────────────────────────────────
     zoxide = {
       enable = true;
@@ -417,6 +424,23 @@ in
         inline_height = 25;
         show_preview = true;
         update_check = false;
+        theme.name = "gruvbox-material";
+      };
+      # No Stylix target for atuin; the names are atuin's semantic slots
+      # (docs.atuin.sh/guide/theming), filled from the shared palette.
+      themes.gruvbox-material = {
+        theme.name = "gruvbox-material";
+        colors = {
+          Base = palette.fg;
+          Title = palette.yellow;
+          Guidance = palette.blue;
+          Important = palette.orange;
+          Annotation = palette.aqua;
+          Muted = palette.gray;
+          AlertInfo = palette.green;
+          AlertWarn = palette.yellow;
+          AlertError = palette.red;
+        };
       };
     };
 
@@ -474,19 +498,22 @@ in
         set -g status-interval  5
         set -g status-position  bottom
         set -g status-justify   left
-        set -g status-style     "bg=${palette.bg0}"
+        # bg=default leaves the bar unpainted so kitty's translucency shows
+        # through; the segments keep their own fills, capped with Nerd Font
+        # powerline glyphs that fade into the (transparent) bar.
+        set -g status-style     "bg=default"
         set -g status-left-length  80
         set -g status-right-length 150
 
         set -g status-left \
-          "#[fg=${palette.bg0},bg=${palette.yellow},bold] #S #[fg=${palette.yellow},bg=${palette.bg1},nobold]#[fg=${palette.fg},bg=${palette.bg1}] #{b:pane_current_path} #[fg=${palette.bg1},bg=${palette.bg0}]"
+          "#[fg=${palette.bg0},bg=${palette.yellow},bold] #S #[fg=${palette.yellow},bg=${palette.bg1},nobold]#[fg=${palette.fg},bg=${palette.bg1}] #{b:pane_current_path} #[fg=${palette.bg1},bg=default] "
         set -g status-right \
-          "#[fg=${palette.bg1},bg=${palette.bg0}]#[fg=${palette.fg},bg=${palette.bg1}] %H:%M #[fg=${palette.bg2},bg=${palette.bg1}]#[fg=${palette.fg},bg=${palette.bg2}] %d %b #[fg=${palette.blue},bg=${palette.bg2}]#[fg=${palette.bg0},bg=${palette.blue},bold] #h "
+          "#[fg=${palette.bg1},bg=default]#[fg=${palette.fg},bg=${palette.bg1}] %H:%M #[fg=${palette.bg2},bg=${palette.bg1}]#[fg=${palette.fg},bg=${palette.bg2}] %d %b #[fg=${palette.blue},bg=${palette.bg2}]#[fg=${palette.bg0},bg=${palette.blue},bold] #h "
 
         set -g window-status-format \
-          "#[fg=${palette.bg0},bg=${palette.bg1}]#[fg=${palette.fg},bg=${palette.bg1}] #I  #W #[fg=${palette.bg1},bg=${palette.bg0}]"
+          "#[fg=${palette.bg1},bg=default]#[fg=${palette.fg},bg=${palette.bg1}]#I  #W#[fg=${palette.bg1},bg=default] "
         set -g window-status-current-format \
-          "#[fg=${palette.bg0},bg=${palette.yellow}]#[fg=${palette.bg0},bg=${palette.yellow},bold] #I  #W #[fg=${palette.yellow},bg=${palette.bg0}]"
+          "#[fg=${palette.yellow},bg=default]#[fg=${palette.bg0},bg=${palette.yellow},bold]#I  #W#[fg=${palette.yellow},bg=default,nobold] "
         set -g window-status-separator ""
 
         set -g pane-border-style        "fg=${palette.bg2}"

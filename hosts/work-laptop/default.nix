@@ -18,6 +18,7 @@
     ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
     ../common/optional/limine.nix
+    ../common/optional/plymouth.nix
   ];
 
   home-manager.backupFileExtension = "backup";

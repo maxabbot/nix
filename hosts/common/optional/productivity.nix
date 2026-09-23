@@ -242,9 +242,7 @@ in
     pdfarranger
     masterpdfeditor
     onlyoffice-desktopeditors
-    thunderbird
     element-desktop
-    obsidian
     bitwarden-desktop
     vlc
     imv
@@ -256,7 +254,6 @@ in
     veracrypt
     kdePackages.qtstyleplugin-kvantum
     papirus-icon-theme
-    yazi
     quickshell
     theclicker # autoclicker CLI (x11/wayland, evdev/uinput); wrapped as `autoclick`
   ];

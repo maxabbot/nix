@@ -110,6 +110,11 @@
         zen = {
           profilePath = "default";
         };
+        # Same idea for Thunderbird (modules/home/thunderbird.nix), whose HM
+        # module names the profile directory after the profile.
+        thunderbird = {
+          profileName = "default";
+        };
       };
 
       # Builds a NixosSystem with Home Manager wired in.
@@ -200,6 +205,7 @@
               # activateOnStartup = true; # flip once the link is confirmed working
             };
             zen.profilePath = "alhlpwpr.Default Profile";
+            thunderbird.profileName = "4z8l4vef.default";
           };
         };
 

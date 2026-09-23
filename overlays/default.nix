@@ -3,6 +3,12 @@
 final: prev: {
   wine-ge-custom = final.callPackage ../pkgs/wine-ge-custom { };
 
+  # Papirus ships blue folders, which clash with Gruvbox. The package's own
+  # `color` argument runs papirus-folders at build time; paleorange sits
+  # closest to the palette's yellow. Overridden here rather than at the use
+  # site so Stylix's icon theme and the system package stay the same build.
+  papirus-icon-theme = prev.papirus-icon-theme.override { color = "paleorange"; };
+
   # nixpkgs still ships 0.10.7; 1.0.0 adds frame-rate-independent smoothing and
   # better PipeWire error handling. Drop this override once nixpkgs catches up.
   cava = prev.cava.overrideAttrs (_old: rec {

@@ -74,4 +74,4 @@ nix run github:nix-community/nixos-anywhere -- \
 - [ ] **GPG commit signing** — `programs.gpg` in HM + `signingkey` in flake
 - [ ] **Backups** — `restic` or `borgbackup`; BTRFS snapshots don't cover disk failure
 - [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05; once a `release-26.05` branch exists, pin it and drop the two `enableReleaseChecks = false` lines plus the kmscon `disabledModules` workaround in `hosts/common/optional/stylix.nix`
-- [ ] **Decide what `plymouth.nix` is for** — `vm` is the only host importing it, which is backwards: a QEMU guest is the least interesting place for a boot splash, and the three real machines don't get one. Either drop the import from `hosts/vm/default.nix` and delete the module, or add it to the hosts that should actually have a splash. Left as-is for now because it harms nothing; it just reads as leftover testing.
+- [x] **Decide what `plymouth.nix` is for** — imported on all four hosts, themed by Stylix instead of the adi1090x "spin" theme.

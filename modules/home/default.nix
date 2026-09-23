@@ -7,6 +7,8 @@
     ./apps.nix
     ./theme.nix
     ./zen.nix
+    ./obsidian.nix
+    ./thunderbird.nix
     ./wm/hyprland.nix
     ./wm/waybar.nix
     ./wm/kanshi.nix

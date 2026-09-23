@@ -50,7 +50,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
 | `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); also owns the Bolt receiver's wakeup-disable udev rule, so it follows the receiver between machines. Tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared). Pairing and key diversion are per-machine device state — see the file header |
 | `tailscale.nix` | Tailscale client (reaches the Tailscale-only services in the servers repo) + systemd-resolved for MagicDNS. Log in once per machine with `sudo tailscale up --operator=max` |
-| `plymouth.nix` | Custom boot splash (vm only — see TODO.md; probably leftover from testing) |
+| `plymouth.nix` | Boot splash (all four hosts), themed by Stylix's plymouth target — Gruvbox bg + spinning snowflake; also themes the framework LUKS prompt |
 | `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (all four hosts; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
 
 ### Home Manager
