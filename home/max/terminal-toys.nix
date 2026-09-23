@@ -47,7 +47,7 @@ in
 
       [color]
       # 'default' = don't paint a background; the terminal's own (kitty,
-      # background_opacity 0.75) shows through, keeping the subtle transparency
+      # background_opacity 0.65) shows through, keeping the subtle transparency
       background = 'default'
       # VU-meter gradient: green base, yellow mids, red peaks
       gradient = 1
@@ -85,7 +85,7 @@ in
       name = "gruvbox-material-dark"
 
       [themes.palette]
-      background    = "${palette.bg0}"
+      # No background: leave it to kitty's translucent one, like cava.
       foreground    = "${palette.fg}"
       black         = "${palette.bg1}"
       red           = "${palette.red}"

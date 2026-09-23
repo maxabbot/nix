@@ -23,7 +23,7 @@ in
       settings = {
         window_padding_width = 8;
         hide_window_decorations = "titlebar-only";
-        background_opacity = "0.75";
+        background_opacity = "0.65";
         dynamic_background_opacity = true;
 
         tab_bar_edge = "bottom";
@@ -94,6 +94,8 @@ in
       enable = true;
       settings = {
         color_theme = "gruvbox_material_dark";
+        # Leave the background unpainted so kitty's translucent one shows through.
+        theme_background = false;
         vim_keys = true;
         rounded_corners = true;
         graph_symbol = "braille";
@@ -182,7 +184,11 @@ in
       enable = true;
       settings = {
         main = {
-          dpi-aware = "auto";
+          # Not "auto": with every output at scale 1 that sizes text from each
+          # monitor's physical DPI, and fuzzel draws its first frame at the
+          # laptop panel's size before shrinking on the docked externals — the
+          # oversized frame showed as a blue rectangle behind the fade-in.
+          dpi-aware = "no";
           prompt = "❯ ";
           placeholder = "Search…";
           icons-enabled = true;

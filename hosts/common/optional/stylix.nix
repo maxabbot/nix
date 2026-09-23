@@ -53,6 +53,11 @@ in
     };
     polarity = "dark";
 
+    # Translucent launcher: Stylix's fuzzel target writes this into the
+    # background colour's alpha. Blurred by the "launcher" layer rule in
+    # hyprland.lua.
+    opacity.popups = 0.85;
+
     # Solid dark background — desktop wallpaper is managed separately by awww.
     # 1×1 px is enough: anything that displays it scales it to a solid fill.
     image = pkgs.runCommand "gruvbox-wallpaper" {
