@@ -43,7 +43,7 @@ in
       left = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Connector name of the left external monitor (e.g. DP-1). Run wlr-randr when docked to find it.";
+        description = "Kanshi output criteria for the left external monitor: a connector name (DP-1) or, better, the EDID description from `hyprctl monitors`.";
       };
       leftMode = lib.mkOption {
         type = lib.types.str;
@@ -52,7 +52,7 @@ in
       right = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Connector name of the right external monitor (e.g. DP-2). Run wlr-randr when docked to find it.";
+        description = "Kanshi output criteria for the right external monitor: a connector name (DP-2) or, better, the EDID description from `hyprctl monitors`.";
       };
       rightMode = lib.mkOption {
         type = lib.types.str;

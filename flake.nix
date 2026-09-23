@@ -277,10 +277,10 @@
               secondary = null;
             };
             # Kanshi manages the docked/undocked layout automatically.
-            # To find the real connector names: boot docked, then run `wlr-randr`.
-            # Look for the "name:" field on each output — update left/right below.
-            # The two Philips PHL0947 monitors are identical in model; kanshi
-            # distinguishes them by connector name (DP-x), NOT by description.
+            # The two Philips 276B1s are the same model, but each reports its own
+            # serial in the EDID description, so match on that (see
+            # `hyprctl monitors`) rather than the DP-x connector — dock connector
+            # numbers are handed out per hotplug and aren't stable across replugs.
             kanshi = {
               enable = true;
               internal = {
@@ -288,9 +288,11 @@
                 mode = "1920x1200@60";
               };
               docked = {
-                left = null; # TODO: replace with connector name from wlr-randr
-                right = null; # TODO: replace with connector name from wlr-randr
-                # leftMode / rightMode default to 2560x1440@60 — override if refresh differs
+                left = "Philips Consumer Electronics Company PHL 276B1 UK02150032264";
+                right = "Philips Consumer Electronics Company PHL 276B1 UK02150032262";
+                # Both panels top out at 74.97 Hz over the dock.
+                leftMode = "2560x1440@74.97Hz";
+                rightMode = "2560x1440@74.97Hz";
                 # rightPosition defaults to "2560,0" (left monitor width)
                 # laptopPosition defaults to "1600,1440" (centred below 2×2560 externals)
               };
