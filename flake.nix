@@ -20,6 +20,8 @@
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      # Its HM module builds on home-manager's mkFirefoxModule; use ours.
+      inputs.home-manager.follows = "home-manager";
     };
 
     # Stylix has no release-26.05 branch yet (lags the nixpkgs release), so track
@@ -56,7 +58,6 @@
       home-manager,
       nixos-hardware,
       disko,
-      zen-browser,
       ...
     }@inputs:
     let
@@ -104,6 +105,11 @@
         lanMouse = {
           enable = false;
         };
+        # Zen profile directory (modules/home/zen.nix). Zen names it randomly on
+        # first run, so hosts with an existing profile point at theirs.
+        zen = {
+          profilePath = "default";
+        };
       };
 
       # Builds a NixosSystem with Home Manager wired in.
@@ -122,7 +128,6 @@
             inherit
               inputs
               nixos-hardware
-              zen-browser
               hostName
               machineType
               ;
@@ -194,6 +199,7 @@
               # ips = [ "192.168.x.x" ]; # set if the router doesn't resolve hostnames
               # activateOnStartup = true; # flip once the link is confirmed working
             };
+            zen.profilePath = "alhlpwpr.Default Profile";
           };
         };
 

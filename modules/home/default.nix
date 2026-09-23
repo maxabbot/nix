@@ -6,6 +6,7 @@
     ./editor.nix
     ./apps.nix
     ./theme.nix
+    ./zen.nix
     ./wm/hyprland.nix
     ./wm/waybar.nix
     ./wm/kanshi.nix

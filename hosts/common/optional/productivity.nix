@@ -3,7 +3,6 @@
   lib,
   pkgs,
   inputs,
-  zen-browser,
   ...
 }:
 let
@@ -245,7 +244,6 @@ in
     onlyoffice-desktopeditors
     thunderbird
     element-desktop
-    zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
     obsidian
     bitwarden-desktop
     vlc
