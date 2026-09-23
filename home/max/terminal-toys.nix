@@ -47,7 +47,7 @@ in
 
       [color]
       # 'default' = don't paint a background; the terminal's own (kitty,
-      # background_opacity 0.65) shows through, keeping the subtle transparency
+      # background_opacity 0.75) shows through, keeping the subtle transparency
       background = 'default'
       # VU-meter gradient: green base, yellow mids, red peaks
       gradient = 1

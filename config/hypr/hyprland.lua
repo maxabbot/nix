@@ -181,7 +181,7 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 6,  bezier = "defaul
 
 hl.layer_rule({ match = { namespace = "waybar" },                 blur = true,  ignore_alpha = 0.0 })
 hl.layer_rule({ match = { namespace = "quickshell" },             blur = true,  ignore_alpha = 0.0 })
--- fuzzel: its background is 0.85 alpha (stylix opacity.popups), so 0.5 still
+-- fuzzel: its background is 0.75 alpha (stylix opacity.popups), so 0.5 still
 -- blurs it but skips the fully transparent corners outside its rounded border.
 hl.layer_rule({ match = { namespace = "launcher" },               blur = true,  ignore_alpha = 0.5, animation = "fade" })
 
