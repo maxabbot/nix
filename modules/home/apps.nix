@@ -23,7 +23,7 @@ in
       settings = {
         window_padding_width = 8;
         hide_window_decorations = "titlebar-only";
-        background_opacity = "0.95";
+        background_opacity = "0.75";
         dynamic_background_opacity = true;
 
         tab_bar_edge = "bottom";
