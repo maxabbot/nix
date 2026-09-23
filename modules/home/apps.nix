@@ -219,6 +219,11 @@ in
     "hypr/hyprlock.conf" = lib.mkIf gui { text = renderTheme ../../config/hypr/hyprlock.conf; };
     # ── Mise version manager ────────────────────────────────────────────────────
     "mise/config.toml".source = ../../config/mise/config.toml;
+    # ── Thunar "Open Terminal Here" ─────────────────────────────────────────────
+    # Thunar runs `exo-open --launch TerminalEmulator`. Without xfce4-settings'
+    # xfce4-mime-helper, libexo reads this key as a desktop-file id and
+    # otherwise falls back to xfce4-terminal.desktop, which isn't installed.
+    "xfce4/helpers.rc" = lib.mkIf gui { text = "TerminalEmulator=kitty\n"; };
   };
 
   # ── Misc packages ─────────────────────────────────────────────────────────────
