@@ -22,8 +22,11 @@ let
   snippets = builtins.filter (s: s.text != null) (
     lib.optionals (defaults.cssSnippets != null) defaults.cssSnippets
   );
+  # Stylix's baseFontSize is its point size (11), but Obsidian reads the key
+  # as pixels against a 16 px default, which shrank all note text. Keep only
+  # the font families.
   appearance = (pkgs.formats.json { }).generate "obsidian-appearance.json" (
-    (lib.optionalAttrs (defaults.appearance != null) defaults.appearance)
+    removeAttrs (lib.optionalAttrs (defaults.appearance != null) defaults.appearance) [ "baseFontSize" ]
   );
   snippetFiles = map (s: {
     inherit (s) name;
