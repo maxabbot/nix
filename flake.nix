@@ -50,6 +50,14 @@
     # Native Claude Code binary — updates hourly, ahead of nixpkgs
     claude-code-nix.url = "github:sadjow/claude-code-nix";
 
+    # DMS plugin registry — only its nix/default.nix package set is used
+    # (pinned revs + hashes per plugin; see modules/home/wm/dms-plugins.nix).
+    # flake = false so its own nixpkgs input isn't pulled in.
+    dms-plugin-registry = {
+      url = "github:AvengeMedia/dms-plugin-registry";
+      flake = false;
+    };
+
   };
 
   outputs =

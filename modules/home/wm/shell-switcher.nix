@@ -23,6 +23,8 @@
   config,
   pkgs,
   machineType,
+  osConfig,
+  inputs,
   ...
 }:
 let
@@ -30,6 +32,14 @@ let
 
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
   outputs = import ./outputs.nix { inherit lib; } cfg;
+  dmsPlugins = import ./dms-plugins.nix {
+    inherit
+      lib
+      pkgs
+      inputs
+      osConfig
+      ;
+  };
 
   isLaptop = machineType == "laptop";
 
@@ -243,11 +253,88 @@ let
           to = "    BarPillTooltip {\n        pill: root\n    }\n\n    property bool _blurRegistered: false";
         }
         {
-          # The CPU pill only subscribes to dgop's cpu module; load average
-          # comes from the system module.
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml";
-          from = ''Ref(["cpu"]);'';
-          to = ''Ref(["cpu", "system"]);'';
+          # Not a dispatch fix: the tray as a drawer, as in Noctalia. DMS
+          # already has an overflow popup behind a chevron for icons hidden
+          # one by one (SessionData's hidden tray ids); treating every item as
+          # hidden leaves only the chevron on the bar. Hiding/unhiding single
+          # icons from DMS's tray menu stops mattering.
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          from = "readonly property var mainBarItemsRaw: allSortedTrayItems.filter(item => !SessionData.isHiddenTrayId(root.getTrayItemKey(item)))";
+          to = "readonly property var mainBarItemsRaw: []";
+        }
+        {
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          from = "readonly property var hiddenBarItems: allSortedTrayItems.filter(item => SessionData.isHiddenTrayId(root.getTrayItemKey(item)))";
+          to = "readonly property var hiddenBarItems: allSortedTrayItems";
+        }
+        {
+          # With only the chevron on the bar, its slot is the whole pill:
+          # upstream sizes it icon + 6px, but the expand_more glyph fills only
+          # the middle half of its box. 70 percent of the icon size keeps the
+          # glyph whole and the hover highlight with it (horizontal bars only).
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          from = "            Item {\n                width: root.trayItemSize\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                Rectangle {\n                    id: caretButton\n                    width: root.trayItemSize\n";
+          to = "            Item {\n                width: Math.round(Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale) * 0.7)\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                Rectangle {\n                    id: caretButton\n                    width: parent.width\n";
+        }
+        {
+          # Not a dispatch fix: the focused window shows its app icon instead
+          # of the app name on horizontal bars (upstream loads the icon, but
+          # only for vertical ones), then the title. The name comes back if
+          # the icon can't be resolved.
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
+          from = "                visible: !root.isVerticalOrientation\n\n                StyledText {\n                    id: appText\n";
+          to = "                visible: !root.isVerticalOrientation\n\n                IconImage {\n                    id: rowAppIcon\n                    anchors.verticalCenter: parent.verticalCenter\n                    width: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)\n                    height: width\n                    source: appIcon.source\n                    smooth: true\n                    mipmap: true\n                    asynchronous: true\n                    visible: status === Image.Ready\n                }\n\n                StyledText {\n                    id: appText\n";
+        }
+        {
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
+          from = "                    visible: !compactMode && text.length > 0\n";
+          to = "                    visible: !compactMode && text.length > 0 && rowAppIcon.status !== Image.Ready\n";
+        }
+        {
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
+          from = "                    visible: !compactMode && appText.text && titleText.text\n";
+          to = "                    visible: !compactMode && appText.visible && titleText.text\n";
+        }
+        {
+          # Not a dispatch fix: album art in the bar's media pill. Upstream
+          # shows only a cava visualiser (or a note) before the title; the
+          # track's MPRIS art, when it loads, takes that slot as a small
+          # rounded thumbnail, and the visualiser returns for tracks without.
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/Media.qml";
+          from = "import Quickshell.Services.Mpris\n";
+          to = "import Quickshell.Services.Mpris\nimport Quickshell.Widgets\n";
+        }
+        {
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/Media.qml";
+          from = "                    Item {\n                        width: 20\n                        height: 20\n                        anchors.verticalCenter: parent.verticalCenter\n\n                        AudioVisualization {\n                            anchors.fill: parent\n                            visible: CavaService.cavaAvailable && SettingsData.audioVisualizerEnabled\n                        }\n\n                        DankIcon {\n                            anchors.fill: parent\n                            name: \"music_note\"\n                            size: 20\n                            color: Theme.primary\n                            visible: !CavaService.cavaAvailable || !SettingsData.audioVisualizerEnabled\n                        }\n";
+          to = "                    Item {\n                        readonly property bool hasArt: artThumb.status === Image.Ready\n                        width: hasArt ? Math.round(root.widgetThickness * 0.75) : 20\n                        height: width\n                        anchors.verticalCenter: parent.verticalCenter\n\n                        ClippingRectangle {\n                            anchors.fill: parent\n                            radius: Theme.cornerRadius / 2\n                            color: \"transparent\"\n                            visible: parent.hasArt\n\n                            Image {\n                                id: artThumb\n                                anchors.fill: parent\n                                source: activePlayer ? (activePlayer.trackArtUrl || \"\") : \"\"\n                                fillMode: Image.PreserveAspectCrop\n                                sourceSize: Qt.size(96, 96)\n                                asynchronous: true\n                                smooth: true\n                                mipmap: true\n                            }\n                        }\n\n                        AudioVisualization {\n                            anchors.fill: parent\n                            visible: !parent.hasArt && CavaService.cavaAvailable && SettingsData.audioVisualizerEnabled\n                        }\n\n                        DankIcon {\n                            anchors.fill: parent\n                            name: \"music_note\"\n                            size: 20\n                            color: Theme.primary\n                            visible: !parent.hasArt && (!CavaService.cavaAvailable || !SettingsData.audioVisualizerEnabled)\n                        }\n";
+        }
+        {
+          # Not a dispatch fix: plugin popouts lagged on every open. DankPopout's
+          # contentLoader is only active while the popout shows, so each click
+          # rebuilt the plugin's whole popout from scratch, and PluginPopout
+          # then rebinds its height to the freshly loaded content, so the
+          # surface opened at the plugin's nominal height and snapped to the
+          # real one. After the first open, keep the content loaded: later
+          # opens reuse it at its settled size. Plugin popouts only — built-in
+          # ones keep upstream's load-on-open.
+          file = "share/quickshell/dms/Modules/Plugins/PluginPopout.qml";
+          from = "    onBackgroundClicked: close()\n";
+          to = ''
+                onBackgroundClicked: close()
+
+                property bool keepContentLoaded: false
+                onShouldBeVisibleChanged: {
+                    if (shouldBeVisible)
+                        keepContentLoaded = true;
+                }
+                Binding {
+                    target: root.contentLoader
+                    property: "active"
+                    value: true
+                    when: root.keepContentLoaded
+                }
+          '';
         }
       ]
       ++
@@ -262,9 +349,6 @@ let
               );
           })
           {
-            CpuMonitor = ''
-              tooltipText: "CPU " + Math.round(DgopService.cpuUsage) + "% · " + (DgopService.cpuFrequency / 1000).toFixed(1) + " GHz" + (DgopService.loadAverage ? "\nLoad " + DgopService.loadAverage.split(" ").join(" · ") : "")
-            '';
             RamMonitor = ''
               tooltipText: "Memory " + (DgopService.usedMemoryMB / 1024).toFixed(1) + " / " + (DgopService.totalMemoryMB / 1024).toFixed(1) + " GiB (" + Math.round(DgopService.memoryUsage) + "%)" + (DgopService.totalSwapKB > 0 ? "\nSwap " + (DgopService.usedSwapKB / 1048576).toFixed(1) + " / " + (DgopService.totalSwapKB / 1048576).toFixed(1) + " GiB" : "")
             '';
@@ -311,6 +395,11 @@ let
           chmod u+w "$out/share/quickshell/dms/Widgets"
           install -Dm444 ${../../../config/dms/BarPillTooltip.qml} \
             "$out/share/quickshell/dms/Widgets/BarPillTooltip.qml"
+          # CPU + memory + GPU in one pill with usage gauges; replaces the
+          # cpuUsage widget in place — see the header of the QML file.
+          chmod u+w "$out/share/quickshell/dms/Modules/DankBar/Widgets"
+          install -Dm444 ${../../../config/dms/BarSystemMonitor.qml} \
+            "$out/share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml"
         '';
       });
 
@@ -516,25 +605,32 @@ let
       # "all" when there is nothing to split, so single-output hosts still show a bar.
       mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
       portraitScreens = outputs.portraitOutputs;
+      # Plugin pills (dms-plugins.nix) are each [ ] on a host without that
+      # plugin. They fit on the right now that Claude and Nix Monitor are
+      # icon-sized; at full size they ran the right section into the centre.
       left = [
         "workspaceSwitcher"
         "focusedWindow"
       ];
+      # music sits with the clock, as in DMS's own default: in the right
+      # section a playing track pushed it into the centre group.
+      # Odd count with the clock in the middle: in DMS's default "index"
+      # centeringMode that pins the clock to the exact centre of the bar,
+      # whatever its neighbours' widths.
       center = [
+        "music"
         "clock"
         "weather"
       ];
-      right = [
-        "music"
-        "cpuUsage"
-        "memUsage"
-        "cpuTemp"
-      ]
-      ++ lib.optional cfg.nvidia "gpuTemp"
-      ++ [
-        "diskUsage"
-        "privacyIndicator"
-      ]
+      # "cpuUsage" is config/dms/BarSystemMonitor.qml (installed over
+      # CpuMonitor.qml above): CPU, memory and GPU in one pill, so cpuTemp,
+      # memUsage and gpuTemp aren't listed.
+      right = [ "cpuUsage" ]
+      ++ dmsPlugins.barWidget "dankKDEConnect"
+      ++ dmsPlugins.barWidget "claudeUsage"
+      ++ dmsPlugins.barWidget "dankscale"
+      ++ dmsPlugins.barWidget "nixMonitor"
+      ++ [ "privacyIndicator" ]
       ++ lib.optional isLaptop "battery"
       ++ [
         "idleInhibitor"
@@ -559,6 +655,7 @@ let
 
   noctaliaDecl = pkgs.writeText "noctalia-declared.json" (builtins.toJSON noctaliaSettings);
   dmsDecl = pkgs.writeText "dms-declared.json" (builtins.toJSON dmsDeclared);
+  dmsPluginDecl = pkgs.writeText "dms-plugins-declared.json" (builtins.toJSON dmsPlugins.settings);
 
   shells = {
     own = {
@@ -664,10 +761,13 @@ in
     # Noctalia scans its scheme dir with `find -mindepth 2`, so the JSON has to
     # sit in a subdirectory of its own — colorschemes/<name>/<name>.json — and
     # the scheme's display name is that basename.
-    xdg.configFile."noctalia/colorschemes/Gruvbox-Material/Gruvbox-Material.json".text =
-      renderTheme ../../../config/noctalia/Gruvbox-Material.json;
-    xdg.configFile."DankMaterialShell/gruvbox-material.json".text =
-      renderTheme ../../../config/dms/gruvbox-material.json;
+    xdg.configFile = {
+      "noctalia/colorschemes/Gruvbox-Material/Gruvbox-Material.json".text =
+        renderTheme ../../../config/noctalia/Gruvbox-Material.json;
+      "DankMaterialShell/gruvbox-material.json".text = renderTheme ../../../config/dms/gruvbox-material.json;
+    }
+    # DMS plugins: one store symlink per plugin directory — see dms-plugins.nix.
+    // dmsPlugins.configFiles;
 
     # Pointing each shell AT its scheme and layout has to be done differently:
     # settings.json is owned and rewritten by the shell itself, so it can't be a
@@ -695,6 +795,21 @@ in
         $DRY_RUN_CMD ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
           > "$file.hm-tmp" && $DRY_RUN_CMD mv "$file.hm-tmp" "$file"
       }
+
+      # Stale compiled QML: see `stamp` in dms-plugins.nix. Deleting the cache
+      # under a running shell is safe; it recompiles on its next start.
+      qmlStamp="${config.xdg.cacheHome}/quickshell/dms-plugins.stamp"
+      if [ "$(cat "$qmlStamp" 2>/dev/null)" != "${dmsPlugins.stamp}" ]; then
+        $DRY_RUN_CMD rm -f "${config.xdg.cacheHome}"/quickshell/qmlcache/*.qmlc
+        $DRY_RUN_CMD mkdir -p "$(dirname "$qmlStamp")"
+        $DRY_RUN_CMD sh -c "echo ${dmsPlugins.stamp} > '$qmlStamp'"
+      fi
+
+      # DMS plugin_settings.json: which plugins are on, plus a few settings.
+      # Same plain merge — each plugin's other keys are whatever it saved.
+      apply "${config.xdg.configHome}/DankMaterialShell/plugin_settings.json" \
+        ${dmsPluginDecl} \
+        '. * $d'
 
       # Noctalia: a plain recursive merge. Objects merge, arrays are replaced —
       # which is exactly right for widget lists.

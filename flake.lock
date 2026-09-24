@@ -128,6 +128,22 @@
         "type": "github"
       }
     },
+    "dms-plugin-registry": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790216452,
+        "narHash": "sha256-aTgGujx2c368JGxcA/3eHJWUbBpdhyq42PzIeFlV5tY=",
+        "owner": "AvengeMedia",
+        "repo": "dms-plugin-registry",
+        "rev": "fac7c9914395e7e8252f5b88f06a42fc4848abe3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dms-plugin-registry",
+        "type": "github"
+      }
+    },
     "firefox-gnome-theme": {
       "flake": false,
       "locked": {
@@ -369,6 +385,7 @@
         "apollo-flake": "apollo-flake",
         "claude-code-nix": "claude-code-nix",
         "disko": "disko",
+        "dms-plugin-registry": "dms-plugin-registry",
         "home-manager": "home-manager",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",

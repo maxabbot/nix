@@ -31,7 +31,7 @@ What the two third-party shells have against each panel in
 | `InputPanel` | ❌ | ❌ |
 | `KDEConnectPanel` | ❌ | ❌ |
 | `KeybindCheatSheet` | ❌ | ✅ `dms keybinds` + cheatsheet UI |
-| `KeyboardPanel` | ⚠️ displays layout, no switcher page | ❌ |
+| `KeyboardPanel` | ⚠️ displays layout, no switcher page | ⚠️ `keyboard_layout_name` bar widget — click cycles via `hyprctl switchxkblayout`; no switcher page, untested here |
 | `MonitorManager` | ❌ its `monitors` IPC is DPMS on/off only | ⚠️ full UI, but cannot apply here — see below |
 | `NetworkPanel` | ✅ | ✅ |
 | `NixPanel` | ❌ | ❌ updater is pacman/dnf family only |
@@ -162,6 +162,25 @@ transparency, corners) alongside its widget arrays. The merge rewrites the
 widget lists in place and clones bar 0 for the portrait output, so styling
 survives. Verified idempotent.
 
+`config/dms/BarSystemMonitor.qml` is installed over DMS's `CpuMonitor.qml`, so
+the `cpuUsage` slot (and its click-through to the process list) renders one
+pill for CPU, memory and GPU: each a Nerd Font icon (chip, RAM stick,
+expansion card) plus a thin usage gauge, after
+Noctalia's SystemMonitor in compact mode, with CPU and GPU temperature as text
+and exact figures, plus root filesystem usage, in the tooltip. GPU data comes from `nvtop -s`
+(installed everywhere by `productivity.nix`), which reads NVIDIA, AMD and Intel
+without root: the discrete GPU wins where there is one, so the laptops show
+their integrated GPU (a gauge with no temperature — Intel iGPUs don't report
+one). `cpuTemp`, `memUsage`, `gpuTemp` and `diskUsage`
+are left off the bar.
+
+Two more DMS widgets are patched to look like Noctalia's: the system tray
+treats every icon as hidden, so the bar shows only DMS's overflow chevron and
+the icons open in its popup (a drawer); and the focused window shows its app
+icon instead of the app name on horizontal bars, falling back to the name when
+the icon can't be resolved. The media pill also shows the track's album art
+as a small thumbnail in place of the visualiser, when the player provides it.
+
 DMS ships `showWorkspaceIndex = false` — unlabelled dots — while waybar and
 Noctalia (`labelMode: "index"`) number their workspaces, so it is declared on.
 
@@ -232,6 +251,52 @@ and `dms-wallpaper-bridge.sh` applies the pick through awww. A global pick
 skips portrait outputs to keep the cheat-sheet; a per-monitor pick is honoured
 as given. The dedupe stamp lives in `$XDG_RUNTIME_DIR` so a pick re-applies
 once after login instead of losing to the leaves.
+
+## DMS plugins
+
+Declared in `modules/home/wm/dms-plugins.nix` rather than installed with
+`dms plugins install`: each plugin is a store path symlinked into
+`~/.config/DankMaterialShell/plugins/`, turned on through the same `jq` merge
+into `plugin_settings.json`, and pinned by the `dms-plugin-registry` flake
+input (its `nix/default.nix` carries a rev and hash per plugin). Hand-installed
+plugins still work alongside.
+
+| Plugin | Kind | Hosts |
+|---|---|---|
+| `nixMonitor` | bar — store size (sum of narSize, not `df`), generations, `nh os switch` / `nh clean user` | all |
+| `dankKDEConnect` | bar + control centre | all |
+| `claudeUsage` | bar — Claude Code limits, via `api.anthropic.com` only; patched to lead with the Claude Code logo (Simple Icons, pinned) and tightened | all |
+| `nixPackageRunner` | launcher — `nix search` / `nix run` | all |
+| `dankHyprlandWindows` | launcher — window switcher | all |
+| `dankscale` | bar + control centre, Tailscale | tailscale hosts |
+
+All the pills are on the main bar, spread across its sections: `nixMonitor`
+and `claudeUsage` on the left after the workspaces and focused window, `dankKDEConnect` (icon
+patched to `phonelink`) and `dankscale` on the right after the system monitor.
+The centre is music · clock · weather: an odd count with the clock in the
+middle, which DMS's "index" centring mode pins to the exact centre. Together on the right they ran that section into the centre group.
+
+A rebuild that changes any plugin clears `~/.cache/quickshell/qmlcache`: Qt
+keys its compiled-QML cache on file path and mtime, and both are unchanged
+across rebuilds (same `plugins/<id>/` path, store mtime 1970), so DMS otherwise
+keeps running the old version of an edited plugin.
+
+`dankKDEConnect` and `dankHyprlandWindows` are pinned to older commits of
+`AvengeMedia/dms-plugins` by hand: upstream's current versions need DMS ≥ 1.6
+(`I18n.trFor`, `DankSpinner`). `dankHyprlandWindows` is also patched to pass
+windows through `hl.get_window()`. `nixMonitor`'s pill is patched to show the NixOS snowflake and an
+up-to-date / behind / unknown status icon. `nixMonitor` reads its commands from
+`plugins/NixMonitor/config.json`, which is built into the plugin directory.
+
+Plugin popouts are patched to keep their content loaded after the first open.
+Upstream rebuilds a plugin's popout on every click and then resizes the surface
+to the new content, which made every open lag; built-in popouts are unchanged.
+
+Left out on purpose: `displaySettings` (eval-disabled outputs need
+`hyprctl reload` to come back), `displayProfile` (writes `hyprland.conf`),
+`ddcBrightness` (DMS already does DDC/CI), `dockerManager` (tried, dropped), `nvidiaGpuMonitor` (replaced by the system monitor pill), `hyprlandSubmap` (no submaps here),
+`keybindingCheatSheet` (parses `hyprland.conf`), `screenRecorder` (a
+"composite" plugin, which DMS 1.4.6 rejects as an invalid manifest).
 
 ## Known issues
 
