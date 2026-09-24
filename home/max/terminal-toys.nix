@@ -10,7 +10,6 @@ in
 
     # ── Music TUIs ───────────────────────────────────────────────────────────────
     spotify-player # full-featured Spotify TUI client
-    ncspot # lightweight ncurses Spotify client
 
     # ── Weather ──────────────────────────────────────────────────────────────────
     wego # terminal weather (forecast graphs); `wttr` alias hits wttr.in, no config
@@ -23,6 +22,21 @@ in
     # ── Data TUI ─────────────────────────────────────────────────────────────────
     harlequin # SQL IDE in the terminal (DuckDB/SQLite/Postgres/…)
   ];
+
+  # spotify-player ships no .desktop file; this puts it in fuzzel, which opens
+  # Terminal=true entries in its `terminal` (kitty).
+  xdg.desktopEntries.spotify-player = {
+    name = "Spotify Player";
+    genericName = "Spotify TUI";
+    exec = "spotify_player";
+    icon = "spotify";
+    terminal = true;
+    categories = [
+      "Audio"
+      "Music"
+      "Player"
+    ];
+  };
 
   xdg.configFile = {
     # cava — Gruvbox Material Dark gradient
@@ -66,10 +80,14 @@ in
 
     # spotify-player — shows up as a Spotify Connect device named "max-tui"; control
     # playback on (or hand off from) the official Spotify client. Streaming playback
-    # needs Spotify Premium. If auth fails, register a Spotify app and set client_id:
-    #   https://github.com/aome510/spotify-player#audio-sources
+    # needs Spotify Premium. client_id is our own developer.spotify.com app: the
+    # default (ncspot's shared ID) gets 429-rate-limited, surfacing as "Token is not
+    # valid" on every Web API call. PKCE flow, so the ID isn't a secret. The app's
+    # redirect URI must be http://127.0.0.1:8989/login; after changing the ID run
+    # `spotify_player authenticate`.
     "spotify-player/app.toml".text = ''
       theme = "gruvbox-material-dark"
+      client_id = "51efa6806a1c43c3a18208e033e20beb"
 
       [device]
       name = "max-tui"

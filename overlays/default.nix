@@ -35,6 +35,30 @@ final: prev: {
   # pkgs.unstable is added by a later overlay in flake.nix, hence `final`.
   solaar = final.unstable.solaar;
 
+  # Spotify started enforcing refresh-token expiry on 2026-07-20; from then on
+  # 26.05's spotify-player 0.23.0 wipes its Web API token right after login (it
+  # "refreshes" a PKCE token Spotify issued without a refresh_token), so every
+  # request fails with "Token is not valid" / "no access token" and nothing
+  # plays. Fixed in 0.24.1 (aome510/spotify-player#1040). 0.25.0 then fixes the
+  # custom client_id path: Spotify strips fields (tracks, popularity, followers)
+  # from Development-mode apps' responses, which 0.24 fails to parse (#1064);
+  # 0.25 falls back to the shared ncspot ID for those requests. Unstable only has
+  # 0.24.1, so bump on top of it. Drop once nixpkgs stable carries >= 0.25.1.
+  spotify-player = final.unstable.spotify-player.overrideAttrs (_old: rec {
+    version = "0.25.1";
+    src = final.fetchFromGitHub {
+      owner = "aome510";
+      repo = "spotify-player";
+      rev = "v${version}";
+      hash = "sha256-lJOHhrJ6ser1vs2m0pUnDpbnSgTtdTX/yXhCjvzCrTM=";
+    };
+    cargoDeps = final.rustPlatform.fetchCargoVendor {
+      inherit src;
+      name = "spotify-player-${version}";
+      hash = "sha256-RsUuPkX4oVG6mDM16mM7VGW22mvKZPjShqs8BO36hbY=";
+    };
+  });
+
   # Upstream code-industry.net only hosts the newest tarball, so nixpkgs' pinned
   # 5.9.98 now 404s. Bump to whatever they currently publish; drop once nixpkgs
   # catches up. x86_64 only — every host here is.
