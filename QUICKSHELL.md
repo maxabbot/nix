@@ -18,7 +18,7 @@ Panel/overlay layer for the Hyprland hosts: notification server (replaces swaync
 
 **`WorkspaceOverview.qml`** — Fullscreen workspace exposé ("mission control"), opened via `qs_manager.sh toggle overview` (bound to `Super+Tab`). A grid of workspace tiles, each drawing its windows as geometry-accurate rectangles scaled from the real `hyprctl clients/monitors/workspaces -j` layout (per-window fractions computed against the owning monitor's logical size). Click a window to focus it (`dispatch focuswindow address:…`), click a tile's empty canvas to switch to that workspace (`dispatch workspace`); the focused workspace is accent-ringed. State is parsed once per open and lightly re-polled (1.5s) — not live screencopy thumbnails, which Quickshell 0.3.0 can't map to individual toplevels. Esc / click-off closes.
 
-**`ClipboardPanel.qml`** — Centred cliphist history modal (`Super+Shift+V`) with hover-to-expand rows. On open, `clipboard-prep.sh` emits one JSON line per history entry (images decoded to thumbnail files, text in full). Clicking a row copies it and closes; Esc / click-off dismisses.
+**`ClipboardPanel.qml`** — Centred cliphist history modal (`Super+V`) with hover-to-expand rows. On open, `clipboard-prep.sh` emits one JSON line per history entry (images decoded to thumbnail files, text in full). Clicking a row copies it and closes; Esc / click-off dismisses.
 
 **`ScreenshotOverlay.qml`** — Fullscreen screenshot mode picker (`Print`): region, annotate, full, window, record, QR scan. Tiles dispatch through Hyprland IPC to `screenshot-launch.sh`, which closes the overlay, waits for the surface to clear, then runs `screenshot.sh` in the chosen mode.
 

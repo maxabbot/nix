@@ -11,12 +11,11 @@
 # Plugins installed by hand still work alongside — the directory itself stays
 # writable.
 #
-# Most come from the registry's own Nix package set (dms-plugin-registry
-# flake input, nix/default.nix — pinned revs and hashes). Two are pinned
-# further back by hand: on 2026-09-15 upstream moved every AvengeMedia plugin
-# to I18n.trFor and requires_dms >= 1.6, and dms-shell here is 1.4.6, which has
-# neither trFor nor the DankSpinner the newer KDE Connect UI uses. Bump them
-# when dms-shell reaches 1.6.
+# All come from the registry's own Nix package set (dms-plugin-registry
+# flake input, nix/default.nix — pinned revs and hashes), so `nix flake update
+# dms-plugin-registry` bumps them together. Most AvengeMedia plugins need
+# requires_dms >= 1.6 (I18n.trFor), which is why dms-shell comes from unstable
+# (overlays/default.nix).
 #
 # Considered and left out:
 #   • displaySettings — toggles outputs via `hyprctl eval hl.monitor`, and an
@@ -29,35 +28,24 @@
 #   • dockerManager — tried, dropped from the bar by choice
 #   • nvidiaGpuMonitor — tried; GPU usage and temperature now come from the
 #     system monitor pill (config/dms/BarSystemMonitor.qml)
-#   • screenRecorder — a "composite" plugin; DMS 1.4.6's PluginService rejects
-#     the manifest ("invalid manifest fields") and never loads it
+#   • screenRecorder — quickCapture records as well
+#   • dmsScreenshot — tried; a front end for `dms screenshot` with no editor,
+#     replaced by quickCapture
 {
   lib,
   pkgs,
   inputs,
   osConfig,
+  isLaptop,
 }:
 let
   registry = import "${inputs.dms-plugin-registry}/nix/default.nix" { inherit pkgs; };
-
-  dmsPluginsAt =
-    rev: hash:
-    pkgs.fetchFromGitHub {
-      owner = "AvengeMedia";
-      repo = "dms-plugins";
-      inherit rev hash;
-    };
-
-  # 2.0.4, requires_dms >= 1.4.2 — the last release before the #78 UI rewrite.
-  kdeConnectSrc = dmsPluginsAt "f4583449f12920e0a2f16808b00a860c27f0173d" "sha256-QkQPqP7Wmo5DLRyKNSY5NuOau4LSaSfz3DYdHDLxluA=";
-  # 1.0.0, requires_dms >= 1.4.0 — the last release before the trFor move.
-  hyprWindowsSrc = dmsPluginsAt "6fc7f25bfb24f93b6488fb8a36ed67b5f242abdb" "sha256-KGpNgxN/zXiMjLLm4zLX+Wgnj1vx8bGGd6WwGBWo7Ds=";
 
   # Bar pill icon: phonelink (phone + laptop) instead of a bare smartphone —
   # it reads as "phone linked to this machine" and pairs with the plugin's own
   # offline icon, phonelink_off.
   kdeConnect = pkgs.runCommand "dms-plugin-dankKDEConnect" { } ''
-    cp -r ${kdeConnectSrc}/DankKDEConnect $out
+    cp -r ${registry.dankKDEConnect} $out
     chmod -R u+w $out
     substituteInPlace $out/DankKDEConnect.qml \
       --replace-fail 'root.selectedDevice.isReachable ? "smartphone" : "phonelink_off"' \
@@ -118,7 +106,7 @@ let
   # Hyprland accepts and ignores; targets have to go through hl.get_window().
   # Same fix as the luaDispatch rewrites in shell-switcher.nix.
   hyprWindows = pkgs.runCommand "dms-plugin-dankHyprlandWindows" { } ''
-    cp -r ${hyprWindowsSrc}/DankHyprlandWindows $out
+    cp -r ${registry.dankHyprlandWindows} $out
     chmod -R u+w $out
     substituteInPlace $out/DankHyprlandWindows.qml \
       --replace-fail 'hl.dsp.focus({ window = "''${selector}" })' \
@@ -183,6 +171,31 @@ let
                      'name: root.canCompareVersions ? (root.isUpToDate ? "check_circle" : "update") : "help"'
   '';
 
+  # Print opens quickCapture's bar menu as a floating, centred window, with no
+  # bar pill: config/dms/QuickCapturePicker.qml hosts the menu, the daemon gets
+  # an instance, and `dms ipc call quickCapture showPicker` toggles it
+  # (config/hypr-scripts/shell-ipc.sh).
+  quickCapture = pkgs.runCommand "dms-plugin-quickCapture" { } ''
+    cp -r ${registry.quickCapture} $out
+    chmod -R u+w $out
+    cp ${../../../config/dms/QuickCapturePicker.qml} $out/QuickCapturePicker.qml
+    substituteInPlace $out/QuickCaptureDaemon.qml \
+      --replace-fail '        function showHistory(): string {' \
+                     '        function showPicker(): string {
+            picker.show();
+            return "SUCCESS";
+        }
+
+        function showHistory(): string {' \
+      --replace-fail '    RecordingRegionBorder {' \
+                     '    QuickCapturePicker {
+        id: picker
+        daemon: root
+    }
+
+    RecordingRegionBorder {'
+  '';
+
   # dir: directory name under plugins/ (only NixMonitor's matters — see above).
   # Launcher plugins (nixPackageRunner, dankHyprlandWindows) add a launcher
   # provider and have no bar pill.
@@ -209,10 +222,26 @@ let
       id = "claudeUsage";
       src = claudeUsage;
     }
+    {
+      # Screenshots with an annotation editor, OCR, QR, scrolling capture and
+      # screen recording. No bar pill or Control Center tile: Print opens its
+      # menu floating (above). Its tools are in home.packages
+      # (shell-switcher.nix).
+      id = "quickCapture";
+      src = quickCapture;
+    }
   ]
   ++ lib.optional osConfig.services.tailscale.enable {
     id = "dankscale";
     src = registry.dankscale;
+  }
+  # Replaces the built-in battery pill: same icon + percent, but its popout
+  # (and Control Center tile) adds UPower's charge history, health/drain stats
+  # and power profiles. The profile buttons need power-profiles-daemon, so on
+  # work-laptop they do nothing.
+  ++ lib.optional isLaptop {
+    id = "batteryPlus";
+    src = registry.batteryPlus;
   };
 
   has = id: lib.any (p: p.id == id) plugins;

@@ -31,16 +31,17 @@ let
 
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
   outputs = import ./outputs.nix { inherit lib; } cfg;
+  isLaptop = machineType == "laptop";
+
   dmsPlugins = import ./dms-plugins.nix {
     inherit
       lib
       pkgs
       inputs
       osConfig
+      isLaptop
       ;
   };
-
-  isLaptop = machineType == "laptop";
 
   scriptsDir = "${config.home.homeDirectory}/.config/hypr/scripts";
   # Deployed 0444 (see hyprland.nix), so invoke through bash rather than
@@ -48,21 +49,21 @@ let
   switch = "${pkgs.bash}/bin/bash ${scriptsDir}/shell-switch.sh";
 
   # ── Lua dispatch fixups ─────────────────────────────────────────────────────
-  # DMS hardcodes classic Hyprland dispatcher strings, which
-  # this config's Lua parser evaluates as Lua and rejects: `dispatch
-  # "workspace 3"` dies with `')' expected near '3'`. Every workspace click,
-  # overview drag and window focus is a silent no-op without this. Exactly the
-  # breakage waybar needed pkgs/waybar/hyprland-lua-dispatch.patch for.
+  # DMS 1.6 routes every Hyprland dispatch through Services/HyprlandService.qml
+  # and speaks Lua when the compositor is on it (luaConfigActive), so the
+  # per-call-site rewrites 1.4.6 needed are gone. One gap remains: window
+  # targets. It passes `window = "address:0x…"` as a bare string, which
+  # Hyprland accepts and ignores; they have to go through hl.get_window() (see
+  # the hyprland-lua-dispatch notes). Overview clicks, drags and closes, and the
+  # window switcher's focus, all go through these three functions.
   #
   # substituteInPlace on the installed QML rather than a .patch file: it is
   # plain text at a stable path, and --replace-fail turns a version bump that
   # reworded a call site into a BUILD failure rather than a silent return to
   # dead clicks.
   #
-  # Window targets go through hl.get_window(): passing the address as a bare
-  # string is accepted but does nothing (see the hyprland-lua-dispatch notes).
   # patchQml also carries patches that aren't about dispatch, after the
-  # dispatch ones: the bar picker, caffeine icons, tooltips and widget tweaks.
+  # dispatch ones: caffeine icons, tooltips and widget tweaks.
   patchQml =
     pkg: subs:
     pkg.overrideAttrs (old: {
@@ -77,96 +78,35 @@ let
   dms-shell =
     (patchQml pkgs.dms-shell (
       let
-        bar = "share/quickshell/dms/Modules/DankBar/DankBarContent.qml";
-        sw = "share/quickshell/dms/Modules/DankBar/Widgets/WorkspaceSwitcher.qml";
-        ov = "share/quickshell/dms/Modules/WorkspaceOverlays/OverviewWidget.qml";
-        hov = "share/quickshell/dms/Modules/WorkspaceOverlays/HyprlandOverview.qml";
+        hs = "share/quickshell/dms/Services/HyprlandService.qml";
       in
       [
         {
-          file = bar;
-          from = "Hyprland.dispatch(`workspace \${realWorkspaces[nextIndex].id}`);";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${realWorkspaces[nextIndex].id} })`);";
+          file = hs;
+          from = "Hyprland.dispatch(`hl.dsp.focus({ window = \${luaString(selector)} })`);";
+          to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\${luaString(selector)}) })`);";
         }
         {
-          file = sw;
-          from = "Hyprland.dispatch(`workspace \${data.id}`);";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${data.id} })`);";
+          file = hs;
+          from = "Hyprland.dispatch(`hl.dsp.window.close(\${luaString(selector)})`);";
+          to = "Hyprland.dispatch(`hl.dsp.window.close({ window = hl.get_window(\${luaString(selector)}) })`);";
         }
         {
-          file = sw;
-          from = "Hyprland.dispatch(`workspace \${realWorkspaces[nextIndex].id}`);";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${realWorkspaces[nextIndex].id} })`);";
+          file = hs;
+          from = "window = \${luaString(selector)}, follow = ";
+          to = "window = hl.get_window(\${luaString(selector)}), follow = ";
         }
-        {
-          file = sw;
-          from = "Hyprland.dispatch(`workspace \${modelData.id}`);";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${modelData.id} })`);";
-        }
-        {
-          # Two identical call sites in this file; both are rewritten.
-          file = sw;
-          from = "Hyprland.dispatch(`focuswindow address:\${winId}`);";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:\${winId}\") })`);";
-        }
-        {
-          file = ov;
-          from = "Hyprland.dispatch(`workspace \${workspaceValue}`)";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${workspaceValue} })`)";
-        }
-        {
-          # Drag a window onto another workspace in the overview. "silent" =
-          # don't follow it, hence follow = false.
-          file = ov;
-          from = "Hyprland.dispatch(`movetoworkspacesilent \${targetWorkspace},address:\${windowData?.address}`)";
-          to = "Hyprland.dispatch(`hl.dsp.window.move({ window = hl.get_window(\"address:\${windowData?.address}\"), workspace = \${targetWorkspace}, follow = false })`)";
-        }
-        {
-          file = ov;
-          from = "Hyprland.dispatch(`focuswindow address:\${windowData.address}`)";
-          to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:\${windowData.address}\") })`)";
-        }
-        {
-          file = ov;
-          from = "Hyprland.dispatch(`closewindow address:\${windowData.address}`)";
-          to = "Hyprland.dispatch(`hl.dsp.window.close({ window = hl.get_window(\"address:\${windowData.address}\") })`)";
-        }
-        {
-          file = hov;
-          from = ''Hyprland.dispatch("workspace " + targetId)'';
-          to = ''Hyprland.dispatch("hl.dsp.focus({ workspace = " + targetId + " })")'';
-        }
-        {
-          # Power menu's log-out. Correct by the API's shape, but the only
-          # substitution here not verified by running it — testing costs the
-          # session.
-          file = "share/quickshell/dms/Services/SessionService.qml";
-          from = ''Hyprland.dispatch("exit");'';
-          to = ''Hyprland.dispatch("hl.dsp.exit()");'';
-        }
-        {
-          # Not a dispatch fix — an upstream bug. getPreferredBar is meant to pick
-          # the bar on the focused screen, but its `break` only leaves the inner
-          # loop over screens; the outer loop over bar configs carries on and the
-          # last bar with the widget wins. With DMS's stock single bar that's
-          # harmless. With the separate portrait bar declared below it sent
-          # dankdash wallpaper, dash open/toggle and control-center open/toggle
-          # to DP-2 regardless of focus. Returning instead leaves both loops.
-          file = "share/quickshell/dms/DMSShellIPC.qml";
-          from = "if (onFocusedScreen)\n                        break;";
-          to = "if (onFocusedScreen)\n                        return currentBar;";
-        }
-        # Deliberately NOT rewritten: `dpms off` / `dpms on` in
-        # Services/CompositorService.qml. hl.dsp.dpms ignores its state argument
-        # and just toggles, so a literal translation would make DMS's idle
-        # handling worse than the current no-op — an absolute "on" needs the
-        # per-monitor dpmsStatus dance in config/hypr-scripts/wake-monitors.sh.
-        # Hypridle owns screen blanking here anyway.
+        # Left as upstream: dpmsOff/dpmsOn send hl.dsp.dpms({ action = … }), but
+        # hl.dsp.dpms has been seen to ignore its argument and toggle. Only
+        # DMS's own monitor-off timeouts call them, and those are 0 (off) —
+        # hypridle owns screen blanking here.
       ]
       # Not a dispatch fix: coffee icons for the idle inhibitor ("caffeine")
       # instead of upstream's motion sensor. `coffee` (steaming mug) = keeping
-      # awake, `local_cafe` (plain cup) = idle allowed. --replace-fail swaps
-      # every occurrence, so DragDropGrid's two call sites are covered.
+      # awake, `local_cafe` (plain cup) = idle allowed, where DMS shows the
+      # state; the Control Center tile and its button's status icons use a
+      # fixed icon, so they get the mug. --replace-fail swaps every occurrence,
+      # so each file's two call sites are covered.
       ++
         map
           (file: {
@@ -177,7 +117,17 @@ let
           [
             "share/quickshell/dms/Modules/DankBar/Widgets/IdleInhibitor.qml"
             "share/quickshell/dms/Modules/OSD/IdleInhibitorOSD.qml"
+          ]
+      ++
+        map
+          (file: {
+            inherit file;
+            from = ''return "motion_sensor_active";'';
+            to = ''return "coffee";'';
+          })
+          [
             "share/quickshell/dms/Modules/ControlCenter/Components/DragDropGrid.qml"
+            "share/quickshell/dms/Modules/DankBar/Widgets/ControlCenterButton.qml"
           ]
       ++
         map
@@ -190,6 +140,13 @@ let
             "share/quickshell/dms/Modules/ControlCenter/Models/WidgetModel.qml"
             "share/quickshell/dms/Modules/Settings/WidgetsTab.qml"
           ]
+      ++ [
+        {
+          file = "share/quickshell/dms/Modules/Settings/WidgetsTabSection.qml";
+          from = ''icon: "motion_sensor_active",'';
+          to = ''icon: "coffee",'';
+        }
+      ]
       # Not a dispatch fix: Noctalia-style hover tooltips on the bar. DMS only
       # has bar tooltips for vertical bars, and only on disk/focused-app. BasePill
       # (every bar widget's base) gains a tooltipText property and an instance
@@ -211,14 +168,15 @@ let
           # already has an overflow popup behind a chevron for icons hidden
           # one by one (SessionData's hidden tray ids); treating every item as
           # hidden leaves only the chevron on the bar. Hiding/unhiding single
-          # icons from DMS's tray menu stops mattering.
+          # icons from DMS's tray menu, and 1.6's automatic overflow limit
+          # (trayMaxVisibleItems, which can't go below 1), stop mattering.
           file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
-          from = "readonly property var mainBarItemsRaw: allSortedTrayItems.filter(item => !SessionData.isHiddenTrayId(root.getTrayItemKey(item)))";
+          from = "readonly property var mainBarItemsRaw: visibleSortedTrayItems.slice(0, automaticVisibleItemLimit)";
           to = "readonly property var mainBarItemsRaw: []";
         }
         {
           file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
-          from = "readonly property var hiddenBarItems: allSortedTrayItems.filter(item => SessionData.isHiddenTrayId(root.getTrayItemKey(item)))";
+          from = "readonly property var hiddenBarItems: allSortedTrayItems.filter(item => hiddenBarItemKeys.indexOf(root.getTrayItemKey(item)) !== -1)";
           to = "readonly property var hiddenBarItems: allSortedTrayItems";
         }
         {
@@ -231,23 +189,75 @@ let
           to = "            Item {\n                width: Math.round(Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale) * 0.7)\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                Rectangle {\n                    id: caretButton\n                    width: parent.width\n";
         }
         {
-          # Not a dispatch fix: the focused window shows its app icon instead
-          # of the app name on horizontal bars (upstream loads the icon, but
-          # only for vertical ones), then the title. The name comes back if
-          # the icon can't be resolved.
+          # The drawer behaves as one button, like any other pill: the whole
+          # pill opens it, with the pill's own hover highlight, cursor and
+          # ripple (BasePill's MouseArea, whose clicked signal upstream leaves
+          # unhandled here). The chevron's own MouseArea is disabled so clicks
+          # and hover fall through to it, and its separate highlight is gone.
+          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          from = "    enableBackgroundHover: false\n    enableCursor: false\n";
+          to = "    enableBackgroundHover: true\n    enableCursor: true\n    onClicked: if (hasHiddenItems) menuOpen = !menuOpen\n";
+        }
+      ]
+      ++ lib.concatMap
+        (area: [
+          {
+            file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+            from = "color: ${area}.containsMouse ? BlurService.hoverColor(Theme.widgetBaseHoverColor) : Theme.withAlpha(BlurService.hoverColor(Theme.widgetBaseHoverColor), 0)";
+            to = "color: \"transparent\"";
+          }
+          {
+            file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+            from = "                        id: ${area}\n                        anchors.fill: parent\n";
+            to = "                        id: ${area}\n                        enabled: false\n                        anchors.fill: parent\n";
+          }
+        ])
+        [
+          "caretArea"
+          "caretAreaVert"
+        ]
+      ++ [
+        {
+          # Not a dispatch fix: the focused window pill is app icon + title on
+          # horizontal bars. 1.6 draws the icon itself (focusedWindowShowIcon),
+          # but keeps the app name beside it; the name only shows now when no
+          # icon resolved. The • separator follows it.
           file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
-          from = "                visible: !root.isVerticalOrientation\n\n                StyledText {\n                    id: appText\n";
-          to = "                visible: !root.isVerticalOrientation\n\n                IconImage {\n                    id: rowAppIcon\n                    anchors.verticalCenter: parent.verticalCenter\n                    width: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)\n                    height: width\n                    source: appIcon.source\n                    smooth: true\n                    mipmap: true\n                    asynchronous: true\n                    visible: status === Image.Ready\n                }\n\n                StyledText {\n                    id: appText\n";
+          from = "                        visible: text.length > 0\n                    }\n\n                    StyledText {\n                        id: appSeparator\n";
+          to = "                        visible: text.length > 0 && !horizontalAppIcon.visible && !horizontalSteamIcon.visible\n                    }\n\n                    StyledText {\n                        id: appSeparator\n";
         }
         {
           file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
-          from = "                    visible: !compactMode && text.length > 0\n";
-          to = "                    visible: !compactMode && text.length > 0 && rowAppIcon.status !== Image.Ready\n";
+          from = "                        visible: !compactMode && appText.text && titleText.text\n";
+          to = "                        visible: !compactMode && appText.visible && titleText.text\n";
         }
         {
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
-          from = "                    visible: !compactMode && appText.text && titleText.text\n";
-          to = "                    visible: !compactMode && appText.visible && titleText.text\n";
+          # Not a dispatch fix: make DMS's Settings → Displays → Configuration
+          # page actually do something here. Upstream writes DMS's outputs.lua
+          # and reloads Hyprland, but hyprland.lua (read-only, from
+          # monitors.lua) never loads that file, so every Apply snapped back.
+          # Apply and revert now go live over wlr-output-management —
+          # session-only, which is what's wanted; the permanent layout stays in
+          # monitors.lua. 1.6 already does exactly this for its Aqueous
+          # compositor (WlrOutputService.outputsConfigHeads); VRR is added on
+          # top. The Hyprland-only extras (bit depth, HDR, colour management)
+          # still go nowhere.
+          file = "share/quickshell/dms/Modules/Settings/DisplayConfig/DisplayConfigState.qml";
+          from = "    function backendWriteOutputsConfig(outputsData, settingsOrCallback, maybeCallback) {\n";
+          to = "    // Hyprland here is configured by a read-only hyprland.lua that never loads\n    // DMS's outputs.lua, so the upstream path (write the file, reload) changes\n    // nothing. Apply the layout live over wlr-output-management instead:\n    // session-only, gone at the next reload/login. Revert goes through the\n    // same function, so the confirmation dialog's countdown undoes a bad\n    // layout live too.\n    function applyOutputsLive(outputsData, finish) {\n        const heads = WlrOutputService.outputsConfigHeads(outputsData, outputs);\n        for (const head of heads) {\n            const o = outputsData[head.name];\n            if (head.enabled && o.vrr_supported)\n                head.adaptiveSync = o.vrr_enabled ? 1 : 0;\n        }\n        WlrOutputService.applyConfiguration(heads, (ok, message) => {\n            if (!ok)\n                console.warn(\"DisplayConfig: live apply failed:\", message);\n            WlrOutputService.requestState();\n            finish(ok);\n        });\n    }\n\n    function backendWriteOutputsConfig(outputsData, settingsOrCallback, maybeCallback) {\n";
+        }
+        {
+          file = "share/quickshell/dms/Modules/Settings/DisplayConfig/DisplayConfigState.qml";
+          from = "                const hyprlandSettings = hasExplicitSettings ? settings : buildMergedHyprlandSettings();\n                HyprlandService.generateOutputsConfig(outputsData, hyprlandSettings, finish);\n";
+          to = "                applyOutputsLive(outputsData, finish);\n";
+        }
+        {
+          # The include warning box offers to splice a require of outputs.lua
+          # into hyprland.lua, which is a store file here and doesn't need it
+          # now.
+          file = "share/quickshell/dms/Modules/Settings/DisplayConfig/IncludeWarningBox.qml";
+          from = "    visible: (showLegacy || showSetup) && DisplayConfigState.hasOutputBackend && !DisplayConfigState.checkingInclude\n";
+          to = "    visible: false\n";
         }
         {
           # Not a dispatch fix: album art in the bar's media pill. Upstream
@@ -368,7 +378,7 @@ let
   #   • camera+mic fold into one privacyIndicator; recording has no home
   # Declaring these means per-widget tweaks made in a shell's own GUI are
   # overwritten on the next nixup — the arrays are replaced, not merged.
-  # DMS's own default barConfigs[0], copied verbatim from dms-shell 1.4.6's
+  # DMS's own default barConfigs[0], copied verbatim from dms-shell 1.6.2's
   # Common/settings/SettingsSpec.js. Only used to seed a settings.json that has
   # no barConfigs yet — see the activation script below.
   #
@@ -380,7 +390,7 @@ let
   # nothing renders at all.
   #
   # Re-check this against SettingsSpec.js when bumping dms-shell: keys added
-  # upstream after 1.4.6 would land undefined on a first-run seed.
+  # upstream after 1.6.2 would land undefined on a first-run seed.
   dmsDefaultBar = {
     id = "default";
     name = "Main Bar";
@@ -409,6 +419,9 @@ let
     ];
     spacing = 4;
     innerPadding = 4;
+    barLengthPadding = 0;
+    attachToScreenEdge = false;
+    batteryColorMode = "theme";
     bottomGap = 0;
     transparency = 1.0;
     widgetTransparency = 1.0;
@@ -433,6 +446,8 @@ let
     iconScale = 1.0;
     autoHide = false;
     autoHideDelay = 250;
+    autoHideStrict = false;
+    useOverlayLayer = false;
     showOnWindowsOpen = false;
     openOnOverview = false;
     visible = true;
@@ -444,9 +459,11 @@ let
     scrollYBehavior = "workspace";
     shadowIntensity = 0;
     shadowOpacity = 60;
-    shadowColorMode = "text";
+    shadowColorMode = "default";
     shadowCustomColor = "#000000";
     clickThrough = false;
+    hoverPopouts = false;
+    hoverPopoutDelay = 150;
   };
 
   dmsDeclared = {
@@ -476,6 +493,13 @@ let
       "darkMode"
       "nightMode"
     ];
+    # Plugin tiles appended when missing — only on hosts with the plugin.
+    # Once there, their position and width are DMS's to keep.
+    controlCenterAdd = map (id: {
+      id = "plugin_${id}";
+      enabled = true;
+      width = 50;
+    }) (dmsPlugins.barWidget "batteryPlus");
     bars = {
       # "all" when there is nothing to split, so single-output hosts still show a bar.
       mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
@@ -506,7 +530,7 @@ let
       ++ dmsPlugins.barWidget "dankscale"
       ++ dmsPlugins.barWidget "nixMonitor"
       ++ [ "privacyIndicator" ]
-      ++ lib.optional isLaptop "battery"
+      ++ dmsPlugins.barWidget "batteryPlus"
       ++ [
         "idleInhibitor"
         "systemTray"
@@ -619,6 +643,19 @@ in
       # DMS's CPU/memory/temperature/disk widgets and its process list all read
       # from dgop, which dms-shell doesn't depend on; without it they're blank.
       pkgs.dgop
+      # The launcher's "paste" action types Ctrl+V into the focused window.
+      pkgs.wtype
+      # quickCapture (dms-plugins.nix): recording (gpu-screen-recorder comes
+      # from streaming-tools.nix where a host has it; wf-recorder is the CPU
+      # fallback), PDF export, OCR and QR scanning. Its ffmpeg and ImageMagick
+      # are already in home/max/packages.nix.
+      pkgs.wf-recorder
+      pkgs.img2pdf
+      pkgs.tesseract
+      pkgs.zbar
+      # The launcher's Files tab and `/` queries; DMS only probes for the binary
+      # and pings the dsearch service below.
+      pkgs.dsearch
     ];
 
     # ── Theming ───────────────────────────────────────────────────────────────
@@ -689,6 +726,9 @@ in
                 "audioOutput", "audioInput", "nightMode", "darkMode"
               ] | map({ id: ., enabled: true, width: 50 })))
              | map(select(.id as $i | $d.controlCenterDrop | index($i) | not)))
+         | reduce $d.controlCenterAdd[] as $w (.;
+             if any(.controlCenterWidgets[]; .id == $w.id)
+             then . else .controlCenterWidgets += [$w] end)
          # barConfigs is written by DMS itself, not by the empty-object seed in
          # apply(), so on a machine where DMS has never run there was nothing
          # here to rewrite: the bar came up with stock widgets and DMSs own
@@ -749,6 +789,23 @@ in
             ];
             ExecStart = "${pkgs.bash}/bin/bash ${scriptsDir}/dms-wallpaper-bridge.sh";
           };
+        };
+
+        # File index behind the DMS launcher's file search. Same unit dsearch
+        # ships in lib/systemd/user (HM doesn't pick those up). Runs whichever
+        # shell is active; it's idle apart from inotify once the index is built.
+        # Listens on a unix socket plus 127.0.0.1:43654.
+        dsearch = {
+          Unit = {
+            Description = "dsearch filesystem search service";
+            Documentation = "https://github.com/AvengeMedia/dsearch";
+          };
+          Service = {
+            ExecStart = "${lib.getExe pkgs.dsearch} serve";
+            Restart = "on-failure";
+            RestartSec = 5;
+          };
+          Install.WantedBy = [ "default.target" ];
         };
 
         # Re-applies the recorded choice at login, so a switch survives logout.

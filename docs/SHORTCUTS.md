@@ -12,7 +12,7 @@ Gruvbox Material Dark · @host@
 | Super + Return | Terminal (kitty) |
 | Super + E | Files (thunar) |
 | Super + B | Browser (zen) |
-| Super + D | Launcher (fuzzel) |
+| Super + D | Launcher (DMS's under DMS, fuzzel under the own shell) |
 | Super + Shift + C | Cava visualiser ² |
 | **Windows** | |
 | Super + Q | Close window |
@@ -44,7 +44,7 @@ Gruvbox Material Dark · @host@
 | Super + I | Settings |
 | Super + N | Toggle notifications |
 | Super + Tab | Workspace overview |
-| Super + Shift + V | Clipboard history |
+| Super + V | Clipboard history |
 | Super + W | Wallpaper picker |
 | Super + O | Audio output switcher |
 | Super + Shift + P | Colour picker |

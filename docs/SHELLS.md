@@ -10,7 +10,7 @@ register `org.freedesktop.Notifications` — wired up in
 |---|---|---|
 | Key | `SUPER+ALT+1` | `SUPER+ALT+3` |
 | Unit | `shell-own.service` | `shell-dms.service` |
-| Source | `config/hypr-scripts/quickshell/` | `nixpkgs#dms-shell` 1.4.6 |
+| Source | `config/hypr-scripts/quickshell/` | `dms-shell` 1.6.2 (unstable's recipe on stable Qt — `overlays/default.nix`) |
 | Size | 21 panels, 25 QML files, ~7,350 lines | — |
 | Bar | Waybar (separate unit) | built in |
 | Shape | panels only, opened on demand | complete shell |
@@ -35,14 +35,14 @@ What DMS has against each panel in `config/hypr-scripts/quickshell/`.
 | `KDEConnectPanel` | ❌ |
 | `KeybindCheatSheet` | ✅ `dms keybinds` + cheatsheet UI |
 | `KeyboardPanel` | ⚠️ `keyboard_layout_name` bar widget — click cycles via `hyprctl switchxkblayout`; no switcher page, untested here |
-| `MonitorManager` | ⚠️ full UI, but cannot apply here — see below |
+| `MonitorManager` | ⚠️ Settings → Displays → Configuration applies live, session-only (patched — see below); permanent layout stays in `monitors.lua` |
 | `NetworkPanel` | ✅ |
 | `NixPanel` | ❌ updater is pacman/dnf family only |
 | `NotificationCenter` | ✅ |
 | `NotificationToast` | ✅ |
 | `Osd` | ✅ |
 | `PowerMenu` | ✅ |
-| `ScreenshotOverlay` | ✅ `dms screenshot` region/window/output/all/last |
+| `ScreenshotOverlay` | ✅ quickCapture plugin: region/window/output/all/last/scroll, editor, OCR, QR, recording |
 | `SysInfoPanel` | ✅ |
 | `WallpaperPicker` | ✅ |
 | `WorkspaceOverview` | ✅ WorkspaceOverlays |
@@ -82,32 +82,44 @@ Three things about this setup that DMS does not expect.
 ### Lua dispatch
 
 Hyprland here is configured by `config/hypr/hyprland.lua` and evaluates IPC
-dispatch requests as Lua. DMS hardcodes classic dispatcher strings, so `dispatch "workspace 3"` dies with `')' expected near '3'` and
-every workspace click is a silent no-op.
+dispatch requests as Lua. DMS 1.4.6 hardcoded classic dispatcher strings
+(`dispatch "workspace 3"` died with `')' expected near '3'`) and needed ten
+call sites rewritten. 1.6 routes every dispatch through
+`Services/HyprlandService.qml` and speaks Lua itself when the compositor is on
+it.
 
-Fixed by the `luaDispatch` helper in `modules/home/wm/shell-switcher.nix`,
-which rewrites the call sites with `substituteInPlace --replace-fail` at build
-time — 10 in DMS. The `--replace-fail` is deliberate: a version
-bump that rewords a call site fails the build rather than silently restoring
-dead clicks. Same class of breakage as
-`pkgs/waybar/hyprland-lua-dispatch.patch`.
+One gap remains, patched in `modules/home/wm/shell-switcher.nix` with
+`substituteInPlace --replace-fail` (a version bump that rewords a call site
+fails the build rather than silently restoring dead clicks): window targets
+must go through `hl.get_window("address:0x…")`, and DMS passes a bare address
+string, which is accepted and does nothing. Three functions — focus, close,
+move — cover the overview and window switcher.
 
-Window targets must go through `hl.get_window("address:0x…")`; passing a bare
-address string is accepted and does nothing.
-
-Still classic on purpose: DMS's `dpms on` / `dpms off`. `hl.dsp.dpms` ignores
-its state argument and only toggles, so a literal translation would blank
-screens that are already on — worse than the current no-op. An absolute "on"
-needs the per-monitor `dpmsStatus` logic in
-`config/hypr-scripts/wake-monitors.sh`. Hypridle owns blanking here anyway.
+Left as upstream: DMS's `dpmsOff`/`dpmsOn` now send
+`hl.dsp.dpms({ action = … })`, but `hl.dsp.dpms` has been seen to ignore its
+argument and toggle. Only DMS's own monitor-off timeouts call them, and those
+are 0 here; hypridle owns blanking (and `config/hypr-scripts/wake-monitors.sh`
+the absolute "on").
 
 ### Monitor configuration
 
-DMS's `DisplayConfig` tab persists by writing `~/.config/hypr/dms/outputs.conf`
-and splicing `source = ./dms/outputs.conf` into `~/.config/hypr/hyprland.conf`.
-This config has no `hyprland.conf` — it has `hyprland.lua`, deployed as a
-read-only store symlink. Expect its "Outputs Include Missing" warning and a
-failed write. `MonitorManager` remains the only working monitor UI.
+DMS's Settings → Displays → Configuration page persists by writing
+`~/.config/hypr/dms/outputs.lua` and reloading, relying on `hyprland.lua` to
+load that file. Here `hyprland.lua` is a read-only store symlink whose monitors
+come from `monitors.lua` and never loads it — so upstream, every Apply snapped
+straight back.
+
+`shell-switcher.nix` patches `DisplayConfigState.qml` so Apply (and revert)
+go live over wlr-output-management instead (`WlrOutputService.outputsConfigHeads`
++ `applyConfiguration`, which 1.6 uses for its Aqueous compositor but not
+Hyprland). Changes are
+session-only: position, mode, scale, rotation and VRR apply and last until
+the next `hyprctl reload` or login. The page's 10-second keep/revert dialog
+still guards it, and revert is live too. Hyprland-only extras (bit depth,
+HDR, colour management) go nowhere. The include warning box, which offers to
+edit `hyprland.lua`, is hidden. Lasting changes belong in
+`monitors.lua` / the host config; `MonitorManager` (own shell) is the other
+working UI.
 
 ### NixOS
 
@@ -255,10 +267,8 @@ keys its compiled-QML cache on file path and mtime, and both are unchanged
 across rebuilds (same `plugins/<id>/` path, store mtime 1970), so DMS otherwise
 keeps running the old version of an edited plugin.
 
-`dankKDEConnect` and `dankHyprlandWindows` are pinned to older commits of
-`AvengeMedia/dms-plugins` by hand: upstream's current versions need DMS ≥ 1.6
-(`I18n.trFor`, `DankSpinner`). `dankHyprlandWindows` is also patched to pass
-windows through `hl.get_window()`. `nixMonitor`'s pill is patched to show the NixOS snowflake (and a status icon
+Every plugin comes from the `dms-plugin-registry` input's Nix package set.
+`dankHyprlandWindows` is patched to pass windows through `hl.get_window()`. `nixMonitor`'s pill is patched to show the NixOS snowflake (and a status icon
 when update checking is on — it is off here, with generations and store size,
 via `plugin_settings.json`). `nixMonitor` reads its commands from
 `plugins/NixMonitor/config.json`, which is built into the plugin directory.
@@ -270,8 +280,14 @@ to the new content, which made every open lag; built-in popouts are unchanged.
 Left out on purpose: `displaySettings` (eval-disabled outputs need
 `hyprctl reload` to come back), `displayProfile` (writes `hyprland.conf`),
 `ddcBrightness` (DMS already does DDC/CI), `dockerManager` (tried, dropped), `nvidiaGpuMonitor` (replaced by the system monitor pill), `hyprlandSubmap` (no submaps here),
-`keybindingCheatSheet` (parses `hyprland.conf`), `screenRecorder` (a
-"composite" plugin, which DMS 1.4.6 rejects as an invalid manifest).
+`keybindingCheatSheet` (parses `hyprland.conf`), `screenRecorder`
+(quickCapture records too), `dmsScreenshot` (tried; no editor).
+
+`quickCapture` has no bar pill and no Control Center tile. Print runs
+`dms ipc call quickCapture showPicker`, a command `dms-plugins.nix` adds to the
+plugin: it shows the plugin's bar menu (capture modes, outputs, recording) as a
+floating, centred window, hosted by `config/dms/QuickCapturePicker.qml`. Its
+recording, PDF, OCR and QR tools are in `home.packages`.
 
 ## Known issues
 
@@ -283,14 +299,10 @@ went to a shell that wasn't running: Print opened the own screenshot panel
 under DMS, and caffeine never came on. The same `ExecStartPost` now records
 the name, so the file tracks whatever is actually up.
 
-**DMS opened bar popouts on the wrong monitor.** An upstream bug in
-`DMSShellIPC.qml`'s `getPreferredBar`: the `break` meant to stop at the bar on
-the focused screen only leaves the inner loop over screens, so the outer loop
-over bar configs carries on and the last bar with the widget wins. DMS's stock
-single bar hides it; the separate portrait bar declared here made
-`dankdash wallpaper` (`SUPER+W`), `dash open/toggle` and
-`control-center open/toggle` all land on DP-2. Patched at build time to
-`return` instead.
+**DMS opened bar popouts on the wrong monitor** (fixed upstream in 1.6).
+`getPreferredBar`'s `break` only left the inner of two loops, so with the
+separate portrait bar `SUPER+W`, the dash and the control centre all landed on
+DP-2. Patched here until 1.6 flattened the loop.
 
 **Optional DMS dependencies** (`dms doctor`):
 

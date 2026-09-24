@@ -60,7 +60,7 @@ silently rejects — dead *and* broken.
 
 ### 🟡 F3 — ✅ FIXED (deleted) — Orphaned files
 - `config/hypr-scripts/clipboard-fuzzel.sh` — superseded by `ClipboardPanel.qml`
-  (`Super+Shift+V` routes through `qs_manager.sh toggle clipboard`); no callers.
+  (`Super+V` routes through `qs_manager.sh toggle clipboard`); no callers.
 - `config/wlogout/{layout,style.css}` — wlogout was replaced by `PowerMenu.qml`;
   nothing installed the package or deployed these files.
 - `waybar-refactor-plan.md` — completed plan for the already-shipped refactor.

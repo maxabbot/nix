@@ -11,7 +11,12 @@
 # they run alongside DMS as shell-utility.service (see
 # modules/home/wm/shell-switcher.nix), so the fallback is always available.
 #
-#   shell-ipc.sh <power|notifications|overview|settings|control|clipboard|screenshot|keybinds|wallpaper>
+#   shell-ipc.sh <power|notifications|overview|settings|control|clipboard|screenshot|keybinds|wallpaper|launcher>
+#
+# launcher is DMS's launcher (apps, files via dsearch, plus the nix-run and
+# window-switcher plugins). The own shell has no launcher panel, so there it
+# falls back to fuzzel. fuzzel stays installed either way: the dmenu pickers
+# (audio-output, emoji, clipboard) use it under both shells.
 #
 # wallpaper opens each shell's own picker like everything else. DMS hands its
 # picks to awww (dms-wallpaper-bridge.sh), so awww stays the only wallpaper
@@ -44,15 +49,20 @@ case "$(bash "$SCRIPTS_DIR/shell-switch.sh" current)" in
             clipboard)     dms ipc clipboard toggle ;;
             overview)      dms ipc hypr toggleOverview ;;
             keybinds)      dms ipc hypr toggleBinds ;;
-            # No screenshot IPC target; the CLI is the interface.
-            screenshot)    dms screenshot region ;;
+            # `dms screenshot` goes straight to a region grab; the mode picker
+            # is the quickCapture plugin's menu, floating (dms-plugins.nix).
+            screenshot)    dms ipc call quickCapture showPicker ;;
             wallpaper)     dms ipc dankdash wallpaper ;;
+            launcher)      dms ipc launcher toggle ;;
             *) own "$ACTION" "$@" ;;
         esac
         ;;
     *)
         # own shell (and any unrecognised value — shell-switch.sh already
         # falls back to "own" for those).
-        own "$ACTION" "$@"
+        case "$ACTION" in
+            launcher) exec fuzzel ;;
+            *) own "$ACTION" "$@" ;;
+        esac
         ;;
 esac

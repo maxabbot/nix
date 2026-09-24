@@ -45,7 +45,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - **hypridle** — idle daemon; locks at 5 min, suspends at 15 min
 - **Gammastep** — night light; shared lat/long from `flake.nix` (Christchurch), 6500K day → 3500K night
 - **Quickshell notification centre** (`Super+N`) — replaces swaync
-- **cliphist** — clipboard history, browsed via the Quickshell clipboard panel (`Super+Shift+V`)
+- **cliphist** — clipboard history, browsed via the Quickshell clipboard panel (`Super+V`)
 - **Quickshell power menu** (`Super+Shift+E`) — replaces wlogout
 - **Thunar** — file manager (`Super+E`); archive plugin, thumbnail support via tumbler
 - **Yazi** — terminal file manager
