@@ -42,7 +42,9 @@ unit_for() { printf 'shell-%s.service' "$1"; }
 # 2026-09).
 current() {
     local recorded=""
-    [[ -f "$STATE_FILE" ]] && read -r recorded < "$STATE_FILE" 2>/dev/null || true
+    if [[ -f "$STATE_FILE" ]]; then
+        read -r recorded < "$STATE_FILE" 2>/dev/null || true
+    fi
     if is_known "${recorded:-}"; then
         printf '%s\n' "$recorded"
     else

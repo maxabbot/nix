@@ -199,23 +199,24 @@ let
           to = "    enableBackgroundHover: true\n    enableCursor: true\n    onClicked: if (hasHiddenItems) menuOpen = !menuOpen\n";
         }
       ]
-      ++ lib.concatMap
-        (area: [
-          {
-            file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
-            from = "color: ${area}.containsMouse ? BlurService.hoverColor(Theme.widgetBaseHoverColor) : Theme.withAlpha(BlurService.hoverColor(Theme.widgetBaseHoverColor), 0)";
-            to = "color: \"transparent\"";
-          }
-          {
-            file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
-            from = "                        id: ${area}\n                        anchors.fill: parent\n";
-            to = "                        id: ${area}\n                        enabled: false\n                        anchors.fill: parent\n";
-          }
-        ])
-        [
-          "caretArea"
-          "caretAreaVert"
-        ]
+      ++
+        lib.concatMap
+          (area: [
+            {
+              file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+              from = "color: ${area}.containsMouse ? BlurService.hoverColor(Theme.widgetBaseHoverColor) : Theme.withAlpha(BlurService.hoverColor(Theme.widgetBaseHoverColor), 0)";
+              to = "color: \"transparent\"";
+            }
+            {
+              file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+              from = "                        id: ${area}\n                        anchors.fill: parent\n";
+              to = "                        id: ${area}\n                        enabled: false\n                        anchors.fill: parent\n";
+            }
+          ])
+          [
+            "caretArea"
+            "caretAreaVert"
+          ]
       ++ [
         {
           # Not a dispatch fix: the focused window pill is app icon + title on
@@ -285,19 +286,19 @@ let
           file = "share/quickshell/dms/Modules/Plugins/PluginPopout.qml";
           from = "    onBackgroundClicked: close()\n";
           to = ''
-                onBackgroundClicked: close()
+            onBackgroundClicked: close()
 
-                property bool keepContentLoaded: false
-                onShouldBeVisibleChanged: {
-                    if (shouldBeVisible)
-                        keepContentLoaded = true;
-                }
-                Binding {
-                    target: root.contentLoader
-                    property: "active"
-                    value: true
-                    when: root.keepContentLoaded
-                }
+            property bool keepContentLoaded: false
+            onShouldBeVisibleChanged: {
+                if (shouldBeVisible)
+                    keepContentLoaded = true;
+            }
+            Binding {
+                target: root.contentLoader
+                property: "active"
+                value: true
+                when: root.keepContentLoaded
+            }
           '';
         }
       ]
@@ -524,7 +525,9 @@ let
       # "cpuUsage" is config/dms/BarSystemMonitor.qml (installed over
       # CpuMonitor.qml above): CPU, memory and GPU in one pill, so cpuTemp,
       # memUsage and gpuTemp aren't listed.
-      right = [ "cpuUsage" ]
+      right = [
+        "cpuUsage"
+      ]
       ++ dmsPlugins.barWidget "dankKDEConnect"
       ++ dmsPlugins.barWidget "claudeUsage"
       ++ dmsPlugins.barWidget "dankscale"
@@ -663,7 +666,8 @@ in
     # unlike its settings.json this can be a plain store symlink rendered from
     # palette.nix.
     xdg.configFile = {
-      "DankMaterialShell/gruvbox-material.json".text = renderTheme ../../../config/dms/gruvbox-material.json;
+      "DankMaterialShell/gruvbox-material.json".text =
+        renderTheme ../../../config/dms/gruvbox-material.json;
     }
     # DMS plugins: one store symlink per plugin directory — see dms-plugins.nix.
     // dmsPlugins.configFiles;

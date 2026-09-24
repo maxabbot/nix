@@ -808,19 +808,21 @@ in
       '';
     };
 
-    # Waybar launches on graphical-session.target, which fires while Hyprland is
-    # still bringing outputs online — the bar can render before all monitors
-    # exist, and modules occasionally fail to attach (the weather module dropped
-    # off the main bar this way). Hold start briefly so the outputs settle first.
-    systemd.user.services.waybar.Service.ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+    systemd.user.services.waybar = {
+      # Waybar launches on graphical-session.target, which fires while Hyprland is
+      # still bringing outputs online — the bar can render before all monitors
+      # exist, and modules occasionally fail to attach (the weather module dropped
+      # off the main bar this way). Hold start briefly so the outputs settle first.
+      Service.ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
 
-    # Bind waybar's lifecycle to the own-shell unit: started by its Wants=,
-    # stopped whenever another shell wins the Conflicts= race. Both forced,
-    # because HM's waybar module sets these unconditionally (tray.target).
-    systemd.user.services.waybar.Unit.PartOf = lib.mkForce [
-      "graphical-session.target"
-      "shell-own.service"
-    ];
-    systemd.user.services.waybar.Install.WantedBy = lib.mkForce [ ];
+      # Bind waybar's lifecycle to the own-shell unit: started by its Wants=,
+      # stopped whenever another shell wins the Conflicts= race. Both forced,
+      # because HM's waybar module sets these unconditionally (tray.target).
+      Unit.PartOf = lib.mkForce [
+        "graphical-session.target"
+        "shell-own.service"
+      ];
+      Install.WantedBy = lib.mkForce [ ];
+    };
   };
 }

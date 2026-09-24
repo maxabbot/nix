@@ -5,7 +5,7 @@
 # and for the client to reach it, which is fine on a box that lives on one
 # trusted LAN and is not on a laptop that joins arbitrary networks. Hosts that
 # only need to *watch* a stream import moonlight.nix instead.
-{ pkgs, inputs, ... }:
+{ inputs, ... }:
 {
   imports = [
     inputs.apollo-flake.nixosModules."x86_64-linux".default
