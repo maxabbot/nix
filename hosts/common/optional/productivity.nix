@@ -243,6 +243,7 @@ in
     masterpdfeditor
     onlyoffice-desktopeditors
     element-desktop
+    obsidian
     bitwarden-desktop
     vlc
     imv
