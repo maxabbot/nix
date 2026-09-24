@@ -1,23 +1,22 @@
-# modules/home/wm/shell-switcher.nix — swap between three desktop shells.
+# modules/home/wm/shell-switcher.nix — swap between two desktop shells.
 #
-# Installs Noctalia and DMS (DankMaterialShell) alongside this config's own
-# Quickshell panels, and gives each one a systemd user unit.
+# Installs DMS (DankMaterialShell) alongside this config's own Quickshell
+# panels, and gives each one a systemd user unit.
 #
-# The units are mutually exclusive via Conflicts=: every one of these shells
-# registers org.freedesktop.Notifications, so two running at once means one of
-# them silently loses its notification daemon (and both draw a bar). Letting
+# The units are mutually exclusive via Conflicts=: both shells register
+# org.freedesktop.Notifications, so two running at once means one of them
+# silently loses its notification daemon (and both draw a bar). Letting
 # systemd enforce that — rather than pkill in the switcher script — makes the
 # swap a single transaction: starting one unit stops the incumbent first.
 #
-# Driven by config/hypr-scripts/shell-switch.sh, bound to SUPER+ALT+1..3 and
-# SUPER+ALT+S in config/hypr/hyprland.lua. The choice is recorded under
+# Driven by config/hypr-scripts/shell-switch.sh, bound to SUPER+ALT+1 (own),
+# SUPER+ALT+3 (DMS) and SUPER+ALT+S in config/hypr/hyprland.lua. The choice is recorded under
 # $XDG_STATE_HOME/hypr/active-shell and re-applied at login by
 # shell-restore.service.
 #
-# Both third-party shells are themed from config/stylix/palette.nix like every
-# other app here, via their own custom-scheme mechanisms (see "Theming" below),
-# and both hand their wallpaper picks to awww so it stays the single wallpaper
-# owner.
+# DMS is themed from config/stylix/palette.nix like every other app here, via
+# its own custom-scheme mechanism (see "Theming" below), and hands its
+# wallpaper picks to awww so that stays the single wallpaper owner.
 {
   lib,
   config,
@@ -49,7 +48,7 @@ let
   switch = "${pkgs.bash}/bin/bash ${scriptsDir}/shell-switch.sh";
 
   # ── Lua dispatch fixups ─────────────────────────────────────────────────────
-  # Both third-party shells hardcode classic Hyprland dispatcher strings, which
+  # DMS hardcodes classic Hyprland dispatcher strings, which
   # this config's Lua parser evaluates as Lua and rejects: `dispatch
   # "workspace 3"` dies with `')' expected near '3'`. Every workspace click,
   # overview drag and window focus is a silent no-op without this. Exactly the
@@ -62,8 +61,8 @@ let
   #
   # Window targets go through hl.get_window(): passing the address as a bare
   # string is accepted but does nothing (see the hyprland-lua-dispatch notes).
-  # patchQml also carries patches that aren't about dispatch, at the end of each
-  # list: Noctalia's wallpaper layer, DMS's bar picker and its caffeine icons.
+  # patchQml also carries patches that aren't about dispatch, after the
+  # dispatch ones: the bar picker, caffeine icons, tooltips and widget tweaks.
   patchQml =
     pkg: subs:
     pkg.overrideAttrs (old: {
@@ -74,51 +73,6 @@ let
             --replace-fail ${lib.escapeShellArg s.from} ${lib.escapeShellArg s.to}
         '') subs;
     });
-
-  noctalia-shell = patchQml pkgs.noctalia-shell (
-    let
-      f = "share/noctalia-shell/Services/Compositor/HyprlandService.qml";
-    in
-    [
-      {
-        file = f;
-        from = "Hyprland.dispatch(`workspace \${workspace.name}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \"\${workspace.name}\" })`);";
-      }
-      {
-        file = f;
-        from = "Hyprland.dispatch(`workspace \${workspace.idx}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ workspace = \${workspace.idx} })`);";
-      }
-      {
-        file = f;
-        from = "Hyprland.dispatch(`focuswindow address:0x\${windowId}`);";
-        to = "Hyprland.dispatch(`hl.dsp.focus({ window = hl.get_window(\"address:0x\${windowId}\") })`);";
-      }
-      {
-        file = f;
-        from = "Hyprland.dispatch(`alterzorder top,address:0x\${windowId}`);";
-        to = "Hyprland.dispatch(`hl.dsp.window.bring_to_top({ window = hl.get_window(\"address:0x\${windowId}\") })`);";
-      }
-      {
-        # Upstream names the function closeWindow but dispatches killwindow;
-        # hl.dsp.window.kill preserves that, not window.close.
-        file = f;
-        from = "Hyprland.dispatch(`killwindow address:0x\${window.id}`);";
-        to = "Hyprland.dispatch(`hl.dsp.window.kill({ window = hl.get_window(\"address:0x\${window.id}\") })`);";
-      }
-      {
-        # Not a dispatch fix. Background.qml draws the noctalia-wallpaper-*
-        # layer, which stacks over awww rather than replacing it. Disabling it
-        # at build time lets wallpaper.enabled stay on — every Noctalia picker
-        # binds `enabled` to that flag — while noctalia-wallpaper-hook.sh hands
-        # the picks to awww.
-        file = "share/noctalia-shell/Modules/Background/Background.qml";
-        from = "active: modelData && Settings.data.wallpaper.enabled && (!PowerProfileService.noctaliaPerformanceMode || !Settings.data.noctaliaPerformance.disableWallpaper)";
-        to = "active: false";
-      }
-    ]
-  );
 
   dms-shell =
     (patchQml pkgs.dms-shell (
@@ -407,100 +361,13 @@ let
   # Waybar's main bar is  workspaces/scratchpad/window | clock/weather |
   # mpris, {cpu,mem,temp,gpu}, disk, {recording,camera,mic,audio,bt,net},
   # battery, idle-inhibitor, tray, rebuild, keybinds, notifications, settings —
-  # and a trimmed portrait bar. Neither shell has every counterpart:
-  #   • no scratchpad, rebuild (NixPanel) or keybinds widget in either
-  #   • Noctalia has no weather widget; DMS has no volume/network/bluetooth bar
-  #     widgets at all (they live behind its control centre button)
-  #   • DMS folds camera+mic into one privacyIndicator; recording has no home
+  # and a trimmed portrait bar. DMS lacks some counterparts:
+  #   • no scratchpad, rebuild (NixPanel) or keybinds widget
+  #   • no volume/network/bluetooth bar widgets at all (they live behind its
+  #     control centre button)
+  #   • camera+mic fold into one privacyIndicator; recording has no home
   # Declaring these means per-widget tweaks made in a shell's own GUI are
   # overwritten on the next nixup — the arrays are replaced, not merged.
-  noctaliaSettings = {
-    bar = {
-      # Empty means every screen, not none: each consumer tests
-      # `monitors.length === 0 || monitors.includes(screen.name)` (Bar.qml,
-      # MainScreen.qml, AllScreens.qml, BarBackground.qml,
-      # CurrentScreenDetector.qml). So hosts that leave custom.hm.monitors null
-      # — work-laptop, where kanshi owns the layout — still get a bar; naming
-      # the outputs here only matters where a portrait screen has to be told
-      # apart from a landscape one.
-      monitors = outputs.allOutputs;
-      position = "top";
-      # Transparent bar with opaque capsules, matching waybar (whose
-      # window#waybar is already `background: transparent`). Migration35.qml
-      # shows the pairing: the old bar.transparent=true became
-      # backgroundOpacity=0 *plus* useSeparateOpacity=true — without the
-      # second flag the capsules fade with the bar.
-      backgroundOpacity = 0;
-      useSeparateOpacity = true;
-      showCapsule = true;
-      capsuleOpacity = 1;
-      widgets = {
-        left = [
-          { id = "Workspace"; }
-          { id = "ActiveWindow"; }
-        ];
-        center = [
-          {
-            id = "Clock";
-            formatHorizontal = "HH:mm";
-            formatVertical = "HH mm";
-            tooltipFormat = "HH:mm ddd, MMM dd";
-          }
-        ];
-        right = [
-          { id = "MediaMini"; }
-          { id = "SystemMonitor"; }
-          { id = "Microphone"; }
-          { id = "Volume"; }
-          { id = "Bluetooth"; }
-          { id = "Network"; }
-        ]
-        ++ lib.optional isLaptop { id = "Battery"; }
-        ++ [
-          { id = "KeepAwake"; }
-          { id = "Tray"; }
-          { id = "NotificationHistory"; }
-          { id = "Settings"; }
-        ];
-      };
-      # Same trim as waybar's slimBar: workspaces, clock, audio, net, the rest cut.
-      screenOverrides = map (name: {
-        inherit name;
-        widgets = {
-          left = [ { id = "Workspace"; } ];
-          center = [
-            {
-              id = "Clock";
-              formatVertical = "HH mm";
-            }
-          ];
-          right = [
-            { id = "Volume"; }
-            { id = "Network"; }
-            { id = "NotificationHistory"; }
-            { id = "Settings"; }
-          ];
-        };
-      }) outputs.portraitOutputs;
-    };
-    colorSchemes.predefinedScheme = "Gruvbox-Material";
-    colorSchemes.useWallpaperColors = false;
-    # On so Noctalia's pickers work; its layer is patched off above and the hook
-    # hands picks to awww, which stays the only wallpaper layer.
-    wallpaper.enabled = true;
-    hooks.enabled = true;
-    # Noctalia substitutes $1/$2 (path, screen) into the string itself.
-    hooks.wallpaperChange = ''bash ~/.config/hypr/scripts/noctalia-wallpaper-hook.sh "$1" "$2"'';
-    # Waybar's custom/weather hits wttr.in with no location and lets it
-    # geolocate by IP, so auto-locate is the faithful mirror — and it keeps a
-    # home address out of a public repo. Set location.name to a city here to
-    # pin it instead; without either, Noctalia logs "Cannot fetch weather
-    # without coordinates" and the widget stays blank.
-    location.autoLocate = true;
-    location.weatherEnabled = true;
-    location.useFahrenheit = false;
-  };
-
   # DMS's own default barConfigs[0], copied verbatim from dms-shell 1.4.6's
   # Common/settings/SettingsSpec.js. Only used to seed a settings.json that has
   # no barConfigs yet — see the activation script below.
@@ -592,8 +459,7 @@ let
       useAutoLocation = true;
       weatherEnabled = true;
       showWeather = true;
-      # Waybar and Noctalia (labelMode "index") number their workspaces; DMS
-      # ships unlabelled dots.
+      # Waybar numbers its workspaces; DMS ships unlabelled dots.
       showWorkspaceIndex = true;
       # Exactly what DMS's "Disable Built-in Wallpapers" toggle writes: no screen
       # renders its own wallpaper layer, so a pick can't stack over awww.
@@ -601,6 +467,15 @@ let
       screenPreferences.wallpaper = [ ];
       customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json";
     };
+    # Control Center tiles to strip. Dark Mode would flip DMS off the fixed
+    # Gruvbox Material Dark scheme; Night Mode is a second gamma client racing
+    # the gammastep service. Filtered out of whatever list DMS has saved rather
+    # than replacing it, so tiles added and per-tile tweaks made in its GUI
+    # (the brightness slider's DDC device) survive.
+    controlCenterDrop = [
+      "darkMode"
+      "nightMode"
+    ];
     bars = {
       # "all" when there is nothing to split, so single-output hosts still show a bar.
       mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
@@ -653,7 +528,6 @@ let
     };
   };
 
-  noctaliaDecl = pkgs.writeText "noctalia-declared.json" (builtins.toJSON noctaliaSettings);
   dmsDecl = pkgs.writeText "dms-declared.json" (builtins.toJSON dmsDeclared);
   dmsPluginDecl = pkgs.writeText "dms-plugins-declared.json" (builtins.toJSON dmsPlugins.settings);
 
@@ -664,11 +538,6 @@ let
       # Waybar is this shell's bar; it is PartOf shell-own.service (see
       # waybar.nix) so it comes and goes with it.
       wants = [ "waybar.service" ];
-    };
-    noctalia = {
-      description = "Desktop shell: Noctalia";
-      exec = "${noctalia-shell}/bin/noctalia-shell";
-      wants = [ "shell-utility.service" ];
     };
     dms = {
       description = "Desktop shell: DankMaterialShell";
@@ -684,9 +553,9 @@ let
     };
   };
 
-  # Same Shell.qml as shell-own.service, run alongside Noctalia/DMS so their
-  # missing panels (Nix, Monitors, KDEConnect, Input — plus screenshots, the
-  # cheat sheet and the overview under Noctalia) stay on their keybinds.
+  # Same Shell.qml as shell-own.service, run alongside DMS so the panels it has
+  # no counterpart for (Nix, Monitors, KDEConnect, Input) stay on their
+  # keybinds.
   # QS_UTILITY_MODE makes it skip the notification server, the OSD and the
   # waybar bridge, which are the only parts that would fight the active shell.
   #
@@ -695,7 +564,7 @@ let
   # path and a second instance would make that IPC ambiguous.
   utilityUnit = {
     Unit = {
-      Description = "Own Quickshell panels, alongside a third-party shell";
+      Description = "Own Quickshell panels, alongside DMS";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       Requisite = [ "graphical-session.target" ];
@@ -746,7 +615,6 @@ in
 {
   config = lib.mkIf (cfg.compositor == "hyprland") {
     home.packages = [
-      noctalia-shell
       dms-shell
       # DMS's CPU/memory/temperature/disk widgets and its process list all read
       # from dgop, which dms-shell doesn't depend on; without it they're blank.
@@ -754,26 +622,19 @@ in
     ];
 
     # ── Theming ───────────────────────────────────────────────────────────────
-    # Both shells read a user-supplied scheme file that they never write back
-    # to, so unlike their settings.json these can be plain store symlinks
-    # rendered from palette.nix.
-    #
-    # Noctalia scans its scheme dir with `find -mindepth 2`, so the JSON has to
-    # sit in a subdirectory of its own — colorschemes/<name>/<name>.json — and
-    # the scheme's display name is that basename.
+    # DMS reads a user-supplied scheme file that it never writes back to, so
+    # unlike its settings.json this can be a plain store symlink rendered from
+    # palette.nix.
     xdg.configFile = {
-      "noctalia/colorschemes/Gruvbox-Material/Gruvbox-Material.json".text =
-        renderTheme ../../../config/noctalia/Gruvbox-Material.json;
       "DankMaterialShell/gruvbox-material.json".text = renderTheme ../../../config/dms/gruvbox-material.json;
     }
     # DMS plugins: one store symlink per plugin directory — see dms-plugins.nix.
     // dmsPlugins.configFiles;
 
-    # Pointing each shell AT its scheme and layout has to be done differently:
+    # Pointing DMS AT its scheme and layout has to be done differently:
     # settings.json is owned and rewritten by the shell itself, so it can't be a
-    # store symlink (Noctalia would lose every setting it saves, silently — it
-    # uses a FileView/JsonAdapter with printErrors:false and has no read-only
-    # handling). Merge in only the keys we declare and leave the rest alone.
+    # store symlink (it would lose every setting it saves). Merge in only the
+    # keys we declare and leave the rest alone.
     systemd.user.paths.dms-wallpaper-bridge = {
       Unit = {
         Description = "Watch DMS session state for wallpaper picks";
@@ -789,8 +650,8 @@ in
       apply() {
         local file="$1" decl="$2" prog="$3"
         $DRY_RUN_CMD mkdir -p "$(dirname "$file")"
-        # Both shells load JSON over their Store property defaults, so seeding
-        # an empty object is enough when the shell has never run.
+        # DMS loads JSON over its Store property defaults, so seeding an empty
+        # object is enough when it has never run.
         [ -s "$file" ] || $DRY_RUN_CMD sh -c "echo '{}' > '$file'"
         $DRY_RUN_CMD ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
           > "$file.hm-tmp" && $DRY_RUN_CMD mv "$file.hm-tmp" "$file"
@@ -811,12 +672,6 @@ in
         ${dmsPluginDecl} \
         '. * $d'
 
-      # Noctalia: a plain recursive merge. Objects merge, arrays are replaced —
-      # which is exactly right for widget lists.
-      apply "${config.xdg.configHome}/noctalia/settings.json" \
-        ${noctaliaDecl} \
-        '. * $d'
-
       # DMS: the theme keys merge the same way, but its bars can't — a barConfig
       # carries styling (spacing, transparency, corners…) alongside its widget
       # arrays, and replacing the array wholesale would discard all of it. So
@@ -826,6 +681,14 @@ in
         ${dmsDecl} \
         '($d.settings) as $s
          | . * $s
+         # Never run → DMS falls back to its stock list, which has the dropped
+         # tiles in it, so seed that list (SettingsData.qml) before filtering.
+         | .controlCenterWidgets = (
+             (.controlCenterWidgets // ([
+                "volumeSlider", "brightnessSlider", "wifi", "bluetooth",
+                "audioOutput", "audioInput", "nightMode", "darkMode"
+              ] | map({ id: ., enabled: true, width: 50 })))
+             | map(select(.id as $i | $d.controlCenterDrop | index($i) | not)))
          # barConfigs is written by DMS itself, not by the empty-object seed in
          # apply(), so on a machine where DMS has never run there was nothing
          # here to rewrite: the bar came up with stock widgets and DMSs own

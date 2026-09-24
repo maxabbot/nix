@@ -54,7 +54,6 @@ Gruvbox Material Dark · @host@
 | **Desktop shell** | |
 | Super + Alt + S | Cycle shell |
 | Super + Alt + 1 | Shell: own (Quickshell + Waybar) |
-| Super + Alt + 2 | Shell: Noctalia |
 | Super + Alt + 3 | Shell: DMS |
 | **Screenshots** | |
 | Print | Screenshot picker |

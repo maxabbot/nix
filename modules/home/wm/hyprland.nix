@@ -246,7 +246,7 @@ in
 
     # ── Wallpaper directory ──────────────────────────────────────────────────
     # Every picker defaults here — the own WallpaperPicker (qs_manager.sh's
-    # $WALLPAPER_DIR fallback) and Noctalia's wallpaper.directory — and it didn't
+    # $WALLPAPER_DIR fallback) and DMS's — and it didn't
     # exist, so they all listed nothing. Seeded with a real copy of the leaves,
     # not an HM symlink: the thumbnail scan uses `find -type f`, which skips
     # symlinks. Only seeded when the directory is first created, so deleting the

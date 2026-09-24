@@ -104,7 +104,7 @@ else
     touch "$GAMING_STATE_FILE"
 
     # Kill distractions: stop the active shell's unit rather than pkill'ing
-    # Shell.qml, which would miss noctalia/dms/caelestia entirely. Waybar is
+    # Shell.qml, which would miss DMS entirely. Waybar is
     # PartOf=shell-own.service so it goes down with it.
     systemctl --user stop "$(bash ~/.config/hypr/scripts/shell-switch.sh unit)"
 

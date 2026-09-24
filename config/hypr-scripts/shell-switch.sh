@@ -2,9 +2,9 @@
 #
 # shell-switch.sh — swap the active desktop shell.
 #
-# Three shells are installed: this config's own Quickshell panels (+ Waybar),
-# Noctalia and DMS (DankMaterialShell). They are mutually exclusive
-# — every one of them claims org.freedesktop.Notifications — so exclusion is
+# Two shells are installed: this config's own Quickshell panels (+ Waybar) and
+# DMS (DankMaterialShell). They are mutually exclusive — both claim
+# org.freedesktop.Notifications — so exclusion is
 # enforced by Conflicts= in the systemd user units, NOT here. Starting one unit
 # stops whichever was running; this script only picks a target, records it and
 # reports. Units live in modules/home/wm/shell-switcher.nix.
@@ -12,7 +12,7 @@
 # The recorded choice is re-applied at login by shell-restore.service, so a
 # switch survives logout.
 #
-#   shell-switch.sh set <own|noctalia|dms>
+#   shell-switch.sh set <own|dms>
 #   shell-switch.sh cycle     # next in the list above, wrapping
 #   shell-switch.sh current   # print the recorded shell name
 #   shell-switch.sh unit      # print the systemd unit of the recorded shell
@@ -21,7 +21,7 @@
 
 set -euo pipefail
 
-SHELLS=(own noctalia dms)
+SHELLS=(own dms)
 DEFAULT_SHELL=own
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hypr"
@@ -38,7 +38,8 @@ is_known() {
 unit_for() { printf 'shell-%s.service' "$1"; }
 
 # The recorded shell, falling back to the default when the state file is
-# missing or holds something no longer in SHELLS (e.g. a renamed entry).
+# missing or holds something no longer in SHELLS (e.g. "noctalia", removed
+# 2026-09).
 current() {
     local recorded=""
     [[ -f "$STATE_FILE" ]] && read -r recorded < "$STATE_FILE" 2>/dev/null || true
@@ -58,8 +59,8 @@ announce() {
 }
 
 # Caffeine on by default. Waybar's idle_inhibitor has start-activated for the
-# own shell, but neither third-party shell persists its toggle, so flip theirs
-# over IPC once they are up. Backgrounded and retried: it runs from the unit's
+# own shell, but DMS doesn't persist its toggle, so flip it over IPC once it is
+# up. Backgrounded and retried: it runs from the unit's
 # ExecStartPost, the moment the process is spawned and before it is listening.
 caffeine_on() {
     local target=$1
@@ -68,7 +69,6 @@ caffeine_on() {
     (
         for _ in $(seq 20); do
             case "$target" in
-                noctalia) noctalia-shell ipc call idleInhibitor enable ;;
                 dms)      dms ipc inhibit enable ;;
                 *)        exit 0 ;;
             esac >/dev/null 2>&1 && exit 0

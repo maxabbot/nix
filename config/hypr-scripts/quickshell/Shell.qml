@@ -20,9 +20,8 @@ ShellRoot {
     id: root
 
     // ── Global state ───────────────────────────────────────────────────────────
-    // Utility mode: this shell runs *alongside* Noctalia or DMS purely for the
-    // panels they have no counterpart for (Nix, Monitors, KDEConnect, Input,
-    // and on Noctalia also screenshots, the cheat sheet and the overview).
+    // Utility mode: this shell runs *alongside* DMS purely for the panels it
+    // has no counterpart for (Nix, Monitors, KDEConnect, Input).
     // The active shell owns the notification daemon, the OSD and the bar, so
     // those three are switched off here to avoid fighting it. Set by
     // shell-utility.service — see modules/home/wm/shell-switcher.nix.
@@ -151,7 +150,7 @@ ShellRoot {
     // ── Notification server ────────────────────────────────────────────────────
     // Registers as org.freedesktop.Notifications on the session D-Bus.
     // Remove swaync from autostart — only one daemon may run at a time, which
-    // is also why this sits behind a Loader: in utility mode Noctalia or DMS
+    // is also why this sits behind a Loader: in utility mode DMS
     // already holds the name and a second server would just lose the race.
     readonly property var notifServer: notifLoader.item
 

@@ -1,97 +1,93 @@
 # Desktop shells
 
-Three shells are installed and swapped with `SUPER+ALT+1..3` (`SUPER+ALT+S`
-cycles). They are mutually exclusive systemd user units — all three register
-`org.freedesktop.Notifications` — wired up in
+Two shells are installed and swapped with `SUPER+ALT+1` / `SUPER+ALT+3`
+(`SUPER+ALT+S` cycles). They are mutually exclusive systemd user units — both
+register `org.freedesktop.Notifications` — wired up in
 `modules/home/wm/shell-switcher.nix` and driven by
 `config/hypr-scripts/shell-switch.sh`.
 
-| | Own | Noctalia | DMS |
-|---|---|---|---|
-| Key | `SUPER+ALT+1` | `SUPER+ALT+2` | `SUPER+ALT+3` |
-| Unit | `shell-own.service` | `shell-noctalia.service` | `shell-dms.service` |
-| Source | `config/hypr-scripts/quickshell/` | `nixpkgs#noctalia-shell` 4.7.6 | `nixpkgs#dms-shell` 1.4.6 |
-| Size | 21 panels, 25 QML files, ~7,350 lines | — | — |
-| Bar | Waybar (separate unit) | built in | built in |
-| Shape | panels only, opened on demand | complete shell | complete shell |
+| | Own | DMS |
+|---|---|---|
+| Key | `SUPER+ALT+1` | `SUPER+ALT+3` |
+| Unit | `shell-own.service` | `shell-dms.service` |
+| Source | `config/hypr-scripts/quickshell/` | `nixpkgs#dms-shell` 1.4.6 |
+| Size | 21 panels, 25 QML files, ~7,350 lines | — |
+| Bar | Waybar (separate unit) | built in |
+| Shape | panels only, opened on demand | complete shell |
+
+Noctalia was the third shell (`SUPER+ALT+2`) until 2026-09; it was removed
+from the config. A machine whose recorded shell is still `noctalia` falls back
+to `own` (`shell-switch.sh current`).
 
 ## Panel parity
 
-What the two third-party shells have against each panel in
-`config/hypr-scripts/quickshell/`.
+What DMS has against each panel in `config/hypr-scripts/quickshell/`.
 
-| Own panel | Noctalia | DMS |
-|---|---|---|
-| `AudioMixer` | ✅ | ✅ |
-| `BatteryPanel` | ✅ | ✅ |
-| `BluetoothPanel` | ✅ | ✅ |
-| `ClipboardPanel` | ✅ launcher clipboard mode | ✅ popout + `dms clipboard` CLI |
-| `ControlCenter` | ✅ | ✅ |
-| `DiskPanel` | ✅ SystemStats | ✅ |
-| `InputPanel` | ❌ | ❌ |
-| `KDEConnectPanel` | ❌ | ❌ |
-| `KeybindCheatSheet` | ❌ | ✅ `dms keybinds` + cheatsheet UI |
-| `KeyboardPanel` | ⚠️ displays layout, no switcher page | ⚠️ `keyboard_layout_name` bar widget — click cycles via `hyprctl switchxkblayout`; no switcher page, untested here |
-| `MonitorManager` | ❌ its `monitors` IPC is DPMS on/off only | ⚠️ full UI, but cannot apply here — see below |
-| `NetworkPanel` | ✅ | ✅ |
-| `NixPanel` | ❌ | ❌ updater is pacman/dnf family only |
-| `NotificationCenter` | ✅ NotificationHistory | ✅ |
-| `NotificationToast` | ✅ | ✅ |
-| `Osd` | ✅ | ✅ |
-| `PowerMenu` | ✅ SessionMenu | ✅ |
-| `ScreenshotOverlay` | ❌ | ✅ `dms screenshot` region/window/output/all/last |
-| `SysInfoPanel` | ✅ SystemStats | ✅ |
-| `WallpaperPicker` | ✅ | ✅ |
-| `WorkspaceOverview` | ❌ no exposé at all | ✅ WorkspaceOverlays |
+| Own panel | DMS |
+|---|---|
+| `AudioMixer` | ✅ |
+| `BatteryPanel` | ✅ |
+| `BluetoothPanel` | ✅ |
+| `ClipboardPanel` | ✅ popout + `dms clipboard` CLI |
+| `ControlCenter` | ✅ |
+| `DiskPanel` | ✅ |
+| `InputPanel` | ❌ |
+| `KDEConnectPanel` | ❌ |
+| `KeybindCheatSheet` | ✅ `dms keybinds` + cheatsheet UI |
+| `KeyboardPanel` | ⚠️ `keyboard_layout_name` bar widget — click cycles via `hyprctl switchxkblayout`; no switcher page, untested here |
+| `MonitorManager` | ⚠️ full UI, but cannot apply here — see below |
+| `NetworkPanel` | ✅ |
+| `NixPanel` | ❌ updater is pacman/dnf family only |
+| `NotificationCenter` | ✅ |
+| `NotificationToast` | ✅ |
+| `Osd` | ✅ |
+| `PowerMenu` | ✅ |
+| `ScreenshotOverlay` | ✅ `dms screenshot` region/window/output/all/last |
+| `SysInfoPanel` | ✅ |
+| `WallpaperPicker` | ✅ |
+| `WorkspaceOverview` | ✅ WorkspaceOverlays |
 
-**Irreplaceable under both:** `NixPanel`, `MonitorManager`, `KDEConnectPanel`,
+**No DMS counterpart:** `NixPanel`, `MonitorManager`, `KDEConnectPanel`,
 `InputPanel`.
 
-**Also missing under Noctalia:** `ScreenshotOverlay`, `KeybindCheatSheet`,
-`WorkspaceOverview` — so `SUPER+Tab` and `Print` do nothing there.
+Extras DMS adds that the own panels don't have: an app launcher, a lock
+screen, a dock, a notepad, a printer tab and a window-rules editor.
 
-Extras neither of these replaces, but which the third-party shells add: an app
-launcher, a lock screen and a dock (both), plus a notepad, printer tab and
-window-rules editor (DMS).
-
-## Utility mode — keeping the own panels under the other shells
+## Utility mode — keeping the own panels under DMS
 
 The only thing that makes `Shell.qml` exclusive is
 `org.freedesktop.Notifications`; the panels themselves collide with nothing. So
-it runs *alongside* Noctalia and DMS as `shell-utility.service` — the same QML
-with `QS_UTILITY_MODE=1`, which skips the notification server (behind a
-`Loader`), the OSD and the waybar bridge. Every panel keeps working, so
-`SUPER+I/N/Tab/Shift+V/Print` behave the same under all three shells.
+it runs *alongside* DMS as `shell-utility.service` — the same QML with
+`QS_UTILITY_MODE=1`, which skips the notification server (behind a `Loader`),
+the OSD and the waybar bridge. Every panel keeps working, so
+`SUPER+I/N/Tab/Shift+V/Print` behave the same under both shells.
 
 ```
-own      → shell-own.service      (+ waybar)
-noctalia → shell-noctalia.service (+ shell-utility.service)
-dms      → shell-dms.service      (+ shell-utility.service)
+own → shell-own.service (+ waybar)
+dms → shell-dms.service (+ shell-utility.service)
 ```
 
-It `Conflicts` with `shell-own.service` rather than joining the three-way web,
+It `Conflicts` with `shell-own.service` rather than joining the shell units,
 so exactly one `Shell.qml` runs at a time — `qs_manager.sh` addresses it by
 config path, and a second instance would make that IPC ambiguous. The zombie
 watchdog in that script starts whichever of the two fits the selected shell.
 
 This recovers `NixPanel`, `MonitorManager`, `KDEConnectPanel` and `InputPanel`
-everywhere, plus `ScreenshotOverlay`, `KeybindCheatSheet` and
-`WorkspaceOverview` under Noctalia.
+under DMS.
 
 ## This config's incompatibilities
 
-Three things about this setup that these shells do not expect.
+Three things about this setup that DMS does not expect.
 
 ### Lua dispatch
 
 Hyprland here is configured by `config/hypr/hyprland.lua` and evaluates IPC
-dispatch requests as Lua. Both third-party shells hardcode classic dispatcher
-strings, so `dispatch "workspace 3"` dies with `')' expected near '3'` and
+dispatch requests as Lua. DMS hardcodes classic dispatcher strings, so `dispatch "workspace 3"` dies with `')' expected near '3'` and
 every workspace click is a silent no-op.
 
 Fixed by the `luaDispatch` helper in `modules/home/wm/shell-switcher.nix`,
 which rewrites the call sites with `substituteInPlace --replace-fail` at build
-time — 5 in Noctalia, 10 in DMS. The `--replace-fail` is deliberate: a version
+time — 10 in DMS. The `--replace-fail` is deliberate: a version
 bump that rewords a call site fails the build rather than silently restoring
 dead clicks. Same class of breakage as
 `pkgs/waybar/hyprland-lua-dispatch.patch`.
@@ -117,24 +113,22 @@ failed write. `MonitorManager` remains the only working monitor UI.
 
 DMS's SystemUpdater knows `yay`, `paru`, `pacman` and `dnf` across the arch and
 fedora families only, so it is inert here. `NixPanel` — `/nix` store gauge plus
-a streaming `nh os switch` — has no counterpart in either shell.
+a streaming `nh os switch` — has no counterpart in DMS (the `nixMonitor`
+plugin covers part of it).
 
 ## Theming
 
-All three are Gruvbox Material Dark from `config/stylix/palette.nix`, rendered
+Both are Gruvbox Material Dark from `config/stylix/palette.nix`, rendered
 through `config/stylix/palette-subst.nix` at build time:
 
 | Shell | Template | Deployed to |
 |---|---|---|
 | Own | `config/hypr-scripts/quickshell/Theme.qml` | store symlink |
-| Noctalia | `config/noctalia/Gruvbox-Material.json` | `~/.config/noctalia/colorschemes/Gruvbox-Material/` |
 | DMS | `config/dms/gruvbox-material.json` | `~/.config/DankMaterialShell/` |
 
-Noctalia scans its scheme directory with `find -mindepth 2`, so its JSON must
-sit in a subdirectory of its own and the basename becomes the display name.
 DMS needs `currentThemeName = "custom"` before it reads `customThemeFile`.
 
-Pointing each shell at its scheme is *not* declarative: `settings.json` is
+Pointing DMS at its scheme is *not* declarative: `settings.json` is
 owned and rewritten by the shell itself, so a store symlink would cost it every
 setting it tries to save. An activation script in `shell-switcher.nix` merges
 only those keys with `jq` and leaves the rest alone.
@@ -146,15 +140,14 @@ Bar layouts mirror `modules/home/wm/waybar.nix` and are declared in
 and landscape outputs come from the shared `modules/home/wm/outputs.nix`, so
 every bar trims the same screen waybar does.
 
-Neither shell has a full set of counterparts:
+DMS doesn't have a full set of counterparts:
 
-- no scratchpad, rebuild (`NixPanel`) or keybinds widget in either
-- Noctalia has no weather widget
-- DMS has no volume / network / bluetooth bar widgets at all — they live behind
-  its control-centre button
-- DMS folds camera and mic into one `privacyIndicator`; recording has no home
+- no scratchpad, rebuild (`NixPanel`) or keybinds widget
+- no volume / network / bluetooth bar widgets at all — they live behind its
+  control-centre button
+- camera and mic fold into one `privacyIndicator`; recording has no home
 
-Declaring widget lists means per-widget tweaks made in a shell's own GUI are
+Declaring widget lists means per-widget tweaks made in DMS's own GUI are
 overwritten on the next `nixup` — the arrays are replaced, not merged.
 
 DMS bars can't be replaced wholesale: a `barConfig` carries styling (spacing,
@@ -174,42 +167,33 @@ their integrated GPU (a gauge with no temperature — Intel iGPUs don't report
 one). `cpuTemp`, `memUsage`, `gpuTemp` and `diskUsage`
 are left off the bar.
 
-Two more DMS widgets are patched to look like Noctalia's: the system tray
+Two more DMS widgets are patched after Noctalia's (the former third shell): the system tray
 treats every icon as hidden, so the bar shows only DMS's overflow chevron and
 the icons open in its popup (a drawer); and the focused window shows its app
 icon instead of the app name on horizontal bars, falling back to the name when
 the icon can't be resolved. The media pill also shows the track's album art
 as a small thumbnail in place of the visualiser, when the player provides it.
 
-DMS ships `showWorkspaceIndex = false` — unlabelled dots — while waybar and
-Noctalia (`labelMode: "index"`) number their workspaces, so it is declared on.
+DMS ships `showWorkspaceIndex = false` — unlabelled dots — while waybar numbers
+its workspaces, so it is declared on.
 
-Noctalia's `bar.monitors` defaults to `[]` on a fresh install, which renders no
-bar at all and looks like a silent failure — it is declared here for that
-reason.
-
-Weather needs a location in both, and neither ships one — Noctalia logs
-"Cannot fetch weather without coordinates" and stays blank. Waybar's
+Weather needs a location, and DMS ships none. Waybar's
 `custom/weather` calls `wttr.in` with no location at all and lets it geolocate
 by IP, so auto-locate is the faithful mirror (`location.autoLocate` /
-`useAutoLocation`), and it keeps a home address out of a public repo. Set
-Noctalia's `location.name` to a city in `shell-switcher.nix` to pin it instead;
-DMS caches resolved coordinates into its own SessionData.
+`useAutoLocation`), and it keeps a home address out of a public repo. DMS caches
+resolved coordinates into its own SessionData.
 
 ## Bar transparency and caffeine
 
-All three run a transparent bar with opaque widget capsules. Waybar's
-`window#waybar` was already `background: transparent`; Noctalia needs
-`backgroundOpacity = 0` **and** `useSeparateOpacity = true` (Migration35.qml
-shows the pairing — without the second flag the capsules fade with the bar);
-DMS reads `barConfig.transparency` straight into the background alpha despite
+Both run a transparent bar with opaque widget capsules. Waybar's
+`window#waybar` was already `background: transparent`; DMS reads `barConfig.transparency` straight into the background alpha despite
 the name, so `0` is fully transparent and `widgetTransparency = 1` keeps the
 pills.
 
-The idle inhibitor starts on. Waybar has `start-activated` natively, but
-neither third-party shell persists its toggle at all, so each shell unit's
-`ExecStartPost` runs `shell-switch.sh started <name>`, which enables theirs over
-IPC (`idleInhibitor enable` / `inhibit enable`) — backgrounded and retried,
+The idle inhibitor starts on. Waybar has `start-activated` natively, but DMS
+doesn't persist its toggle at all, so each shell unit's `ExecStartPost` runs
+`shell-switch.sh started <name>`, which enables DMS's over IPC
+(`inhibit enable`) — backgrounded and retried,
 since the process isn't listening the moment it's spawned. Doing it from the
 unit rather than the switcher means it holds however the shell was started.
 
@@ -232,18 +216,6 @@ source changed. Store files all have mtime 1970, so `-nt` can't see an edit;
 it stamps the resolved store paths of `shortcuts.md` and `.css` instead, which
 a `nixup` repoints. A cache hit is ~0.06s against a headless-Chrome render.
 
-**Noctalia** stacked its own layer (`noctalia-wallpaper-*`, drawn by
-`Background.qml`) on top of awww's rather than replacing it. That layer is
-patched off at build time instead of switching `wallpaper.enabled` off, because
-every Noctalia picker — bar, control centre, settings, and the `wallpaper`
-IPC target — binds `enabled` to that flag and would be greyed out. With it on,
-`hooks.wallpaperChange` runs `noctalia-wallpaper-hook.sh` once per screen,
-which applies the pick through awww: it skips Noctalia's bundled default and
-anything already on screen, handles `solid://` colours, and leaves portrait
-outputs alone while `setWallpaperOnAllMonitors` is on. Noctalia's cache restore
-doesn't emit a change, so starting it never touches the wallpaper.
-`useWallpaperColors` stays off so the palette scheme isn't overridden.
-
 **DMS** gets `screenPreferences.wallpaper = []`, exactly what its "Disable
 Built-in Wallpapers" toggle writes, so a pick can never draw over awww. Its
 picker still works: `dms-wallpaper-bridge.path` watches DMS's `session.json`
@@ -263,18 +235,20 @@ plugins still work alongside.
 
 | Plugin | Kind | Hosts |
 |---|---|---|
-| `nixMonitor` | bar — store size (sum of narSize, not `df`), generations, `nh os switch` / `nh clean user` | all |
+| `nixMonitor` | bar — snowflake-only pill; popout has store size (sum of narSize, not `df`), generations, `nh os switch` / `nh clean user` | all |
 | `dankKDEConnect` | bar + control centre | all |
 | `claudeUsage` | bar — Claude Code limits, via `api.anthropic.com` only; patched to lead with the Claude Code logo (Simple Icons, pinned) and tightened | all |
 | `nixPackageRunner` | launcher — `nix search` / `nix run` | all |
 | `dankHyprlandWindows` | launcher — window switcher | all |
 | `dankscale` | bar + control centre, Tailscale | tailscale hosts |
 
-All the pills are on the main bar, spread across its sections: `nixMonitor`
-and `claudeUsage` on the left after the workspaces and focused window, `dankKDEConnect` (icon
-patched to `phonelink`) and `dankscale` on the right after the system monitor.
-The centre is music · clock · weather: an odd count with the clock in the
-middle, which DMS's "index" centring mode pins to the exact centre. Together on the right they ran that section into the centre group.
+The main bar reads workspaces · focused window | music · clock · weather |
+system monitor · `dankKDEConnect` (icon patched to `phonelink`) · `claudeUsage`
+(logo + two rings, no percentages) · `dankscale` · `nixMonitor` · tray… The
+centre has an odd count with the clock in the middle, which DMS's "index"
+centring mode pins to the exact centre. The plugin pills only fit on the right
+once Claude and Nix Monitor were cut down to icon size; at full size they ran
+that section into the centre group.
 
 A rebuild that changes any plugin clears `~/.cache/quickshell/qmlcache`: Qt
 keys its compiled-QML cache on file path and mtime, and both are unchanged
@@ -284,8 +258,9 @@ keeps running the old version of an edited plugin.
 `dankKDEConnect` and `dankHyprlandWindows` are pinned to older commits of
 `AvengeMedia/dms-plugins` by hand: upstream's current versions need DMS ≥ 1.6
 (`I18n.trFor`, `DankSpinner`). `dankHyprlandWindows` is also patched to pass
-windows through `hl.get_window()`. `nixMonitor`'s pill is patched to show the NixOS snowflake and an
-up-to-date / behind / unknown status icon. `nixMonitor` reads its commands from
+windows through `hl.get_window()`. `nixMonitor`'s pill is patched to show the NixOS snowflake (and a status icon
+when update checking is on — it is off here, with generations and store size,
+via `plugin_settings.json`). `nixMonitor` reads its commands from
 `plugins/NixMonitor/config.json`, which is built into the plugin directory.
 
 Plugin popouts are patched to keep their content loaded after the first open.
@@ -330,8 +305,8 @@ single bar hides it; the separate portrait bar declared here made
   name.
 
 **Wallpaper directory.** `~/Pictures/Wallpapers` is what every picker
-defaults to — the own WallpaperPicker's `$WALLPAPER_DIR` fallback and Noctalia's
-`wallpaper.directory` — and it didn't exist, so they all listed nothing. An
+defaults to — the own WallpaperPicker's `$WALLPAPER_DIR` fallback and DMS's —
+and it didn't exist, so they all listed nothing. An
 activation in `hyprland.nix` now creates it and seeds a real copy of the leaves
 (not a symlink: the thumbnail scan uses `find -type f`). It only seeds on first
 creation, so removing the image isn't undone by the next `nixup`.

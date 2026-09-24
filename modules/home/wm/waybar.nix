@@ -23,7 +23,7 @@ let
   qs = "bash ~/.config/hypr/scripts/qs_manager.sh";
 
   # ── Portrait outputs ────────────────────────────────────────────────────────
-  # Shared with shell-switcher.nix so the mirrored Noctalia/DMS bars trim the
+  # Shared with shell-switcher.nix so the mirrored DMS bars trim the
   # same output this one does.
   outputs = import ./outputs.nix { inherit lib; } cfg;
   inherit (outputs) portraitOutputs hasPortrait;
@@ -266,8 +266,8 @@ let
     };
 
     idle_inhibitor = {
-      # Caffeine on by default. Noctalia and DMS persist no equivalent, so
-      # shell-switch.sh enables theirs over IPC after a switch instead.
+      # Caffeine on by default. DMS persists no equivalent, so shell-switch.sh
+      # enables its inhibitor over IPC after a switch instead.
       start-activated = true;
       format = "{icon}";
       format-icons = {

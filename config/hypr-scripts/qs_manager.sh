@@ -44,7 +44,7 @@ MANIFEST="$THUMB_DIR/.manifest"
 # -----------------------------------------------------------------------------
 
 # These panels run either as the whole desktop (shell-own.service) or beside
-# noctalia/dms as shell-utility.service — the same Shell.qml with the
+# DMS as shell-utility.service — the same Shell.qml with the
 # notification server, OSD and waybar bridge switched off, so it doesn't fight
 # the active shell for org.freedesktop.Notifications. Resurrect whichever fits
 # the selected shell, via systemd so the instance stays managed rather than
