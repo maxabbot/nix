@@ -255,6 +255,26 @@
         "type": "github"
       }
     },
+    "lmms-appimage": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790067943,
+        "narHash": "sha256-i/RPnLbyGbk26WJ+vlGTH5GVYeZage5yUs9NYW36hrw=",
+        "owner": "Matko802",
+        "repo": "lmms-appimage-nix",
+        "rev": "2a1652e38487b304dd4ee7e39e352a05b6bf5f8b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Matko802",
+        "repo": "lmms-appimage-nix",
+        "type": "github"
+      }
+    },
     "nix-index-database": {
       "inputs": {
         "nixpkgs": [
@@ -387,6 +407,7 @@
         "disko": "disko",
         "dms-plugin-registry": "dms-plugin-registry",
         "home-manager": "home-manager",
+        "lmms-appimage": "lmms-appimage",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",

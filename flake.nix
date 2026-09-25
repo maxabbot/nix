@@ -302,8 +302,11 @@
           hmArgs = {
             machineType = "laptop";
             compositor = "hyprland";
+            # Matches kanshi's "undocked" profile below, so there's no scale
+            # flash while kanshi starts. primaryName stays unset so startup
+            # workspaces/cursor aren't pinned to the laptop panel when docked.
             monitors = {
-              primary = null;
+              primary = "eDP-1,1920x1200@60,0x0,1.25";
               secondary = null;
             };
             # Kanshi manages the docked/undocked layout automatically.
@@ -316,6 +319,8 @@
               internal = {
                 output = "eDP-1"; # Lenovo internal panel — almost universal
                 mode = "1920x1200@60";
+                # 1.25 divides the panel evenly → logical 1536x960.
+                scale = 1.25;
               };
               docked = {
                 left = "Philips Consumer Electronics Company PHL 276B1 UK02150032264";
@@ -324,7 +329,9 @@
                 leftMode = "2560x1440@74.97Hz";
                 rightMode = "2560x1440@74.97Hz";
                 # rightPosition defaults to "2560,0" (left monitor width)
-                # laptopPosition defaults to "1600,1440" (centred below 2×2560 externals)
+                # Centred below 2×2560 externals at the 1536-wide logical size:
+                # (5120 - 1536) / 2 = 1792.
+                laptopPosition = "1792,1440";
               };
             };
             lanMouse = {
