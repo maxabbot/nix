@@ -36,7 +36,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `cloud-tools.nix` | kubectl, helm, opentofu, AWS/Azure/GCP CLIs |
 | `productivity.nix` | Hyprland, SDDM (SilentSDDM), PipeWire, syncthing, core desktop apps |
 | `stylix.nix` | Stylix theming (base16 Gruvbox Material, fonts, cursor) |
-| `creative-apps.nix` | GIMP, Inkscape, Krita |
+| `creative-apps.nix` | GIMP, Inkscape, Krita; LMMS 1.3 (upstream AppImage via `lmms-appimage` flake input, not nixpkgs' stale 1.2.2) + Surge XT for LV2 synths |
 | `streaming-tools.nix` | OBS, Shotcut, RustDesk, gpu-screen-recorder |
 | `google-chrome.nix` | Google Chrome |
 | `onedrive.nix` | OneDrive sync via `onedriver` (FUSE, on-demand files) — run `onedriver-launcher` once per machine to add the account/mountpoint |

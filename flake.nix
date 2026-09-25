@@ -47,6 +47,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # LMMS 1.3 packaged from the upstream AppImage — nixpkgs still ships the
+    # outdated 1.2.2 stable release, whose LV2 plugin support (Carla/Surge XT)
+    # is incomplete. Pre-release: project files saved with it aren't openable
+    # in LMMS 1.2.x.
+    lmms-appimage = {
+      url = "github:Matko802/lmms-appimage-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Native Claude Code binary — updates hourly, ahead of nixpkgs
     claude-code-nix.url = "github:sadjow/claude-code-nix";
 
@@ -90,6 +99,7 @@
               config.allowUnfree = true;
             };
           })
+          inputs.lmms-appimage.overlays.default
         ];
       };
 
