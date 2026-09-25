@@ -248,6 +248,22 @@ hl.window_rule({ match = { class = "nm-connection-editor" }, float = true })
 hl.window_rule({ match = { class = "blueman-manager" },    float = true })
 hl.window_rule({ match = { title = "Picture-in-Picture" }, float = true })
 
+-- DMS Settings as a dropdown: pinned under the bar at the top right, sliding
+-- down out of it. The QML half (no drag/maximise, close once focus leaves DMS)
+-- is patched in modules/home/wm/shell-switcher.nix. Static rules suffice: DMS
+-- destroys the window on close, so every open is a fresh window. y = DMS bar
+-- (48) plus its edge gap and a popout-sized gap. Class hedged between
+-- Quickshell's app id and a bare "quickshell"; the title keeps the rule off
+-- Settings' child browsers and pickers, which carry their own.
+hl.window_rule({
+    name      = "dms-settings-dropdown",
+    match     = { class = "(org\\.)?quickshell", title = "Settings" },
+    float     = true,
+    pin       = true,
+    move      = "monitor_w-window_w-10 62",
+    animation = "slide top",
+})
+
 -- Scratchpad — windows on a special workspace float centred with an orange
 -- border so they read as scratchpad windows, not tiles. The static fields
 -- (float/size/center) only apply to windows that open on the special; the

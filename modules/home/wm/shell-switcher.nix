@@ -302,6 +302,63 @@ let
           '';
         }
       ]
+      # Not a dispatch fix: Settings as a dropdown. Upstream's is a movable,
+      # maximisable window; here Hyprland places it under the bar at the top
+      # right (the dms-settings-dropdown rule in hyprland.lua) and it closes
+      # once focus leaves DMS. It stays an xdg toplevel rather than a layer
+      # panel on purpose: its theme/plugin/widget browsers and file pickers
+      # are child windows, and Hyprland draws every layer surface above
+      # windows, so a panel would bury them.
+      ++ (
+        let
+          sm = "share/quickshell/dms/Modals/Settings/SettingsModal.qml";
+        in
+        [
+          {
+            # No dragging it around or double-click maximise from the header.
+            file = sm;
+            from = "                MouseArea {\n                    anchors.fill: parent\n                    onPressed: windowControls.tryStartMove()\n                    onDoubleClicked: windowControls.tryToggleMaximize()\n                }\n\n";
+            to = "";
+          }
+          {
+            file = sm;
+            from = "                        visible: windowControls.canMaximize\n";
+            to = "                        visible: false\n";
+          }
+          {
+            # Close on focus-out, keyed on the whole app rather than this
+            # window: Settings' own child windows (and DMS popouts opened over
+            # it) keep Qt's application state active, so they don't close it;
+            # focusing another app, or clicking empty desktop, does. The short
+            # delay rides out the focus hand-off while a child window maps.
+            file = sm;
+            # `from` skips the line's indent, which the '' string strips.
+            from = "onClosed: hide()\n";
+            to = ''
+              onClosed: hide()
+
+                  Connections {
+                      target: Qt.application
+                      function onStateChanged() {
+                          if (settingsModal.visible && Qt.application.state !== Qt.ApplicationActive)
+                              focusOutHide.restart();
+                          else
+                              focusOutHide.stop();
+                      }
+                  }
+
+                  Timer {
+                      id: focusOutHide
+                      interval: 200
+                      onTriggered: {
+                          if (settingsModal.visible && Qt.application.state !== Qt.ApplicationActive)
+                              settingsModal.hide();
+                      }
+                  }
+            '';
+          }
+        ]
+      )
       ++
         lib.mapAttrsToList
           (widget: body: {
