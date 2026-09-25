@@ -80,6 +80,20 @@ hl.on("monitor.added", function()
     hl.exec_cmd("bash ~/.config/hypr/scripts/wallpaper-fill.sh " .. mon.secondary)
 end)
 
+-- Hotplug moves every window off (or back onto) the changed output, and each
+-- move animates from the old position — windows fly in from where the dock
+-- monitors were, with the bezier's overshoot on landing. A flapping USB-C dock
+-- repeats that every couple of seconds. Snap instead: animations off here,
+-- back on once events have been quiet for a moment (hotplug-calm.sh, which
+-- also leaves them off while gaming mode holds them off).
+local function calmHotplug()
+    hl.config({ animations = { enabled = false } })
+    hl.exec_cmd("bash ~/.config/hypr/scripts/hotplug-calm.sh")
+end
+
+hl.on("monitor.added", calmHotplug)
+hl.on("monitor.removed", calmHotplug)
+
 --------------------
 ---- SETTINGS ------
 --------------------
