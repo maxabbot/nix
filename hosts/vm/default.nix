@@ -16,6 +16,8 @@
     ../common/optional/streaming-tools.nix
     ../common/optional/google-chrome.nix
     ../common/optional/comms.nix
+    ../common/optional/onedrive.nix
+    ../common/optional/pwas.nix
     ../common/optional/stylix.nix
     ../common/optional/gaming.nix
     ../common/optional/wine.nix

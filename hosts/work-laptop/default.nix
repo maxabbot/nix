@@ -15,6 +15,8 @@
     ../common/optional/productivity.nix
     ../common/optional/google-chrome.nix
     ../common/optional/comms.nix
+    ../common/optional/onedrive.nix
+    ../common/optional/pwas.nix
     ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
     ../common/optional/limine.nix
