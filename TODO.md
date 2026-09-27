@@ -68,10 +68,20 @@ nix run github:nix-community/nixos-anywhere -- \
 
 ---
 
+## Up next
+
+- [ ] **Theming: Hyprland windows + DMS** — bring DMS in line with the Hyprland window styling; add transparency to DMS panels/popouts
+- [ ] **DMS Settings as a drop-down** instead of a window — started in 2ba26d8, still needs fixing
+- [ ] **Fix DMS display settings**
+- [ ] **Cursor sharing with the laptop (lan-mouse)** — configured, still needs pairing + testing
+- [ ] **Fix game mode**
+- [ ] **Fix `Super+Q` closing every instance** — should close only the focused window
+- [ ] **Backblaze B2 backups** of home-desktop and framework (see Backups below)
+
 ## Future improvements
 
 - [ ] **Secrets management** — sops-nix or agenix; unblocks real deployment
 - [ ] **GPG commit signing** — `programs.gpg` in HM + `signingkey` in flake
-- [ ] **Backups** — `restic` or `borgbackup`; BTRFS snapshots don't cover disk failure
+- [ ] **Backups** — `restic` → Backblaze B2 (home-desktop + framework); BTRFS snapshots don't cover disk failure. B2 credentials want secrets management first
 - [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05; once a `release-26.05` branch exists, pin it and drop the two `enableReleaseChecks = false` lines plus the kmscon `disabledModules` workaround in `hosts/common/optional/stylix.nix`
 - [x] **Decide what `plymouth.nix` is for** — imported on all four hosts, themed by Stylix instead of the adi1090x "spin" theme.
