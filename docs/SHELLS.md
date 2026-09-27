@@ -209,6 +209,13 @@ doesn't persist its toggle at all, so each shell unit's `ExecStartPost` runs
 since the process isn't listening the moment it's spawned. Doing it from the
 unit rather than the switcher means it holds however the shell was started.
 
+DMS's inhibitor is a Wayland idle-inhibitor on its bar, and it doesn't survive
+a resume reliably. DMS rebuilds the bar surfaces on wake, and hypridle then
+locked 5 min later even though `dms ipc inhibit status` still said enabled. So
+hypridle's lock, blank and suspend listeners are wrapped in `unlessCaffeine`
+(`modules/home/wm/hyprland.nix`). Under DMS they ask the IPC first and skip
+while caffeine is on.
+
 ## Wallpaper
 
 `awww` is the single wallpaper owner. Every output gets the leaves at login

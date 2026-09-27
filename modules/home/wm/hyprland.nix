@@ -68,6 +68,19 @@ let
   # toggles what actually differs.
   blankBeforeSleep = "loginctl lock-session; sleep 1; bash ~/.config/hypr/scripts/dpms.sh hold-off";
 
+  # Skip an idle action while DMS's caffeine is on. DMS inhibits idle through a
+  # Wayland idle-inhibitor on its bar, and that inhibitor goes missing after a
+  # resume. DMS rebuilds its bar surfaces twice on wake, and hypridle locked 5
+  # min after both resumes on 2026-09-28 with `dms ipc inhibit status` still
+  # reporting enabled. Asking DMS directly doesn't depend on the compositor
+  # seeing the inhibitor. The own shell needs no guard: Waybar's idle_inhibitor
+  # holds. `timeout` so a wedged IPC call can't hang hypridle's action.
+  unlessCaffeine =
+    cmd:
+    "[ \"$(cat ~/.local/state/hypr/active-shell 2>/dev/null)\" = dms ] "
+    + "&& timeout 2 dms ipc inhibit status 2>/dev/null | grep -q 'is enabled' "
+    + "|| ${cmd}";
+
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
   # into a Lua hl.monitor({}) call.
   monitorToLua =
@@ -357,7 +370,7 @@ in
           listener = [
             {
               timeout = 300;
-              on-timeout = "loginctl lock-session";
+              on-timeout = unlessCaffeine "loginctl lock-session";
             }
             # Blank the screens shortly after the lock rather than leaving them
             # lit until the 15-minute suspend. 30s of grace after hyprlock
@@ -369,12 +382,12 @@ in
             # something (a manual blank, gaming mode's exit) left that disarmed.
             {
               timeout = 330;
-              on-timeout = "bash ~/.config/hypr/scripts/dpms.sh idle-off";
+              on-timeout = unlessCaffeine "bash ~/.config/hypr/scripts/dpms.sh idle-off";
               on-resume = "bash ~/.config/hypr/scripts/dpms.sh idle-on";
             }
             {
               timeout = 900;
-              on-timeout = "systemctl suspend";
+              on-timeout = unlessCaffeine "systemctl suspend";
             }
           ];
         };
