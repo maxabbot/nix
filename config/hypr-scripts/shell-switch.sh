@@ -17,7 +17,7 @@
 #   shell-switch.sh current   # print the recorded shell name
 #   shell-switch.sh unit      # print the systemd unit of the recorded shell
 #   shell-switch.sh restore   # start the recorded shell (login, gaming-mode exit)
-#   shell-switch.sh started <name>  # unit ExecStartPost: record it, caffeine on
+#   shell-switch.sh started <name>  # unit ExecStartPost: record it
 
 set -euo pipefail
 
@@ -60,30 +60,11 @@ announce() {
     hyprctl notify -1 2000 "0" "Shell → $1" >/dev/null 2>&1 || true
 }
 
-# Caffeine on by default. Waybar's idle_inhibitor has start-activated for the
-# own shell, but DMS doesn't persist its toggle, so flip it over IPC once it is
-# up. Backgrounded and retried: it runs from the unit's
-# ExecStartPost, the moment the process is spawned and before it is listening.
-caffeine_on() {
-    local target=$1
-    [[ "$target" == "own" ]] && return 0
-
-    (
-        for _ in $(seq 20); do
-            case "$target" in
-                dms)      dms ipc inhibit enable ;;
-                *)        exit 0 ;;
-            esac >/dev/null 2>&1 && exit 0
-            sleep 0.5
-        done
-    ) >/dev/null 2>&1 &
-}
-
 # Called from every shell unit's ExecStartPost, so the record follows systemd
 # however the shell was started — a keybind, shell-restore, gaming-toggle, or a
 # bare `systemctl --user restart`. Before this, starting a unit directly left
 # the file naming the previous shell, so shell-ipc.sh routed keys to a shell
-# that wasn't running and caffeine never came on.
+# that wasn't running.
 started() {
     local name=$1
     if ! is_known "$name"; then
@@ -92,7 +73,6 @@ started() {
     fi
     mkdir -p "$STATE_DIR"
     printf '%s\n' "$name" >"$STATE_FILE"
-    caffeine_on "$name"
 }
 
 set_shell() {

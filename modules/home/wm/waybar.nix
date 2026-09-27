@@ -266,8 +266,7 @@ let
     };
 
     idle_inhibitor = {
-      # Caffeine on by default. DMS persists no equivalent, so shell-switch.sh
-      # enables its inhibitor over IPC after a switch instead.
+      # Caffeine on by default. DMS persists its own toggle in session.json.
       start-activated = true;
       format = "{icon}";
       format-icons = {

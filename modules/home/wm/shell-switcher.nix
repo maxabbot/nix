@@ -681,8 +681,8 @@ let
     Service = {
       Type = "simple";
       ExecStart = shell.exec;
-      # Record the running shell and switch caffeine on from the unit itself, so
-      # both hold however it was started (see `started` in shell-switch.sh).
+      # Record the running shell from the unit itself, so it holds however the
+      # shell was started (see `started` in shell-switch.sh).
       ExecStartPost = "${switch} started ${name}";
       # dms exits 143 on SIGTERM rather than dying by signal, so without this
       # every Conflicts-driven swap leaves the unit in `failed` — which then

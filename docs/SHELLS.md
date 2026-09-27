@@ -202,12 +202,10 @@ Both run a transparent bar with opaque widget capsules. Waybar's
 the name, so `0` is fully transparent and `widgetTransparency = 1` keeps the
 pills.
 
-The idle inhibitor starts on. Waybar has `start-activated` natively, but DMS
-doesn't persist its toggle at all, so each shell unit's `ExecStartPost` runs
-`shell-switch.sh started <name>`, which enables DMS's over IPC
-(`inhibit enable`) — backgrounded and retried,
-since the process isn't listening the moment it's spawned. Doing it from the
-unit rather than the switcher means it holds however the shell was started.
+The idle inhibitor starts on under the own shell: Waybar has
+`start-activated`. DMS (1.6.2+) persists its toggle as `idleInhibited` in
+`~/.local/state/DankMaterialShell/session.json`, so it keeps whatever you last
+chose. Nothing forces it on at startup, since that would override an "off".
 
 DMS's inhibitor is a Wayland idle-inhibitor on its bar, and it doesn't survive
 a resume reliably. DMS rebuilds the bar surfaces on wake, and hypridle then
@@ -303,7 +301,7 @@ shell, and that record used to be written only by the switcher — so starting a
 unit any other way (`systemctl --user restart shell-dms.service`, or
 `shell-restore` after a `nixup`) left it naming the previous shell. Keys then
 went to a shell that wasn't running: Print opened the own screenshot panel
-under DMS, and caffeine never came on. The same `ExecStartPost` now records
+under DMS. The same `ExecStartPost` now records
 the name, so the file tracks whatever is actually up.
 
 **DMS opened bar popouts on the wrong monitor** (fixed upstream in 1.6).
