@@ -42,7 +42,13 @@ in
     hashedPassword = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      description = "Hashed password for the primary user (generate with mkpasswd -m yescrypt).";
+      description = "Hashed password for the primary user (generate with mkpasswd -m yescrypt). Prefer hashedPasswordFile — a literal hash ends up in git and the world-readable store.";
+    };
+
+    hashedPasswordFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Path to a file holding the primary user's password hash (set by hosts/common/optional/sops.nix).";
     };
 
     initialPassword = lib.mkOption {
@@ -162,7 +168,7 @@ in
       ++ lib.optionals config.virtualisation.podman.enable [ "podman" ]
       ++ lib.optionals config.programs.steam.enable [ "gamemode" ];
       shell = pkgs.zsh;
-      inherit (cfg) hashedPassword initialPassword;
+      inherit (cfg) hashedPassword hashedPasswordFile initialPassword;
       openssh.authorizedKeys.keys = cfg.sshKeys;
     };
 

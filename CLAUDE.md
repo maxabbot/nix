@@ -21,7 +21,7 @@ The `hyprland` NixOS module is enabled inside `hosts/common/optional/productivit
 ### Option hierarchy (base module only)
 
 ```
-custom.base.{enable, username, timezone, powerManagement, firewall, hashedPassword, initialPassword, sshKeys, fancontrol.*}
+custom.base.{enable, username, timezone, powerManagement, firewall, hashedPassword, hashedPasswordFile, initialPassword, sshKeys, fancontrol.*}
 ```
 
 ### hosts/common/optional/ files
@@ -52,6 +52,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
 | `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); also owns the Bolt receiver's wakeup-disable udev rule, so it follows the receiver between machines. Tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared). Pairing and key diversion are per-machine device state — see the file header |
 | `tailscale.nix` | Tailscale client (reaches the Tailscale-only services in the servers repo) + systemd-resolved for MagicDNS. Log in once per machine with `sudo tailscale up --operator=max` |
+| `sops.nix` | sops-nix secrets (all four hosts): decrypts `secrets/*.yaml` with the host age key at `/var/lib/sops-nix/key.txt`; sets `custom.base.hashedPasswordFile`. Recipients in `.sops.yaml`; admin key shared with the homelab repo |
 | `plymouth.nix` | Boot splash (all four hosts), themed by Stylix's plymouth target — Gruvbox bg + spinning snowflake; also themes the framework LUKS prompt |
 | `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (all four hosts; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
 
@@ -91,7 +92,7 @@ All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -e
 ## Security
 
 - Never commit credentials — `github_pat`, `*.iso` are gitignored.
-- Hosts currently set `custom.base.hashedPassword` inline — the hash is in git history, so treat it as exposed: move to agenix/sops-nix (`hashedPasswordFile`) and rotate the password (see TODO.md).
+- Secrets go in sops (`hosts/common/optional/sops.nix`, `secrets/*.yaml`, recipients in `.sops.yaml`) — never a literal in a `.nix` file, which lands in git and the world-readable store. Edit with `sops secrets/common.yaml` on home-desktop. The user password hash is `max-password-hash`; with `mutableUsers` on it only applies at user creation, so existing machines change password with `passwd`. The old inline hash is still in git history — treat that password as exposed.
 - `sshKeys = [ ]` is empty by default; populate before enabling `services.openssh` for remote login.
 - Secure boot: on the Limine hosts, set `boot.loader.limine.secureBoot.enable = true` after running `sbctl create-keys` + `sbctl enroll-keys` (see the `limine.nix` header).
 

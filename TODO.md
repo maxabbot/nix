@@ -15,17 +15,12 @@ cp /mnt/etc/nixos/hardware-configuration.nix hosts/<name>/hardware-configuration
 
 ### Secrets
 
-- Move `hashedPassword` out of the host files into agenix or sops-nix (`hashedPasswordFile`) — the current hash is committed to git history, so rotate the password once secrets land
+- Finish the sops move (config landed 2026-09-28, `hosts/common/optional/sops.nix`):
+  - Install each host's age key from `.bootstrap/<host>/key.txt` (gitignored) *before* that host's next rebuild: `sudo install -Dm600 key.txt /var/lib/sops-nix/key.txt`, then delete the staged copy
+  - Rotate the password (the old hash is in git history): `passwd` on each machine, then store the new hash so fresh installs get it — `sops set secrets/common.yaml '["max-password-hash"]' "\"$(mkpasswd -m yescrypt)\""` (`secrets/common.yaml` holds `REPLACE_ME` until then)
+  - Back up the admin key (`~/.config/sops/age/keys.txt`, shared with homelab) outside both repos
 - Populate `sshKeys` in `custom.base` before enabling `services.openssh` for remote login
 - GPG commit signing: add a `signingkey` hmArg in `flake.nix` and consume it in `home/max/git.nix` (the old empty stub was removed as dead code)
-
-Full setup: add `agenix` to flake inputs, create `secrets/secrets.nix` with the host's SSH public key (`/etc/ssh/ssh_host_ed25519_key.pub`), then:
-
-```bash
-agenix -e secrets/hashed-password.age  # paste mkpasswd output
-```
-
-See fufexan/dotfiles `secrets/` for a clean reference.
 
 ---
 
@@ -80,7 +75,7 @@ nix run github:nix-community/nixos-anywhere -- \
 
 ## Future improvements
 
-- [ ] **Secrets management** — sops-nix or agenix; unblocks real deployment
+- [x] **Secrets management** — sops-nix (2026-09-28); key install + password rotation still pending, see Secrets above
 - [ ] **GPG commit signing** — `programs.gpg` in HM + `signingkey` in flake
 - [ ] **Backups** — `restic` → Backblaze B2 (home-desktop + framework); BTRFS snapshots don't cover disk failure. B2 credentials want secrets management first
 - [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05; once a `release-26.05` branch exists, pin it and drop the two `enableReleaseChecks = false` lines plus the kmscon `disabledModules` workaround in `hosts/common/optional/stylix.nix`

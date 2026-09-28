@@ -12,6 +12,12 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    # Secrets (hosts/common/optional/sops.nix) — same tool as the homelab repo.
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -156,6 +162,7 @@
               ;
           };
           modules = modules ++ [
+            inputs.sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
             {
               home-manager = {
@@ -183,6 +190,8 @@
           statix
           deadnix
           nil
+          sops
+          age
         ];
       };
 

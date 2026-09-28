@@ -22,6 +22,7 @@
     ../common/optional/gaming.nix
     ../common/optional/wine.nix
     ../common/optional/plymouth.nix
+    ../common/optional/sops.nix
     ../common/optional/limine.nix
   ];
 
@@ -30,7 +31,6 @@
   custom.base = {
     enable = true;
     username = "max";
-    hashedPassword = "$y$j9T$2U13TXbQqrmp.PD068E0E.$1uJPVe1dF1C0KhlXbn.iMg2qthRxOdp.9s/h6GG6YC6";
     sshKeys = [ ];
   };
 

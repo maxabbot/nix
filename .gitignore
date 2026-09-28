@@ -14,3 +14,15 @@ github_pat
 
 # Claude Code per-machine permission approvals
 .claude/settings.local.json
+
+# ── Secrets ──────────────────────────────────────────────────────────────────
+# secrets/*.yaml is sops-encrypted and IS committed. These patterns stop the
+# plaintext forms (age private keys, decrypted copies) being staged by accident.
+keys.txt
+key.txt
+*.agekey
+.sops-decrypted-*
+
+# Per-host age keys staged before they're copied onto each machine (PRIVATE).
+# Delete a host's directory once its key is installed and a rebuild decrypts.
+.bootstrap/

@@ -36,6 +36,7 @@
     ../common/optional/tailscale.nix
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
+    ../common/optional/sops.nix
   ];
 
   home-manager.backupFileExtension = "backup";
@@ -50,7 +51,6 @@
   custom.base = {
     enable = true;
     username = "max";
-    hashedPassword = "$y$j9T$2U13TXbQqrmp.PD068E0E.$1uJPVe1dF1C0KhlXbn.iMg2qthRxOdp.9s/h6GG6YC6";
     sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
   };
 

@@ -1,0 +1,34 @@
+# .sops.yaml — who can decrypt what. See hosts/common/optional/sops.nix.
+#
+# `admin` is the same dedicated age key the homelab repo uses
+# (~/.config/sops/age/keys.txt on home-desktop) — the one key secrets are edited
+# with. Each host has its own age key at /var/lib/sops-nix/key.txt. These are
+# plain age keys, not converted SSH host keys: none of these machines run sshd,
+# so there is no host key to derive from.
+#
+# Adding a recipient: edit keys + rules below, then `sops updatekeys secrets/*.yaml`.
+
+keys:
+  - &admin age1yx8x4zy40xuh2e4hjcu735s5edlv2n4kq597nzfx3xntrxqppfkqqr8vea
+  - &home-desktop age1q5w9yuv39yuc3gpd30cwgfgt8ckp5nmrm669s3ppvhgmdk2d8yrqeyw9t2
+  - &framework age160ut708amyjck93v88j6cv0pnhmtmhc5reul0he5k4vqcfzpcslqzgxp7p
+  - &work-laptop age16yfhwr26qg7qjknlzmlsunt85laem8p8unxkklct7ezwzxyjkakswerh5g
+  - &vm age1l4gyppnz3cev0ztmssmls5rgxsyz6jxu9hqcq38xz7hd8we59cwq2l9ucg
+
+creation_rules:
+  # Shared by every host (the login password hash).
+  - path_regex: secrets/common\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *home-desktop
+          - *framework
+          - *work-laptop
+          - *vm
+
+  # Catch-all: admin only. Per-host files (e.g. secrets/home-desktop.yaml for
+  # the B2 credentials) get their own rule above this one. Keep it last.
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *admin
