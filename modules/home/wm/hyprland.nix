@@ -232,6 +232,16 @@ in
 
   config = lib.mkIf (cfg.compositor == "hyprland") {
 
+    # hl.env in env.lua only reaches Hyprland and what it spawns. Under UWSM
+    # the systemd user units (shell-dms.service among them) inherit the login
+    # environment instead, and without $TERMINAL DMS's launcher runs
+    # Terminal=true entries (spotify-player, yazi) in xterm — not installed,
+    # so they fail silently.
+    home.sessionVariables = {
+      TERMINAL = cfg.terminal;
+      BROWSER = cfg.browser;
+    };
+
     xdg.configFile = {
       # ── Store-symlinked scripts (gaming-toggle, screenshot, lock, …) ────────
       # Theme.qml is a template: its @token@ palette placeholders are rendered
