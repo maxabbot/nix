@@ -332,11 +332,34 @@ let
             # it) keep Qt's application state active, so they don't close it;
             # focusing another app, or clicking empty desktop, does. The short
             # delay rides out the focus hand-off while a child window maps.
+            #
+            # Armed only once Settings has actually held focus since it
+            # opened. The Control Center's settings button opens it while the
+            # popout still holds the keyboard, so it maps unfocused; when the
+            # popout closes Hyprland refocuses the previous window, and an
+            # unarmed focus-out would hide Settings within 200ms of opening.
+            # Unarmed, the timer pulls focus to Settings instead.
             file = sm;
             # `from` skips the line's indent, which the '' string strips.
             from = "onClosed: hide()\n";
             to = ''
               onClosed: hide()
+
+                  readonly property var ownToplevel: ToplevelManager.toplevels.values.find(t => t.appId === "com.danklinux.dms" && t.title === settingsModal.title) ?? null
+                  readonly property bool ownActivated: ownToplevel?.activated ?? false
+                  property bool focusOutArmed: false
+                  onOwnActivatedChanged: {
+                      if (ownActivated)
+                          focusOutArmed = true;
+                  }
+
+                  Connections {
+                      target: settingsModal
+                      function onVisibleChanged() {
+                          if (!settingsModal.visible)
+                              settingsModal.focusOutArmed = false;
+                      }
+                  }
 
                   Connections {
                       target: Qt.application
@@ -352,11 +375,23 @@ let
                       id: focusOutHide
                       interval: 200
                       onTriggered: {
-                          if (settingsModal.visible && Qt.application.state !== Qt.ApplicationActive)
-                              settingsModal.hide();
+                          if (!settingsModal.visible || Qt.application.state === Qt.ApplicationActive)
+                              return;
+                          if (!settingsModal.focusOutArmed) {
+                              if (settingsModal.ownToplevel)
+                                  CompositorService.activateToplevel(settingsModal.ownToplevel);
+                              return;
+                          }
+                          settingsModal.hide();
                       }
                   }
             '';
+          }
+          {
+            # ToplevelManager, for the focus-out arming above.
+            file = sm;
+            from = "import Quickshell\n";
+            to = "import Quickshell\nimport Quickshell.Wayland\n";
           }
         ]
       )
