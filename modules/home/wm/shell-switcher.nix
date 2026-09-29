@@ -30,6 +30,7 @@ let
   cfg = config.custom.hm;
 
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
+  palette = import ../../../config/stylix/palette.nix;
   outputs = import ./outputs.nix { inherit lib; } cfg;
   isLaptop = machineType == "laptop";
 
@@ -541,6 +542,24 @@ let
       # dms-wallpaper-bridge forwards picks to awww instead.
       screenPreferences.wallpaper = [ ];
       customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json";
+
+      # ── Match Hyprland's window styling (config/hypr/hyprland.lua) ──────────
+      # Corners follow decoration.rounding.
+      cornerRadius = 10;
+      # Popouts, control center and the Settings window see-through like kitty.
+      # DMS's own blur needs ext-background-effect-v1, which Hyprland 0.55
+      # lacks (`dms blur check` → unsupported), so blurEnabled stays off and
+      # Hyprland blurs instead: the dms:* layer rule for popouts, and window
+      # blur for Settings, which is an ordinary toplevel.
+      popupTransparency = 0.85;
+      floatingWindowTransparency = 0.85;
+      # Popout outline in the active-border blue at its ee alpha. The blur*
+      # names are legacy — DMS draws this border whether or not it blurs. It is
+      # fixed at 1px (BlurService.borderWidth), against Hyprland's 2.
+      blurBorderEnabled = true;
+      blurBorderColor = "custom";
+      blurBorderCustomColor = palette.blue;
+      blurBorderOpacity = 0.93;
     };
     # Control Center tiles to strip. Dark Mode would flip DMS off the fixed
     # Gruvbox Material Dark scheme; Night Mode is a second gamma client racing
@@ -598,11 +617,12 @@ let
         "controlCenterButton"
       ];
       # DankBarWindow.qml reads barConfig.transparency straight into the
-      # background alpha despite the name, so 0 is fully transparent and
-      # widgetTransparency 1 keeps the widget pills opaque. Already the
-      # shipped default; declared so it survives a reset.
+      # background alpha despite the name, so 0 is a fully transparent bar
+      # strip. widgetTransparency is the pills' alpha (BasePill.qml), 0.85 to
+      # match popupTransparency; the dms:* layer rule in hyprland.lua blurs
+      # behind them (its ignore_alpha 0.5 keeps the empty strip unblurred).
       barAlpha = 0;
-      widgetAlpha = 1;
+      widgetAlpha = 0.85;
       pLeft = [ "workspaceSwitcher" ];
       pCenter = [ "clock" ];
       pRight = [
