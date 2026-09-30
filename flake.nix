@@ -127,6 +127,9 @@
         # Desktop wallpaper (modules/home/wm/hyprland.nix), set by awww on every
         # output at login.
         wallpaper = ./config/sddm/leaves-wall.png;
+        # Image for a rotated secondary monitor; null keeps the rendered
+        # SHORTCUTS.md cheat-sheet there.
+        wallpaperPortrait = null;
         # Software KVM (home/max/lan-mouse.nix) — the module-system ignores
         # function-signature defaults for HM args, so the off-default lives here.
         lanMouse = {
@@ -211,6 +214,8 @@
             machineType = "desktop";
             compositor = "hyprland";
             nvidia = true;
+            wallpaper = ./config/wallpapers/waterfall-3.jpg;
+            wallpaperPortrait = ./config/wallpapers/cave.jpg;
             monitors = {
               # DP-2: 4K portrait monitor (left); 90° rotation + 1.5x scale → logical 1440x2560
               secondary = "DP-2,3840x2160@60,0x0,1.5,transform,1";

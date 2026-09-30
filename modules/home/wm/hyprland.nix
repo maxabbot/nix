@@ -167,8 +167,11 @@ let
       -- Do not edit manually.
       hl.exec_cmd("awww img ~/.config/hypr/wallpaper.png --resize crop ${transition}")
     ''
-    + lib.optionalString secRotated ''
+    + lib.optionalString (secRotated && cfg.wallpaperPortrait == null) ''
       hl.exec_cmd("bash ~/.config/hypr/scripts/shortcuts-wallpaper.sh ${secName}")
+    ''
+    + lib.optionalString (secRotated && cfg.wallpaperPortrait != null) ''
+      hl.exec_cmd("awww img ~/.config/hypr/wallpaper-portrait.png --outputs ${secName} --resize crop ${transition}")
     '';
 in
 {
@@ -204,6 +207,12 @@ in
       type = lib.types.path;
       default = ../../../config/sddm/leaves-wall.png;
       description = "Desktop wallpaper image, deployed to ~/.config/hypr/wallpaper.png and set by awww.";
+    };
+
+    wallpaperPortrait = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Image for a rotated secondary monitor, deployed to ~/.config/hypr/wallpaper-portrait.png. When null the secondary shows the rendered SHORTCUTS.md cheat-sheet.";
     };
 
     monitors = {
@@ -248,6 +257,9 @@ in
       "hypr/wallpaper.lua".text = wallpaperLua;
       # ── Wallpaper — deployed to ~/.config/hypr/wallpaper.png, set by awww ─────
       "hypr/wallpaper.png".source = cfg.wallpaper;
+      "hypr/wallpaper-portrait.png" = lib.mkIf (cfg.wallpaperPortrait != null) {
+        source = cfg.wallpaperPortrait;
+      };
       # ── Shortcuts cheat-sheet source + style (rendered onto the 2nd monitor) ─
       # @host@ is substituted so the subtitle names the machine the sheet is
       # actually deployed on, rather than whichever host it was written for.

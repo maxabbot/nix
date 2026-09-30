@@ -4,6 +4,7 @@
   inputs,
   nvidia ? false,
   wallpaper,
+  wallpaperPortrait,
   kanshi ? {
     enable = false;
   },
@@ -28,6 +29,7 @@
       nvidia
       kanshi
       wallpaper
+      wallpaperPortrait
       ;
   };
 

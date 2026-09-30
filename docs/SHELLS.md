@@ -155,7 +155,9 @@ caffeine is on.
 
 `awww` is the single wallpaper owner. Every output gets the leaves at login
 from the generated `wallpaper.lua`, then `shortcuts-wallpaper.sh` renders
-`SHORTCUTS.md` into a cheat-sheet over the rotated secondary.
+`SHORTCUTS.md` into a cheat-sheet over the rotated secondary. A host can set
+`wallpaperPortrait` (hmArgs) to put an image there instead — home-desktop does;
+`wallpaper-redress.sh` then restores that image on hotplug, not the cheat-sheet.
 
 **Hotplug.** awww re-attaches a returning output with the last image set for
 *all* outputs — the leaves — so unplugging the portrait monitor used to drop

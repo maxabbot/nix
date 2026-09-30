@@ -29,6 +29,8 @@ case "$transform" in
     *) exit 0 ;;
 esac
 
+PORTRAIT="$HOME/.config/hypr/wallpaper-portrait.png"
+
 # monitor.added can fire before awww has attached to the new output.
 line=""
 for _ in $(seq 20); do
@@ -37,6 +39,13 @@ for _ in $(seq 20); do
     sleep 0.5
 done
 [[ -n "$line" ]] || exit 0
+
+# A host with its own portrait image (wallpaperPortrait) gets that back instead.
+if [[ -e "$PORTRAIT" ]]; then
+    [[ "$line" == *"$PORTRAIT"* ]] && exit 0
+    exec awww img "$PORTRAIT" --outputs "$OUTPUT" --resize crop \
+        --transition-type wipe --transition-fps 60
+fi
 
 # Already right — the event was for the other monitor.
 [[ "$line" == *"$PNG"* ]] && exit 0
