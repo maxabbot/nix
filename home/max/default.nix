@@ -3,6 +3,7 @@
   monitors,
   inputs,
   nvidia ? false,
+  wallpaper,
   kanshi ? {
     enable = false;
   },
@@ -26,6 +27,7 @@
       monitors
       nvidia
       kanshi
+      wallpaper
       ;
   };
 

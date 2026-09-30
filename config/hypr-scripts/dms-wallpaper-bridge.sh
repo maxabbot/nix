@@ -14,7 +14,7 @@
 set -euo pipefail
 
 SESSION="${XDG_STATE_HOME:-$HOME/.local/state}/DankMaterialShell/session.json"
-# Runtime dir, not state: wallpaper.lua resets awww to the leaves at every
+# Runtime dir, not state: wallpaper.lua resets awww to the host wallpaper at every
 # login, so a stamp that outlived the session would wrongly skip re-applying.
 APPLIED="${XDG_RUNTIME_DIR:-/tmp}/hypr/dms-wallpaper-applied"
 
