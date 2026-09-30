@@ -34,13 +34,13 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `db-gui.nix` | DBeaver, Beekeeper, mycli, litecli |
 | `duckdb.nix` | DuckDB |
 | `cloud-tools.nix` | kubectl, helm, opentofu, AWS/Azure/GCP CLIs |
-| `productivity.nix` | Hyprland, SDDM (SilentSDDM), PipeWire, syncthing, core desktop apps |
+| `productivity.nix` | Hyprland, SDDM (SilentSDDM), PipeWire, core desktop apps, syncthing. Syncthing: flake-authoritative (`overrideDevices`/`overrideFolders`, so GUI changes revert on rebuild), one folder `~/SyncDrive` shared with the homelab (hub, tailnet) and the workstations; each workstation's cert/key comes from `secrets/<hostname>.yaml` when that file exists (hosts without one generate their own), so device IDs survive a reinstall. Peers/folders are mirrored in the nixos-homelab repo — change both |
 | `stylix.nix` | Stylix theming (base16 Gruvbox Material, fonts, cursor) |
 | `creative-apps.nix` | GIMP, Inkscape, Krita; LMMS 1.3 (upstream AppImage via `lmms-appimage` flake input, not nixpkgs' stale 1.2.2) + Surge XT for LV2 synths |
 | `streaming-tools.nix` | OBS, Shotcut, RustDesk, gpu-screen-recorder |
 | `google-chrome.nix` | Google Chrome |
 | `onedrive.nix` | OneDrive sync via `onedriver` (FUSE, on-demand files) — run `onedriver-launcher` once per machine to add the account/mountpoint |
-| `pwas.nix` | Declarative "installed" web apps (Teams, Google Chat, WhatsApp, Outlook) via Chrome `--app` mode — `.desktop` entries generated with `makeDesktopItem`, edit the `apps` list here to add/remove |
+| `pwas.nix` | Declarative "installed" web apps (Teams, Google Chat, WhatsApp, Outlook, Immich — tailnet-only) via Chrome `--app` mode — `.desktop` entries generated with `makeDesktopItem`, edit the `apps` list here to add/remove. `icon` is required: a Papirus name, or a store path for apps Papirus lacks (Immich uses the pinned upstream logo) |
 | `comms.nix` | Slack, Discord, Zoom |
 | `nvidia.nix` | NVIDIA driver (open, RTX 40-series) |
 | `cuda.nix` | CUDA / cuDNN stack |
@@ -52,7 +52,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `lan-mouse.nix` | Software KVM firewall port (config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs) |
 | `logitech.nix` | Solaar + logitech-udev-rules for Unifying/Bolt peripherals (MX Ergo S); also owns the Bolt receiver's wakeup-disable udev rule, so it follows the receiver between machines. Tray unit + `config/solaar/rules.yaml` wiring in `modules/home/wm/hyprland.nix` (Solaar owns `config.yaml`, so only `rules.yaml` is declared). Pairing and key diversion are per-machine device state — see the file header |
 | `tailscale.nix` | Tailscale client (reaches the Tailscale-only services in the servers repo) + systemd-resolved for MagicDNS. Log in once per machine with `sudo tailscale up --operator=max` |
-| `sops.nix` | sops-nix secrets (all four hosts): decrypts `secrets/*.yaml` with the host age key at `/var/lib/sops-nix/key.txt`; sets `custom.base.hashedPasswordFile`. Recipients in `.sops.yaml`; admin key shared with the homelab repo |
+| `sops.nix` | sops-nix secrets (all four hosts): decrypts `secrets/*.yaml` with the host age key at `/var/lib/sops-nix/key.txt`; sets `custom.base.hashedPasswordFile`. Recipients in `.sops.yaml`; admin key shared with the homelab repo. Per-host files `secrets/home-desktop.yaml` and `secrets/framework.yaml` (Syncthing identity) are decryptable by admin + that host only |
 | `plymouth.nix` | Boot splash (all four hosts) — Gruvbox bg + spinning snowflake; also themes the framework LUKS prompt. Own script theme (`config/plymouth/`, Stylix's plymouth target disabled): it re-centres every frame, since the displays change mid-splash (simpledrm → real KMS driver) |
 | `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (all four hosts; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
 
@@ -61,7 +61,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 - Wired as a NixOS module via `home-manager.nixosModules.home-manager`.
 - `mkHost` passes `hmArgs` to `home-manager.extraSpecialArgs`. **Do not** add `extraSpecialArgs` inside a host's `default.nix` — this conflicts with `mkHost` and is a recurring footgun.
 - Shared args (git name/email) live in `sharedHmArgs` in `flake.nix`; per-host args override via `sharedHmArgs // hmArgs`.
-- `home/max/` is split into feature files: `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `packages.nix`, `terminal-toys.nix`.
+- `home/max/` is split into feature files: `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `libreoffice.nix`, `packages.nix`, `terminal-toys.nix`.
 - Setting `compositor = "none"` skips Hyprland and the DMS shell entirely via `mkIf`.
 - The desktop shell is DMS (DankMaterialShell): `modules/home/wm/dms.nix` (package patches, declared settings/bars, `shell-dms.service`) and `modules/home/wm/dms-plugins.nix`; design notes in `docs/SHELLS.md`.
 
@@ -98,7 +98,7 @@ All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -e
 ## Security
 
 - Never commit credentials — `github_pat`, `*.iso` are gitignored.
-- Secrets go in sops (`hosts/common/optional/sops.nix`, `secrets/*.yaml`, recipients in `.sops.yaml`) — never a literal in a `.nix` file, which lands in git and the world-readable store. Edit with `sops secrets/common.yaml` on home-desktop. The user password hash is `max-password-hash`; with `mutableUsers` on it only applies at user creation, so existing machines change password with `passwd`. The old inline hash is still in git history — treat that password as exposed.
+- Secrets go in sops (`hosts/common/optional/sops.nix`, `secrets/*.yaml`, recipients in `.sops.yaml`) — never a literal in a `.nix` file, which lands in git and the world-readable store. Edit with `sops secrets/common.yaml` on home-desktop; a new per-host file needs its own `.sops.yaml` rule (above the admin-only catch-all) so it isn't encrypted to every host. The user password hash is `max-password-hash`; with `mutableUsers` on it only applies at user creation, so existing machines change password with `passwd`. The old inline hash is still in git history — treat that password as exposed.
 - `sshKeys = [ ]` is empty by default; populate before enabling `services.openssh` for remote login.
 - Secure boot: on the Limine hosts, set `boot.loader.limine.secureBoot.enable = true` after running `sbctl create-keys` + `sbctl enroll-keys` (see the `limine.nix` header).
 

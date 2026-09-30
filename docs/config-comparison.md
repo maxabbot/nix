@@ -16,7 +16,7 @@ Comparing this repo against [Misterio77/nix-config](https://github.com/Misterio7
 
 ## Home Manager Structure
 
-**This repo**: `home/max/` split into `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `packages.nix`, `terminal-toys.nix`, with shared modules in `modules/home/`. Shared `git` args extracted into `sharedHmArgs` in `flake.nix` so per-host hmArgs only contain what differs.
+**This repo**: `home/max/` split into `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `libreoffice.nix`, `packages.nix`, `terminal-toys.nix`, with shared modules in `modules/home/`. Shared `git` args extracted into `sharedHmArgs` in `flake.nix` so per-host hmArgs only contain what differs.
 
 **Misterio77**: `home/gabriel/features/cli/`, `features/desktop/hyprland/`, `features/games/`, etc. Per-host home files (`alcyone.nix`, `atlas.nix`) import only the features that host needs.
 
