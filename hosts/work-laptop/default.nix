@@ -115,7 +115,6 @@
     # manually created "NixOS Limine" entry (see efibootmgr note below); the
     # generic firmware "USB HDD:" option also reaches it.
     loader.efi.canTouchEfiVariables = false;
-    initrd.systemd.enable = true;
 
     # Windows lives on the ThinkBook's internal NVMe, which has its own ESP —
     # a different disk from the USB we boot Limine off, so `boot():` can't reach
