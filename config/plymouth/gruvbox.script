@@ -1,0 +1,198 @@
+# Plymouth splash (hosts/common/optional/plymouth.nix): bg0 with a spinning
+# snowflake, plus the password/question/message prompts. A template — the
+# @name-rgb@ placeholders are rendered from config/stylix/palette.nix by
+# palette-subst.nix.
+#
+# Adapted from Stylix's plymouth target, which works out the screen centre
+# once at start-up. That is wrong whenever the displays change under a running
+# splash: on home-desktop Plymouth starts on simpledrm's single firmware
+# framebuffer, then nvidia-drm replaces it with two outputs of different sizes
+# and the logo stays where the old centre was. Here layout() runs every frame.
+#
+# Coordinates: sprites live in one box as large as the widest and tallest
+# display, and every display shows the middle of that box. So the box centre is
+# the centre of every screen, but only the middle min_height rows are visible
+# on all of them — text is placed relative to that, not to the box.
+
+### COLOURS ###
+
+# The palette tokens are 0-255 triples; Plymouth wants 0-1.
+fun set_background (r, g, b) {
+  Window.SetBackgroundTopColor(r / 255, g / 255, b / 255);
+  Window.SetBackgroundBottomColor(r / 255, g / 255, b / 255);
+}
+
+fun text_image (text, r, g, b) {
+  return Image.Text(text, r / 255, g / 255, b / 255);
+}
+
+set_background(@bg0-rgb@);
+
+### LAYOUT ###
+
+logo.image = Image("logo.png");
+logo.sprite = Sprite(logo.image);
+
+fun layout () {
+  min_height = Window.GetHeight();
+  for (i = 0; Window.GetHeight(i); i++) {
+    if (Window.GetHeight(i) < min_height) {
+      min_height = Window.GetHeight(i);
+    }
+  }
+
+  global.center_x = Window.GetWidth() / 2;
+  global.center_y = Window.GetHeight() / 2;
+  global.baseline_y = global.center_y + min_height * 0.4;
+  global.message_y = global.center_y + min_height * 0.25;
+
+  logo.sprite.SetPosition(
+    global.center_x - (logo.image.GetWidth() / 2),
+    global.center_y - (logo.image.GetHeight() / 2),
+    1
+  );
+}
+
+layout();
+
+### LOGO ###
+
+logo.spinner_active = 1;
+logo.spinner_index = 0;
+logo.spinner_max_third = 32;
+logo.spinner_max = logo.spinner_max_third * 3;
+
+# One turn in three eased thirds.
+real_index = 0;
+for (third = 0; third < 3; third++) {
+  for (index = 0; index < logo.spinner_max_third; index++) {
+    subthird = index / logo.spinner_max_third;
+    angle = (third + ((Math.Sin(Math.Pi * (subthird - 0.5)) / 2) + 0.5)) / 3;
+    logo.spinner_image[real_index] = logo.image.Rotate(2 * Math.Pi * angle);
+    real_index++;
+  }
+}
+
+fun activate_spinner () {
+  logo.spinner_active = 1;
+}
+
+fun deactivate_spinner () {
+  logo.spinner_active = 0;
+  logo.sprite.SetImage(logo.image);
+}
+
+fun refresh_callback () {
+  layout();
+  if (logo.spinner_active) {
+    logo.spinner_index = (logo.spinner_index + 1) % (logo.spinner_max * 2);
+    logo.sprite.SetImage(logo.spinner_image[Math.Int(logo.spinner_index / 2)]);
+  }
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+### PASSWORD ###
+
+prompt = null;
+bullets = null;
+bullet.image = text_image("•", @fg-rgb@);
+
+fun password_callback (prompt_text, bullet_count) {
+  deactivate_spinner();
+
+  prompt.image = text_image(prompt_text, @fg-rgb@);
+  prompt.sprite = Sprite(prompt.image);
+  prompt.sprite.SetPosition(
+    center_x - (prompt.image.GetWidth() / 2),
+    baseline_y - prompt.image.GetHeight(),
+    1
+  );
+
+  total_width = bullet_count * bullet.image.GetWidth();
+  start_x = center_x - (total_width / 2);
+
+  bullets = null;
+  for (i = 0; i < bullet_count; i++) {
+    bullets[i].sprite = Sprite(bullet.image);
+    bullets[i].sprite.SetPosition(
+      start_x + (i * bullet.image.GetWidth()),
+      baseline_y + bullet.image.GetHeight(),
+      1
+    );
+  }
+}
+
+Plymouth.SetDisplayPasswordFunction(password_callback);
+
+### QUESTION ###
+
+question = null;
+answer = null;
+
+fun question_callback (prompt_text, entry) {
+  deactivate_spinner();
+
+  question = null;
+  answer = null;
+
+  question.image = text_image(prompt_text, @fg-rgb@);
+  question.sprite = Sprite(question.image);
+  question.sprite.SetPosition(
+    center_x - (question.image.GetWidth() / 2),
+    baseline_y - question.image.GetHeight(),
+    1
+  );
+
+  answer.image = text_image(entry, @fg-rgb@);
+  answer.sprite = Sprite(answer.image);
+  answer.sprite.SetPosition(
+    center_x - (answer.image.GetWidth() / 2),
+    baseline_y + answer.image.GetHeight(),
+    1
+  );
+}
+
+Plymouth.SetDisplayQuestionFunction(question_callback);
+
+### MESSAGE ###
+
+message = null;
+
+fun message_callback (text) {
+  message.image = text_image(text, @fg-rgb@);
+  message.sprite = Sprite(message.image);
+  message.sprite.SetPosition(
+    center_x - message.image.GetWidth() / 2,
+    message_y,
+    1
+  );
+}
+
+Plymouth.SetMessageFunction(message_callback);
+
+### NORMAL ###
+
+fun normal_callback () {
+  prompt = null;
+  bullets = null;
+
+  question = null;
+  answer = null;
+
+  message = null;
+
+  activate_spinner();
+}
+
+Plymouth.SetDisplayNormalFunction(normal_callback);
+
+### QUIT ###
+
+fun quit_callback () {
+  prompt = null;
+  bullets = null;
+  deactivate_spinner();
+}
+
+Plymouth.SetQuitFunction(quit_callback);

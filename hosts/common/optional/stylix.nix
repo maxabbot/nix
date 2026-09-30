@@ -117,20 +117,10 @@ in
   # (custom wallpaper + saner terminal slot mapping than the Stylix target).
   stylix.targets.limine.enable = false;
 
-  # Plymouth (plymouth.nix): the target already paints bg0 and fg text, but its
-  # default logo is the stock NixOS-blue snowflake. Swap in the palette-rendered
-  # one — 256 px, the same size as that default. Every arm is the same shape, so
-  # the spin animation still works with the arms coloured differently.
-  stylix.targets.plymouth.logo =
-    let
-      renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
-      svg = pkgs.writeText "nix-snowflake-gruvbox.svg" (
-        renderTheme ../../../config/plymouth/nix-snowflake.svg
-      );
-    in
-    pkgs.runCommand "nix-snowflake-gruvbox.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
-      rsvg-convert -w 256 -h 256 ${svg} -o $out
-    '';
+  # Likewise plymouth.nix: its own script theme, because the Stylix one fixes
+  # the screen centre at start-up and ends up off-centre once the displays
+  # change under it (simpledrm → nvidia-drm on home-desktop).
+  stylix.targets.plymouth.enable = false;
 
   home-manager.sharedModules = [
     {

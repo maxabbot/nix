@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- NixOS snowflake, one Gruvbox Material accent per lambda — the Plymouth
-     logo (hosts/common/optional/stylix.nix). Geometry is nixos-icons'
+     logo (hosts/common/optional/plymouth.nix). Geometry is nixos-icons'
      nix-snowflake-white.svg with the fade gradients dropped; the @name@
      placeholders are rendered from config/stylix/palette.nix by
      palette-subst.nix. The two paths carry no fill of their own, so each
