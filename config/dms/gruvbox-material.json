@@ -4,7 +4,7 @@
     "name": "Gruvbox Material",
     "primary": "@yellow@",
     "primaryText": "@bg0@",
-    "primaryContainer": "@bg2@",
+    "primaryContainer": "@accentBg@",
     "secondary": "@blue@",
     "surface": "@bg0@",
     "surfaceText": "@fg@",
@@ -16,13 +16,17 @@
     "outline": "@bg3@",
     "surfaceContainer": "@bgAlt@",
     "surfaceContainerHigh": "@bg1@",
-    "surfaceContainerHighest": "@bg2@"
+    "surfaceContainerHighest": "@bg2@",
+    "error": "@red@",
+    "warning": "@orange@",
+    "info": "@blue@",
+    "success": "@green@"
   },
   "light": {
     "name": "Gruvbox Material",
     "primary": "@yellow@",
     "primaryText": "@bg0@",
-    "primaryContainer": "@bg2@",
+    "primaryContainer": "@accentBg@",
     "secondary": "@blue@",
     "surface": "@bg0@",
     "surfaceText": "@fg@",
@@ -34,6 +38,10 @@
     "outline": "@bg3@",
     "surfaceContainer": "@bgAlt@",
     "surfaceContainerHigh": "@bg1@",
-    "surfaceContainerHighest": "@bg2@"
+    "surfaceContainerHighest": "@bg2@",
+    "error": "@red@",
+    "warning": "@orange@",
+    "info": "@blue@",
+    "success": "@green@"
   }
 }

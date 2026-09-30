@@ -616,12 +616,12 @@ let
       # blur for Settings, which is an ordinary toplevel.
       popupTransparency = 0.85;
       floatingWindowTransparency = 0.85;
-      # Popout outline in the active-border blue at its ee alpha. The blur*
+      # Popout outline in the active-border yellow at its ee alpha. The blur*
       # names are legacy — DMS draws this border whether or not it blurs. It is
       # fixed at 1px (BlurService.borderWidth), against Hyprland's 2.
       blurBorderEnabled = true;
       blurBorderColor = "custom";
-      blurBorderCustomColor = palette.blue;
+      blurBorderCustomColor = palette.yellow;
       blurBorderOpacity = 0.93;
     };
     # Control Center tiles to strip. Dark Mode would flip DMS off the fixed

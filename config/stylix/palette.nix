@@ -7,7 +7,8 @@
 # gruvbox-material accent names. The base16 slot each value fills is noted
 # so the mapping in stylix.nix stays auditable.
 #
-# Plain-text configs (Theme.qml, hyprlock.conf, shortcuts.css, hyprland.lua)
+# Plain-text configs (hyprlock.conf, shortcuts.css, hyprland.lua, the DMS theme
+# JSON)
 # are rendered from this palette at build time via palette-subst.nix — write
 # @name@ / @name-hex@ / @name-rgb@ placeholders there, never literal hex.
 # Only config/fastfetch/config.jsonc is untemplated (named ANSI colours).
@@ -39,14 +40,9 @@
   brown = "#bd6f3e"; # base0F
 
   # ── Derived surfaces ───────────────────────────────────────────────────────
-  # Tinted blends with no base16 slot and no gruvbox-material name of their own:
-  # hover states and accent/status-tinted fills that sit between two of the
-  # slots above. They live here anyway so Theme.qml can stay free of literal
-  # hex; stylix.nix maps base16 by explicit name, so these are never picked up
-  # as part of the scheme.
-  bgHover = "#383432"; # bg0→bgAlt, hovered list row
-  accentBg = "#2d4a52"; # blue-tinted fill, active tile/button
-  accentBgHover = "#3a5a62"; # accentBg, hovered
-  redDark = "#6b2a2a"; # red on a dark ground, critical toast fill
-  toastBg = "#2d3b3b"; # aqua-tinted fill, default-urgency toast
+  # Tinted blends with no base16 slot and no gruvbox-material name of their
+  # own. They live here anyway so the templates can stay free of literal hex;
+  # stylix.nix maps base16 by explicit name, so these are never picked up as
+  # part of the scheme.
+  accentBg = "#544834"; # bg0→yellow 25%, selected row / text selection (DMS primaryContainer)
 }

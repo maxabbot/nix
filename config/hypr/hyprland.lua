@@ -134,7 +134,7 @@ hl.config({
         layout          = "dwindle",
         allow_tearing   = true,
         col = {
-            active_border   = "rgba(@blue-hex@ee)",
+            active_border   = "rgba(@yellow-hex@ee)",
             inactive_border = "rgba(@bg1-hex@aa)",
         },
     },
@@ -143,14 +143,18 @@ hl.config({
         rounding = 10,
         blur = {
             enabled = true,
-            size    = 3,
-            passes  = 1,
+            -- Strong enough that text behind the 0.75–0.85 alpha surfaces
+            -- (kitty, DMS pills and popouts, fuzzel) stops reading as text.
+            size     = 6,
+            passes   = 3,
+            noise    = 0.02,
+            vibrancy = 0.17,
         },
         shadow = {
             enabled      = true,
-            range        = 4,
+            range        = 20,
             render_power = 3,
-            color        = "rgba(1a1a1aee)",
+            color        = "rgba(@bg0Hard-hex@99)",
         },
     },
 
@@ -183,14 +187,14 @@ hl.config({
 })
 
 -- Animations
-hl.curve("myBezier", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
+-- Ease-out with no overshoot, to sit with DMS's Material easing.
+hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
 
-hl.animation({ leaf = "windows",    enabled = true, speed = 7,  bezier = "myBezier" })
-hl.animation({ leaf = "windowsOut", enabled = true, speed = 7,  bezier = "default",   style = "popin 80%" })
+hl.animation({ leaf = "windows",    enabled = true, speed = 5,  bezier = "easeOutQuint" })
+hl.animation({ leaf = "windowsOut", enabled = true, speed = 5,  bezier = "easeOutQuint", style = "popin 80%" })
 hl.animation({ leaf = "border",     enabled = true, speed = 10, bezier = "default" })
-hl.animation({ leaf = "borderangle",enabled = true, speed = 8,  bezier = "default" })
-hl.animation({ leaf = "fade",       enabled = true, speed = 7,  bezier = "default" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 6,  bezier = "default" })
+hl.animation({ leaf = "fade",       enabled = true, speed = 5,  bezier = "easeOutQuint" })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 5,  bezier = "easeOutQuint" })
 
 ---------------------
 ---- LAYER RULES ----
