@@ -26,6 +26,19 @@ creation_rules:
           - *work-laptop
           - *vm
 
+  # Per-host Syncthing identity (cert + key define the device ID). Only that
+  # host and admin can decrypt: two hosts sharing a cert would be one device.
+  - path_regex: secrets/home-desktop\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *home-desktop
+  - path_regex: secrets/framework\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *framework
+
   # Catch-all: admin only. Per-host files (e.g. secrets/home-desktop.yaml for
   # the B2 credentials) get their own rule above this one. Keep it last.
   - path_regex: secrets/.*\.yaml$

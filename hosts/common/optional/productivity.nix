@@ -7,6 +7,8 @@
 }:
 let
   inherit (config.custom.base) username;
+  hostSecrets = ../../../secrets/${config.networking.hostName}.yaml;
+  hasIdentity = builtins.pathExists hostSecrets;
 in
 {
   imports = [ inputs.silentSDDM.nixosModules.default ];
@@ -124,6 +126,42 @@ in
       user = username;
       dataDir = "/home/${username}";
       configDir = "/home/${username}/.config/syncthing";
+      # Reproducible device ID: the host's cert/key come from sops when
+      # secrets/<hostname>.yaml exists (home-desktop, framework); other hosts
+      # generate their own on first start. One keypair per host — two hosts
+      # sharing a cert would be a single device.
+      cert = lib.mkIf hasIdentity config.sops.secrets."syncthing/cert-pem".path;
+      key = lib.mkIf hasIdentity config.sops.secrets."syncthing/key-pem".path;
+      openDefaultPorts = true; # 22000 sync + 21027/udp LAN discovery
+      # Flake is authoritative, as on the homelab: GUI-added devices/folders
+      # are reverted on rebuild. Device IDs are public, not secrets.
+      overrideDevices = true;
+      overrideFolders = true;
+      settings = {
+        devices = {
+          # ID derived from the homelab's sops-held cert; its ID is stable across
+          # reinstalls. Reached by MagicDNS over the tailnet (nixos-homelab repo).
+          homelab = {
+            id = "KPU5JYT-SBB4ZNY-QQGQ6YN-ML5MWOH-ZIT6D55-3W4GUCV-NAQCO73-LSKHQAT";
+            addresses = [
+              "tcp://homelab:22000"
+              "dynamic"
+            ];
+          };
+          home-desktop.id = "SJMUANY-4V4KATR-SBM36YJ-XZET74T-RECLCYD-PNC6JXD-OSO4R4A-A4GEPQC";
+          # Both workstation IDs are stable: their cert/key live in sops
+          # (secrets/<host>.yaml), so a reinstall rejoins as the same device.
+          framework.id = "TTXBUEW-AA4YQVU-DEC4GOP-2D7QAD7-VBN4F3X-RJPTKUL-JYUUDRO-7AEDPAN";
+        };
+        folders.syncdrive = {
+          path = "/home/${username}/SyncDrive";
+          devices = [
+            "homelab"
+            "home-desktop"
+            "framework"
+          ];
+        };
+      };
     };
     # ── Flatpak ─────────────────────────────────────────────────────────────────
     flatpak.enable = true;
@@ -132,6 +170,18 @@ in
     gvfs.enable = true;
     tumbler.enable = true;
   };
+
+  sops.secrets = lib.mkIf hasIdentity (
+    lib.genAttrs [ "syncthing/cert-pem" "syncthing/key-pem" ] (_: {
+      sopsFile = hostSecrets;
+      owner = username;
+      mode = "0400";
+    })
+  );
+
+  # ~/SyncDrive — the one folder Syncthing shares (add it in the GUI or under
+  # services.syncthing.settings.folders). Created here so it exists on every host.
+  systemd.tmpfiles.rules = [ "d /home/${username}/SyncDrive 0755 ${username} users -" ];
 
   # KWin reads cursor theme/size from kcminputrc, not from sddm.conf [Theme].
   system.activationScripts.sddmCursorConfig = {
