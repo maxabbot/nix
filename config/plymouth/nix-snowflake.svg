@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NixOS snowflake, one Gruvbox Material accent per lambda — the Plymouth
+     logo (hosts/common/optional/stylix.nix). Geometry is nixos-icons'
+     nix-snowflake-white.svg with the fade gradients dropped; the @name@
+     placeholders are rendered from config/stylix/palette.nix by
+     palette-subst.nix. The two paths carry no fill of their own, so each
+     instance takes the fill set on its parent or on its <use>. Clockwise from
+     top-left: red, orange, yellow, green, blue, purple — the same order as the
+     Limine wallpaper's logo. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="535" height="535" viewBox="0 0 501.56252 501.56251">
+  <g transform="translate(-156.48372,537.56136)">
+    <g transform="matrix(0.09048806,0,0,0.09048806,142.32381,-419.8252)">
+      <g transform="matrix(11.047619,0,0,11.047619,-1572.2888,9377.7107)"
+         fill="@blue@" fill-rule="evenodd">
+        <g transform="rotate(-60,226.35754,-449.37199)" fill="@green@">
+          <path id="lambda-a"
+                d="m 449.71876,-420.51322 122.19683,211.67512 -56.15706,0.5268 -32.6236,-56.8692 -32.85645,56.5653 -27.90237,-0.011 -14.29086,-24.6896 46.81047,-80.4901 -33.22946,-57.8257 z" />
+        </g>
+        <path id="lambda-b"
+              d="m 309.54892,-710.38827 122.19683,211.67512 -56.15706,0.5268 -32.6236,-56.8692 -32.85645,56.5653 -27.90237,-0.011 -14.29086,-24.6896 46.81047,-80.4901 -33.22946,-57.8256 z" />
+        <use xlink:href="#lambda-a" fill="@purple@" transform="rotate(60,728.23563,-692.24036)" />
+        <use xlink:href="#lambda-a" fill="@orange@" transform="rotate(180,477.5036,-570.81898)" />
+        <use xlink:href="#lambda-b" fill="@red@" transform="rotate(120,407.33916,-716.08356)" />
+        <use xlink:href="#lambda-b" fill="@yellow@" transform="rotate(-120,407.28823,-715.86995)" />
+      </g>
+    </g>
+  </g>
+</svg>
