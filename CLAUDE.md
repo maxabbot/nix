@@ -77,6 +77,10 @@ sudo nixos-rebuild switch --flake /etc/nixos#<host>
 
 All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -euo pipefail` for new scripts (long-running event loops in `config/hypr-scripts/` intentionally omit it so one failed poll doesn't kill the loop).
 
+### Machine-local state (not in Nix)
+
+- **Obsidian vault:** `~/Obsidian` (moved from `~/Documents/Personal` on 2026-09-30), synced by Obsidian Sync — not Syncthing, so never add it as a Syncthing folder. Only the `obsidian` package is declared (`productivity.nix`); the vault's location lives in `~/.config/obsidian/obsidian.json`, which Obsidian rewrites itself, so it is deliberately not managed by Home Manager. On a fresh machine: "Open folder as vault", then log in to Sync and pick the existing remote vault.
+
 ## Adding things
 
 | Want to add… | Where |
