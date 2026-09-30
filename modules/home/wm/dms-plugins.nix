@@ -171,6 +171,9 @@ let
                      'name: root.canCompareVersions ? (root.isUpToDate ? "check_circle" : "update") : "help"'
   '';
 
+  # Left-clicking a menu row copies the capture straight to the clipboard
+  # (upstream opens the editor); right-click opens the editor instead.
+
   # Print opens quickCapture's bar menu as a floating, centred window, with no
   # bar pill: config/dms/QuickCapturePicker.qml hosts the menu, the daemon gets
   # an instance, and `dms ipc call quickCapture showPicker` toggles it (the
@@ -179,6 +182,9 @@ let
     cp -r ${registry.quickCapture} $out
     chmod -R u+w $out
     cp ${../../../config/dms/QuickCapturePicker.qml} $out/QuickCapturePicker.qml
+    substituteInPlace $out/components/bar/CaptureMenuItem.qml \
+      --replace-fail 'mouse.button === Qt.RightButton ? root.rightClickAction : "edit"' \
+                     'mouse.button === Qt.RightButton ? "edit" : "copy"'
     substituteInPlace $out/QuickCaptureDaemon.qml \
       --replace-fail '        function showHistory(): string {' \
                      '        function showPicker(): string {
