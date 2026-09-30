@@ -1,6 +1,6 @@
 // Hover tooltip for DankBar pills — not part of upstream DMS.
 //
-// modules/home/wm/shell-switcher.nix installs this into the package's Widgets/
+// modules/home/wm/dms.nix installs this into the package's Widgets/
 // directory, adds a `tooltipText` property to Modules/Plugins/BasePill.qml and
 // instantiates one of these per pill; individual bar widgets are then patched
 // to bind tooltipText. An empty tooltipText means no tooltip.

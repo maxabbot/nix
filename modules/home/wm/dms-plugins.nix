@@ -1,6 +1,6 @@
 # modules/home/wm/dms-plugins.nix — DMS plugins, pinned and declared.
 #
-# Not a module: a plain function consumed by shell-switcher.nix (like
+# Not a module: a plain function consumed by dms.nix (like
 # outputs.nix), returning what to deploy, what to enable and which ids to put
 # on the bar.
 #
@@ -104,7 +104,7 @@ let
 
   # Its Lua branch passes the window as a bare "address:0x…" string, which
   # Hyprland accepts and ignores; targets have to go through hl.get_window().
-  # Same fix as the luaDispatch rewrites in shell-switcher.nix.
+  # Same fix as the luaDispatch rewrites in dms.nix.
   hyprWindows = pkgs.runCommand "dms-plugin-dankHyprlandWindows" { } ''
     cp -r ${registry.dankHyprlandWindows} $out
     chmod -R u+w $out
@@ -173,8 +173,8 @@ let
 
   # Print opens quickCapture's bar menu as a floating, centred window, with no
   # bar pill: config/dms/QuickCapturePicker.qml hosts the menu, the daemon gets
-  # an instance, and `dms ipc call quickCapture showPicker` toggles it
-  # (config/hypr-scripts/shell-ipc.sh).
+  # an instance, and `dms ipc call quickCapture showPicker` toggles it (the
+  # Print bind in config/hypr/hyprland.lua).
   quickCapture = pkgs.runCommand "dms-plugin-quickCapture" { } ''
     cp -r ${registry.quickCapture} $out
     chmod -R u+w $out
@@ -224,11 +224,16 @@ let
     }
     {
       # Screenshots with an annotation editor, OCR, QR, scrolling capture and
-      # screen recording. No bar pill or Control Center tile: Print opens its
+      # screen recording. No bar pill, only a Control Center tile: Print opens its
       # menu floating (above). Its tools are in home.packages
-      # (shell-switcher.nix).
+      # (dms.nix).
       id = "quickCapture";
       src = quickCapture;
+    }
+    {
+      # Local: a Control Center tile that opens the keybind overlay (Super+/).
+      id = "keybindsTile";
+      src = ../../../config/dms/keybindsTile;
     }
   ]
   ++ lib.optional osConfig.services.tailscale.enable {
@@ -279,6 +284,6 @@ in
   );
 
   # [ id ] when this host has the plugin, else [ ] — for the bar lists in
-  # shell-switcher.nix.
+  # dms.nix.
   barWidget = id: lib.optional (has id) id;
 }

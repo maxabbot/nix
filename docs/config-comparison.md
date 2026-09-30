@@ -47,7 +47,7 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 | Impermanence | No | Yes (ephemeral btrfs root) | No |
 | Binary cache | No | Self-hosted (cache.m7.rs) | Cachix |
 | Hyprland config | Lua files (+ Nix-generated fragments) | Nix DSL | Lua files |
-| Bar | waybar | waybar | Quickshell (QML) |
+| Bar | DMS (Quickshell) | waybar | Quickshell (QML) |
 | CI | GitHub Actions | Hydra (self-hosted) | GitHub Actions |
 | Git signing | None yet | GPG | GPG |
 | Flake framework | Hand-rolled mkHost | Hand-rolled | flake-parts |
@@ -68,7 +68,7 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); `framework` and `work-laptop` both use one. There is no ThinkBook board module upstream, so `work-laptop` imports `common/cpu/intel/meteor-lake` by path (it isn't a named `nixosModules` output) for its Meteor Lake iGPU stack
 
 **Only matters with multiple real hosts:**
-- **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) and a waybar patch so far
+- **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) so far
 
 **Advanced / optional:**
 - **Impermanence** — ephemeral root forces explicit declaration of all persistent state; very clean but requires upfront planning

@@ -34,7 +34,7 @@ modules/
     apps.nix                     #   Kitty, btop, mpv, Zathura, fuzzel
     theme.nix                    #   Icons, dark-mode prefs, MIME defaults (Stylix owns the rest)
     wm/hyprland.nix              #   Hyprland (compositor-gated)
-    wm/waybar.nix                #   Waybar status bar (compositor-gated)
+    wm/dms.nix                   #   DMS desktop shell: bar, panels, notifications (compositor-gated)
     wm/kanshi.nix                #   Docked/undocked display profiles (laptop)
 home/max/                        # User config entry point + feature files
 overlays/                        # Custom package overrides
@@ -67,7 +67,7 @@ See the table in `CLAUDE.md`. Short version:
 
 ## Theme
 
-**Gruvbox Material Dark** throughout — Hyprland, Waybar, Kitty, tmux, Starship, btop, Zed, Zathura, GTK, Qt.
+**Gruvbox Material Dark** throughout — Hyprland, DMS, Kitty, tmux, Starship, btop, Zed, Zathura, GTK, Qt.
 
 ## License
 

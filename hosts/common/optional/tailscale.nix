@@ -14,8 +14,8 @@
     # Accept subnet routes / exit nodes advertised by the servers. Also relaxes
     # checkReversePath to "loose" so the rpfilter doesn't drop that traffic.
     useRoutingFeatures = "client";
-    # Let the primary user run `tailscale up/down` without sudo — the Quickshell
-    # Control Center tile shells out to exactly that.
+    # Let the primary user run `tailscale up/down` without sudo — the DMS
+    # dankscale plugin shells out to exactly that.
     extraSetFlags = [ "--operator=${config.custom.base.username}" ];
   };
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Gaming mode toggle for Hyprland
-# Kills waybar/notifications, disables blur+animations, and drops every other
+# Stops the desktop shell (bar, notifications), disables blur+animations, and drops every other
 # screen out of the layout entirely, so the gaming panel is the only display
 # Hyprland — and anything running on it — can see.
 # Run again to restore the normal desktop session (screens back).
@@ -47,10 +47,8 @@ if [ -f "$GAMING_STATE_FILE" ]; then
     # saved spec: re-applying a spec (even with an explicit disabled = false)
     # leaves the output config-enabled but not re-attached until a second
     # identical call — observed repeatedly on 0.55.4. `hyprctl reload` re-runs
-    # monitors.lua, which is the Nix-declared layout plus any monitors-local.lua
-    # saved from the Quickshell Monitors page, and re-attaches in about a
-    # second. The cost is that Monitors-page tweaks made this session and never
-    # saved are dropped; "Save layout" there is what makes them survive.
+    # monitors.lua, the Nix-declared layout, and re-attaches in about a second.
+    # The cost is that session-only tweaks from DMS's Displays page are dropped.
     #
     # Reload is asynchronous, and the config's top level only registers event
     # handlers (autostart hangs off hl.on("hyprland.start")), so this re-runs
@@ -80,12 +78,8 @@ if [ -f "$GAMING_STATE_FILE" ]; then
         disown
     fi
 
-    # Restore whichever shell was selected before gaming mode — not
-    # unconditionally this config's own one, since the shell is switchable
-    # (shell-switch.sh / modules/home/wm/shell-switcher.nix). Waybar comes back
-    # with it via shell-own.service's Wants=, and stays down for the other
-    # three, which bring their own bars.
-    bash ~/.config/hypr/scripts/shell-switch.sh restore
+    # Bring the shell back (modules/home/wm/dms.nix).
+    systemctl --user start shell-dms.service
 else
     # Enter gaming mode
 
@@ -103,10 +97,8 @@ else
 
     touch "$GAMING_STATE_FILE"
 
-    # Kill distractions: stop the active shell's unit rather than pkill'ing
-    # Shell.qml, which would miss DMS entirely. Waybar is
-    # PartOf=shell-own.service so it goes down with it.
-    systemctl --user stop "$(bash ~/.config/hypr/scripts/shell-switch.sh unit)"
+    # Kill distractions: the bar and notifications go with the shell's unit.
+    systemctl --user stop shell-dms.service
 
     # Disable compositor effects for performance (eval, not keyword — see above).
     hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } }, animations = { enabled = false } })'

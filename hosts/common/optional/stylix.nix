@@ -135,7 +135,6 @@ in
         tmux.enable = false;
         starship.enable = false;
         btop.enable = false;
-        waybar.enable = false;
         hyprland.enable = false;
         mpv.enable = false;
         vscode.enable = false;

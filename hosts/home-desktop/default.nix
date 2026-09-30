@@ -77,7 +77,7 @@
     displayManager.sddm.wayland.compositor = "kwin";
 
     # ── Audio ──────────────────────────────────────────────────────────────────
-    # Default sink is the Built-in analog line out for general apps (waybar etc).
+    # Default sink is the Built-in analog line out for general apps.
     pipewire.wireplumber.extraConfig = {
       # Make the onboard analog line-out the default sink. WirePlumber picks the
       # highest-priority node as the auto-default, so raise analog above the
@@ -279,7 +279,7 @@
 
   # ── DDC/CI ───────────────────────────────────────────────────────────────────
   # Loads i2c-dev and grants i2c-bus access (the "i2c" group / seat users) so the
-  # Quickshell Display tab can drive external-monitor brightness via ddcutil.
+  # DMS brightness slider can drive external-monitor brightness via ddcutil.
   hardware.i2c.enable = true;
 
   boot = {

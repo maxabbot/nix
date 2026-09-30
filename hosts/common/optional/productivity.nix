@@ -26,7 +26,7 @@ in
     };
 
     # KDE Connect — phone integration (daemon + firewall ports 1714-1764).
-    # Surfaced in the Quickshell Settings "KDE Connect" tab via kdeconnect-cli.
+    # Surfaced on the DMS bar and control centre by the dankKDEConnect plugin.
     kdeconnect.enable = true;
 
     silentSDDM = {
@@ -144,60 +144,6 @@ in
     '';
   };
 
-  # ── SMART health bridge ───────────────────────────────────────────────────────
-  # smartctl needs root (raw device access) but the Quickshell "Drives" panel
-  # runs as the user. A root oneshot dumps a reduced health summary for the fixed
-  # disks to /run/smart/summary.json (RuntimeDirectory → world-readable) every
-  # 5 min; the panel just reads that file — no sudo/setuid in the UI path. SMART
-  # attributes change slowly, so the timer latency is immaterial.
-  systemd = {
-    services.smart-status = {
-      description = "Dump SMART health JSON for the Quickshell Drives panel";
-      path = with pkgs; [
-        smartmontools
-        util-linux
-        jq
-      ];
-      serviceConfig = {
-        Type = "oneshot";
-        RuntimeDirectory = "smart"; # /run/smart, mode 0755 (user-readable)
-        RuntimeDirectoryPreserve = "yes"; # survive between oneshot runs
-        ExecStart = pkgs.writeShellScript "smart-status" ''
-          set -euo pipefail
-          dir=/run/smart
-          # One reduced record per fixed disk; skip removable/hotplug (those are
-          # the panel's mount list, not the health list). smartctl exits non-zero
-          # on benign status bits, so guard the per-disk pipe with `|| true`.
-          {
-            lsblk -dpno NAME,TYPE,RM,HOTPLUG | while read -r dev type rm hp; do
-              [ "$type" = disk ] || continue
-              [ "$rm" = 1 ] && continue
-              [ "$hp" = 1 ] && continue
-              name=$(basename "$dev")
-              smartctl --json=c -H -A -i "$dev" 2>/dev/null \
-                | jq -c --arg n "$name" '{
-                    name:   $n,
-                    model:  (.model_name // $n),
-                    passed: (.smart_status.passed),
-                    temp:   (.temperature.current // null),
-                    wear:   (.nvme_smart_health_information_log.percentage_used // null)
-                  }' || true
-            done
-          } | jq -sc '.' > "$dir/summary.json.tmp"
-          mv "$dir/summary.json.tmp" "$dir/summary.json"
-        '';
-      };
-    };
-
-    timers.smart-status = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "1min";
-        OnUnitActiveSec = "5min";
-      };
-    };
-  };
-
   # /dev/uinput for synthetic input (theclicker autoclicker emits clicks through a
   # virtual device). TAG+="uaccess" grants the active-session user access; the
   # primary user is also in the "input" group (base.nix) to read the keyboard.
@@ -211,26 +157,21 @@ in
 
   environment.systemPackages = with pkgs; [
     grim
-    slurp
-    satty
-    zbar
     awww # wallpaper daemon — NOT "swww"
     wl-clipboard
-    cliphist
     nwg-look
     hyprlock
     playerctl
     brightnessctl
-    grimblast
     hyprpicker # eyedropper colour picker (Super+Shift+P → color-picker.sh)
     bemoji # fuzzel emoji/glyph picker (Super+. → emoji-picker.sh)
-    ddcutil # external-monitor brightness over DDC/CI (Quickshell Display tab)
+    ddcutil # external-monitor brightness over DDC/CI (DMS brightness slider)
     xorg.xrandr # marks the XWayland primary output (hyprland.lua setXPrimary)
-    smartmontools # smartctl — fixed-disk SMART health (smart-status service → Drives tab)
+    smartmontools # smartctl — fixed-disk SMART health
     pavucontrol
     pamixer
     pulseaudio
-    easyeffects # PipeWire EQ / effects (driven from the Quickshell Audio tab)
+    easyeffects # PipeWire EQ / effects
     hypridle
     thunar
     thunar-archive-plugin
@@ -255,7 +196,7 @@ in
     veracrypt
     kdePackages.qtstyleplugin-kvantum
     papirus-icon-theme
-    quickshell
+    quickshell # DMS's runtime — `dms run` finds it on PATH
     theclicker # autoclicker CLI (x11/wayland, evdev/uinput); wrapped as `autoclick`
   ];
 

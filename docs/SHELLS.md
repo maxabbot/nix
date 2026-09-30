@@ -1,79 +1,26 @@
-# Desktop shells
+# Desktop shell
 
-Two shells are installed and swapped with `SUPER+ALT+1` / `SUPER+ALT+3`
-(`SUPER+ALT+S` cycles). They are mutually exclusive systemd user units — both
-register `org.freedesktop.Notifications` — wired up in
-`modules/home/wm/shell-switcher.nix` and driven by
-`config/hypr-scripts/shell-switch.sh`.
+The desktop shell is DMS (DankMaterialShell): bar, notifications, launcher,
+control centre, settings and the rest. It runs as `shell-dms.service`, started
+with the graphical session and declared in `modules/home/wm/dms.nix`
+(`dms-shell` 1.6.2 — unstable's recipe on stable Qt, see
+`overlays/default.nix`). The panel keybinds in `config/hypr/hyprland.lua` call
+`dms ipc …` directly.
 
-| | Own | DMS |
-|---|---|---|
-| Key | `SUPER+ALT+1` | `SUPER+ALT+3` |
-| Unit | `shell-own.service` | `shell-dms.service` |
-| Source | `config/hypr-scripts/quickshell/` | `dms-shell` 1.6.2 (unstable's recipe on stable Qt — `overlays/default.nix`) |
-| Size | 21 panels, 25 QML files, ~7,350 lines | — |
-| Bar | Waybar (separate unit) | built in |
-| Shape | panels only, opened on demand | complete shell |
+Until 2026-09-30 this config also carried its own Quickshell panels and a
+Waybar bar, switchable against DMS (and, before that, Noctalia). They were
+removed; DMS is the only shell. Four things went with them that DMS doesn't
+replace one for one:
 
-Noctalia was the third shell (`SUPER+ALT+2`) until 2026-09; it was removed
-from the config. A machine whose recorded shell is still `noctalia` falls back
-to `own` (`shell-switch.sh current`).
-
-## Panel parity
-
-What DMS has against each panel in `config/hypr-scripts/quickshell/`.
-
-| Own panel | DMS |
-|---|---|
-| `AudioMixer` | ✅ |
-| `BatteryPanel` | ✅ |
-| `BluetoothPanel` | ✅ |
-| `ClipboardPanel` | ✅ popout + `dms clipboard` CLI |
-| `ControlCenter` | ✅ |
-| `DiskPanel` | ✅ |
-| `InputPanel` | ❌ |
-| `KDEConnectPanel` | ❌ |
-| `KeybindCheatSheet` | ✅ `dms keybinds` + cheatsheet UI |
-| `KeyboardPanel` | ⚠️ `keyboard_layout_name` bar widget — click cycles via `hyprctl switchxkblayout`; no switcher page, untested here |
-| `MonitorManager` | ⚠️ Settings → Displays → Configuration applies live, session-only (patched — see below); permanent layout stays in `monitors.lua` |
-| `NetworkPanel` | ✅ |
-| `NixPanel` | ❌ updater is pacman/dnf family only |
-| `NotificationCenter` | ✅ |
-| `NotificationToast` | ✅ |
-| `Osd` | ✅ |
-| `PowerMenu` | ✅ |
-| `ScreenshotOverlay` | ✅ quickCapture plugin: region/window/output/all/last/scroll, editor, OCR, QR, recording |
-| `SysInfoPanel` | ✅ |
-| `WallpaperPicker` | ✅ |
-| `WorkspaceOverview` | ✅ WorkspaceOverlays |
-
-**No DMS counterpart:** `NixPanel`, `MonitorManager`, `KDEConnectPanel`,
-`InputPanel`.
-
-Extras DMS adds that the own panels don't have: an app launcher, a lock
-screen, a dock, a notepad, a printer tab and a window-rules editor.
-
-## Utility mode — keeping the own panels under DMS
-
-The only thing that makes `Shell.qml` exclusive is
-`org.freedesktop.Notifications`; the panels themselves collide with nothing. So
-it runs *alongside* DMS as `shell-utility.service` — the same QML with
-`QS_UTILITY_MODE=1`, which skips the notification server (behind a `Loader`),
-the OSD and the waybar bridge. Every panel keeps working, so
-`SUPER+I/N/Tab/Shift+V/Print` behave the same under both shells.
-
-```
-own → shell-own.service (+ waybar)
-dms → shell-dms.service (+ shell-utility.service)
-```
-
-It `Conflicts` with `shell-own.service` rather than joining the shell units,
-so exactly one `Shell.qml` runs at a time — `qs_manager.sh` addresses it by
-config path, and a second instance would make that IPC ambiguous. The zombie
-watchdog in that script starts whichever of the two fits the selected shell.
-
-This recovers `NixPanel`, `MonitorManager`, `KDEConnectPanel` and `InputPanel`
-under DMS.
+- **Input page** (tap to click, natural scroll, pointer sensitivity at
+  runtime) — no counterpart; those are set in `hyprland.lua`.
+- **Monitors page** with a saved layout (`monitors-local.lua`) — DMS's
+  Displays page applies live but session-only (see below); lasting layout
+  belongs in the host config.
+- **Nix page** with a streaming `nh os switch` — the `nixMonitor` plugin has
+  store size, generations, `nh os switch` and `nh clean user`.
+- **Keyboard layout page** — DMS has a `keyboard_layout_name` bar widget that
+  cycles layouts; not on the bar here.
 
 ## This config's incompatibilities
 
@@ -88,7 +35,7 @@ call sites rewritten. 1.6 routes every dispatch through
 `Services/HyprlandService.qml` and speaks Lua itself when the compositor is on
 it.
 
-One gap remains, patched in `modules/home/wm/shell-switcher.nix` with
+One gap remains, patched in `modules/home/wm/dms.nix` with
 `substituteInPlace --replace-fail` (a version bump that rewords a call site
 fails the build rather than silently restoring dead clicks): window targets
 must go through `hl.get_window("address:0x…")`, and DMS passes a bare address
@@ -109,7 +56,7 @@ load that file. Here `hyprland.lua` is a read-only store symlink whose monitors
 come from `monitors.lua` and never loads it — so upstream, every Apply snapped
 straight back.
 
-`shell-switcher.nix` patches `DisplayConfigState.qml` so Apply (and revert)
+`dms.nix` patches `DisplayConfigState.qml` so Apply (and revert)
 go live over wlr-output-management instead (`WlrOutputService.outputsConfigHeads`
 + `applyConfiguration`, which 1.6 uses for its Aqueous compositor but not
 Hyprland). Changes are
@@ -118,45 +65,38 @@ the next `hyprctl reload` or login. The page's 10-second keep/revert dialog
 still guards it, and revert is live too. Hyprland-only extras (bit depth,
 HDR, colour management) go nowhere. The include warning box, which offers to
 edit `hyprland.lua`, is hidden. Lasting changes belong in
-`monitors.lua` / the host config; `MonitorManager` (own shell) is the other
-working UI.
+`monitors.lua` / the host config.
 
 ### NixOS
 
 DMS's SystemUpdater knows `yay`, `paru`, `pacman` and `dnf` across the arch and
-fedora families only, so it is inert here. `NixPanel` — `/nix` store gauge plus
-a streaming `nh os switch` — has no counterpart in DMS (the `nixMonitor`
-plugin covers part of it).
+fedora families only, so it is inert here. The `nixMonitor` plugin stands in:
+store size, generations, `nh os switch` and `nh clean user`.
 
 ## Theming
 
-Both are Gruvbox Material Dark from `config/stylix/palette.nix`, rendered
-through `config/stylix/palette-subst.nix` at build time:
-
-| Shell | Template | Deployed to |
-|---|---|---|
-| Own | `config/hypr-scripts/quickshell/Theme.qml` | store symlink |
-| DMS | `config/dms/gruvbox-material.json` | `~/.config/DankMaterialShell/` |
+Gruvbox Material Dark from `config/stylix/palette.nix`: the template
+`config/dms/gruvbox-material.json` is rendered through
+`config/stylix/palette-subst.nix` at build time and deployed to
+`~/.config/DankMaterialShell/`.
 
 DMS needs `currentThemeName = "custom"` before it reads `customThemeFile`.
 
 Pointing DMS at its scheme is *not* declarative: `settings.json` is
 owned and rewritten by the shell itself, so a store symlink would cost it every
-setting it tries to save. An activation script in `shell-switcher.nix` merges
+setting it tries to save. An activation script in `dms.nix` merges
 only those keys with `jq` and leaves the rest alone.
 
 ## Declarative configuration
 
-Bar layouts mirror `modules/home/wm/waybar.nix` and are declared in
-`shell-switcher.nix`, applied by the same `jq` merge as the theme keys. Portrait
-and landscape outputs come from the shared `modules/home/wm/outputs.nix`, so
-every bar trims the same screen waybar does.
+Bar layouts are declared in `dms.nix` and applied by the same `jq` merge as
+the theme keys. Portrait and landscape outputs come from
+`modules/home/wm/outputs.nix`; a portrait output gets a trimmed bar.
 
-DMS doesn't have a full set of counterparts:
+What DMS's bar has no widget for:
 
-- no scratchpad, rebuild (`NixPanel`) or keybinds widget
-- no volume / network / bluetooth bar widgets at all — they live behind its
-  control-centre button
+- scratchpad count, rebuild and keybinds
+- volume / network / bluetooth — they live behind its control-centre button
 - camera and mic fold into one `privacyIndicator`; recording has no home
 
 Declaring widget lists means per-widget tweaks made in DMS's own GUI are
@@ -179,31 +119,28 @@ their integrated GPU (a gauge with no temperature — Intel iGPUs don't report
 one). `cpuTemp`, `memUsage`, `gpuTemp` and `diskUsage`
 are left off the bar.
 
-Two more DMS widgets are patched after Noctalia's (the former third shell): the system tray
+Two more DMS widgets are patched after Noctalia's (a shell tried here earlier): the system tray
 treats every icon as hidden, so the bar shows only DMS's overflow chevron and
 the icons open in its popup (a drawer); and the focused window shows its app
 icon instead of the app name on horizontal bars, falling back to the name when
 the icon can't be resolved. The media pill also shows the track's album art
 as a small thumbnail in place of the visualiser, when the player provides it.
 
-DMS ships `showWorkspaceIndex = false` — unlabelled dots — while waybar numbers
-its workspaces, so it is declared on.
+DMS ships `showWorkspaceIndex = false` — unlabelled dots — so it is declared
+on to number the workspaces.
 
-Weather needs a location, and DMS ships none. Waybar's
-`custom/weather` calls `wttr.in` with no location at all and lets it geolocate
-by IP, so auto-locate is the faithful mirror (`location.autoLocate` /
-`useAutoLocation`), and it keeps a home address out of a public repo. DMS caches
+Weather needs a location, and DMS ships none. Auto-locate
+(`useAutoLocation`) geolocates by IP, which keeps a home address out of a
+public repo. DMS caches
 resolved coordinates into its own SessionData.
 
 ## Bar transparency and caffeine
 
-Both run a transparent bar with opaque widget capsules. Waybar's
-`window#waybar` was already `background: transparent`; DMS reads `barConfig.transparency` straight into the background alpha despite
-the name, so `0` is fully transparent and `widgetTransparency = 1` keeps the
-pills.
+The bar is a transparent strip with widget capsules. DMS reads
+`barConfig.transparency` straight into the background alpha despite the name,
+so `0` is fully transparent; `widgetTransparency` is the pills' alpha.
 
-The idle inhibitor starts on under the own shell: Waybar has
-`start-activated`. DMS (1.6.2+) persists its toggle as `idleInhibited` in
+DMS (1.6.2+) persists its idle-inhibitor toggle as `idleInhibited` in
 `~/.local/state/DankMaterialShell/session.json`, so it keeps whatever you last
 chose. Nothing forces it on at startup, since that would override an "off".
 
@@ -211,8 +148,8 @@ DMS's inhibitor is a Wayland idle-inhibitor on its bar, and it doesn't survive
 a resume reliably. DMS rebuilds the bar surfaces on wake, and hypridle then
 locked 5 min later even though `dms ipc inhibit status` still said enabled. So
 hypridle's lock, blank and suspend listeners are wrapped in `unlessCaffeine`
-(`modules/home/wm/hyprland.nix`). Under DMS they ask the IPC first and skip
-while caffeine is on.
+(`modules/home/wm/hyprland.nix`): they ask the IPC first and skip while
+caffeine is on.
 
 ## Wallpaper
 
@@ -288,21 +225,13 @@ Left out on purpose: `displaySettings` (eval-disabled outputs need
 `keybindingCheatSheet` (parses `hyprland.conf`), `screenRecorder`
 (quickCapture records too), `dmsScreenshot` (tried; no editor).
 
-`quickCapture` has no bar pill and no Control Center tile. Print runs
+`quickCapture` has no bar pill, only a Control Center tile. Print runs
 `dms ipc call quickCapture showPicker`, a command `dms-plugins.nix` adds to the
 plugin: it shows the plugin's bar menu (capture modes, outputs, recording) as a
 floating, centred window, hosted by `config/dms/QuickCapturePicker.qml`. Its
 recording, PDF, OCR and QR tools are in `home.packages`.
 
 ## Known issues
-
-**Recorded shell follows systemd.** `shell-ipc.sh` routes keys by the recorded
-shell, and that record used to be written only by the switcher — so starting a
-unit any other way (`systemctl --user restart shell-dms.service`, or
-`shell-restore` after a `nixup`) left it naming the previous shell. Keys then
-went to a shell that wasn't running: Print opened the own screenshot panel
-under DMS. The same `ExecStartPost` now records
-the name, so the file tracks whatever is actually up.
 
 **DMS opened bar popouts on the wrong monitor** (fixed upstream in 1.6).
 `getPreferredBar`'s `break` only left the inner of two loops, so with the
@@ -321,11 +250,10 @@ DP-2. Patched here until 1.6 flattened the loop.
 - `accountsservice` — not enabled. Only feeds DMS the user's avatar and display
   name.
 
-**Wallpaper directory.** `~/Pictures/Wallpapers` is what every picker
-defaults to — the own WallpaperPicker's `$WALLPAPER_DIR` fallback and DMS's —
-and it didn't exist, so they all listed nothing. An
-activation in `hyprland.nix` now creates it and seeds a real copy of the leaves
-(not a symlink: the thumbnail scan uses `find -type f`). It only seeds on first
+**Wallpaper directory.** `~/Pictures/Wallpapers` is what DMS's picker
+defaults to, and it didn't exist, so it listed nothing. An
+activation in `hyprland.nix` now creates it and seeds a real copy of the leaves.
+It only seeds on first
 creation, so removing the image isn't undone by the next `nixup`.
 
 **Harmless log noise:** DMS failing to register as polkit agent

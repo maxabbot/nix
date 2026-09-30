@@ -44,7 +44,7 @@ final: prev: {
   # time. Install the tree to share/quickshell/dms as well and point `dms` at
   # it — DMS's own flake does the same with -c. The env var rather than -c so
   # every subcommand, `dms ipc` included, resolves the same instance; and so
-  # shell-switcher.nix can keep patching files under share/quickshell/dms.
+  # modules/home/wm/dms.nix can keep patching files under share/quickshell/dms.
   # The copy comes from the embed dir (`make sync-shell` output): DankCommon
   # symlink resolved, PAM paths substituted, dev files stripped.
   # Drop once nixpkgs stable carries >= 1.6.

@@ -35,18 +35,14 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 ## Desktop (Hyprland hosts)
 
 - **Hyprland** — tiling Wayland compositor; monitor layout generated from Nix per-host
-- **Waybar** — top status bar (plus a slim bar on portrait monitors); see `WAYBAR.md`
-- **Quickshell** — notification server, OSD, power menu, and the tabbed Settings panel; see `QUICKSHELL.md`
+- **DMS (DankMaterialShell)** — the desktop shell: bar (plus a slim one on portrait monitors), notifications, OSD, launcher (`Super+D`), control centre, settings, power menu, clipboard history; see `docs/SHELLS.md`
 - **SDDM** — display manager (SilentSDDM theme); KWin Wayland greeter on DP-3 only (home-desktop)
-- **fuzzel** — app launcher (`Super+D`), Gruvbox theme
+- **fuzzel** — dmenu for the audio-output and emoji pickers, Gruvbox theme
 - **Kitty** — terminal; JetBrainsMono Nerd Font 13pt, Gruvbox palette, tab bar
 - **awww** — wallpaper daemon
 - **hyprlock** — lockscreen; triggered on idle (5 min) and suspend
 - **hypridle** — idle daemon; locks at 5 min, suspends at 15 min
 - **Gammastep** — night light; shared lat/long from `flake.nix` (Christchurch), 6500K day → 3500K night
-- **Quickshell notification centre** (`Super+N`) — replaces swaync
-- **cliphist** — clipboard history, browsed via the Quickshell clipboard panel (`Super+V`)
-- **Quickshell power menu** (`Super+Shift+E`) — replaces wlogout
 - **Thunar** — file manager (`Super+E`); archive plugin, thumbnail support via tumbler
 - **Yazi** — terminal file manager
 - **Syncthing** — file sync daemon; web UI at `localhost:8384`
@@ -186,6 +182,6 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ## Theme
 
-**Gruvbox Material Dark** everywhere — Hyprland borders, Waybar, Kitty, tmux, Starship, btop, Zed, Zathura, fuzzel, GTK apps, Qt/Kvantum apps.
+**Gruvbox Material Dark** everywhere — Hyprland borders, DMS, Kitty, tmux, Starship, btop, Zed, Zathura, fuzzel, GTK apps, Qt/Kvantum apps.
 
 Palette: `#282828` bg · `#d4be98` fg · `#7daea3` teal · `#d8a657` yellow · `#ea6962` red · `#a9b665` green · `#d3869b` purple

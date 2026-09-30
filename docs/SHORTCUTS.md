@@ -12,11 +12,10 @@ Gruvbox Material Dark · @host@
 | Super + Return | Terminal (kitty) |
 | Super + E | Files (thunar) |
 | Super + B | Browser (zen) |
-| Super + D | Launcher (DMS's under DMS, fuzzel under the own shell) |
+| Super + D | Launcher |
 | Super + Shift + C | Cava visualiser ² |
 | **Windows** | |
 | Super + Q | Close window |
-| Super + Shift + Q | Exit Hyprland |
 | Super + F | Fullscreen |
 | Super + Shift + F | Fake fullscreen |
 | Super + Space | Toggle float |
@@ -46,15 +45,12 @@ Gruvbox Material Dark · @host@
 | Super + Tab | Workspace overview |
 | Super + V | Clipboard history |
 | Super + W | Wallpaper picker |
+| Super + / | Keybind cheat sheet |
 | Super + O | Audio output switcher |
 | Super + Shift + P | Colour picker |
 | Super + Period | Emoji picker |
 | Super + Shift + D | Wake all screens |
 | Super + Shift + G | Toggle gaming mode |
-| **Desktop shell** | |
-| Super + Alt + S | Cycle shell |
-| Super + Alt + 1 | Shell: own (Quickshell + Waybar) |
-| Super + Alt + 3 | Shell: DMS |
 | **Screenshots** | |
 | Print | Screenshot picker |
 
@@ -111,4 +107,3 @@ Gruvbox Material Dark · @host@
 | Idle 15 min | Suspend |
 | Before suspend | Lock screen |
 | Lid close | Suspend ¹ |
-| Super + Shift + D | Wake all screens |

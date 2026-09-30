@@ -1,8 +1,7 @@
 # modules/home/wm/outputs.nix — split the configured monitors into portrait and
 # landscape connectors.
 #
-# Shared by waybar.nix and shell-switcher.nix so every bar agrees on which
-# output gets the trimmed layout. Monitor strings look like
+# Used by dms.nix to decide which output gets the trimmed bar layout. Monitor strings look like
 # "DP-2,3840x2160@60,1920x0,1.5,transform,1"; transform 1/3 = 90°/270° = portrait.
 #
 # Usage: outputs = import ./outputs.nix { inherit lib; } config.custom.hm;

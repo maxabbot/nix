@@ -1,0 +1,13 @@
+{
+    "id": "keybindsTile",
+    "name": "Keybinds",
+    "description": "Control Center tile that opens the Hyprland keybind cheat sheet",
+    "version": "1.0.0",
+    "author": "max",
+    "icon": "keyboard",
+    "type": "widget",
+    "capabilities": ["control-center"],
+    "component": "./KeybindsTile.qml",
+    "requires_dms": ">=1.6.0",
+    "permissions": ["process"]
+}

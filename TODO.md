@@ -47,8 +47,8 @@ nix run github:nix-community/nixos-anywhere -- \
 ## Post-install checklist
 
 - [ ] Hyprland starts, SDDM greeter appears on correct monitor
-- [ ] Waybar visible with correct Gruvbox colours
-- [ ] Fuzzel opens with `Super+D`
+- [ ] DMS bar visible with correct Gruvbox colours
+- [ ] DMS launcher opens with `Super+D`
 - [ ] Gruvbox Material theme applied in GTK apps
 - [ ] Kitty opens with correct font and colours
 - [ ] `git log` shows Gruvbox delta diffs
@@ -58,7 +58,7 @@ nix run github:nix-community/nixos-anywhere -- \
 - [ ] `nvidia-smi` shows GPU
 - [ ] Steam launches, Proton available
 - [ ] Syncthing UI at `localhost:8384`
-- [ ] Quickshell notifications work (`notify-send test` — served by Shell.qml's NotificationServer)
+- [ ] Notifications work (`notify-send test` — served by DMS)
 - [ ] Apollo streaming UI at `https://localhost:47990`
 
 ---

@@ -62,7 +62,8 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 - `mkHost` passes `hmArgs` to `home-manager.extraSpecialArgs`. **Do not** add `extraSpecialArgs` inside a host's `default.nix` — this conflicts with `mkHost` and is a recurring footgun.
 - Shared args (git name/email) live in `sharedHmArgs` in `flake.nix`; per-host args override via `sharedHmArgs // hmArgs`.
 - `home/max/` is split into feature files: `default.nix` (entry), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `packages.nix`, `terminal-toys.nix`.
-- Setting `compositor = "none"` skips Hyprland and Waybar entirely via `mkIf`.
+- Setting `compositor = "none"` skips Hyprland and the DMS shell entirely via `mkIf`.
+- The desktop shell is DMS (DankMaterialShell): `modules/home/wm/dms.nix` (package patches, declared settings/bars, `shell-dms.service`) and `modules/home/wm/dms-plugins.nix`; design notes in `docs/SHELLS.md`.
 
 ### Rebuild
 
@@ -86,7 +87,8 @@ All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -e
 | User package | `home.packages` in `home/max/packages.nix` |
 | New HM feature | New file in `home/max/`, add to imports in `home/max/default.nix` |
 | Plain-text dotfile | `config/<app>/...` + wire via `xdg.configFile` |
-| Hypr/Quickshell script or QML | `config/hypr-scripts/` — deployed as a store symlink to `~/.config/hypr/scripts/`, so edits need `git add` + `nixup` (+ quickshell restart for QML) to take effect |
+| Hypr script | `config/hypr-scripts/` — deployed as a store symlink to `~/.config/hypr/scripts/`, so edits need `git add` + `nixup` to take effect |
+| DMS widget / plugin QML | `config/dms/` — installed into the DMS package or a plugin by `modules/home/wm/dms.nix` / `dms-plugins.nix`; needs `nixup` + `systemctl --user restart shell-dms` |
 | Package not in nixpkgs | Add derivation under `pkgs/<name>/`, expose via `callPackage` in `overlays/default.nix` |
 
 ## Security
@@ -98,6 +100,6 @@ All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -e
 
 ## Theme
 
-**Gruvbox Material Dark** across all apps. `config/stylix/palette.nix` is the single source of truth for colour values: Stylix (`hosts/common/optional/stylix.nix`) derives its base16 scheme from it and owns GTK/Qt/fonts/cursor; apps with richer needs (kitty, tmux, Starship, waybar, cava, spotify-player, limine, plymouth) have their Stylix targets disabled and interpolate the palette in their Nix modules instead. Plain-text configs (`config/hypr-scripts/quickshell/Theme.qml`, `hyprlock.conf`, `shortcuts.css`, `hyprland.lua`, `config/plymouth/*`, plus `config/dms/gruvbox-material.json` for the switchable DMS shell) are templates: `config/stylix/palette-subst.nix` renders their `@name@` / `@name-hex@` / `@name-rgb@` placeholders from the palette at build time — write placeholders there, never literal hex. Only `config/fastfetch/config.jsonc` is untemplated (named ANSI colours, nothing to sync).
+**Gruvbox Material Dark** across all apps. `config/stylix/palette.nix` is the single source of truth for colour values: Stylix (`hosts/common/optional/stylix.nix`) derives its base16 scheme from it and owns GTK/Qt/fonts/cursor; apps with richer needs (kitty, tmux, Starship, cava, spotify-player, limine, plymouth) have their Stylix targets disabled and interpolate the palette in their Nix modules instead. Plain-text configs (`hyprlock.conf`, `shortcuts.css`, `hyprland.lua`, `config/plymouth/*`, plus `config/dms/gruvbox-material.json` for the DMS shell) are templates: `config/stylix/palette-subst.nix` renders their `@name@` / `@name-hex@` / `@name-rgb@` placeholders from the palette at build time — write placeholders there, never literal hex. Only `config/fastfetch/config.jsonc` is untemplated (named ANSI colours, nothing to sync).
 
 One `@token@` is *not* a palette placeholder: `docs/SHORTCUTS.md` carries `@host@`, substituted with the hostname in `modules/home/wm/hyprland.nix` (via `osConfig`) so the cheat sheet names the machine it's deployed on. Don't route that file through `palette-subst.nix`.

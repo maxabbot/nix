@@ -1,10 +1,10 @@
 // QuickCapturePicker.qml — quickCapture's bar menu as a floating, centred
-// window: what Print opens under DMS, with no bar pill and no Control Center.
+// window: what Print opens under DMS, with no bar pill.
 //
 // Installed into the quickCapture plugin directory by
 // modules/home/wm/dms-plugins.nix, which also gives QuickCaptureDaemon.qml a
 // `picker` instance and a `showPicker` IPC command
-// (`dms ipc call quickCapture showPicker`, see config/hypr-scripts/shell-ipc.sh).
+// (`dms ipc call quickCapture showPicker`, the Print bind in config/hypr/hyprland.lua).
 //
 // CaptureMenu (components/bar/) expects to be the plugin's bar popout and reads
 // its state from the bar widget, QuickCaptureWidget.qml. `host` below provides

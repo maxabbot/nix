@@ -116,8 +116,8 @@ in
       gnome.gnome-keyring.enable = true;
       upower.enable = true;
 
-      # Let the Quickshell Battery tab write the laptop charge-limit threshold
-      # (e.g. Framework) without root. No-ops on machines lacking the attribute.
+      # Let the user write the laptop charge-limit threshold (e.g. Framework)
+      # without root. No-ops on machines lacking the attribute.
       udev.extraRules = ''
         ACTION=="add|change", SUBSYSTEM=="power_supply", KERNEL=="BAT*", RUN+="${pkgs.coreutils}/bin/chmod 0666 /sys/class/power_supply/%k/charge_control_end_threshold"
       '';
@@ -237,8 +237,6 @@ in
 
       # Monitoring
       lm_sensors
-
-      # upower — needed by Waybar battery module
     ];
 
     # ── Fonts ──────────────────────────────────────────────────────────────────

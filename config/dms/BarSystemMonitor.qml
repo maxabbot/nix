@@ -4,7 +4,7 @@
 // show their temperature; exact figures, and root filesystem usage, are in
 // the tooltip.
 //
-// modules/home/wm/shell-switcher.nix installs this OVER the package's
+// modules/home/wm/dms.nix installs this OVER the package's
 // Modules/DankBar/Widgets/CpuMonitor.qml, so it renders wherever the
 // "cpuUsage" id is on a bar and DankBarContent's cpuUsageComponent wiring
 // (bar geometry, popoutTarget, onCpuClicked → process list) applies

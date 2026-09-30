@@ -1,7 +1,7 @@
 # config/stylix/palette.nix — Gruvbox Material Dark, the single source of truth
 # for every colour in the repo. Plain attrset: `import`-able from both NixOS
 # modules (stylix.nix derives the base16 scheme from it) and Home Manager
-# modules (waybar, tmux, starship, kitty, cava, spotify-player interpolate it).
+# modules (tmux, starship, kitty, cava, spotify-player interpolate it).
 #
 # Names follow classic Gruvbox structural slots (bg0..bg4, fg) plus the
 # gruvbox-material accent names. The base16 slot each value fills is noted
@@ -13,7 +13,7 @@
 # Only config/fastfetch/config.jsonc is untemplated (named ANSI colours).
 {
   # ── Backgrounds (dark → light) ─────────────────────────────────────────────
-  bg0Hard = "#1d2021"; # hard background (waybar bar, active-pill text)
+  bg0Hard = "#1d2021"; # hard background (darkest surface, active-pill text)
   bg0 = "#282828"; # base00       default background
   bgAlt = "#32302f"; # soft background (inputs, tiles)
   bg1 = "#3c3836"; # base01       status bar / capsule background

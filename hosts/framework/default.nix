@@ -43,8 +43,8 @@
 
   # ── Base ─────────────────────────────────────────────────────────────────────
   # powerManagement is left at base.nix's default (power-profiles-daemon) rather
-  # than work-laptop's TLP: the Quickshell control centre drives profiles through
-  # `powerprofilesctl`, which only exists with power-profiles-daemon, and
+  # than work-laptop's TLP: the DMS battery popout's profile buttons (batteryPlus)
+  # need power-profiles-daemon, and
   # nixos-hardware's laptop module already backs off TLP when ppd is on. The
   # powersave specialisation below is where TLP's finer-grained knobs live, for
   # the days that need them.
@@ -62,8 +62,8 @@
   # derives `power-profiles-daemon.enable` and `tlp.enable` from it).
   #
   # Trade-off worth knowing before picking this entry: with ppd gone, the
-  # Quickshell control centre's profile toggle stops working — it shells out to
-  # `powerprofilesctl`, which no longer exists. Power management becomes purely
+  # DMS battery popout's profile buttons stop working — they need
+  # power-profiles-daemon. Power management becomes purely
   # declarative until you reboot into the default generation.
   specialisation.powersave.configuration = {
     system.nixos.tags = [ "powersave" ];

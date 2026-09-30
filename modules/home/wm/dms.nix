@@ -1,18 +1,8 @@
-# modules/home/wm/shell-switcher.nix — swap between two desktop shells.
+# modules/home/wm/dms.nix — the desktop shell: DMS (DankMaterialShell).
 #
-# Installs DMS (DankMaterialShell) alongside this config's own Quickshell
-# panels, and gives each one a systemd user unit.
-#
-# The units are mutually exclusive via Conflicts=: both shells register
-# org.freedesktop.Notifications, so two running at once means one of them
-# silently loses its notification daemon (and both draw a bar). Letting
-# systemd enforce that — rather than pkill in the switcher script — makes the
-# swap a single transaction: starting one unit stops the incumbent first.
-#
-# Driven by config/hypr-scripts/shell-switch.sh, bound to SUPER+ALT+1 (own),
-# SUPER+ALT+3 (DMS) and SUPER+ALT+S in config/hypr/hyprland.lua. The choice is recorded under
-# $XDG_STATE_HOME/hypr/active-shell and re-applied at login by
-# shell-restore.service.
+# Installs DMS, patches the places where it doesn't fit this config (Lua
+# dispatch, the read-only hyprland.lua, a few bar widgets) and runs it as
+# shell-dms.service, started with the graphical session.
 #
 # DMS is themed from config/stylix/palette.nix like every other app here, via
 # its own custom-scheme mechanism (see "Theming" below), and hands its
@@ -44,10 +34,9 @@ let
       ;
   };
 
+  # Scripts here are deployed 0444 (see hyprland.nix), so invoke them through
+  # bash rather than exec'ing directly — a direct exec dies with 126.
   scriptsDir = "${config.home.homeDirectory}/.config/hypr/scripts";
-  # Deployed 0444 (see hyprland.nix), so invoke through bash rather than
-  # exec'ing the script directly — a direct exec dies with 126.
-  switch = "${pkgs.bash}/bin/bash ${scriptsDir}/shell-switch.sh";
 
   # ── Lua dispatch fixups ─────────────────────────────────────────────────────
   # DMS 1.6 routes every Hyprland dispatch through Services/HyprlandService.qml
@@ -303,6 +292,49 @@ let
           '';
         }
       ]
+      # Not a dispatch fix: friendlier key names in the keybind overlay
+      # (Super+/). It prints Hyprland's raw names; mouse buttons and the wheel
+      # get words, as on the cheat-sheet wallpaper, and the XF86 media keys get
+      # Nerd Font icons (DMS's mono font has none, so those labels name the
+      # system Nerd Font).
+      ++ (
+        let
+          pad = lib.concatStrings (lib.genList (_: " ") 64);
+          cp = c: "String.fromCodePoint(0x${c})";
+          labels = lib.concatStringsSep ", " (
+            lib.mapAttrsToList (k: v: ''"${k}": ${v}'') {
+              "mouse:272" = ''"Drag"'';
+              "mouse:273" = ''"Right-drag"'';
+              WheelScrollDown = ''"Scroll down"'';
+              WheelScrollUp = ''"Scroll up"'';
+              XF86AudioRaiseVolume = cp "F075D";
+              XF86AudioLowerVolume = cp "F075E";
+              XF86AudioMute = cp "F0581";
+              XF86AudioPlay = cp "F040E";
+              XF86AudioNext = cp "F04AD";
+              XF86AudioPrev = cp "F04AE";
+              XF86MonBrightnessUp = cp "F00E0";
+              XF86MonBrightnessDown = cp "F00DE";
+            }
+          );
+        in
+        [
+          {
+            file = "share/quickshell/dms/Modals/KeybindsContent.qml";
+            from =
+              ''text: (modelData.key || "").replace(/\+/g, " + ")''
+              + "\n${pad}font.pixelSize: Theme.fontSizeSmall\n";
+            to =
+              lib.concatMapStrings (l: "${l}\n${pad}") [
+                "readonly property var keyLabels: ({ ${labels} })"
+                ''readonly property bool iconKey: (modelData.key || "").indexOf("XF86") !== -1''
+                ''text: (modelData.key || "").split("+").map(k => keyLabels[k] ?? k).join(" + ")''
+                ''font.family: iconKey ? "JetBrainsMono Nerd Font" : resolvedFontFamily''
+              ]
+              + "font.pixelSize: iconKey ? Theme.fontSizeLarge : Theme.fontSizeSmall\n";
+          }
+        ]
+      )
       # Not a dispatch fix: Settings as a dropdown. Upstream's is a movable,
       # maximisable window; here Hyprland places it under the bar at the top
       # right (the dms-settings-dropdown rule in hyprland.lua) and it closes
@@ -461,17 +493,13 @@ let
         '';
       });
 
-  # ── Bar layouts, mirroring modules/home/wm/waybar.nix ───────────────────────
-  # Waybar's main bar is  workspaces/scratchpad/window | clock/weather |
-  # mpris, {cpu,mem,temp,gpu}, disk, {recording,camera,mic,audio,bt,net},
-  # battery, idle-inhibitor, tray, rebuild, keybinds, notifications, settings —
-  # and a trimmed portrait bar. DMS lacks some counterparts:
-  #   • no scratchpad, rebuild (NixPanel) or keybinds widget
-  #   • no volume/network/bluetooth bar widgets at all (they live behind its
-  #     control centre button)
-  #   • camera+mic fold into one privacyIndicator; recording has no home
-  # Declaring these means per-widget tweaks made in a shell's own GUI are
-  # overwritten on the next nixup — the arrays are replaced, not merged.
+  # ── Bar layouts ─────────────────────────────────────────────────────────────
+  # The main bar, and a trimmed one for portrait outputs. Declaring these means
+  # per-widget tweaks made in DMS's own GUI are overwritten on the next nixup —
+  # the arrays are replaced, not merged. DMS has no volume/network/bluetooth
+  # bar widgets (they live behind its control centre button), and camera + mic
+  # fold into one privacyIndicator.
+  #
   # DMS's own default barConfigs[0], copied verbatim from dms-shell 1.6.2's
   # Common/settings/SettingsSpec.js. Only used to seed a settings.json that has
   # no barConfigs yet — see the activation script below.
@@ -570,7 +598,7 @@ let
       useAutoLocation = true;
       weatherEnabled = true;
       showWeather = true;
-      # Waybar numbers its workspaces; DMS ships unlabelled dots.
+      # DMS ships unlabelled dots; number the workspaces instead.
       showWorkspaceIndex = true;
       # Exactly what DMS's "Disable Built-in Wallpapers" toggle writes: no screen
       # renders its own wallpaper layer, so a pick can't stack over awww.
@@ -606,12 +634,33 @@ let
       "nightMode"
     ];
     # Plugin tiles appended when missing — only on hosts with the plugin.
-    # Once there, their position and width are DMS's to keep.
-    controlCenterAdd = map (id: {
-      id = "plugin_${id}";
-      enabled = true;
-      width = 50;
-    }) (dmsPlugins.barWidget "batteryPlus");
+    # Once there, their width and other per-tile settings are DMS's to keep.
+    controlCenterAdd =
+      map
+        (id: {
+          id = "plugin_${id}";
+          enabled = true;
+          width = 50;
+        })
+        (
+          dmsPlugins.barWidget "batteryPlus"
+          ++ dmsPlugins.barWidget "quickCapture"
+          ++ dmsPlugins.barWidget "keybindsTile"
+        );
+    # Tile order, re-applied on every nixup: a drag in DMS's edit mode lasts
+    # only until the next rebuild. Tiles not listed (added in the GUI) keep
+    # their relative order after these; listed ones a host lacks are skipped.
+    controlCenterOrder = [
+      "volumeSlider"
+      "brightnessSlider"
+      "wifi"
+      "bluetooth"
+      "audioOutput"
+      "audioInput"
+      "plugin_batteryPlus"
+      "plugin_quickCapture"
+      "plugin_keybindsTile"
+    ];
     bars = {
       # "all" when there is nothing to split, so single-output hosts still show a bar.
       mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
@@ -670,85 +719,31 @@ let
   dmsDecl = pkgs.writeText "dms-declared.json" (builtins.toJSON dmsDeclared);
   dmsPluginDecl = pkgs.writeText "dms-plugins-declared.json" (builtins.toJSON dmsPlugins.settings);
 
-  shells = {
-    own = {
-      description = "Desktop shell: this config's Quickshell panels + Waybar";
-      exec = "${pkgs.quickshell}/bin/quickshell -p ${scriptsDir}/quickshell/Shell.qml";
-      # Waybar is this shell's bar; it is PartOf shell-own.service (see
-      # waybar.nix) so it comes and goes with it.
-      wants = [ "waybar.service" ];
-    };
-    dms = {
-      description = "Desktop shell: DankMaterialShell";
-      # --session is upstream's own systemd invocation: stays in the
-      # foreground and expects to be session-managed.
-      exec = "${dms-shell}/bin/dms run --session";
-      wants = [
-        "shell-utility.service"
+  shellUnit = {
+    Unit = {
+      Description = "Desktop shell: DankMaterialShell";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      Wants = [
         # Watch for wallpaper picks, and apply any existing one once at start.
         "dms-wallpaper-bridge.path"
         "dms-wallpaper-bridge.service"
       ];
     };
-  };
-
-  # Same Shell.qml as shell-own.service, run alongside DMS so the panels it has
-  # no counterpart for (Nix, Monitors, KDEConnect, Input) stay on their
-  # keybinds.
-  # QS_UTILITY_MODE makes it skip the notification server, the OSD and the
-  # waybar bridge, which are the only parts that would fight the active shell.
-  #
-  # It Conflicts with shell-own.service rather than joining the three-way web:
-  # exactly one Shell.qml may run, because qs_manager.sh addresses it by config
-  # path and a second instance would make that IPC ambiguous.
-  utilityUnit = {
-    Unit = {
-      Description = "Own Quickshell panels, alongside DMS";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      Requisite = [ "graphical-session.target" ];
-      Conflicts = [ "shell-own.service" ];
-    };
     Service = {
       Type = "simple";
-      Environment = [ "QS_UTILITY_MODE=1" ];
-      ExecStart = "${pkgs.quickshell}/bin/quickshell -p ${scriptsDir}/quickshell/Shell.qml";
-      SuccessExitStatus = "143 SIGTERM";
-      Restart = "on-failure";
-      RestartSec = 2;
-      Slice = "session.slice";
-    };
-  };
-
-  unitName = name: "shell-${name}.service";
-  allUnits = map unitName (lib.attrNames shells);
-
-  mkShellUnit = name: shell: {
-    Unit = {
-      Description = shell.description;
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      Requisite = [ "graphical-session.target" ];
-      Conflicts =
-        lib.filter (u: u != unitName name) allUnits ++ lib.optional (name == "own") "shell-utility.service";
-      Wants = shell.wants;
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = shell.exec;
-      # Record the running shell from the unit itself, so it holds however the
-      # shell was started (see `started` in shell-switch.sh).
-      ExecStartPost = "${switch} started ${name}";
+      # --session is upstream's own systemd invocation: stays in the
+      # foreground and expects to be session-managed.
+      ExecStart = "${dms-shell}/bin/dms run --session";
       # dms exits 143 on SIGTERM rather than dying by signal, so without this
-      # every Conflicts-driven swap leaves the unit in `failed` — which then
-      # hides a genuine crash. Restart still covers the real thing.
+      # every stop (gaming mode, a rebuild) leaves the unit in `failed` — which
+      # then hides a genuine crash. Restart still covers the real thing.
       SuccessExitStatus = "143 SIGTERM";
       Restart = "on-failure";
       RestartSec = 2;
       Slice = "session.slice";
     };
-    # Deliberately no Install.WantedBy: nothing may autostart a shell, or the
-    # login would race all three. shell-restore.service picks exactly one.
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 in
 {
@@ -845,6 +840,9 @@ in
          | reduce $d.controlCenterAdd[] as $w (.;
              if any(.controlCenterWidgets[]; .id == $w.id)
              then . else .controlCenterWidgets += [$w] end)
+         | .controlCenterWidgets |= (. as $w
+             | [ $d.controlCenterOrder[] as $id | $w[] | select(.id == $id) ]
+             + [ $w[] | select(.id as $i | $d.controlCenterOrder | index($i) | not) ])
          # barConfigs is written by DMS itself, not by the empty-object seed in
          # apply(), so on a machine where DMS has never run there was nothing
          # here to rewrite: the bar came up with stock widgets and DMSs own
@@ -879,66 +877,45 @@ in
            else . end'
     '';
 
-    systemd.user.services =
-      lib.mapAttrs' (name: shell: {
-        name = "shell-${name}";
-        value = mkShellUnit name shell;
-      }) shells
-      // {
-        shell-utility = utilityUnit;
+    systemd.user.services = {
+      shell-dms = shellUnit;
 
-        # Applies wallpapers picked in DMS through awww; see the script header.
-        dms-wallpaper-bridge = {
-          Unit.Description = "Apply DMS wallpaper picks through awww";
-          Service = {
-            Type = "oneshot";
-            Environment = [
-              "PORTRAIT_OUTPUTS=${lib.concatStringsSep "," outputs.portraitOutputs}"
-              # A user unit doesn't inherit the login shell's PATH.
-              "PATH=${
-                lib.makeBinPath [
-                  pkgs.jq
-                  pkgs.coreutils
-                  pkgs.gnugrep
-                ]
-              }:/run/current-system/sw/bin:${config.home.profileDirectory}/bin"
-            ];
-            ExecStart = "${pkgs.bash}/bin/bash ${scriptsDir}/dms-wallpaper-bridge.sh";
-          };
-        };
-
-        # File index behind the DMS launcher's file search. Same unit dsearch
-        # ships in lib/systemd/user (HM doesn't pick those up). Runs whichever
-        # shell is active; it's idle apart from inotify once the index is built.
-        # Listens on a unix socket plus 127.0.0.1:43654.
-        dsearch = {
-          Unit = {
-            Description = "dsearch filesystem search service";
-            Documentation = "https://github.com/AvengeMedia/dsearch";
-          };
-          Service = {
-            ExecStart = "${lib.getExe pkgs.dsearch} serve";
-            Restart = "on-failure";
-            RestartSec = 5;
-          };
-          Install.WantedBy = [ "default.target" ];
-        };
-
-        # Re-applies the recorded choice at login, so a switch survives logout.
-        # The script uses `systemctl --user --no-block start`: a blocking start
-        # from inside a unit this same manager is running would deadlock.
-        shell-restore = {
-          Unit = {
-            Description = "Start the desktop shell recorded by shell-switch.sh";
-            PartOf = [ "graphical-session.target" ];
-            After = [ "graphical-session.target" ];
-          };
-          Service = {
-            Type = "oneshot";
-            ExecStart = "${switch} restore";
-          };
-          Install.WantedBy = [ "graphical-session.target" ];
+      # Applies wallpapers picked in DMS through awww; see the script header.
+      dms-wallpaper-bridge = {
+        Unit.Description = "Apply DMS wallpaper picks through awww";
+        Service = {
+          Type = "oneshot";
+          Environment = [
+            "PORTRAIT_OUTPUTS=${lib.concatStringsSep "," outputs.portraitOutputs}"
+            # A user unit doesn't inherit the login shell's PATH.
+            "PATH=${
+              lib.makeBinPath [
+                pkgs.jq
+                pkgs.coreutils
+                pkgs.gnugrep
+              ]
+            }:/run/current-system/sw/bin:${config.home.profileDirectory}/bin"
+          ];
+          ExecStart = "${pkgs.bash}/bin/bash ${scriptsDir}/dms-wallpaper-bridge.sh";
         };
       };
+
+      # File index behind the DMS launcher's file search. Same unit dsearch
+      # ships in lib/systemd/user (HM doesn't pick those up). It's idle
+      # apart from inotify once the index is built.
+      # Listens on a unix socket plus 127.0.0.1:43654.
+      dsearch = {
+        Unit = {
+          Description = "dsearch filesystem search service";
+          Documentation = "https://github.com/AvengeMedia/dsearch";
+        };
+        Service = {
+          ExecStart = "${lib.getExe pkgs.dsearch} serve";
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+        Install.WantedBy = [ "default.target" ];
+      };
+    };
   };
 }

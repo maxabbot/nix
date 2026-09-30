@@ -6,7 +6,7 @@
 # which is what its "Disable Built-in Wallpapers" toggle writes) so awww stays
 # the single wallpaper owner. But a pick in DMS's picker then only lands in its
 # session.json and nothing draws it. dms-wallpaper-bridge.path watches that
-# file and runs this; see modules/home/wm/shell-switcher.nix.
+# file and runs this; see modules/home/wm/dms.nix.
 #
 # A global pick skips the outputs in $PORTRAIT_OUTPUTS, which carry the
 # rendered cheat-sheet. A per-monitor pick is honoured exactly as given.
