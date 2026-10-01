@@ -32,7 +32,7 @@ modules/
   home/                          # Home Manager modules
     shell.nix                    #   Zsh, Starship, fzf, zoxide, atuin, tmux
     editor.nix                   #   Zed (primary) + VSCode (backup)
-    apps.nix                     #   Kitty, btop, mpv, Zathura, fuzzel
+    apps.nix                     #   Kitty, btop, mpv, Zathura
     theme.nix                    #   Icons, dark-mode prefs, MIME defaults (Stylix owns the rest)
     wm/hyprland.nix              #   Hyprland (compositor-gated)
     wm/dms.nix                   #   DMS desktop shell: bar, panels, notifications (compositor-gated)

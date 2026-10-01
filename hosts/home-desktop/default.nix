@@ -82,7 +82,7 @@
       # Make the onboard analog line-out the default sink. WirePlumber picks the
       # highest-priority node as the auto-default, so raise analog above the
       # NVIDIA HDMI outputs. NOTE: a *manually* chosen default (pavucontrol or the
-      # Super+O switcher) is stored in ~/.local/state/wireplumber/default-nodes
+      # DMS output picker) is stored in ~/.local/state/wireplumber/default-nodes
       # and overrides priority — if HDMI ever sticks, clear it with
       # `wpctl set-default <analog-id>`.
       "20-default-sink" = {

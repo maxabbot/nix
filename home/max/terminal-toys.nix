@@ -23,8 +23,8 @@ in
     harlequin # SQL IDE in the terminal (DuckDB/SQLite/Postgres/…)
   ];
 
-  # spotify-player ships no .desktop file; this puts it in fuzzel, which opens
-  # Terminal=true entries in its `terminal` (kitty).
+  # spotify-player ships no .desktop file; this puts it in the DMS launcher,
+  # which opens Terminal=true entries in a terminal.
   xdg.desktopEntries.spotify-player = {
     name = "Spotify Player";
     genericName = "Spotify TUI";

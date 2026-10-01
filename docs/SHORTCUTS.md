@@ -46,9 +46,7 @@ Gruvbox Material Dark · @host@
 | Super + V | Clipboard history |
 | Super + W | Wallpaper picker |
 | Super + / | Keybind cheat sheet |
-| Super + O | Audio output switcher |
 | Super + Shift + P | Colour picker |
-| Super + Period | Emoji picker |
 | Super + Shift + D | Wake all screens |
 | Super + Shift + G | Toggle gaming mode |
 | **Screenshots** | |

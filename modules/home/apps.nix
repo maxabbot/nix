@@ -1,5 +1,5 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
-# GUI apps (kitty, mpv, zathura, fuzzel, hyprlock config, freetube) are
+# GUI apps (kitty, mpv, zathura, hyprlock config, freetube) are
 # gated on a compositor being configured; CLI tools (btop, fastfetch, mise,
 # tmux-sessionizer) apply everywhere.
 {
@@ -216,66 +216,6 @@ in
         "r" = "reload";
         "R" = "rotate";
         "i" = "recolor";
-      };
-    };
-
-    # ── Fuzzel launcher ───────────────────────────────────────────────────────────
-    # Colours are managed by Stylix; only layout/behaviour settings live here.
-    fuzzel = lib.mkIf gui {
-      enable = true;
-      # Pin every launch to the focused output. Without --output fuzzel doesn't
-      # know its monitor until the surface maps, so with mixed scales (the
-      # portrait DP-2 at 1.5 beside DP-3 at 1.0) it guesses scale 1, draws its
-      # first frame at that size, then resizes once Hyprland reports 1.5 — the
-      # same jump the laptop showed. Wrapping the binary covers the Super+D
-      # bind, the hypr-scripts pickers and bemoji alike.
-      package = pkgs.symlinkJoin {
-        name = "fuzzel-focused-output";
-        paths = [ pkgs.fuzzel ];
-        postBuild = ''
-          rm "$out/bin/fuzzel"
-          cp ${pkgs.writeShellScript "fuzzel" ''
-            for arg in "$@"; do
-              case "$arg" in -o | --output | --output=*) exec ${lib.getExe pkgs.fuzzel} "$@" ;; esac
-            done
-            out=$(hyprctl monitors -j 2>/dev/null | ${lib.getExe pkgs.jq} -r '.[] | select(.focused) | .name' 2>/dev/null)
-            exec ${lib.getExe pkgs.fuzzel} ''${out:+--output "$out"} "$@"
-          ''} "$out/bin/fuzzel"
-        '';
-        inherit (pkgs.fuzzel) meta;
-      };
-      settings = {
-        main = {
-          # Not "auto": with every output at scale 1 that sizes text from each
-          # monitor's physical DPI, and fuzzel draws its first frame at the
-          # laptop panel's size before shrinking on the docked externals — the
-          # oversized frame showed as a blue rectangle behind the fade-in.
-          dpi-aware = "no";
-          prompt = "❯ ";
-          placeholder = "Search…";
-          icons-enabled = true;
-          icon-theme = "Papirus-Dark";
-          lines = 10;
-          width = 40;
-          horizontal-pad = 20;
-          vertical-pad = 8;
-          inner-pad = 4;
-          line-height = 22;
-          # fuzzel 1.13+ replaced the old `fuzzy` bool with match-mode (exact|fzf|fuzzy).
-          match-mode = "fzf";
-          # Show "match/total" so you can see how many results a query has.
-          match-counter = true;
-          # Larger inline thumbnails for image entries (clipboard picker).
-          image-size-ratio = 0.9;
-          terminal = "kitty";
-        };
-        border = {
-          width = 2;
-          radius = 10;
-        };
-        dmenu = {
-          exit-immediately-if-empty = true;
-        };
       };
     };
   };

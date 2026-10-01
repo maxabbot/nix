@@ -214,7 +214,6 @@ in
     playerctl
     brightnessctl
     hyprpicker # eyedropper colour picker (Super+Shift+P → color-picker.sh)
-    bemoji # fuzzel emoji/glyph picker (Super+. → emoji-picker.sh)
     ddcutil # external-monitor brightness over DDC/CI (DMS brightness slider)
     xorg.xrandr # marks the XWayland primary output (hyprland.lua setXPrimary)
     smartmontools # smartctl — fixed-disk SMART health

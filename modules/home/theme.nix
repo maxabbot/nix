@@ -31,7 +31,7 @@ in
     };
 
     # ── Translucent Thunar ───────────────────────────────────────────────────────
-    # The window background carries the alpha (0.75, like kitty/fuzzel) and
+    # The window background carries the alpha (0.75, like kitty) and
     # every pane on top of it goes transparent, so the layers don't stack
     # back up to near-solid. GTK3 drops its Wayland opaque region once the
     # background has alpha, and Hyprland blurs behind it. Selected rows keep

@@ -37,7 +37,6 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - **Hyprland** — tiling Wayland compositor; monitor layout generated from Nix per-host
 - **DMS (DankMaterialShell)** — the desktop shell: bar (plus a slim one on portrait monitors), notifications, OSD, launcher (`Super+D`), control centre, settings, power menu, clipboard history; see `docs/SHELLS.md`
 - **SDDM** — display manager (SilentSDDM theme); KWin Wayland greeter on DP-3 only (home-desktop)
-- **fuzzel** — dmenu for the audio-output and emoji pickers, Gruvbox theme
 - **Kitty** — terminal; JetBrainsMono Nerd Font 13pt, Gruvbox palette, tab bar
 - **awww** — wallpaper daemon
 - **hyprlock** — lockscreen; triggered on idle (5 min) and suspend
@@ -182,6 +181,6 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ## Theme
 
-**Gruvbox Material Dark** everywhere — Hyprland borders, DMS, Kitty, tmux, Starship, btop, Zed, Zathura, fuzzel, GTK apps, Qt/Kvantum apps.
+**Gruvbox Material Dark** everywhere — Hyprland borders, DMS, Kitty, tmux, Starship, btop, Zed, Zathura, GTK apps, Qt/Kvantum apps.
 
 Palette: `#282828` bg · `#d4be98` fg · `#7daea3` teal · `#d8a657` yellow · `#ea6962` red · `#a9b665` green · `#d3869b` purple

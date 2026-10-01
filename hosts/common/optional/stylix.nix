@@ -53,9 +53,8 @@ in
     };
     polarity = "dark";
 
-    # Translucent launcher: Stylix's fuzzel target writes this into the
-    # background colour's alpha. Blurred by the "launcher" layer rule in
-    # hyprland.lua.
+    # Alpha for popup surfaces: DMS's popup transparency and MangoHud's
+    # background both come from this.
     opacity.popups = 0.75;
 
     # Solid dark background — desktop wallpaper is managed separately by awww.

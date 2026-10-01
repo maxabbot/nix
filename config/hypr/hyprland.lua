@@ -144,7 +144,7 @@ hl.config({
         blur = {
             enabled = true,
             -- Strong enough that text behind the 0.75–0.85 alpha surfaces
-            -- (kitty, DMS pills and popouts, fuzzel) stops reading as text.
+            -- (kitty, DMS pills and popouts) stops reading as text.
             size     = 6,
             passes   = 3,
             noise    = 0.02,
@@ -209,9 +209,6 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 5,  bezier = "easeOu
 -- their soft shadows or the empty surface around them.
 hl.layer_rule({ match = { namespace = "dms:.*" },                 blur = true,  ignore_alpha = 0.5 })
 hl.layer_rule({ match = { namespace = "dms:.*:background" },      blur = false })
--- fuzzel: its background is 0.75 alpha (stylix opacity.popups), so 0.5 still
--- blurs it but skips the fully transparent corners outside its rounded border.
-hl.layer_rule({ match = { namespace = "launcher" },               blur = true,  ignore_alpha = 0.5, animation = "fade" })
 
 ---------------------
 ---- WINDOW RULES ---
@@ -455,9 +452,7 @@ hl.bind(mainMod .. " + I",         hl.dsp.exec_cmd("dms ipc settings toggle"),  
 hl.bind(mainMod .. " + V",         hl.dsp.exec_cmd("dms ipc clipboard toggle"),                                          { description = "Clipboard history" })
 hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("dms ipc dankdash wallpaper"),                                        { description = "Wallpaper picker" })
 hl.bind(mainMod .. " + slash",     hl.dsp.exec_cmd("dms ipc hypr toggleBinds"),                                          { description = "Keybind cheat sheet" })
-hl.bind(mainMod .. " + O",         hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/audio-output.sh"),                       { description = "Audio output switcher" })
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/color-picker.sh"),                       { description = "Colour picker" })
-hl.bind(mainMod .. " + Period",    hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/emoji-picker.sh"),                       { description = "Emoji picker" })
 
 -- Escape hatch for the idle DPMS listener and the pre-suspend blank: both can
 -- leave wake-on-input disarmed, so a blanked screen otherwise has no way back.

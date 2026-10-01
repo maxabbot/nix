@@ -16,7 +16,7 @@ let
   gui = config.custom.hm.compositor != "none";
   profile = "default";
   palette = import ../../config/stylix/palette.nix;
-  # Same 0.75 as kitty and fuzzel, as a CSS/Stylix alpha byte ("C0").
+  # Same 0.75 as kitty, as a CSS/Stylix alpha byte ("C0").
   alphaHex = lib.toHexString (builtins.ceil (0.75 * 255));
   # The window background is lower: Zen stacks it under other translucent
   # layers, and at 0.75 the result read as near-solid. 0.5 comes out about
@@ -75,7 +75,7 @@ in
     stylix.targets.zen-browser = {
       profileNames = [ profile ];
       # Stylix derives this alpha from opacity.applications, which also feeds
-      # zathura and others; set it here alone to match kitty/fuzzel's 0.75.
+      # zathura and others; set it here alone to match kitty's 0.75.
       opacityHex = lib.mkForce alphaHex;
     };
   };
