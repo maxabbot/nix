@@ -38,7 +38,11 @@ let
     }
   ];
   mkPwa =
-    { name, url, icon }:
+    {
+      name,
+      url,
+      icon,
+    }:
     pkgs.makeDesktopItem {
       name = "pwa-${lib.toLower (builtins.replaceStrings [ " " ] [ "-" ] name)}";
       desktopName = name;
