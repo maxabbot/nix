@@ -43,6 +43,10 @@ in
         visual_bell_duration = "0.0";
         window_alert_on_bell = true;
         confirm_os_window_close = 0;
+        # Under a tiling WM the compositor owns size. Remembering it also restores
+        # a stale "maximized" state from ~/.cache/kitty/main.json, which made every
+        # new kitty open maximized and hide the rest of its workspace.
+        remember_window_size = false;
         copy_on_select = "clipboard";
         strip_trailing_spaces = "smart";
         select_by_word_characters = "@-./_~?&=%+#";
