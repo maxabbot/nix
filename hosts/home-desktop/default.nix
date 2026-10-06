@@ -324,6 +324,15 @@
     };
   };
 
+  # ── Secrets admin ────────────────────────────────────────────────────────────
+  # This is the only host holding the admin age key (~/.config/sops/age/keys.txt),
+  # so it is the only one that needs the tools: `sops secrets/*.yaml` here and in
+  # the nixos-homelab repo, and `age-keygen` for new host keys (sops.nix header).
+  environment.systemPackages = [
+    pkgs.sops
+    pkgs.age
+  ];
+
   # ── Networking ───────────────────────────────────────────────────────────────
   networking.hostName = "home-desktop";
 
