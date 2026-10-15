@@ -5,7 +5,7 @@
     kubectx
     kubernetes-helm
     opentofu
-    awscli2
+    unstable.awscli2 # stable lags; unstable has `aws configure agent-toolkit`
     azure-cli
     google-cloud-sdk
     doctl
