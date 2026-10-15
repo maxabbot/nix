@@ -23,6 +23,15 @@ in
   # Expose Wine-GE as a Lutris runner — Lutris scans ~/.local/share/lutris/runners/wine/
   xdg.dataFile."lutris/runners/wine/${wineGe.version}" = lib.mkIf gaming { source = wineGe; };
 
+  # Steam's Linux client downloads slowly over HTTP/2 and under-opens connections;
+  # these dev-cfg flags (read at startup, needs a full Steam restart) fix both.
+  xdg.dataFile."Steam/steam_dev.cfg" = lib.mkIf gaming {
+    text = ''
+      @nClientDownloadEnableHTTP2PlatformLinux 0
+      @fDownloadRateImprovementToAddAnotherConnection 1.0
+    '';
+  };
+
   home.packages =
     with pkgs;
     [
