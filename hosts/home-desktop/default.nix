@@ -7,6 +7,7 @@
     ../../modules/nixos/base.nix
     ../common/optional/development.nix
     ../common/optional/podman.nix
+    ../common/optional/expo.nix
     ../common/optional/libvirt.nix
     ../common/optional/db-gui.nix
     ../common/optional/duckdb.nix
