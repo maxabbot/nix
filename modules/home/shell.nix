@@ -221,29 +221,57 @@ in
           command -v rustup &>/dev/null && rustup update
         }
 
-        # Build first, then decide how to apply. If the new generation swaps out
-        # systemd, a live `switch` re-execs the manager and restarts the Wayland
-        # session (Hyprland dies, desktop freezes) — so stage it for next boot
-        # instead. Otherwise switch live as usual.
+        # Build first, then decide how to apply. A live `switch` is unsafe when
+        # the new generation swaps out:
+        #   • systemd — the manager re-execs and restarts the Wayland session
+        #     (Hyprland dies, desktop freezes);
+        #   • the kernel — the running one can't load the new generation's
+        #     modules;
+        #   • the NVIDIA module — userspace jumps to the new driver while the
+        #     old nvidia.ko stays loaded, so new GL/Vulkan clients fail and
+        #     nvidia-persistenced won't start (and nh aborts before setting the
+        #     boot entry, leaving the generation half-applied).
+        # Any of these stages it for next boot instead. Kernel and NVIDIA are
+        # compared against the *booted* system — what's actually loaded — so a
+        # past live switch that changed them still counts.
+        _nixup_storename() {
+          # /nix/store/<hash>-<name>/… -> <name>; empty input -> "none"
+          [[ -n "$1" ]] || { echo none; return; }
+          echo "$1" | sed -E 's|^/nix/store/[^-]+-([^/]+).*|\1|'
+        }
+        _nixup_nvko() {
+          find -L "$1/kernel-modules/lib/modules/" -name 'nvidia.ko*' -print -quit 2>/dev/null \
+            | xargs -r readlink -f
+        }
         nixup-safe() {
-          local flake=/etc/nixos host new_top cur_sd new_sd
+          local flake=/etc/nixos host new_top cur new reasons=()
           host=$(hostname)
           echo ":: building configuration for $host …"
           new_top=$(nix build --no-link --print-out-paths \
             "$flake#nixosConfigurations.$host.config.system.build.toplevel") || {
             echo ":: build failed — nothing applied"; return 1;
           }
-          cur_sd=$(readlink -f /run/current-system/systemd)
-          new_sd=$(readlink -f "$new_top/systemd")
-          if [[ "$cur_sd" != "$new_sd" ]]; then
-            echo ":: systemd changes under the live session:"
-            echo "     $(basename "$cur_sd")  ->  $(basename "$new_sd")"
-            echo ":: a live switch would re-exec systemd and restart Hyprland (freeze risk)."
-            echo ":: staging for next boot instead of switching live."
-            sudo nixos-rebuild boot --flake "$flake#$host" || return 1
+
+          cur=$(_nixup_storename "$(readlink -f /run/current-system/systemd)")
+          new=$(_nixup_storename "$(readlink -f "$new_top/systemd")")
+          [[ "$cur" != "$new" ]] && reasons+=("systemd   $cur  ->  $new  (re-exec restarts Hyprland)")
+
+          cur=$(_nixup_storename "$(readlink -f /run/booted-system/kernel)")
+          new=$(_nixup_storename "$(readlink -f "$new_top/kernel")")
+          [[ "$cur" != "$new" ]] && reasons+=("kernel    $cur  ->  $new  (new modules won't load)")
+
+          cur=$(_nixup_storename "$(_nixup_nvko /run/booted-system)")
+          new=$(_nixup_storename "$(_nixup_nvko "$new_top")")
+          [[ "$cur" != "$new" ]] && reasons+=("nvidia    $cur  ->  $new  (userspace/module mismatch)")
+
+          if (( ''${#reasons[@]} )); then
+            echo ":: not safe to switch live:"
+            printf '     %s\n' "''${reasons[@]}"
+            echo ":: staging for next boot instead."
+            nh os boot "$flake" || return 1
             echo ":: staged. reboot to apply:  systemctl reboot"
           else
-            echo ":: systemd unchanged — live switch is safe."
+            echo ":: systemd, kernel and nvidia unchanged — live switch is safe."
             nh os switch "$flake"
           fi
         }
