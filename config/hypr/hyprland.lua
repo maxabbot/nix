@@ -258,6 +258,14 @@ if mon.primary ~= "" then
     })
 end
 
+-- Steam's main window lives on the secondary: its UI scale is one global
+-- factor matched to that output (Xft.dpi, set from the secondary's scale in
+-- modules/home/wm/hyprland.nix's env.lua), so opened on the primary
+-- it would come out oversized instead.
+if mon.secondary ~= "" then
+    hl.window_rule({ match = { class = "steam", title = "Steam" }, monitor = mon.secondary })
+end
+
 -- Launchers
 -- Big Picture launched natively (no gamescope wrapper): fullscreen + immediate
 -- so Hyprland direct-scanouts it (no compositor vsync latency).
