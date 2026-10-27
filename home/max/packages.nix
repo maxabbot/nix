@@ -38,7 +38,6 @@ in
       # yq comes from development.nix (yq-go, system-wide)
       gh
       mkcert
-      httpie
       pandoc # renders SHORTCUTS.md → HTML for the cheat-sheet wallpaper
       ffmpeg-full
       sox # audio record/play CLI (`rec`/`play`) — Claude Code voice mode
@@ -63,8 +62,7 @@ in
       procs # ps replacement
       tealdeer # tldr client — simplified man-page examples
       watchexec # run commands on file change
-      glow # render markdown in the terminal
-      mdr # render markdown in the terminal (alt to glow)
+      mdr # render markdown in the terminal
     ]
     # GUI-only apps — skipped when no compositor is configured
     ++ lib.optionals gui [

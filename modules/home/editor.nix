@@ -20,8 +20,9 @@ in
   home.packages = [
     pkgs.nano
   ]
-  # nodejs is only here for Zed (its downloaded binary won't run on NixOS)
-  ++ lib.optionals gui [ pkgs.nodejs_22 ];
+  # nodejs is only here for Zed (its downloaded binary won't run on NixOS).
+  # Unpinned: nixpkgs' default tracks the current LTS.
+  ++ lib.optionals gui [ pkgs.nodejs ];
 
   programs.zed-editor = lib.mkIf gui {
     enable = true;
@@ -44,8 +45,8 @@ in
       # ── Node (use system node; Zed's downloaded binary is dynamically linked
       #    and won't run on NixOS) ───────────────────────────────────────────────
       node = {
-        path = lib.getExe pkgs.nodejs_22;
-        npm_path = lib.getExe' pkgs.nodejs_22 "npm";
+        path = lib.getExe pkgs.nodejs;
+        npm_path = lib.getExe' pkgs.nodejs "npm";
       };
 
       # ── Extensions (auto-installed) ───────────────────────────────────────────

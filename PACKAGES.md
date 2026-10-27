@@ -25,7 +25,7 @@ A "what did I set up" reference. For keybinds see `docs/SHORTCUTS.md`, for struc
 - **just** — command/task runner (`justfile`); pairs with devshells
 - **watchexec** — run a command whenever files change
 - **tldr** — simplified man-page examples (`tealdeer` client)
-- **glow** / **mdr** — render markdown in the terminal
+- **mdr** — render markdown in the terminal
 
 Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `g` (git). See `docs/SHORTCUTS.md`.
 
@@ -99,7 +99,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - `bun` — JS runtime + package manager
 - `yq` — YAML/JSON/TOML processor
 - `shellcheck`, `cloc`, `tig`, `sqlite`, `pgcli`
-- `curlie` (httpie-style curl), `bruno` (API client), `httpie`, `mkcert`
+- `curlie` (httpie-style curl), `bruno` (API client), `mkcert`
 - `ffmpeg`, `imagemagick`, `pandoc`
 - `quickemu` / `quickgui` — VM management without libvirt
 - Podman + Docker-compat aliases (`d ps`, `d images`, etc.)

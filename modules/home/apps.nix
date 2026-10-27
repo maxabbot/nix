@@ -165,7 +165,7 @@ in
     mpv = lib.mkIf gui {
       enable = true;
       config = {
-        profile = "gpu-hq";
+        profile = "high-quality"; # gpu-hq is its deprecated alias
         vo = "gpu";
         video-sync = "display-resample";
         interpolation = true;
