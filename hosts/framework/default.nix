@@ -170,9 +170,21 @@
 
   # ── Fingerprint reader ───────────────────────────────────────────────────────
   # services.fprintd comes from nixos-hardware. Enrol once per finger with
-  # `fprintd-enroll`, then verify with `fprintd-verify`. PAM picks it up
-  # automatically everywhere (sudo, SDDM, hyprlock) because each service's
-  # `fprintAuth` defaults to services.fprintd.enable.
+  # `fprintd-enroll`, then verify with `fprintd-verify`.
+  #
+  # Every PAM service's fprintAuth defaults to on, which puts pam_fprintd ahead
+  # of the password: it waits for a finger, or its timeout, before the password
+  # is tried. Kept for sudo and polkit; off for:
+  #   - login, which SDDM's stack substacks: a fingerprint login hands
+  #     gnome-keyring no password, so the login keyring stays locked.
+  #   - hyprlock, which talks to fprintd itself (the auth block that
+  #     modules/home/apps.nix adds on fprintd hosts), so the finger and the
+  #     password field work at the same time. Both at once would fight over
+  #     the reader.
+  security.pam.services = {
+    login.fprintAuth = false;
+    hyprlock.fprintAuth = false;
+  };
 
   # ── Bootloader ───────────────────────────────────────────────────────────────
   # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
@@ -192,13 +204,21 @@
   };
 
   # ── Lid / suspend ────────────────────────────────────────────────────────────
-  # No swap partition, so hibernation isn't possible — suspend-to-idle only.
-  # Spelled out so a stray `hibernate` action can't leave the machine wedged.
+  # Closing the lid on battery suspends, then hibernates to the @swap swapfile
+  # (disk-config.nix) after HibernateDelaySec, so a laptop left shut in a bag
+  # doesn't drain flat. On AC it only suspends. hypridle's idle suspend and
+  # DMS's power menu stay plain suspend.
+  #
+  # No resume= or resume_offset: when systemd-sleep hibernates it records the
+  # swapfile's location in the HibernateLocation EFI variable, and the systemd
+  # initrd resumes from it once LUKS is unlocked. Secure Boot won't block it
+  # either: the kernel is built without the lockdown LSM.
   services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
+    HandleLidSwitch = "suspend-then-hibernate";
     HandleLidSwitchExternalPower = "suspend";
     HandleLidSwitchDocked = "ignore";
   };
+  systemd.sleep.settings.Sleep.HibernateDelaySec = "2h";
 
   # ── Networking ───────────────────────────────────────────────────────────────
   # iwd handles roaming between APs noticeably better than wpa_supplicant, which

@@ -16,7 +16,6 @@ A "what did I set up" reference. For keybinds see `docs/SHORTCUTS.md`, for struc
 - **eza** — replaces `ls`; icons, git status, tree view via `lt`
 - **delta** — replaces git's diff output; side-by-side, line numbers, Gruvbox
 - **direnv** — auto-loads `.envrc` / `nix develop` shells on `cd`
-- **mise** — runtime version manager (Node, Python, Ruby, etc.) activated in zsh
 - `, <pkg>` — run any nixpkgs package without installing (`comma`); e.g. `, ffprobe`
 - `nix locate <file>` — find which package owns a file (`nix-index`)
 - **dust** — replaces `du`; tree-style disk usage

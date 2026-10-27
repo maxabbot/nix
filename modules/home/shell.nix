@@ -172,9 +172,6 @@ in
         # ── Rust ─────────────────────────────────────────────────────────────────
         [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
-        # ── mise (universal version manager) ─────────────────────────────────────
-        command -v mise &>/dev/null && eval "$(mise activate zsh)"
-
         # fzf's key bindings come from programs.fzf below, and kubectl's
         # completion from the _kubectl the package installs into site-functions.
 

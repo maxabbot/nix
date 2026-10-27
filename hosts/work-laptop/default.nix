@@ -21,6 +21,7 @@
     ../common/optional/logitech.nix
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
+    ../common/optional/btrfs.nix
     # sops.nix is off until secrets/common.yaml is re-encrypted to the new
     # work-laptop key (`sops updatekeys` on home-desktop or framework) — re-add it then.
   ];

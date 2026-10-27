@@ -103,7 +103,9 @@ hl.on("monitor.removed", calmHotplug)
 
 hl.config({
     cursor = {
-        no_hardware_cursors = true,
+        -- 1 = always software (env.lua says which hosts); 2 = Hyprland's
+        -- auto: the hardware plane, except while a window is tearing.
+        no_hardware_cursors = apps.softwareCursor and 1 or 2,
         -- Spawn the cursor on the primary monitor at startup ("" = Hyprland default)
         default_monitor = mon.primary,
         -- Keep the cursor where it is on workspace switches — hl.dsp.focus

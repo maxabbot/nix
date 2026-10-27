@@ -1,6 +1,6 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
 # GUI apps (kitty, mpv, zathura, hyprlock config, freetube) are
-# gated on a compositor being configured; CLI tools (btop, fastfetch, mise,
+# gated on a compositor being configured; CLI tools (btop, fastfetch,
 # tmux-sessionizer) apply everywhere.
 {
   lib,
@@ -228,9 +228,13 @@ in
     # ── Fastfetch system info ───────────────────────────────────────────────────
     "fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
     # ── Hyprlock lockscreen config (palette placeholders rendered at build) ──────
-    "hypr/hyprlock.conf" = lib.mkIf gui { text = renderTheme ../../config/hypr/hyprlock.conf; };
-    # ── Mise version manager ────────────────────────────────────────────────────
-    "mise/config.toml".source = ../../config/mise/config.toml;
+    "hypr/hyprlock.conf" = lib.mkIf gui {
+      text =
+        renderTheme ../../config/hypr/hyprlock.conf
+        + lib.optionalString osConfig.services.fprintd.enable (
+          "\n" + renderTheme ../../config/hypr/hyprlock-fingerprint.conf
+        );
+    };
     # ── Thunar "Open Terminal Here" ─────────────────────────────────────────────
     # Thunar runs `exo-open --launch TerminalEmulator`. Without xfce4-settings'
     # xfce4-mime-helper, libexo reads this key as a desktop-file id and
@@ -240,7 +244,6 @@ in
 
   # ── Misc packages ─────────────────────────────────────────────────────────────
   home.packages = [
-    pkgs.mise
     (pkgs.writeShellScriptBin "tmux-sessionizer" (
       builtins.readFile ../../config/scripts/tmux-sessionizer
     ))

@@ -11,8 +11,9 @@
 # prompt for the passphrase interactively; initrd (systemd-based, see
 # default.nix) prompts again at every boot to unlock it.
 #
-# No swap partition — base.nix enables zram instead, which is why hibernation
-# is not available on this host. Add a swapfile inside @swap if that changes.
+# Swap is a swapfile on its own @swap subvolume, there for hibernation (see
+# the lid block in default.nix). It has to be in the layout from the start:
+# disko only creates subvolumes at install time.
 _: {
   disko.devices = {
     # The disk name determines the GPT partlabels (disk-nvme-*) that the boot
@@ -82,6 +83,18 @@ _: {
                       "compress=zstd"
                       "noatime"
                     ];
+                  };
+                  # Its own subvolume because btrfs refuses to snapshot one that
+                  # holds an active swapfile, which would rule out snapshots of
+                  # @. disko creates it with `btrfs filesystem mkswapfile`
+                  # (nodatacow, so compress= wouldn't apply) and adds the
+                  # swapDevices entry. Sized to hold a hibernation image of the
+                  # whole RAM: raise it if the machine has more than 32 GiB.
+                  # zram (base.nix) keeps the higher priority, so this only
+                  # takes overflow and hibernation.
+                  "@swap" = {
+                    mountpoint = "/.swapvol";
+                    swap.swapfile.size = "32G";
                   };
                 };
               };

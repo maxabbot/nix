@@ -46,8 +46,11 @@ sudo nixos-generate-config --no-filesystems --show-hardware-config
 
 Keep the `nixpkgs.hostPlatform` line and drop anything `nixos-hardware`'s
 `framework-intel-core-ultra-series3` module already sets. Every boot then prompts for the LUKS
-passphrase from the systemd initrd; there is no swap partition, so the machine suspends but
-cannot hibernate.
+passphrase from the systemd initrd. disko also creates a 32G swapfile on its own `@swap`
+subvolume for hibernation: if the machine has more than 32 GiB of RAM, raise
+`swap.swapfile.size` in `hosts/framework/disk-config.nix` *before* installing. Once installed,
+check it with `systemctl hibernate`: the machine should power off and come back to the same
+session after the LUKS prompt.
 
 ---
 

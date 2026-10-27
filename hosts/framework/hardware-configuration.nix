@@ -42,7 +42,7 @@
     extraModulePackages = [ ];
   };
 
-  # No swap partition (LUKS full-disk, zram instead — see disk-config.nix).
+  # The swapfile's swapDevices entry comes from disko (@swap, disk-config.nix).
   swapDevices = [ ];
 
   hardware.cpu.intel = {

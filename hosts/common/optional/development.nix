@@ -38,6 +38,11 @@
 
   programs.direnv.enable = true;
 
+  # Gives downloaded, dynamically linked binaries the /lib64 loader they expect,
+  # e.g. uv-managed Pythons and the native binaries npm packages ship (esbuild,
+  # Prisma's engines). Without it they fail with a bare "No such file or directory".
+  programs.nix-ld.enable = true;
+
   # SSH server disabled — no incoming SSH on these hosts. Outbound git/ssh is
   # unaffected, as is nixos-anywhere (which talks to the live-ISO sshd at install time).
   # To allow remote login later: set enable = true and populate custom.base.sshKeys

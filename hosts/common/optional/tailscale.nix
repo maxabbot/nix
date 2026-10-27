@@ -24,8 +24,7 @@
   # tailscaled registers split DNS on tailscale0 and NM feeds it the LAN servers.
   services.resolved = {
     enable = true;
-    # mDNS is avahi's job where it runs (home-desktop, enabled by the Apollo
-    # module); don't run a second responder.
+    # mDNS is avahi's job (base.nix); don't run a second responder.
     settings.Resolve.MulticastDNS = false;
   };
 }

@@ -108,6 +108,13 @@ in
     services = {
       blueman.enable = true;
       printing.enable = true;
+      # mDNS: lets CUPS find network printers and resolves .local names.
+      avahi = {
+        enable = true;
+        nssmdns4 = true;
+      };
+      # Firmware updates from LVFS: `fwupdmgr refresh && fwupdmgr update`.
+      fwupd.enable = true;
       timesyncd.enable = lib.mkDefault true;
       power-profiles-daemon.enable = cfg.powerManagement == "power-profiles-daemon";
       # TLP settings live in the host file (see work-laptop); base only enables it.

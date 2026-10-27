@@ -22,6 +22,7 @@
     ../common/optional/gaming.nix
     ../common/optional/wine.nix
     ../common/optional/plymouth.nix
+    ../common/optional/btrfs.nix
     ../common/optional/sops.nix
     ../common/optional/limine.nix
   ];
