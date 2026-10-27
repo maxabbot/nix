@@ -24,8 +24,8 @@ in
 
   stylix = {
     enable = true;
-    # Stylix tracks master (no release-26.05 branch yet) while the system is on
-    # stable nixpkgs/HM 26.05 — silence the resulting version-mismatch check.
+    # Stylix tracks master (flake.nix says why not release-26.05) while the
+    # system is on stable nixpkgs/HM 26.05 — silence the version-mismatch check.
     enableReleaseChecks = false;
     # base16 scheme derived from the shared palette (config/stylix/palette.nix).
     base16Scheme = {

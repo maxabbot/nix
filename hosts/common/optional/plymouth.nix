@@ -16,8 +16,8 @@
 #
 # systemd stage 1 on every host: Plymouth runs as a unit from the start and
 # carries through to stage 2 without a restart, and units that only exist in
-# the systemd initrd (home-desktop's initrd-find-nixos-closure retry for
-# btrfs's first mount) actually apply. Its emergency shell is locked by
+# the systemd initrd (btrfs.nix's initrd-find-nixos-closure retry for btrfs's
+# first mount) actually apply. Its emergency shell is locked by
 # default — set boot.initrd.systemd.emergencyAccess to get one. The scripted
 # hooks (postDeviceCommands etc.) don't run under it; nothing here uses them.
 { lib, pkgs, ... }:
@@ -66,6 +66,8 @@ in
       theme = "gruvbox";
       themePackages = [ theme ];
     };
+    # Becomes the kernel's loglevel= argument; `splash` comes from the
+    # plymouth module itself.
     consoleLogLevel = 0;
     initrd = {
       systemd.enable = true;
@@ -73,8 +75,6 @@ in
     };
     kernelParams = [
       "quiet"
-      "splash"
-      "loglevel=3"
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
       "udev.log_priority=3"

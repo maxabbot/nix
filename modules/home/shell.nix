@@ -34,8 +34,6 @@ in
         EDITOR = "zeditor --wait";
         VISUAL = "zeditor --wait";
         LANG = "en_US.UTF-8";
-        LC_ALL = "en_US.UTF-8";
-        ARCHFLAGS = "-arch x86_64";
         MANPAGER = "less -R --use-color -Dd+r -Du+b";
         BAT_PAGER = "less -RF";
         CARGO_HOME = "$HOME/.cargo";
@@ -168,8 +166,8 @@ in
         # CTRL-f — tmux-sessionizer
         bindkey -s '^f' 'tmux-sessionizer\n'
 
-        # ── PATH ─────────────────────────────────────────────────────────────────
-        export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.cargo/bin:$GOPATH/bin:$PATH"
+        # PATH additions (~/.local/bin, cargo, go) are home.sessionPath in
+        # home/max/cli.nix.
 
         # ── Rust ─────────────────────────────────────────────────────────────────
         [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
@@ -177,14 +175,8 @@ in
         # ── mise (universal version manager) ─────────────────────────────────────
         command -v mise &>/dev/null && eval "$(mise activate zsh)"
 
-        # ── fzf key-bindings (provided by fzf NixOS module) ──────────────────────
-        [[ -f /run/current-system/sw/share/fzf/key-bindings.zsh ]] &&
-          source /run/current-system/sw/share/fzf/key-bindings.zsh
-        [[ -f /run/current-system/sw/share/fzf/completion.zsh ]] &&
-          source /run/current-system/sw/share/fzf/completion.zsh
-
-        # ── kubectl completions ───────────────────────────────────────────────────
-        command -v kubectl &>/dev/null && source <(kubectl completion zsh)
+        # fzf's key bindings come from programs.fzf below, and kubectl's
+        # completion from the _kubectl the package installs into site-functions.
 
         # ── Shell functions ───────────────────────────────────────────────────────
         mkcd() { mkdir -p "$1" && cd "$1"; }
@@ -519,7 +511,7 @@ in
         bind C-f run-shell "tmux-sessionizer"
 
         # Reload config
-        bind r source-file ~/.tmux.conf \; display "Config reloaded"
+        bind r source-file ${config.xdg.configHome}/tmux/tmux.conf \; display "Config reloaded"
 
         # ── Theme — Gruvbox Material Dark ─────────────────────────────────────────
         set -g status on

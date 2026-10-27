@@ -1,8 +1,8 @@
 # Tailscale — joins the host to the tailnet. The servers repo is moving every
 # service except SSH to Tailscale-only, so any host that uses those needs this.
 #
-# No secrets management yet, so there's no authKeyFile — log in once by hand
-# after the first rebuild:
+# No authKeyFile: a key is only needed for the first login and Tailscale auth
+# keys expire, so log in once by hand after the first rebuild instead:
 #   sudo tailscale up --operator=max
 { config, ... }:
 {
@@ -24,7 +24,8 @@
   # tailscaled registers split DNS on tailscale0 and NM feeds it the LAN servers.
   services.resolved = {
     enable = true;
-    # avahi already answers mDNS on 5353; don't run a second responder.
+    # mDNS is avahi's job where it runs (home-desktop, enabled by the Apollo
+    # module); don't run a second responder.
     settings.Resolve.MulticastDNS = false;
   };
 }

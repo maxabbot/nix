@@ -17,9 +17,12 @@
     };
   };
 
+  # Prepended to PATH, in this order. ~/go is GOPATH (shell.nix).
   home.sessionPath = [
     "$HOME/.local/bin"
     "$HOME/bin"
+    "$HOME/.cargo/bin"
+    "$HOME/go/bin"
   ];
 
   programs = {
@@ -70,5 +73,7 @@
     };
   };
 
-  services.gnome-keyring.enable = true;
+  # No services.gnome-keyring here: base.nix's services.gnome.gnome-keyring
+  # starts the daemon from PAM at login (unlocking the keyring with the login
+  # password), and HM's unit only started a second one alongside it.
 }

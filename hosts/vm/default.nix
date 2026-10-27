@@ -26,13 +26,7 @@
     ../common/optional/limine.nix
   ];
 
-  home-manager.backupFileExtension = "backup";
-
-  custom.base = {
-    enable = true;
-    username = "max";
-    sshKeys = [ ];
-  };
+  custom.base.enable = true;
 
   # Limine bootloader comes from ../common/optional/limine.nix.
   boot.loader.efi.canTouchEfiVariables = true;

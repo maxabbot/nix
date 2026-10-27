@@ -368,7 +368,9 @@ in
       };
 
       extensions = with pkgs.vscode-extensions; [
-        jdinhlife.gruvbox
+        # Provides "Gruvbox Material Dark" (workbench.colorTheme above);
+        # jdinhlife.gruvbox only has the plain Gruvbox Dark/Light themes.
+        sainnhe.gruvbox-material
         esbenp.prettier-vscode
         dbaeumer.vscode-eslint
         ms-python.python

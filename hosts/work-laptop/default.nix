@@ -25,13 +25,9 @@
     # work-laptop key (`sops updatekeys` on home-desktop or framework) — re-add it then.
   ];
 
-  home-manager.backupFileExtension = "backup";
-
   # ── Base ─────────────────────────────────────────────────────────────────────
   custom.base = {
     enable = true;
-    username = "max";
-    sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     powerManagement = "tlp";
   };
 

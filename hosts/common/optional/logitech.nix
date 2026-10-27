@@ -37,8 +37,8 @@
 #      function, so divert only what a rule actually handles.
 #
 # That second command needs Solaar >= 1.1.20 to stick: on 1.1.19 it reaches the
-# device but dies before saving, and reverts at the next daemon restart. See the
-# solaar override in overlays/default.nix.
+# device but dies before saving, and reverts at the next daemon restart. nixpkgs
+# 26.05 ships 1.1.20.
 _: {
   hardware.logitech.wireless = {
     enable = true;

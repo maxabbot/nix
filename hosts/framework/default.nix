@@ -37,9 +37,8 @@
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
     ../common/optional/sops.nix
+    ../common/optional/btrfs.nix
   ];
-
-  home-manager.backupFileExtension = "backup";
 
   # ── Base ─────────────────────────────────────────────────────────────────────
   # powerManagement is left at base.nix's default (power-profiles-daemon) rather
@@ -48,11 +47,7 @@
   # nixos-hardware's laptop module already backs off TLP when ppd is on. The
   # powersave specialisation below is where TLP's finer-grained knobs live, for
   # the days that need them.
-  custom.base = {
-    enable = true;
-    username = "max";
-    sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
-  };
+  custom.base.enable = true;
 
   # ── Specialisations ───────────────────────────────────────────────────────────
   # Boot menu shows a "powersave" entry for aggressive battery conservation —
@@ -191,19 +186,9 @@
     initrd.systemd.enable = true;
 
     # Secure Boot: the Framework ships with it enabled and Setup Mode available
-    # from BIOS. Once `sbctl create-keys` + `sbctl enroll-keys` have been run,
+    # from BIOS. Once the sbctl key steps in limine.nix's header have been run,
     # flip this on and rebuild — Limine signs with the same sbctl keys.
     # loader.limine.secureBoot.enable = true;
-
-    # btrfs "first mount" free-space-tree init creates a brief window where the
-    # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
-    # (Same guard as home-desktop — same filesystem layout.)
-    initrd.systemd.services.initrd-find-nixos-closure.serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "3";
-      StartLimitBurst = 10;
-      StartLimitIntervalSec = "60";
-    };
   };
 
   # ── Lid / suspend ────────────────────────────────────────────────────────────

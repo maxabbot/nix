@@ -3,9 +3,16 @@
 # wallpaper centred over a matching backdrop (image is 3480x2160, so centering
 # avoids stretch distortion on 16:9 panels).
 #
-# Secure Boot: once sbctl keys are created and enrolled (see lanzaboote.nix for
-# the enrollment steps), set `boot.loader.limine.secureBoot.enable = true` here
-# instead of importing lanzaboote — Limine signs with the same sbctl keys.
+# Secure Boot, once per machine (sbctl ships on framework; elsewhere use
+# `nix shell nixpkgs#sbctl`):
+#   1. sudo sbctl create-keys
+#   2. Put the firmware into Secure Boot Setup Mode (vendor-specific, in BIOS
+#      setup), then: sudo sbctl enroll-keys -m -f
+#      -m keeps Microsoft's keys, which Windows' bootloader and GPU option
+#      ROMs are signed with; -f keeps the firmware's own built-in keys.
+#   3. Set `boot.loader.limine.secureBoot.enable = true` in that host's file and
+#      rebuild — Limine signs itself with the sbctl keys.
+#   4. Leave Setup Mode and turn Secure Boot on; `sbctl status` confirms.
 { lib, ... }:
 let
   palette = import ../../../config/stylix/palette.nix;

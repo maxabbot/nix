@@ -56,6 +56,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `sops.nix` | sops-nix secrets (home-desktop, framework, vm — work-laptop is off until `common.yaml` is re-encrypted to its new key): decrypts `secrets/*.yaml` with the host age key at `/var/lib/sops-nix/key.txt`; sets `custom.base.hashedPasswordFile`. Recipients in `.sops.yaml`; admin key shared with the homelab repo. Per-host files `secrets/home-desktop.yaml` and `secrets/framework.yaml` (Syncthing identity) are decryptable by admin + that host only |
 | `plymouth.nix` | Boot splash (all four hosts) — Gruvbox bg + spinning snowflake; also themes the framework LUKS prompt. Own script theme (`config/plymouth/`, Stylix's plymouth target disabled): it re-centres every frame, since the displays change mid-splash (simpledrm → real KMS driver) |
 | `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (all four hosts; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`. On work-laptop `canTouchEfiVariables = false` makes `efiInstallAsRemovable` default true → installs to the ESP fallback path) |
+| `btrfs.nix` | Hosts with /nix on its own btrfs subvolume (home-desktop, framework): systemd-initrd retry for `initrd-find-nixos-closure` across btrfs's first-mount window |
 
 ### Home Manager
 

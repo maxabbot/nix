@@ -93,13 +93,12 @@ in
     i18n.defaultLocale = "en_US.UTF-8";
 
     # ── Kernel ─────────────────────────────────────────────────────────────────
-    # Known risk: home-desktop builds the out-of-tree it87 module (fancontrol)
+    # Known risk: home-desktop builds the out-of-tree it87 module (fan2go)
     # against this kernel — a `latest` bump can break the module until the
     # driver catches up. Accepted; fall back to the default LTS kernel if it bites.
-    # mkDefault so a host with an out-of-tree driver constraint (nvidia.nix pins
-    # 7.1) can override without mkForce.
+    # mkDefault so a host with an out-of-tree driver constraint can pin an older
+    # kernel without mkForce.
     boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
-    boot.loader.systemd-boot.configurationLimit = lib.mkDefault 5;
 
     # ── Networking ─────────────────────────────────────────────────────────────
     networking.networkmanager.enable = true;
@@ -114,6 +113,9 @@ in
       # TLP settings live in the host file (see work-laptop); base only enables it.
       tlp.enable = cfg.powerManagement == "tlp";
       gnome.gnome-keyring.enable = true;
+      # gpg-agent is the ssh agent (enableSSHSupport below, and ~/.ssh/config
+      # pins IdentityAgent to its socket), so gnome-keyring's would sit unused.
+      gnome.gcr-ssh-agent.enable = false;
       upower.enable = true;
     };
 

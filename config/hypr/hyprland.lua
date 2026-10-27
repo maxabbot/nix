@@ -186,6 +186,11 @@ hl.config({
     },
 })
 
+-- Three-finger horizontal swipe switches workspace on touchpads. The
+-- gestures.* settings above only tune a swipe; since Hyprland 0.51 the swipe
+-- itself has to be registered.
+hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+
 -- Animations
 -- Ease-out with no overshoot, to sit with DMS's Material easing.
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })

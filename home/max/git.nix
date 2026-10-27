@@ -35,7 +35,9 @@ in
       branch.sort = "-committerdate";
       core = {
         autocrlf = "input";
-        editor = "zed --wait";
+        # zeditor, not zed: `zed` is only a zsh alias, and git runs the editor
+        # through sh.
+        editor = "zeditor --wait";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       };
     };

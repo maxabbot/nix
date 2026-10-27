@@ -30,9 +30,11 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    # Stylix has no release-26.05 branch yet (lags the nixpkgs release), so track
-    # master and suppress its version check in stylix.nix. Switch to
-    # github:nix-community/stylix/release-26.05 once that branch exists.
+    # Tracks master, with its version check suppressed in stylix.nix. Not
+    # release-26.05: that branch's Zen target has no opacity support (master's
+    # opacityHex), so its userChrome paints Zen solid and the translucency in
+    # modules/home/zen.nix is lost (checked 2026-10-27). Re-check when the next
+    # release branch is cut.
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -174,6 +176,7 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
+                backupFileExtension = "backup";
                 extraSpecialArgs =
                   sharedHmArgs
                   // hmArgs

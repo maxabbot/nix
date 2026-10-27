@@ -32,15 +32,12 @@
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
     ../common/optional/sops.nix
+    ../common/optional/btrfs.nix
   ];
-
-  home-manager.backupFileExtension = "backup";
 
   # ── Base ─────────────────────────────────────────────────────────────────────
   custom.base = {
     enable = true;
-    username = "max";
-    sshKeys = [ ]; # add your public key: "ssh-ed25519 AAAA..."
     # Fan control moved to fan2go (../common/optional/fan2go.nix) for moving-average
     # temperature smoothing — fancontrol only point-sampled and hunted on CPU spikes.
     fancontrol.enable = false;
@@ -314,15 +311,6 @@
           protocol: chainload
           path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
     '';
-
-    # btrfs "first mount" free-space-tree init creates a brief window where the
-    # @nix subvolume is mounted but path lookups fail; retry instead of panicking.
-    initrd.systemd.services.initrd-find-nixos-closure.serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "3";
-      StartLimitBurst = 10;
-      StartLimitIntervalSec = "60";
-    };
   };
 
   # ── Secrets admin ────────────────────────────────────────────────────────────

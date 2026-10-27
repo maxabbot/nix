@@ -78,5 +78,5 @@ nix run github:nix-community/nixos-anywhere -- \
 - [x] **Secrets management** — sops-nix (2026-09-28); key install + password rotation still pending, see Secrets above
 - [ ] **GPG commit signing** — `programs.gpg` in HM + `signingkey` in flake
 - [ ] **Backups** — `restic` → Backblaze B2 (home-desktop + framework); BTRFS snapshots don't cover disk failure. B2 credentials want secrets management first
-- [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05; once a `release-26.05` branch exists, pin it and drop the two `enableReleaseChecks = false` lines plus the kmscon `disabledModules` workaround in `hosts/common/optional/stylix.nix`
+- [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05. `release-26.05` exists now, but its Zen target lacks master's `opacityHex`, so it paints Zen solid (checked 2026-10-27, see `flake.nix`). Once a release branch carries it, pin that and drop the two `enableReleaseChecks = false` lines plus the kmscon/regreet `disabledModules` workaround in `hosts/common/optional/stylix.nix`
 - [x] **Decide what `plymouth.nix` is for** — imported on all four hosts, themed by Stylix instead of the adi1090x "spin" theme.
