@@ -68,7 +68,7 @@ nix run github:nix-community/nixos-anywhere -- \
 - [x] **Theming: Hyprland windows + DMS** — bring DMS in line with the Hyprland window styling; add transparency to DMS panels/popouts
 - [x] **DMS Settings as a drop-down** instead of a window — started in 2ba26d8, still needs fixing
 - [x] **Fix DMS display settings**
-- [ ] **Cursor sharing with the laptop (lan-mouse)** — configured, still needs pairing + testing
+- [ ] **Cursor sharing with the framework (lan-mouse)** — configured over the tailnet, still needs testing once the framework is installed and on it
 - [ ] **Fix game mode**
 - [x] **Fix `Super+Q` closing every instance** — should close only the focused window
 - [ ] **Backblaze B2 backups** of home-desktop and framework (see Backups below)

@@ -1,4 +1,4 @@
-# lan-mouse — software KVM between home-desktop and work-laptop.
+# lan-mouse — software KVM between home-desktop and the framework.
 # Enabled per-host via the `lanMouse` hmArgs in flake.nix; the firewall port
 # is opened by hosts/common/optional/lan-mouse.nix on the same hosts.
 #
@@ -22,9 +22,10 @@
     home.packages = [ pkgs.lan-mouse ];
 
     # lan-mouse resolves hostnames with its own DNS client (reads
-    # resolv.conf directly, bypassing NSS) — so avahi/.local names won't
-    # work. If the router doesn't resolve DHCP hostnames, set
-    # lanMouse.ips = [ "192.168.x.x" ] for the peer in flake.nix.
+    # resolv.conf directly, bypassing NSS), so avahi/.local names won't work.
+    # It still gets MagicDNS: resolv.conf points at resolved's stub and
+    # searches the tailnet domain, so the bare peer hostname resolves to its
+    # tailnet address. lanMouse.ips in flake.nix pins addresses instead.
     xdg.configFile."lan-mouse/config.toml".source =
       (pkgs.formats.toml { }).generate "lan-mouse-config.toml"
         {

@@ -229,17 +229,13 @@
             };
             # The laptop sits to the right of the desk; its keyboard/mouse are
             # shared via lan-mouse (see home/max/lan-mouse.nix). Swap position
-            # to "left" here (and to "right" on the laptop) if it moves.
-            #
-            # TODO: still points at work-laptop. The framework host is configured
-            # for the other end of this link but isn't installed yet, so leaving
-            # it here would break a working pairing for an unresolvable hostname.
-            # Change peer to "framework" (and set ips below) once it's on the LAN.
+            # to "left" here (and to "right" on the laptop) if it moves. The
+            # peer resolves through MagicDNS once the framework joins the
+            # tailnet, so no IP is pinned.
             lanMouse = {
               enable = true;
-              peer = "work-laptop";
+              peer = "framework";
               position = "right";
-              # ips = [ "192.168.x.x" ]; # set if the router doesn't resolve hostnames
               # activateOnStartup = true; # flip once the link is confirmed working
             };
             zen.profilePath = "alhlpwpr.Default Profile";
@@ -248,9 +244,7 @@
         };
 
         # Framework Laptop 13 Pro (Core Ultra X7 358H, Panther Lake / Arc Xe3) —
-        # personal + work daily driver. Takes over from work-laptop as the machine
-        # paired with home-desktop over lan-mouse, but only once it's installed:
-        # home-desktop's end of that link still points at work-laptop.
+        # personal + work daily driver, and home-desktop's lan-mouse peer.
         framework = mkHost {
           hostName = "framework";
           machineType = "laptop";
@@ -273,8 +267,11 @@
               primaryName = "eDP-1";
               secondary = null;
             };
-            # Kanshi manages the docked/undocked layout automatically. The docked
-            # profile only activates once both external connectors are filled in.
+            # Kanshi manages the docked/undocked layout automatically.
+            # The docked profile is work-laptop's office desk (two Philips 276B1s,
+            # matched by EDID serial, so the dock's connector numbering doesn't
+            # matter). A different desk needs its own descriptions from
+            # `hyprctl monitors`.
             kanshi = {
               enable = true;
               internal = {
@@ -283,24 +280,21 @@
                 scale = 2.0;
               };
               docked = {
-                left = null; # TODO: replace with connector name from wlr-randr
-                right = null; # TODO: replace with connector name from wlr-randr
+                left = "Philips Consumer Electronics Company PHL 276B1 UK02150032264";
+                right = "Philips Consumer Electronics Company PHL 276B1 UK02150032262";
+                leftMode = "2560x1440@74.97Hz";
+                rightMode = "2560x1440@74.97Hz";
+                # Centred below 2×2560 externals at the 1440-wide logical size:
+                # (5120 - 1440) / 2 = 1840.
+                laptopPosition = "1840,1440";
               };
             };
-            # One-sided until the machine exists: home-desktop still peers with
-            # work-laptop, so flip that end over at the same time as first
-            # install or the link only works in one direction.
+            # home-desktop resolves through MagicDNS (both ends are on the
+            # tailnet), so no IP is pinned.
             lanMouse = {
               enable = true;
               peer = "home-desktop";
               position = "left";
-              # TODO: the router doesn't resolve DHCP hostnames, so home-desktop's
-              # address has to be pinned here once confirmed (`ip -4 addr` on the
-              # desktop, then give it a DHCP reservation to keep it stable).
-              # work-laptop pins 192.168.0.235 for the same peer, but its comment
-              # calls that a wlo1 lease — i.e. possibly the laptop's own address —
-              # so re-check rather than copying it.
-              # ips = [ "192.168.x.x" ];
             };
           };
         };
@@ -356,15 +350,6 @@
                 # (5120 - 1536) / 2 = 1792.
                 laptopPosition = "1792,1440";
               };
-            };
-            lanMouse = {
-              enable = true;
-              peer = "home-desktop";
-              position = "left";
-              # Router doesn't resolve DHCP hostnames, so pin the IP (wlo1
-              # lease as of 2026-07-08 — give both machines DHCP reservations
-              # in the router to keep these stable).
-              ips = [ "192.168.0.235" ];
             };
           };
         };

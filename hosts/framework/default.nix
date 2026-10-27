@@ -201,6 +201,23 @@
     # from BIOS. Once the sbctl key steps in limine.nix's header have been run,
     # flip this on and rebuild — Limine signs with the same sbctl keys.
     # loader.limine.secureBoot.enable = true;
+
+    # TPM2 unlock: the initrd tries a TPM2 token in the LUKS header first and
+    # falls back to the passphrase prompt when there is none or the TPM won't
+    # release it. Enrol only once Secure Boot is on, since PCR 7 measures the
+    # Secure Boot state:
+    #   sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 \
+    #     /dev/disk/by-partlabel/disk-nvme-luks
+    # PCR 7 alone, because the kernel and initrd change with every rebuild.
+    # That's safe once Secure Boot is on: Limine then enrols its own config
+    # and checks every kernel and initrd hash, so nothing on the ESP can be
+    # swapped. Without a PIN the disk unlocks for anyone who powers the
+    # machine on, and the login password is what's left; add
+    # --tpm2-with-pin=yes to keep a short PIN at boot. The passphrase keyslot
+    # stays as the fallback. A Secure Boot database update (fwupd's dbx)
+    # changes PCR 7: unlock with the passphrase once, then re-enrol with
+    # --wipe-slot=tpm2 added.
+    initrd.luks.devices.cryptroot.crypttabExtraOpts = [ "tpm2-device=auto" ];
   };
 
   # ── Lid / suspend ────────────────────────────────────────────────────────────
@@ -219,6 +236,27 @@
     HandleLidSwitchDocked = "ignore";
   };
   systemd.sleep.settings.Sleep.HibernateDelaySec = "2h";
+
+  # ── Battery charge limit ─────────────────────────────────────────────────────
+  # Stop charging at 80%: a cell held at 100% on a desk wears fastest. The
+  # limit lives in the EC, written through framework_laptop's
+  # charge_control_end_threshold (nixos-hardware loads the kmod). The attribute
+  # only appears once both the ACPI battery driver and framework_laptop have
+  # loaded, in whichever order udev gets to them, hence the retry. For a full
+  # charge before a trip, until the next boot:
+  #   echo 100 | sudo tee /sys/class/power_supply/BAT1/charge_control_end_threshold
+  systemd.services.battery-charge-limit = {
+    description = "Cap battery charge at 80%";
+    wantedBy = [ "multi-user.target" ];
+    startLimitBurst = 10;
+    startLimitIntervalSec = 60;
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.runtimeShell} -c 'echo 80 > /sys/class/power_supply/BAT1/charge_control_end_threshold'";
+      Restart = "on-failure";
+      RestartSec = 3;
+    };
+  };
 
   # ── Networking ───────────────────────────────────────────────────────────────
   # iwd handles roaming between APs noticeably better than wpa_supplicant, which

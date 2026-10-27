@@ -17,7 +17,6 @@
     ../common/optional/comms.nix
     ../common/optional/onedrive.nix
     ../common/optional/pwas.nix
-    ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
