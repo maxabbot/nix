@@ -73,7 +73,22 @@ let
   # resume would be a worse bug than the one being chased. On the idle path this
   # is a no-op anyway — idle-off blanked them at 330s and every dpms.sh verb only
   # toggles what actually differs.
-  blankBeforeSleep = "loginctl lock-session; sleep 1; bash ~/.config/hypr/scripts/dpms.sh hold-off";
+  #
+  # On a manual suspend the blank never lands before suspend entry. hypridle's
+  # sleep delay-lock is released the moment the session reports locked, so the
+  # machine sleeps inside the `sleep 1`, and the hold-off runs on the far side
+  # racing after_sleep_cmd's `dpms.sh on`. `on` sees two lit outputs and skips;
+  # hold-off then blanks both with input wake disarmed. Black screens that no
+  # key will wake (every manual resume 2026-10-25..27). So the whole sequence
+  # holds sleepBlankLock, and the resume path takes that lock before it wakes:
+  # whatever is still pending finishes first, then `on` undoes it.
+  blankBeforeSleep =
+    "${flock} ${sleepBlankLock} sh -c "
+    + "'loginctl lock-session; sleep 1; bash ~/.config/hypr/scripts/dpms.sh hold-off'";
+  sleepBlankLock = "\"$XDG_RUNTIME_DIR/hypr-sleep-blank.lock\"";
+  # -w caps the wait: a wedged hold-off must not keep the screens dark.
+  awaitBlankBeforeSleep = "${flock} -w 5 ${sleepBlankLock} true; ";
+  flock = "${pkgs.util-linux}/bin/flock";
 
   # Skip an idle action while DMS's caffeine is on. DMS inhibits idle through a
   # Wayland idle-inhibitor on its bar, and that inhibitor goes missing after a
@@ -411,6 +426,7 @@ in
             after_sleep_cmd =
               resumeProbe
               + waitForNvidiaResume
+              + awaitBlankBeforeSleep
               + "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
           };
           listener = [
