@@ -52,6 +52,10 @@ subvolume for hibernation: if the machine has more than 32 GiB of RAM, raise
 check it with `systemctl hibernate`: the machine should power off and come back to the same
 session after the LUKS prompt.
 
+Then work through [framework-post-install.md](framework-post-install.md), which tests everything
+configured for this machine before it existed. It also covers shipping the sops key with
+`--extra-files`, which has to happen at install time.
+
 ---
 
 ## After install

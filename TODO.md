@@ -4,6 +4,10 @@
 
 ## Before deploying a new host
 
+### Framework
+
+Install prep and the full test list: [`docs/guides/framework-post-install.md`](docs/guides/framework-post-install.md).
+
 ### Hardware configuration
 
 `framework` still has a placeholder `hardware-configuration.nix` (work-laptop's is real — ThinkBook via the portable USB SSD). Replace on first install:
@@ -17,7 +21,7 @@ cp /mnt/etc/nixos/hardware-configuration.nix hosts/<name>/hardware-configuration
 
 - Finish the sops move (config landed 2026-09-28, `hosts/common/optional/sops.nix`):
   - Install each host's age key from `.bootstrap/<host>/key.txt` (gitignored) *before* that host's next rebuild: `sudo install -Dm600 key.txt /var/lib/sops-nix/key.txt`, then delete the staged copy
-  - Rotate the password (the old hash is in git history): `passwd` on each machine, then store the new hash so fresh installs get it — `sops set secrets/common.yaml '["max-password-hash"]' "\"$(mkpasswd -m yescrypt)\""` (`secrets/common.yaml` holds `REPLACE_ME` until then)
+  - Rotate the password (the old hash is in git history): `passwd` on each machine, then store the new hash so fresh installs get it — `sops set secrets/common.yaml '["max-password-hash"]' "\"$(mkpasswd -m yescrypt)\""` (`secrets/common.yaml` already holds a real yescrypt hash, checked 2026-10-29; make sure it's the rotated one)
   - Back up the admin key (`~/.config/sops/age/keys.txt`, shared with homelab) outside both repos
 - Populate `sshKeys` in `custom.base` before enabling `services.openssh` for remote login
 - GPG commit signing: add a `signingkey` hmArg in `flake.nix` and consume it in `home/max/git.nix` (the old empty stub was removed as dead code)
