@@ -352,8 +352,10 @@ in
 
     # Polkit authentication agent — GUI privilege prompts (gparted, virt-manager,
     # flatpak system installs). polkit_gnome's binary lives in libexec (never on
-    # PATH), so it must be referenced by store path; nothing else in the session
-    # provides an agent — without one, auth prompts silently never appear.
+    # PATH), so it must be referenced by store path. DMS's built-in agent is
+    # switched off (DMS_DISABLE_POLKIT in dms.nix) so this one is the only
+    # agent, and it outlives a DMS stopped for gaming mode. Without an agent,
+    # auth prompts silently never appear.
     systemd.user.services.polkit-gnome-agent = {
       Unit = {
         Description = "polkit-gnome authentication agent";

@@ -742,6 +742,10 @@ let
       Restart = "on-failure";
       RestartSec = 2;
       Slice = "session.slice";
+      # polkit-gnome is the session's agent (modules/home/wm/hyprland.nix):
+      # it keeps prompting while gaming mode has DMS stopped. Without this,
+      # DMS registers its own agent too, and whichever starts second fails.
+      Environment = [ "DMS_DISABLE_POLKIT=1" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };
