@@ -100,6 +100,17 @@ let
   unlessCaffeine =
     cmd: "timeout 2 dms ipc inhibit status 2>/dev/null | grep -q 'is enabled' || ${cmd}";
 
+  # Where closing the lid suspends then hibernates (framework), so do 15 idle
+  # minutes; everywhere else, plain suspend. Only that one lid value is
+  # followed: ignore or lock would make no sense as a systemctl verb.
+  idleSleep =
+    if
+      osConfig.services.logind.settings.Login.HandleLidSwitch or "suspend" == "suspend-then-hibernate"
+    then
+      "suspend-then-hibernate"
+    else
+      "suspend";
+
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
   # into a Lua hl.monitor({}) call.
   monitorToLua =
@@ -449,7 +460,7 @@ in
             }
             {
               timeout = 900;
-              on-timeout = unlessCaffeine "systemctl suspend";
+              on-timeout = unlessCaffeine "systemctl ${idleSleep}";
             }
           ];
         };

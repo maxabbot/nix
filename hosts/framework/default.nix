@@ -223,8 +223,11 @@
   # ── Lid / suspend ────────────────────────────────────────────────────────────
   # Closing the lid on battery suspends, then hibernates to the @swap swapfile
   # (disk-config.nix) after HibernateDelaySec, so a laptop left shut in a bag
-  # doesn't drain flat. On AC it only suspends. hypridle's idle suspend and
-  # DMS's power menu stay plain suspend.
+  # doesn't drain flat. On AC it only suspends. hypridle's 15-minute idle
+  # suspend follows HandleLidSwitch (modules/home/wm/hyprland.nix), and
+  # HibernateOnACPower = false holds its countdown while plugged in, so a
+  # docked machine left idle stays suspended. DMS's power menu stays plain
+  # suspend.
   #
   # No resume= or resume_offset: when systemd-sleep hibernates it records the
   # swapfile's location in the HibernateLocation EFI variable, and the systemd
@@ -235,7 +238,10 @@
     HandleLidSwitchExternalPower = "suspend";
     HandleLidSwitchDocked = "ignore";
   };
-  systemd.sleep.settings.Sleep.HibernateDelaySec = "2h";
+  systemd.sleep.settings.Sleep = {
+    HibernateDelaySec = "2h";
+    HibernateOnACPower = false;
+  };
 
   # ── Battery charge limit ─────────────────────────────────────────────────────
   # Stop charging at 80%: a cell held at 100% on a desk wears fastest. The
