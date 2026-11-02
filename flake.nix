@@ -230,12 +230,14 @@
             # The laptop sits to the right of the desk; its keyboard/mouse are
             # shared via lan-mouse (see home/max/lan-mouse.nix). Swap position
             # to "left" here (and to "right" on the laptop) if it moves. The
-            # peer resolves through MagicDNS once the framework joins the
-            # tailnet, so no IP is pinned.
+            # peer's tailnet IP is pinned: lan-mouse's own DNS client came back
+            # empty for the bare MagicDNS name (getent resolves it fine), and
+            # with no address the link just times out.
             lanMouse = {
               enable = true;
               peer = "framework";
               position = "right";
+              ips = [ "100.87.132.94" ];
               # activateOnStartup = true; # flip once the link is confirmed working
             };
             zen.profilePath = "alhlpwpr.Default Profile";
@@ -289,12 +291,13 @@
                 laptopPosition = "1840,1440";
               };
             };
-            # home-desktop resolves through MagicDNS (both ends are on the
-            # tailnet), so no IP is pinned.
+            # home-desktop's tailnet IP is pinned — see the home-desktop
+            # lanMouse comment for why MagicDNS isn't enough.
             lanMouse = {
               enable = true;
               peer = "home-desktop";
               position = "left";
+              ips = [ "100.111.189.79" ];
             };
           };
         };

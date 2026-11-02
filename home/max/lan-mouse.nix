@@ -22,10 +22,10 @@
     home.packages = [ pkgs.lan-mouse ];
 
     # lan-mouse resolves hostnames with its own DNS client (reads
-    # resolv.conf directly, bypassing NSS), so avahi/.local names won't work.
-    # It still gets MagicDNS: resolv.conf points at resolved's stub and
-    # searches the tailnet domain, so the bare peer hostname resolves to its
-    # tailnet address. lanMouse.ips in flake.nix pins addresses instead.
+    # resolv.conf directly, bypassing NSS), so avahi/.local names won't work —
+    # and in practice it came back empty for the bare MagicDNS name too
+    # (`ips: []` in `lan-mouse -f cli` → `list`), leaving the link to time
+    # out. lanMouse.ips in flake.nix pins the peers' tailnet addresses.
     xdg.configFile."lan-mouse/config.toml".source =
       (pkgs.formats.toml { }).generate "lan-mouse-config.toml"
         {
