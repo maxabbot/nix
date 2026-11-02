@@ -173,7 +173,9 @@ powerprofilesctl get
 ```
 
 - [ ] **Charge limit.** The service exited `0/SUCCESS` and the threshold reads
-      `80`. Plugged in above 80%, the status is `Not charging`. If the service
+      `80`. Plugged in above 80%, the status is `Discharging`: the EC runs the
+      machine off the battery until it's back down to 80%, then holds it
+      there (`Not charging`). If the service
       failed, `journalctl -b -u battery-charge-limit` shows why; EIO means the
       EC rejected the write.
 - [ ] **Power profiles.** The profile buttons in the DMS battery popout change
