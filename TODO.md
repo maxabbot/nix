@@ -10,7 +10,7 @@ Install prep and the full test list: [`docs/guides/framework-post-install.md`](d
 
 ### Hardware configuration
 
-`framework` still has a placeholder `hardware-configuration.nix` (work-laptop's is real — ThinkBook via the portable USB SSD). Replace on first install:
+All four hosts have a real `hardware-configuration.nix` (framework's landed 2026-11-02). For a new host, generate it on first install:
 
 ```bash
 sudo nixos-generate-config --root /mnt
@@ -76,6 +76,7 @@ nix run github:nix-community/nixos-anywhere -- \
 - [ ] **Fix game mode**
 - [x] **Fix `Super+Q` closing every instance** — should close only the focused window
 - [ ] **Backblaze B2 backups** of home-desktop and framework (see Backups below)
+- [ ] **Framework dbx updates are manual.** Setup Mode ("Erase all Secure Boot Settings") wiped the dbx; it was rebuilt from LVFS's `DBXUpdate-20260707-x64.cab` (291 hashes), but fwupd reads its version as `None` and so never offers dbx updates. For a new one: take the `.bin` from the LVFS cab (`gcab -x`), prefix the attributes `67 00 00 00` (signed for append — `27` is refused), `sudo dd` it to `/sys/firmware/efi/efivars/dbx-d719b2cb-3d3a-4596-a3bc-dad00e67656f` in one write, reboot, then re-enrol the TPM (`--wipe-slot=tpm2`): PCR 7 changes
 
 ## Future improvements
 
