@@ -223,7 +223,7 @@ systemctl --user status lan-mouse
       crosses off the framework's left edge onto home-desktop and back off
       home-desktop's right edge, and typing follows it. The release combo is
       `LeftCtrl+LeftShift+LeftMeta+LeftAlt`.
-- [ ] **Clipboard.** Copy on one machine, cross, and paste on the other.
+- [x] **Clipboard.** Copy on one machine, cross, and paste on the other.
 - [x] **Make it permanent.** Once the link works, set
       `activateOnStartup = true` in both `lanMouse` blocks in `flake.nix`.
 
