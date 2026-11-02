@@ -106,9 +106,9 @@
   };
 
   # ── Nix builds ───────────────────────────────────────────────────────────────
-  # base.nix caps max-jobs at 1 for the RAM-constrained hosts. Once the installed
-  # RAM is known and comfortable (home-desktop uses "auto" at 62 GiB), raise it:
-  #   nix.settings.max-jobs = "auto";
+  # base.nix caps max-jobs at 1 for the RAM-constrained hosts; 32 GB (30.6 GiB
+  # usable) is comfortable for parallel builds (home-desktop uses "auto" at 62 GiB).
+  nix.settings.max-jobs = "auto";
 
   # ── Graphics (Arc Xe3 iGPU) ──────────────────────────────────────────────────
   # There is no discrete GPU here, so the iGPU carries video decode, compute and
