@@ -251,6 +251,26 @@
     HibernateOnACPower = false;
   };
 
+  # The Intel PCIe Bluetooth chip (btintel_pcie) times out entering D3 at the
+  # hibernate power-off ("Timeout … on alive interrupt for D3 entry") and its
+  # poweroff callback returns -EBUSY, which the kernel takes for a wakeup and
+  # rolls the hibernation back — after the image is written, so the machine
+  # just comes back. Unload the driver around the hibernate stage only:
+  # suspend-then-hibernate runs hooks per stage with $2 = suspend-then-hibernate
+  # and SYSTEMD_SLEEP_ACTION naming the stage, so plain suspend keeps Bluetooth.
+  # Drop this once `systemctl hibernate` works without it on a newer kernel.
+  environment.etc."systemd/system-sleep/btintel-pcie-hibernate".source =
+    pkgs.writeShellScript "btintel-pcie-hibernate" ''
+      case "''${SYSTEMD_SLEEP_ACTION:-$2}" in
+        hibernate | hybrid-sleep) ;;
+        *) exit 0 ;;
+      esac
+      case "$1" in
+        pre) ${pkgs.kmod}/bin/modprobe -r btintel_pcie || true ;;
+        post) ${pkgs.kmod}/bin/modprobe btintel_pcie || true ;;
+      esac
+    '';
+
   # ── Battery charge limit ─────────────────────────────────────────────────────
   # Stop charging at 80%: a cell held at 100% on a desk wears fastest. The
   # limit lives in the EC, written through framework_laptop's
