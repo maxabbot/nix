@@ -181,7 +181,34 @@
   # PipeWire filter chain: bass extension, loudness compensation, EQ). Left OFF
   # deliberately — upstream tuned it for the classic Framework 13 chassis and
   # says the Pro's speakers need different values, so enabling it here would
-  # apply the wrong EQ curve. Revisit if a Pro profile lands upstream.
+  # apply the wrong EQ curve.
+  #
+  # Instead: Framework's own Windows tuning (Dolby DAX3, "Balanced" voicing),
+  # rebuilt as a PipeWire filter chain — FIR speaker correction, PEQ,
+  # multiband compressor, regulator, limiter. Generated once by
+  # speaker-tuning-to-easyeffects (a113b2e) from
+  # DEV_0285_SUBSYS_F111000F_PCI_SUBSYS_000FF111.xml in Framework's Windows
+  # driver bundle v1.01 (2026-06-05), with
+  #   dolby_to_pipewire.py <xml> --target-sink <sink> --no-activate
+  # The conf is the generator's output unchanged, bar the @irs@ placeholder:
+  # a WirePlumber smart filter, always on for the built-in analog sink and
+  # absent from the output menu, so volume keys still drive the card itself.
+  # HDMI, USB and Bluetooth bypass it; the headphone jack doesn't (it's a port
+  # on the same sink), so wired headphones get the speaker EQ too. It can't
+  # be bypassed at runtime — PipeWire won't let a client unload it — so A/B
+  # means a rebuild. (Tried as a selectable virtual sink to compare; the
+  # Dolby version won, 2026-11-03.) The conf is marked nofail: if an LV2
+  # plugin is missing, PipeWire just plays unprocessed.
+  services.pipewire = {
+    extraLv2Packages = [ pkgs.lsp-plugins ];
+    configPackages = [
+      (pkgs.writeTextDir "share/pipewire/pipewire.conf.d/60-dolby-speakers.conf" (
+        builtins.replaceStrings [ "@irs@" ] [ "${../../config/pipewire/Dolby_Balanced.irs}" ] (
+          builtins.readFile ../../config/pipewire/Dolby_Balanced.conf
+        )
+      ))
+    ];
+  };
 
   # ── Fingerprint reader ───────────────────────────────────────────────────────
   # services.fprintd comes from nixos-hardware. Enrol once per finger with
