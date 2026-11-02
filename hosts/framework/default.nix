@@ -220,10 +220,11 @@
     # prompt to plymouth/console cleanly.
     initrd.systemd.enable = true;
 
-    # Secure Boot: the Framework ships with it enabled and Setup Mode available
-    # from BIOS. Once the sbctl key steps in limine.nix's header have been run,
-    # flip this on and rebuild — Limine signs with the same sbctl keys.
-    # loader.limine.secureBoot.enable = true;
+    # Secure Boot: Limine signs itself with the sbctl keys in /var/lib/sbctl,
+    # enrolled 2026-11-03 (owner GUID 25f76c52…, Microsoft + firmware keys
+    # kept) per limine.nix's header. A reinstall without those keys needs
+    # the header's create/enroll steps again before this builds.
+    loader.limine.secureBoot.enable = true;
 
     # TPM2 unlock: the initrd tries a TPM2 token in the LUKS header first and
     # falls back to the passphrase prompt when there is none or the TPM won't
