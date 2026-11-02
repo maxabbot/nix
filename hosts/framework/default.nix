@@ -241,6 +241,14 @@
     # stays as the fallback. A Secure Boot database update (fwupd's dbx)
     # changes PCR 7: unlock with the passphrase once, then re-enrol with
     # --wipe-slot=tpm2 added.
+    #
+    # Enrolled 2026-11-03 with a PIN. Each of these asks for the passphrase,
+    # which none of them changes (that's `cryptsetup luksChangeKey`):
+    #   change the PIN, or add one:  the enrol command + --wipe-slot=tpm2
+    #                                + --tpm2-with-pin=yes
+    #   drop the PIN:                the enrol command + --wipe-slot=tpm2
+    #   passphrase only again:       sudo systemd-cryptenroll --wipe-slot=tpm2 \
+    #                                  /dev/disk/by-partlabel/disk-nvme-luks
     initrd.luks.devices.cryptroot.crypttabExtraOpts = [ "tpm2-device=auto" ];
   };
 
