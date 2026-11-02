@@ -186,6 +186,14 @@
     hyprlock.fprintAuth = false;
   };
 
+  # ── Login greeter ────────────────────────────────────────────────────────────
+  # KWin (SDDM's greeter compositor) auto-scales the panel to 1.7x, and
+  # SilentSDDM multiplies its own sizes by that devicePixelRatio again
+  # (Config.automaticScale) — so every widget came out ~1.7x too big. Scale the
+  # theme back by the same factor. Shallow-merges with productivity.nix's
+  # silentSDDM.settings (type `attrs`), so only the General section is set here.
+  programs.silentSDDM.settings.General.scale = 0.6;
+
   # ── Bootloader ───────────────────────────────────────────────────────────────
   # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
   # No Windows chainload entry — this disk is Linux-only (see disk-config.nix).

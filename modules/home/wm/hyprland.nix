@@ -142,17 +142,20 @@ let
   # pixels, so on a scaled output it renders at 1x and comes out tiny. Steam
   # takes one global factor at startup, and only from Xft.dpi — it ignores
   # STEAM_FORCE_DESKTOPUI_SCALING and -forcedesktopscaling. Match the secondary,
-  # where its main window is pinned (hyprland.lua); hosts with no scaled
-  # secondary are left at 96. Applies to every XWayland app that reads Xft.dpi.
-  secScale =
+  # where its main window is pinned (hyprland.lua); laptops with no secondary
+  # match the internal panel instead (so Steam comes out oversized on a docked
+  # 1x external until it restarts). Applies to every XWayland app that reads
+  # Xft.dpi.
+  monitorScale = s: builtins.fromJSON (lib.strings.trim (builtins.elemAt (lib.splitString "," s) 3));
+  xScale =
     if cfg.monitors.secondary != null then
-      builtins.fromJSON (
-        lib.strings.trim (builtins.elemAt (lib.splitString "," cfg.monitors.secondary) 3)
-      )
+      monitorScale cfg.monitors.secondary
+    else if cfg.monitors.primary != null then
+      monitorScale cfg.monitors.primary
     else
       1;
   xresources = pkgs.writeText "xresources" "Xft.dpi: ${
-    toString (builtins.floor (96 * secScale + 0.5))
+    toString (builtins.floor (96 * xScale + 0.5))
   }\n";
 
   # The generated monitors.lua content
@@ -193,7 +196,7 @@ let
       hl.env("LIBVA_DRIVER_NAME",         "nvidia")
       hl.env("__GL_GSYNC_ALLOWED",        "1")
       hl.env("__GL_VRR_ALLOWED",          "1")''}
-    ${lib.optionalString (secScale != 1) ''
+    ${lib.optionalString (xScale != 1) ''
       -- XWayland comes up with Hyprland, so it's there by hyprland.start.
       hl.on("hyprland.start", function()
           hl.exec_cmd("${lib.getExe pkgs.xrdb} -merge ${xresources}")

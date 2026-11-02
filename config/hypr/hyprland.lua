@@ -126,6 +126,9 @@ hl.config({
             natural_scroll       = true,
             disable_while_typing = true,
             tap_to_click         = true,
+            -- libinput's default (1.0) scrolls far too fast on the Framework's
+            -- high-resolution touchpad.
+            scroll_factor        = 0.4,
         },
     },
 
