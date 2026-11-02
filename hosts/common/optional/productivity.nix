@@ -239,7 +239,14 @@ in
     imv
     mpvpaper
     rclone
-    nvtopPackages.full
+    # .full drags in the whole CUDA toolkit (~10 GiB) for its NVIDIA backend,
+    # so only the NVIDIA host gets it; the Intel-only hosts get the Intel build.
+    (
+      if lib.elem "nvidia" config.services.xserver.videoDrivers then
+        nvtopPackages.full
+      else
+        nvtopPackages.intel
+    )
     openrgb-with-all-plugins
     glances
     veracrypt
