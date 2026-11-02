@@ -10,14 +10,14 @@ fails, note it in `TODO.md` with the command and its output.
 
 ## 0. Before installing
 
-- [ ] **RAM vs swapfile.** On the live ISO: `free -g`. The `@swap` swapfile
+- [x] **RAM vs swapfile.** On the live ISO: `free -g`. The `@swap` swapfile
       must hold a hibernation image of all of RAM, and it can only be resized
       by reinstalling. Above 32 GiB, raise `swap.swapfile.size` in
       `hosts/framework/disk-config.nix` first, and commit it (push too, if you
       install from the GitHub flake).
-- [ ] **Disk name.** `lsblk` should show the one NVMe as `nvme0n1`, which is
+- [x] **Disk name.** `lsblk` should show the one NVMe as `nvme0n1`, which is
       what `disk-config.nix` formats.
-- [ ] **Ship the sops key with the install.** The first activation decrypts
+- [x] **Ship the sops key with the install.** The first activation decrypts
       the password hash, so `/var/lib/sops-nix/key.txt` has to exist before it
       runs. From `/etc/nixos` on home-desktop:
 
@@ -45,9 +45,9 @@ fails, note it in `TODO.md` with the command and its output.
       KWin, which picks a scale from the panel. If it's tiny, that needs config.
 - [ ] **TTY font.** On `Ctrl+Alt+F2` the kernel picks its large Terminus font
       by itself. `Ctrl+Alt+F1` goes back.
-- [ ] **Log in with the password.** It comes from `max-password-hash` in
+- [x] **Log in with the password.** It comes from `max-password-hash` in
       `secrets/common.yaml`.
-- [ ] **Real hardware config.** Replace the placeholder
+- [x] **Real hardware config.** Replace the placeholder
       `hosts/framework/hardware-configuration.nix` as described in
       [nix-install.md](nix-install.md#framework--encrypted-root), commit it,
       and run `nixup`, which should succeed with nothing else changing.
@@ -66,12 +66,12 @@ ls /dev/accel
 systemctl is-active iwd
 ```
 
-- [ ] **Panel.** `eDP-1` at `2880x1920@120`, scale `2.00`. If the connector
+- [x] **Panel.** `eDP-1` at `2880x1920@120`, scale `2.00`. If the connector
       or mode differs, fix `monitors` and `kanshi.internal` in `flake.nix`.
-- [ ] **GPU driver.** `Kernel driver in use: xe`.
+- [x] **GPU driver.** `Kernel driver in use: xe`.
 - [ ] **Video decode.** vainfo names the iHD driver (Intel iHD). Play a video
       in Zen while `intel_gpu_top` runs: the Video engine should be busy.
-- [ ] **NPU.** `/dev/accel` lists `accel0`.
+- [x] **NPU.** `/dev/accel` lists `accel0`.
 - [ ] **Wi-Fi.** iwd is `active`, and the connection survives walking between
       access points.
 - [ ] **Audio.** Speakers, microphone and headphones all work, with no pop
@@ -89,12 +89,12 @@ getent hosts home-desktop            # and `getent hosts framework` on home-desk
 avahi-browse -rt _ipp._tcp | grep -E "hostname|address" | head
 ```
 
-- [ ] **Secrets.** `/run/secrets` holds `max-password-hash` and
+- [x] **Secrets.** `/run/secrets` holds `max-password-hash` and
       `syncthing/{cert-pem,key-pem}`.
-- [ ] **Tailscale.** The framework shows in `tailscale status`, and each
+- [x] **Tailscale.** The framework shows in `tailscale status`, and each
       machine resolves the other's bare hostname to a `100.x` address. That
       MagicDNS lookup is what lan-mouse relies on.
-- [ ] **Syncthing.** At `localhost:8384` the device ID matches the framework
+- [x] **Syncthing.** At `localhost:8384` the device ID matches the framework
       entry in the homelab repo (it comes from `secrets/framework.yaml`), and
       `~/SyncDrive` syncs.
 - [ ] **Printers.** Network printers show up in avahi-browse and in CUPS at
@@ -110,18 +110,18 @@ fprintd-verify
 grep -c fprintd /etc/pam.d/{login,hyprlock,sudo,polkit-1}
 ```
 
-- [ ] **PAM wiring.** The counts read `login:0`, `hyprlock:0`, `sudo:1` and
+- [x] **PAM wiring.** The counts read `login:0`, `hyprlock:0`, `sudo:1` and
       `polkit-1:1`.
-- [ ] **sudo.** `sudo -k; sudo true` asks for a finger. Left alone, it falls
+- [x] **sudo.** `sudo -k; sudo true` asks for a finger. Left alone, it falls
       back to the password after the reader's 30 s timeout.
-- [ ] **Polkit.** `pkexec true` opens the polkit-gnome dialog (DMS's own agent
+- [x] **Polkit.** `pkexec true` opens the polkit-gnome dialog (DMS's own agent
       is switched off), and it takes the finger too.
-- [ ] **hyprlock.** Lock with `Super+L`. A line under the password box reads
+- [x] **hyprlock.** Lock with `Super+L`. A line under the password box reads
       "(Scan fingerprint to unlock)". The finger unlocks, and typing the
       password works straight away without waiting for the reader.
-- [ ] **SDDM and TTY.** Both take the password only, with no wait for the
+- [x] **SDDM and TTY.** Both take the password only, with no wait for the
       reader first.
-- [ ] **Keyring unlocked.** After an SDDM login,
+- [x] **Keyring unlocked.** After an SDDM login,
       `busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.Secret.Collection Locked`
       prints `b false`.
 
@@ -135,13 +135,13 @@ grep systemctl ~/.config/hypr/hypridle.conf
 systemctl hibernate
 ```
 
-- [ ] **Swap.** `/dev/zram0` at PRIO 5, plus `/.swapvol/swapfile` at a lower
+- [x] **Swap.** `/dev/zram0` at PRIO 5, plus `/.swapvol/swapfile` at a lower
       (negative) PRIO.
-- [ ] **Idle.** The hypridle line ends in `systemctl suspend-then-hibernate`.
-- [ ] **Hibernate.** The machine powers off. On power-on you get the LUKS
+- [x] **Idle.** The hypridle line ends in `systemctl suspend-then-hibernate`.
+- [x] **Hibernate.** The machine powers off. On power-on you get the LUKS
       prompt, then the same session behind hyprlock with windows intact.
       `journalctl -b -g "sleep operation"` shows `'hibernate'`.
-- [ ] **Plain suspend.** `systemctl suspend`, then wake from the keyboard:
+- [x] **Plain suspend.** `systemctl suspend`, then wake from the keyboard:
       both the screen and hyprlock come back.
 
 **suspend-then-hibernate.** The real delay is 2 h, so shorten it for the test
@@ -152,14 +152,15 @@ sudo mkdir -p /etc/systemd/sleep.conf.d
 printf '[Sleep]\nHibernateDelaySec=2min\n' | sudo tee /etc/systemd/sleep.conf.d/zz-test.conf
 ```
 
-- [ ] **On battery** (unplugged): close the lid, wait about 3 minutes, then
+- [x] **On battery** (unplugged): close the lid, wait about 3 minutes, then
       open it and press power. The LUKS prompt shows it hibernated.
-- [ ] **On AC:** run `systemctl suspend-then-hibernate`, which is what the
-      idle path does, and wait the same 3 minutes. It stays suspended, with no
-      LUKS prompt on wake, because `HibernateOnACPower = false` holds the
-      countdown while plugged in. (Closing the lid on AC only ever suspends.)
+- [x] **On AC:** run `systemctl suspend-then-hibernate` and wait the same
+      3 minutes: no LUKS prompt on wake. But systemd 260 only re-suspends at
+      the first timer wake on AC; after the second it returns to the session,
+      lock screen lit. So nothing on AC uses it: the lid and (since
+      2026-11-02) hypridle's idle action both plain-suspend when plugged in.
 - [ ] **Docked** (external monitor attached): closing the lid does nothing.
-- [ ] **Clean up:** `sudo rm /etc/systemd/sleep.conf.d/zz-test.conf`.
+- [x] **Clean up:** `sudo rm /etc/systemd/sleep.conf.d/zz-test.conf`.
 
 ---
 
@@ -172,17 +173,17 @@ cat /sys/class/power_supply/BAT1/status
 powerprofilesctl get
 ```
 
-- [ ] **Charge limit.** The service exited `0/SUCCESS` and the threshold reads
+- [x] **Charge limit.** The service exited `0/SUCCESS` and the threshold reads
       `80`. Plugged in above 80%, the status is `Discharging`: the EC runs the
       machine off the battery until it's back down to 80%, then holds it
       there (`Not charging`). If the service
       failed, `journalctl -b -u battery-charge-limit` shows why; EIO means the
       EC rejected the write.
-- [ ] **Power profiles.** The profile buttons in the DMS battery popout change
+- [x] **Power profiles.** The profile buttons in the DMS battery popout change
       what `powerprofilesctl get` reports.
 - [ ] **powersave entry.** Boot it from Limine once: `sudo tlp-stat -s | head`
       shows TLP enabled, and `powerprofilesctl` fails, since ppd is off there.
-- [ ] **powertop.** Run `sudo powertop --calibrate` once, then look at what
+- [x] **powertop.** Run `sudo powertop --calibrate` once, then look at what
       keeps the package out of deep C-states.
 
 ---
@@ -236,12 +237,12 @@ systemctl list-timers 'btrfs-scrub*' fwupd-refresh.timer
 ls -l /lib64/ld-linux-x86-64.so.2
 ```
 
-- [ ] **Firmware updates.** Apply any BIOS or EC updates now, before
+- [x] **Firmware updates.** Apply any BIOS or EC updates now, before
       section 10: a BIOS update can change PCR 7 or reset the Secure Boot keys.
-- [ ] **Timers.** Both show a next run: the btrfs scrub is monthly.
-- [ ] **nix-ld.** The loader exists, so downloaded binaries can run.
+- [x] **Timers.** Both show a next run: the btrfs scrub is monthly.
+- [x] **nix-ld.** The loader exists, so downloaded binaries can run.
 - [ ] **Moonlight.** It streams a game from home-desktop's Apollo.
-- [ ] **Build parallelism.** With 32 GiB or more of RAM, uncomment
+- [x] **Build parallelism.** With 32 GiB or more of RAM, uncomment
       `nix.settings.max-jobs = "auto";` in `hosts/framework/default.nix`.
 
 ---
@@ -252,12 +253,15 @@ ls -l /lib64/ld-linux-x86-64.so.2
 
 1. Create the keys: `sudo sbctl create-keys`.
 2. In the BIOS, put Secure Boot into Setup Mode, then run
-   `sudo sbctl enroll-keys -m -f`.
+   `sudo sbctl enroll-keys -m -f`. The Framework's way in, "Erase all
+   Secure Boot Settings", wipes the dbx too, and fwupd can't put it back
+   (no version to upgrade from). Restore it by hand before enrolling the
+   TPM: see "Framework dbx updates are manual" in `TODO.md`.
 3. Uncomment `loader.limine.secureBoot.enable = true;` in
    `hosts/framework/default.nix`, then run `nixup`.
 4. In the BIOS, leave Setup Mode and enable Secure Boot.
 
-- [ ] **Secure Boot on.** `sbctl status` reports Secure Boot enabled, and the
+- [x] **Secure Boot on.** `sbctl status` reports Secure Boot enabled, and the
       machine boots.
 - [ ] **Hibernate still works.** Repeat `systemctl hibernate`. The kernel has
       no lockdown LSM, so Secure Boot doesn't block it.
@@ -283,8 +287,8 @@ sudo systemd-cryptenroll /dev/disk/by-partlabel/disk-nvme-luks   # lists passwor
 
 ## Repo follow-ups once everything passes
 
-- [ ] Real `hardware-configuration.nix` committed (section 1).
+- [x] Real `hardware-configuration.nix` committed (section 1).
 - [ ] `activateOnStartup = true` on both lan-mouse ends (section 8).
-- [ ] `max-jobs` raised if RAM allows (section 9).
-- [ ] `secureBoot.enable` uncommented and committed (section 10).
+- [x] `max-jobs` raised if RAM allows (section 9).
+- [x] `secureBoot.enable` uncommented and committed (section 10).
 - [ ] `kanshi.docked` descriptions updated if the desk differs (section 7).
