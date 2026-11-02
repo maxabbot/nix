@@ -105,6 +105,21 @@
     };
   };
 
+  # ── Idle power (default entry) ───────────────────────────────────────────────
+  # What the powersave entry gets from TLP, for the everyday ppd entry too:
+  # powertop (2026-11-02) flagged all three as untuned there. Audio is already
+  # handled — snd_hda_intel's power_save is 10 s out of the box.
+  #  - PCI runtime PM: idle devices (NVMe, Wi-Fi, chipset) may power down.
+  #    Not the Bluetooth chip (8086:e476): it times out entering D3 — see the
+  #    btintel_pcie hibernate hook below — so it stays on.
+  #  - No NMI watchdog: a debugging aid whose per-CPU timer costs wakeups.
+  #  - Dirty pages flushed every 15 s rather than 5, so the NVMe sleeps longer.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{device}!="0xe476", TEST=="power/control", ATTR{power/control}="auto"
+  '';
+  boot.kernelParams = [ "nmi_watchdog=0" ];
+  boot.kernel.sysctl."vm.dirty_writeback_centisecs" = 1500;
+
   # ── Nix builds ───────────────────────────────────────────────────────────────
   # base.nix caps max-jobs at 1 for the RAM-constrained hosts; 32 GB (30.6 GiB
   # usable) is comfortable for parallel builds (home-desktop uses "auto" at 62 GiB).
