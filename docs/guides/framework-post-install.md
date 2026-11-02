@@ -216,15 +216,15 @@ kdeconnect-cli -l
 systemctl --user status lan-mouse
 ```
 
-- [ ] **Firewall.** Exactly one rule on each machine:
+- [x] **Firewall.** Exactly one rule on each machine:
       `-A nixos-fw -i tailscale0 -p udp -m udp --dport 4242 -j nixos-fw-accept`.
-- [ ] **KDE Connect.** Each machine lists the other as paired and reachable.
-- [ ] **Crossing.** Open `lan-mouse` on both and activate the peer. The cursor
+- [x] **KDE Connect.** Each machine lists the other as paired and reachable.
+- [x] **Crossing.** Open `lan-mouse` on both and activate the peer. The cursor
       crosses off the framework's left edge onto home-desktop and back off
       home-desktop's right edge, and typing follows it. The release combo is
       `LeftCtrl+LeftShift+LeftMeta+LeftAlt`.
 - [ ] **Clipboard.** Copy on one machine, cross, and paste on the other.
-- [ ] **Make it permanent.** Once the link works, set
+- [x] **Make it permanent.** Once the link works, set
       `activateOnStartup = true` in both `lanMouse` blocks in `flake.nix`.
 
 ---
@@ -288,7 +288,7 @@ sudo systemd-cryptenroll /dev/disk/by-partlabel/disk-nvme-luks   # lists passwor
 ## Repo follow-ups once everything passes
 
 - [x] Real `hardware-configuration.nix` committed (section 1).
-- [ ] `activateOnStartup = true` on both lan-mouse ends (section 8).
+- [x] `activateOnStartup = true` on both lan-mouse ends (section 8).
 - [x] `max-jobs` raised if RAM allows (section 9).
 - [x] `secureBoot.enable` uncommented and committed (section 10).
 - [ ] `kanshi.docked` descriptions updated if the desk differs (section 7).
