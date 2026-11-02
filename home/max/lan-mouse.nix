@@ -2,10 +2,10 @@
 # Enabled per-host via the `lanMouse` hmArgs in flake.nix; the firewall port
 # is opened by hosts/common/optional/lan-mouse.nix on the same hosts.
 #
-# The daemon starts with the graphical session but the peer is NOT active on
-# startup (activateOnStartup = false), so nothing captures input until you
-# activate the peer in the GUI (`lan-mouse`) or CLI (`lan-mouse-cli`). Flip
-# activateOnStartup in flake.nix once the link is confirmed working.
+# The daemon starts with the graphical session and, with activateOnStartup in
+# flake.nix (set on both hosts since the link was confirmed 2026-11-03), the
+# peer is live immediately: pushing the cursor off the shared edge crosses
+# over. Deactivate it in the GUI (`lan-mouse`) or `lan-mouse -f cli`.
 #
 # If capture is ever stuck on the other machine, the release bind is the
 # default: LeftCtrl+LeftShift+LeftMeta+LeftAlt pressed together.

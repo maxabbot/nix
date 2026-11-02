@@ -238,7 +238,7 @@
               peer = "framework";
               position = "right";
               ips = [ "100.87.132.94" ];
-              # activateOnStartup = true; # flip once the link is confirmed working
+              activateOnStartup = true;
             };
             zen.profilePath = "alhlpwpr.Default Profile";
             thunderbird.profileName = "4z8l4vef.default";
@@ -298,6 +298,7 @@
               peer = "home-desktop";
               position = "left";
               ips = [ "100.111.189.79" ];
+              activateOnStartup = true;
             };
           };
         };
