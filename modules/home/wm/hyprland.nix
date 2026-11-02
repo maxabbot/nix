@@ -103,13 +103,20 @@ let
   # Where closing the lid suspends then hibernates (framework), so do 15 idle
   # minutes; everywhere else, plain suspend. Only that one lid value is
   # followed: ignore or lock would make no sense as a systemctl verb.
+  #
+  # On AC it's plain suspend, as the lid is (HandleLidSwitchExternalPower).
+  # HibernateOnACPower = false doesn't hold suspend-then-hibernate down on its
+  # own: systemd 260 re-suspends at the first timer wake on AC, but after the
+  # second it returns to the session, lock screen lit (tested 2026-11-02).
+  # "AC" is a Mains supply online, as systemd counts it; the USB-C ucsi
+  # supplies are type USB and don't count.
   idleSleep =
     if
       osConfig.services.logind.settings.Login.HandleLidSwitch or "suspend" == "suspend-then-hibernate"
     then
-      "suspend-then-hibernate"
+      ''{ for s in /sys/class/power_supply/*; do [ "$(cat "$s/type")" = Mains ] && [ "$(cat "$s/online")" = 1 ] && { systemctl suspend; exit; }; done; systemctl suspend-then-hibernate; }''
     else
-      "suspend";
+      "systemctl suspend";
 
   # Parse a hyprlang monitor string "NAME,WxH@Hz,XxY,SCALE[,transform,N]"
   # into a Lua hl.monitor({}) call.
@@ -465,7 +472,7 @@ in
             }
             {
               timeout = 900;
-              on-timeout = unlessCaffeine "systemctl ${idleSleep}";
+              on-timeout = unlessCaffeine idleSleep;
             }
           ];
         };
