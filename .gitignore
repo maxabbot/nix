@@ -26,3 +26,6 @@ key.txt
 # Per-host age keys staged before they're copied onto each machine (PRIVATE).
 # Delete a host's directory once its key is installed and a rebuild decrypts.
 .bootstrap/
+
+# Local-only notes (may name clients, repos and credential locations) — never commit
+*.local.md
