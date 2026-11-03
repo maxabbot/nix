@@ -776,7 +776,10 @@ in
       # The launcher's Files tab and `/` queries; DMS only probes for the binary
       # and pings the dsearch service below.
       pkgs.dsearch
-    ];
+    ]
+    # batteryPlus (dms-plugins.nix, laptops) reads UPower's charge history with
+    # `gdbus call`; without gdbus the call fails silently and the chart is empty.
+    ++ lib.optional isLaptop pkgs.glib.bin;
 
     # ── Theming ───────────────────────────────────────────────────────────────
     # DMS reads a user-supplied scheme file that it never writes back to, so
