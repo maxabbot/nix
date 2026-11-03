@@ -17,6 +17,7 @@
     ../common/optional/development.nix
     ../common/optional/podman.nix
     ../common/optional/libvirt.nix
+    ../common/optional/winboat.nix
     ../common/optional/db-gui.nix
     ../common/optional/duckdb.nix
     ../common/optional/cloud-tools.nix

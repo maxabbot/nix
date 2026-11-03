@@ -172,77 +172,98 @@ What works where:
 | `pbi connect`, DAX queries, measures and modelling through `pbi-cli` | **Does not work natively.** It attaches to the local Analysis Services instance that Desktop starts, using .NET libraries (`~/.pbi-cli/bin`) |
 | Opening, refreshing and publishing `.pbix` / `.pbip` | Needs Desktop, so Windows |
 
-Options, in order of how much I'd recommend them:
+There is no Linux client, and Wine/Proton aren't realistic (WebView2, .NET and
+the Analysis Services engine are the problem). So it's a real Windows guest or
+the old laptop.
 
-1. **Keep the Windows laptop for Power BI work.** It already has Desktop, SSMS,
-   the ODBC drivers, `pbi-cli` and its connections. The framework does
-   everything else. Lowest effort, and nothing breaks.
-2. **A Windows VM on the framework.** `libvirt.nix` is already imported. A
-   Windows 11 guest (virtio drivers, 4+ vCPU, 8+ GB RAM, TPM via swtpm)
-   runs Desktop and `pbi-cli` well. Needs a Windows licence, and share the
-   repos folder by virtiofs or git. Works offline and without the laptop,
-   at the cost of disk and RAM on a 32 GB machine.
-3. **Browser-only.** Fine for light report edits, not for modelling or DAX
-   authoring through `pbi-cli`.
+### Decision: WinBoat, with the Windows laptop kept until it's proven
 
-Wine and Proton aren't realistic for Desktop (WebView2 and the Analysis
-Services engine are the problem). Whichever option you pick, the PBIR and
-TMDL files stay in git, so the VM or the laptop only needs a clone and the
-`~/.pbi-cli` config. `.pbix` files are binary and Windows-only, so keep them in
-a synced folder rather than git.
+Power BI is the only Windows app needed, which is what WinBoat suits: one app
+shown as a native window over RDP, rather than a whole desktop to manage.
 
-### WinBoat vs a plain libvirt VM
+1. **Keep the Windows laptop for Power BI** until the steps below work end to
+   end. It already has Desktop, the ODBC drivers, `pbi-cli` and its
+   connections.
+2. **Try WinBoat** (below). It runs a real Windows 11 guest, so Desktop's local
+   Analysis Services instance is there and `pbi-cli` works inside the guest.
+3. **Fall back to a libvirt VM** if WinBoat's Podman mode won't run here.
+   `libvirt.nix` is already imported. Windows 11 guest, virtio drivers, 4+
+   vCPU, 8+ GB RAM, TPM via swtpm.
+4. **Browser-only** covers light edits to published reports, not modelling or
+   DAX through `pbi-cli`.
 
-WinBoat runs a full Windows VM (QEMU/KVM inside a Docker container) and shows
-individual Windows apps as native windows over RDP. Power BI Desktop runs as a
-real Windows app, so the local Analysis Services instance is there and
-`pbi-cli` works if it runs inside the guest. This is from memory and untested
-on this hardware, so check it against the current WinBoat docs.
+Run one or the other, not both: each is a separate Windows install with its own
+disk image, so both together cost 60–80 GB. Delete the loser's image and ISO.
 
-**Recommendation: try WinBoat first; fall back to libvirt only if it gives
-trouble.**
+### What's known about WinBoat (checked 2026-11-03)
 
-Why WinBoat:
+No first-hand report of Power BI Desktop on WinBoat turned up, official or
+user. It should work, since the guest is plain Windows 11, but it's untested.
 
-- Desktop appears as a normal window beside the Hyprland apps.
-- Setup is mostly automated: no ISO, virtio drivers or swtpm TPM to arrange.
-- Same Windows engine underneath, so no loss in `pbi-cli` or Desktop compatibility.
-
-When the plain VM wins:
-
-- Docker is the sticking point. WinBoat expects Docker, and it's unconfirmed
-  whether it accepts `podman.nix`'s Docker-compat socket. Enabling real Docker
-  just for this costs more than libvirt, which is already imported.
-- You need a full Windows desktop (SSMS, a work VPN client, installers that
-  misbehave in RemoteApp mode).
-- You want snapshots before risky changes (virt-manager makes this easy).
-- You'd rather not depend on a young project that may break between updates.
-
-Things to check on this setup:
-
-- **Packaging:** confirm with `nix search nixpkgs winboat`. If it isn't there,
-  use the AppImage pattern from `lmms-appimage`.
-- **Resources:** about 4 vCPUs and 8 GB RAM or more for the guest, out of 32 GB.
+- **Packaging:** `pkgs.winboat` is in nixpkgs (0.9.0 in this flake's pin). No
+  AppImage needed.
+- **Podman:** supported since 0.9.0, chosen during WinBoat's setup. The
+  nixpkgs package wraps `podman-compose` and FreeRDP onto its own PATH, so
+  nothing extra is needed. USB passthrough doesn't
+  work under Podman (not needed for Power BI), and ports are assigned randomly.
+  The README's NixOS instructions assume Docker, and nothing confirms Podman
+  mode on NixOS, so that's the thing to test.
+- **Not Docker:** switching to real Docker would mean dropping `podman.nix`'s
+  `dockerCompat`, since NixOS won't enable both. If Podman mode fails, use the
+  libvirt VM rather than reshuffling container runtimes.
+- **Status:** beta; expect bugs. The nixpkgs build pins Electron 40, which is
+  EOL, so `flake.nix` permits it as an insecure package (as it already does
+  Electron 39). Drop that entry when WinBoat moves on, or if WinBoat goes.
+- **Requirements:** KVM, FreeRDP 3.x with sound, 4+ GB RAM, 32+ GB free on the
+  install folder's drive (one write-up measured 48 GB). Plan on about 4 vCPU and
+  8 GB RAM for Power BI, out of 32 GB.
 - **Licence:** the image is downloaded for you; activation is on you.
 - **GPU:** no passthrough. Desktop copes with software rendering; large
   visuals will be slower than native.
-- **Repo location:** WinBoat shares the Linux home into the guest as a network
-  drive. Keep the Power BI repo (PBIR/TMDL) on the guest's own disk and sync
-  through git; working over the share is slow and file watching and Desktop's
-  reload are flaky.
-- **Claude Code:** to edit report files and have `pbi-cli` connect to the model,
-  run both inside the guest. Claude Code on Linux against the share only suits
-  the PBIR file-editing part.
+- **Storage on btrfs:** make the install folder and `chattr +C` it **before**
+  WinBoat creates the disk image (it only applies to new files). Otherwise the
+  image fragments badly under copy-on-write. Offline dedup won't help either.
+- **Home share:** WinBoat mounts the Linux home into the guest. Keep the Power
+  BI repo (PBIR/TMDL) on the guest's own disk and sync through git; working
+  over the share is slow, and file watching and Desktop's reload are flaky.
+- **Claude Code:** to edit report files and have `pbi-cli` connect to the
+  model, run both inside the guest. Claude Code on Linux against the share
+  only suits the PBIR file-editing part.
 - **Network:** SQL Server, Snowflake and VPN access follow the guest's network,
   so the VPN client or Tailscale may need installing inside it.
 
-Plan:
+### Plan
 
-1. Keep the Windows laptop for Power BI until the framework settles.
-2. Check the package (above).
-3. Try WinBoat on a throwaway report: install Desktop, run `pbi connect`, and
-   refresh a report that uses real data sources.
-4. If that works, add a `winboat.nix` to `hosts/common/optional/` (and a row in
-   `CLAUDE.md`). If it fails on Docker or networking, set up the libvirt VM.
+1. ~~Add `hosts/common/optional/winboat.nix`~~ (done: framework only, asserts
+   `podman.nix`). Rebuild.
+2. Create the install folder, `chattr +C` it, then run WinBoat setup choosing
+   Podman.
+3. In the guest: `winget install -e --id Microsoft.PowerBI`, then `pbi-cli`
+   and the data-source drivers. DAX Studio and Tabular Editor go here too if
+   wanted; they attach to Desktop's Analysis Services the same way.
+4. Test on a throwaway report: `pbi connect`, a DAX query, a refresh against
+   real data sources (over the VPN if they need it), and a publish.
+5. If that all works, retire Power BI from the Windows laptop. If Podman mode
+   or networking fails, delete the WinBoat folder and set up the libvirt VM.
 
-Everything stays in git, so switching between the two later costs nothing.
+The PBIR and TMDL files stay in git, so the guest only needs a clone and the
+`~/.pbi-cli` config. `.pbix` files are binary and Windows-only, so keep them in
+a synced folder rather than git.
+
+### Other reasons to want Windows later
+
+None of these is needed now. If one comes up, it goes in the same guest, and a
+full Windows desktop (the libvirt VM, or WinBoat's full-desktop mode) starts to
+make more sense than a single app.
+
+- SSMS for admin work (Profiler, Agent jobs). Plain queries work in VS Code's
+  mssql extension.
+- SSIS/SSRS/SSAS projects in Visual Studio; Power BI Report Builder.
+- Excel with VBA, Power Pivot or COM add-ins; Access, Visio, Project; Power
+  Automate Desktop.
+- A work VPN or endpoint client with no Linux build. A VM may not satisfy an
+  Intune compliance policy.
+- Testing Windows behaviour: PowerShell 5.1, CRLF, Windows builds.
+
+A VM doesn't help with games using kernel anti-cheat (they refuse VMs) or
+GPU-heavy work (no passthrough).

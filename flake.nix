@@ -95,7 +95,11 @@
           allowUnfree = true;
           # Several Electron desktop apps in 26.05 (Slack/Discord/Obsidian/Element/…)
           # still bundle Electron 39, which is EOL and flagged insecure. Allow it.
-          permittedInsecurePackages = [ "electron-39.8.10" ];
+          # WinBoat 0.9.0 (winboat.nix, framework only) pins Electron 40, likewise EOL.
+          permittedInsecurePackages = [
+            "electron-39.8.10"
+            "electron-40.10.5"
+          ];
         };
         overlays = [
           (import ./overlays)
