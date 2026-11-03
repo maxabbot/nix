@@ -124,7 +124,15 @@ committed to a shared repo, which needs rotating, not moving.
   plugin).
 - Password manager, Tailscale, Obsidian Sync (`Open folder as vault`, then log
   in and pick the remote vault), Zen sync, Chrome (the PWAs need it), Moonlight
-  pairing, Solaar pairing, `fprintd-enroll`, `onedriver-launcher`.
+  pairing, Solaar pairing, `fprintd-enroll`.
+- Work OneDrive: not through `onedriver`. The work tenant doesn't let users
+  consent to third-party apps ("Need admin approval"), and rclone or
+  `abraunegg/onedrive` would hit the same wall. Work files go through the
+  OneDrive web app in `pwas.nix` (`office.com/launch/onedrive`, which resolves
+  to the signed-in account; `microsoft365.com/onedrive` now 404s in the
+  Copilot app), and `.pbix` files through the OneDrive client in the WinBoat
+  guest, which is Microsoft's own and needs no consent. No personal OneDrive
+  is needed, so `onedriver-launcher` stays unused.
 
 ---
 
@@ -206,8 +214,10 @@ user. It should work, since the guest is plain Windows 11, but it's untested.
   nixpkgs package wraps `podman-compose` and FreeRDP onto its own PATH, so
   nothing extra is needed. USB passthrough doesn't
   work under Podman (not needed for Power BI), and ports are assigned randomly.
-  The README's NixOS instructions assume Docker, and nothing confirms Podman
-  mode on NixOS, so that's the thing to test.
+  The README's NixOS instructions assume Docker. **Tested 2026-11-03:** Podman
+  mode installs fine on the framework. Setup pulled the `dockur/windows` image,
+  built the disk and finished the unattended Windows install in about 25
+  minutes, with no changes beyond `winboat.nix`.
 - **Not Docker:** switching to real Docker would mean dropping `podman.nix`'s
   `dockerCompat`, since NixOS won't enable both. If Podman mode fails, use the
   libvirt VM rather than reshuffling container runtimes.
@@ -236,10 +246,12 @@ user. It should work, since the guest is plain Windows 11, but it's untested.
 
 1. ~~Add `hosts/common/optional/winboat.nix`~~ (done: framework only, asserts
    `podman.nix`). Rebuild.
-2. Create the install folder, `chattr +C` it, then run WinBoat setup choosing
-   Podman.
+2. ~~Create the install folder, `chattr +C` it, then run WinBoat setup choosing
+   Podman.~~ (done 2026-11-03: `~/winboat`, `+C` confirmed with `lsattr`, so
+   the 64 GB `data.img` was created without copy-on-write.)
 3. In the guest: `winget install -e --id Microsoft.PowerBI`, then `pbi-cli`
-   and the data-source drivers. DAX Studio and Tabular Editor go here too if
+   and the data-source drivers. Sign in to the guest's OneDrive client with
+   the work account for `.pbix` files. DAX Studio and Tabular Editor go here too if
    wanted; they attach to Desktop's Analysis Services the same way.
 4. Test on a throwaway report: `pbi connect`, a DAX query, a refresh against
    real data sources (over the VPN if they need it), and a publish.
