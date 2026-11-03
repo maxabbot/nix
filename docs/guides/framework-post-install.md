@@ -76,8 +76,9 @@ systemctl is-active iwd
 - [x] **NPU.** `/dev/accel` lists `accel0`.
 - [ ] **Wi-Fi.** iwd is `active`, and the connection survives walking between
       access points.
-- [ ] **Audio.** Speakers, microphone and headphones all work, with no pop
+- [x] **Audio.** Speakers, microphone and headphones all work, with no pop
       when the codec wakes.
+- [x] **Webcam.** It shows a picture (e.g. in a browser camera test).
 
 ---
 
