@@ -354,6 +354,36 @@ in
       fi
     '';
 
+    # ── Syncthing Tray connection ────────────────────────────────────────────
+    # The tray rewrites syncthingtray.ini itself (window size, last tab), so
+    # it can't be an HM symlink. Instead pin just the connection keys: the
+    # local daemon's GUI address, auto-connect, and its API key — which the
+    # daemon generates per machine, so it's read from config.xml here. On a
+    # fresh install config.xml may not exist yet; the next nixup fills it in.
+    # The running tray only reads the connection at startup, so restart it
+    # when anything changed.
+    home.activation.syncthingtrayConnection = lib.mkIf osConfig.services.syncthing.enable (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        ini="${config.xdg.configHome}/syncthingtray.ini"
+        stConfig="${osConfig.services.syncthing.configDir}/config.xml"
+        crudini="${pkgs.crudini}/bin/crudini --ini-options=nospace"
+        if [ -r "$stConfig" ]; then
+          apiKey=$(${pkgs.gnused}/bin/sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' "$stConfig")
+          before=$(cat "$ini" 2>/dev/null || true)
+          $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\size' 1
+          $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\1\syncthingUrl' \
+            'http://${osConfig.services.syncthing.guiAddress}'
+          $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\1\apiKey' "@ByteArray($apiKey)"
+          $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\1\autoConnect' true
+          if [ "$before" != "$(cat "$ini" 2>/dev/null || true)" ]; then
+            $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user try-restart syncthingtray.service || true
+          fi
+        else
+          echo "syncthingtray: $stConfig not readable yet; connection set on next activation"
+        fi
+      ''
+    );
+
     # ── Tray applets — systemd user services instead of sleep-raced exec-once ─
     # Both HM services bind to tray.target (declared by HM's wayland module).
     # nm-applet (SNI mode) re-registers once the DMS tray appears;
