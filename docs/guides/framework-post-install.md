@@ -69,7 +69,7 @@ systemctl is-active iwd
 - [x] **Panel.** `eDP-1` at `2880x1920@120`, scale `2.00`. If the connector
       or mode differs, fix `monitors` and `kanshi.internal` in `flake.nix`.
 - [x] **GPU driver.** `Kernel driver in use: xe`.
-- [ ] **Video decode.** vainfo names the iHD driver (Intel iHD). Play a video
+- [x] **Video decode.** vainfo names the iHD driver (Intel iHD). Play a video
       in Zen while `intel_gpu_top` runs: the Video engine should be busy.
 - [x] **NPU.** `/dev/accel` lists `accel0`.
 - [ ] **Wi-Fi.** iwd is `active`, and the connection survives walking between
