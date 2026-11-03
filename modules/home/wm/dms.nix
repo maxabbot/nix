@@ -14,6 +14,7 @@
   machineType,
   osConfig,
   inputs,
+  lanMouse,
   ...
 }:
 let
@@ -31,6 +32,7 @@ let
       inputs
       osConfig
       isLaptop
+      lanMouse
       ;
   };
 
@@ -646,6 +648,7 @@ let
           dmsPlugins.barWidget "batteryPlus"
           ++ dmsPlugins.barWidget "quickCapture"
           ++ dmsPlugins.barWidget "keybindsTile"
+          ++ dmsPlugins.barWidget "lanMouseTile"
         );
     # Tile order, re-applied on every nixup: a drag in DMS's edit mode lasts
     # only until the next rebuild. Tiles not listed (added in the GUI) keep
@@ -660,6 +663,7 @@ let
       "plugin_batteryPlus"
       "plugin_quickCapture"
       "plugin_keybindsTile"
+      "plugin_lanMouseTile"
     ];
     bars = {
       # "all" when there is nothing to split, so single-output hosts still show a bar.

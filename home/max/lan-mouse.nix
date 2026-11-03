@@ -5,7 +5,9 @@
 # The daemon starts with the graphical session and, with activateOnStartup in
 # flake.nix (set on both hosts since the link was confirmed 2026-11-03), the
 # peer is live immediately: pushing the cursor off the shared edge crosses
-# over. Deactivate it in the GUI (`lan-mouse`) or `lan-mouse -f cli`.
+# over. Turn it off with the Control Center's Lan Mouse tile (stops the
+# unit until the next login), `systemctl --user stop lan-mouse`, or deactivate
+# the peer in the GUI (`lan-mouse`) / `lan-mouse -f cli`.
 #
 # If capture is ever stuck on the other machine, the release bind is the
 # default: LeftCtrl+LeftShift+LeftMeta+LeftAlt pressed together.

@@ -1,0 +1,13 @@
+{
+    "id": "lanMouseTile",
+    "name": "Lan Mouse",
+    "description": "Control Center tile that starts and stops the lan-mouse daemon",
+    "version": "1.0.0",
+    "author": "max",
+    "icon": "mouse",
+    "type": "widget",
+    "capabilities": ["control-center"],
+    "component": "./LanMouseTile.qml",
+    "requires_dms": ">=1.6.0",
+    "permissions": ["process"]
+}

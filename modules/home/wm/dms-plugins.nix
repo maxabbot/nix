@@ -37,6 +37,7 @@
   inputs,
   osConfig,
   isLaptop,
+  lanMouse,
 }:
 let
   registry = import "${inputs.dms-plugin-registry}/nix/default.nix" { inherit pkgs; };
@@ -242,6 +243,12 @@ let
       src = ../../../config/dms/keybindsTile;
     }
   ]
+  # Local: a Control Center toggle that starts/stops the lan-mouse daemon
+  # (home/max/lan-mouse.nix), on the hosts that run it.
+  ++ lib.optional lanMouse.enable {
+    id = "lanMouseTile";
+    src = ../../../config/dms/lanMouseTile;
+  }
   ++ lib.optional osConfig.services.tailscale.enable {
     id = "dankscale";
     src = registry.dankscale;
