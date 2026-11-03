@@ -70,7 +70,9 @@ systemctl is-active iwd
       or mode differs, fix `monitors` and `kanshi.internal` in `flake.nix`.
 - [x] **GPU driver.** `Kernel driver in use: xe`.
 - [x] **Video decode.** vainfo names the iHD driver (Intel iHD). Play a video
-      in Zen while `intel_gpu_top` runs: the Video engine should be busy.
+      and sum the video-engine cycles twice; the second number should be
+      higher. (`intel_gpu_top` only knows i915 — this GPU runs on `xe`.)
+      `for i in 1 2; do grep -h '^drm-cycles-vcs' /proc/[0-9]*/fdinfo/* 2>/dev/null | awk '{s+=$2} END {print s+0}'; sleep 2; done`
 - [x] **NPU.** `/dev/accel` lists `accel0`.
 - [ ] **Wi-Fi.** iwd is `active`, and the connection survives walking between
       access points.
