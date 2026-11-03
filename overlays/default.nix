@@ -13,6 +13,11 @@ final: prev: {
   # better PipeWire error handling. Taken from unstable; drop once stable catches up.
   cava = final.unstable.cava;
 
+  # Clight (hosts/common/optional/clight.nix) should drive the internal panel
+  # only; with DDC, clightd also takes over external monitors and fights the
+  # DMS brightness slider, which already drives them over DDC/CI.
+  clightd = prev.clightd.override { enableDdc = false; };
+
   # 26.05 ships DMS 1.4.6; quickCapture and the current AvengeMedia plugins
   # need >= 1.6. Unstable's recipe, built against this set's Qt/KDE libraries
   # (same Qt as unstable today, but quickshell here is stable's, and QML

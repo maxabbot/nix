@@ -249,6 +249,13 @@ let
     id = "lanMouseTile";
     src = ../../../config/dms/lanMouseTile;
   }
+  # Clight's Control Center tile (hosts/common/optional/clight.nix): ambient
+  # and backlight levels, pause, and its settings — over Clight's D-Bus API,
+  # so nothing to install beyond the service.
+  ++ lib.optional osConfig.services.clight.enable {
+    id = "dankClight";
+    src = registry.dankClight;
+  }
   ++ lib.optional osConfig.services.tailscale.enable {
     id = "dankscale";
     src = registry.dankscale;

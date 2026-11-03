@@ -649,6 +649,7 @@ let
           ++ dmsPlugins.barWidget "quickCapture"
           ++ dmsPlugins.barWidget "keybindsTile"
           ++ dmsPlugins.barWidget "lanMouseTile"
+          ++ dmsPlugins.barWidget "dankClight"
         );
     # Tile order, re-applied on every nixup: a drag in DMS's edit mode lasts
     # only until the next rebuild. Tiles not listed (added in the GUI) keep
@@ -664,6 +665,7 @@ let
       "plugin_quickCapture"
       "plugin_keybindsTile"
       "plugin_lanMouseTile"
+      "plugin_dankClight"
     ];
     bars = {
       # "all" when there is nothing to split, so single-output hosts still show a bar.

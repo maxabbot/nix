@@ -34,6 +34,7 @@
     ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
     ../common/optional/keyboards.nix
+    ../common/optional/clight.nix
     ../common/optional/moonlight.nix
     ../common/optional/tailscale.nix
     ../common/optional/limine.nix
