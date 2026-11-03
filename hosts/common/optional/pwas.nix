@@ -2,7 +2,7 @@
 # gets its own .desktop entry, taskbar icon, and chromeless window (no tabs/
 # URL bar), sharing the default Chrome profile's login session. `icon` is a
 # theme icon name (Papirus, the Stylix icon theme, ships Teams/Chat/WhatsApp/
-# Outlook) or an absolute svg/png path for apps Papirus lacks (Immich).
+# Outlook/OneDrive) or an absolute svg/png path for apps Papirus lacks (Immich).
 { pkgs, lib, ... }:
 let
   immichLogo = pkgs.fetchurl {
@@ -29,6 +29,15 @@ let
       name = "Outlook";
       icon = "ms-outlook";
       url = "https://outlook.office.com/mail/";
+    }
+    # Work OneDrive: the tenant blocks consent for onedriver, so work files
+    # stay in the browser. Office's /launch/onedrive redirects to the
+    # signed-in account's own OneDrive, so no tenant URL is needed here
+    # (microsoft365.com/onedrive is now a 404 in the Copilot app).
+    {
+      name = "OneDrive";
+      icon = "ms-onedrive";
+      url = "https://www.office.com/launch/onedrive";
     }
     # Photo library on the homelab — tailnet-only, so Tailscale must be up.
     {

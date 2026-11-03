@@ -42,7 +42,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `streaming-tools.nix` | OBS, Shotcut, RustDesk, gpu-screen-recorder |
 | `google-chrome.nix` | Google Chrome |
 | `onedrive.nix` | OneDrive sync via `onedriver` (FUSE, on-demand files) — run `onedriver-launcher` once per machine to add the account/mountpoint |
-| `pwas.nix` | Declarative "installed" web apps (Teams, Google Chat, WhatsApp, Outlook, Immich — tailnet-only) via Chrome `--app` mode — `.desktop` entries generated with `makeDesktopItem`, edit the `apps` list here to add/remove. `icon` is required: a Papirus name, or a store path for apps Papirus lacks (Immich uses the pinned upstream logo) |
+| `pwas.nix` | Declarative "installed" web apps (Teams, Google Chat, WhatsApp, Outlook, OneDrive, Immich — tailnet-only) via Chrome `--app` mode — `.desktop` entries generated with `makeDesktopItem`, edit the `apps` list here to add/remove. `icon` is required: a Papirus name, or a store path for apps Papirus lacks (Immich uses the pinned upstream logo) |
 | `comms.nix` | Slack, Discord, Zoom |
 | `nvidia.nix` | NVIDIA driver (open, RTX 40-series) |
 | `cuda.nix` | CUDA / cuDNN stack |
