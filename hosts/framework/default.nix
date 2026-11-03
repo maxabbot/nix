@@ -32,6 +32,7 @@
     ../common/optional/wine.nix
     ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
+    ../common/optional/keyboards.nix
     ../common/optional/moonlight.nix
     ../common/optional/tailscale.nix
     ../common/optional/limine.nix
@@ -124,6 +125,18 @@
   # base.nix caps max-jobs at 1 for the RAM-constrained hosts; 32 GB (30.6 GiB
   # usable) is comfortable for parallel builds (home-desktop uses "auto" at 62 GiB).
   nix.settings.max-jobs = "auto";
+
+  # ── Fonts ────────────────────────────────────────────────────────────────────
+  # Microsoft core fonts (Georgia, Times New Roman, Arial, …) — the CV build's
+  # Puppeteer render expects Georgia, same as home-desktop. Merges with
+  # base.nix's fonts.packages; unfree is already allowed flake-wide.
+  fonts.packages = [ pkgs.corefonts ];
+
+  # ── DDC/CI ───────────────────────────────────────────────────────────────────
+  # Loads i2c-dev and grants i2c-bus access so the DMS brightness slider can
+  # drive *external* monitors (the docked Philips pair) through ddcutil. The
+  # internal panel is unaffected; it goes through the backlight interface.
+  hardware.i2c.enable = true;
 
   # ── Graphics (Arc Xe3 iGPU) ──────────────────────────────────────────────────
   # There is no discrete GPU here, so the iGPU carries video decode, compute and

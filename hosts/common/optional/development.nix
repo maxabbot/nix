@@ -34,6 +34,10 @@
     curlie
     bruno
     pgcli
+    snowsql # Snowflake SQL client (unfree; allowUnfree is set flake-wide)
+    # dbt with the Snowflake adapter in one env — a bare dbt-core can't load
+    # adapters installed as separate store paths. Profiles live in ~/.dbt/.
+    (python3Packages.dbt-core.withAdapters (a: [ a.dbt-snowflake ]))
   ];
 
   programs.direnv.enable = true;

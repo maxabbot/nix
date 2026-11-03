@@ -28,6 +28,7 @@
     ../common/optional/fan2go.nix
     ../common/optional/lan-mouse.nix
     ../common/optional/logitech.nix
+    ../common/optional/keyboards.nix
     ../common/optional/tailscale.nix
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
@@ -96,36 +97,10 @@
       };
     };
 
-    # ── udev ───────────────────────────────────────────────────────────────────
-    # NuPhy Air75 V3 — grants userspace hidraw access for nuphy.io configurator.
-    # 0660 + input group instead of world-writable 0666; the primary user is in
-    # "input" (base.nix). TAG+="uaccess" won't work here: extraRules lands in
-    # 99-local.rules, after 73-seat-late.rules has already processed the tag.
-    #
-    # The Bolt receiver's wakeup rule used to live here too; it moved to
-    # hosts/common/optional/logitech.nix so it follows the receiver rather than
-    # this host.
-    udev = {
-      extraRules = ''
-        KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", GROUP="input"
-      '';
-
-      # Vial (splitkb Aurora Sofle v2, 8d1d:ec32) — hidraw access for the
-      # vial.rocks WebHID configurator. Unlike the NuPhy rule above this needs
-      # TAG+="uaccess", so it can't live in extraRules (99-local.rules runs too
-      # late); ship it as a package so the filename sorts before
-      # 73-seat-late.rules. The serial match is Vial's magic prefix, common to
-      # every Vial-enabled board, so this covers future ones too.
-      packages = [
-        (pkgs.writeTextFile {
-          name = "vial-udev-rules";
-          destination = "/etc/udev/rules.d/59-vial.rules";
-          text = ''
-            KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users", TAG+="uaccess", TAG+="udev-acl"
-          '';
-        })
-      ];
-    };
+    # udev: the keyboard rules (NuPhy, Vial, QMK) live in
+    # hosts/common/optional/keyboards.nix; the Bolt receiver's wakeup rule in
+    # hosts/common/optional/logitech.nix, so each follows the device rather
+    # than this host.
   };
 
   # ── Fonts ────────────────────────────────────────────────────────────────────
@@ -133,9 +108,6 @@
   # Puppeteer render expects Georgia. Merges with base.nix's fonts.packages;
   # unfree is already allowed flake-wide.
   fonts.packages = [ pkgs.corefonts ];
-
-  # QMK udev rules (bootloader/DFU access for flashing the Sofle).
-  hardware.keyboard.qmk.enable = true;
 
   # ── SDDM: show greeter on DP-3 only ─────────────────────────────────────────
   # Activation runs on every boot before SDDM starts. chmod 444 prevents KWin
