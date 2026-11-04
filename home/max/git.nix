@@ -41,6 +41,14 @@ in
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       };
     };
+    # Work identity lives in an untracked local file so it stays out of this
+    # public repo. Git silently skips the include if the file is missing.
+    includes = [
+      {
+        condition = "gitdir:~/Projects/work/";
+        path = "~/.config/git/work.inc";
+      }
+    ];
   };
 
   programs.delta = {
