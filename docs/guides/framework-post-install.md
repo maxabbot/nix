@@ -205,7 +205,7 @@ journalctl --user -b -u kanshi | tail -5
       Philips `UK02150032264` sits at `0,0`, `UK02150032262` at `2560,0`, and
       `eDP-1` at `1840,1440`. At a different desk, take the descriptions from
       `hyprctl monitors` and replace `kanshi.docked` in `flake.nix`.
-- [ ] **Lid closed while docked.** `kanshictl status` reads `docked-lid` and
+- [x] **Lid closed while docked.** `kanshictl status` reads `docked-lid` and
       `eDP-1` is off, with its windows moved to the externals; opening the lid
       brings it back (`docked`). The lid switch binds in `hyprland.lua` do the
       switching; logind itself ignores the lid while docked.
