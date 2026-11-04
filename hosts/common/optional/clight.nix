@@ -19,8 +19,16 @@
 # inhibit too, and its Pause method lives in the PM module that only loads
 # with inhibit — so the tile's Pause/Inhibit buttons failed ("Invalid
 # argument"). Inhibit also makes Clight try to take org.freedesktop.ScreenSaver
-# (REPLACE_EXISTING); ordered after hypridle so hypridle holds it and Clight
-# falls back to watching it.
+# (REPLACE_EXISTING); hypridle starts first at login and kept it in testing,
+# so Clight falls back to watching it. Don't order clight after hypridle to
+# force that: hypridle is after graphical-session.target, which is after
+# clight, and systemd breaks the cycle by dropping clight's start job.
+#
+# The package also ships an XDG autostart entry that runs a bare `clight` —
+# Clight's defaults: dimmer, screen-off via clightd (which hypridle can't see
+# or undo, so the panel stays black), gamma, fades, a curve down to 0%. That
+# second copy is what blacked the screen out; it's hidden below so only the
+# configured service runs.
 #
 # Fades are off: clightd 5.9's smooth Set to the level the panel is already
 # at drops it to raw 0 and leaves it there (reproduced: 3% → fade to 3% → 0),
@@ -33,7 +41,7 @@
 # Manual changes (brightness keys, the DMS slider) hold until the next capture
 # — every 10 min on AC by day, 20 on battery — Clight doesn't learn from them.
 # Pause it from the tile to keep a manual level.
-{ ... }:
+{ config, ... }:
 {
   services.clight = {
     enable = true;
@@ -81,7 +89,12 @@
     };
   };
 
-  systemd.user.services.clight.after = [ "hypridle.service" ];
+  home-manager.users.${config.custom.base.username}.xdg.configFile."autostart/clight.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Clight
+    Hidden=true
+  '';
 
   # Clight's day/night timing (capture intervals) — and its module asserts on
   # these. Christchurch, as `location` in flake.nix sharedHmArgs (gammastep's);

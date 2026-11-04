@@ -53,6 +53,38 @@ let
                      'root.selectedDevice.isReachable ? "phonelink" : "phonelink_off"'
   '';
 
+  # Tapping the Control Center tile's icon pauses/resumes Clight (the text still
+  # opens the detail view — DMS's CompoundPill splits the two). Upstream wires
+  # no ccWidgetToggled handler, so the icon did nothing and Pause was only in
+  # the detail view.
+  #
+  # The tap reads Clight's live Suspended first instead of trusting the
+  # plugin's cached state, which went stale in practice (taps kept sending
+  # Pause(true)). That matters because Clight counts pauses: each Pause(true)
+  # is one more hold, even when already paused, and it only resumes once every
+  # hold is released — so a stale tap would leave it stuck paused.
+  clight = pkgs.runCommand "dms-plugin-dankClight" { } ''
+    cp -r ${registry.dankClight} $out
+    chmod -R u+w $out
+    substituteInPlace $out/DankClight.qml \
+      --replace-fail 'import qs.Modules.Plugins' \
+                     'import qs.Modules.Plugins
+    import qs.Services' \
+      --replace-fail 'ccWidgetIsActive: ClightService.available && !ClightService.suspended && !ClightService.inhibited' \
+                     'ccWidgetIsActive: ClightService.available && !ClightService.suspended && !ClightService.inhibited
+        onCcWidgetToggled: {
+            if (!ClightService.available)
+                return;
+            DMSService.dbusGetProperty("session", ClightService.clightService, ClightService.clightPath, ClightService.clightInterface, "Suspended", response => {
+                if (response.error)
+                    return;
+                const pause = !response.result?.value;
+                ClightService.setPaused(pause);
+                ClightService.suspended = pause;
+            });
+        }'
+  '';
+
   # The Claude Code logo (its pixel mascot) at the front of the usage pill;
   # upstream has only the two rings. Simple Icons' SVG, pinned by version and
   # hash, filled with its brand orange at build time. It replaces the ✳ in the
@@ -254,7 +286,7 @@ let
   # so nothing to install beyond the service.
   ++ lib.optional osConfig.services.clight.enable {
     id = "dankClight";
-    src = registry.dankClight;
+    src = clight;
   }
   ++ lib.optional osConfig.services.tailscale.enable {
     id = "dankscale";
