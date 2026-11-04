@@ -307,7 +307,13 @@
   # swapfile's location in the HibernateLocation EFI variable, and the systemd
   # initrd resumes from it once LUKS is unlocked. Secure Boot won't block it
   # either: the kernel is built without the lockdown LSM.
+  #
+  # Power button: a tap suspends (logind's default is poweroff, and the button
+  # doubles as the fingerprint reader, so it gets brushed); holding it for
+  # logind's long-press threshold (~5 s) powers off.
   services.logind.settings.Login = {
+    HandlePowerKey = "suspend";
+    HandlePowerKeyLongPress = "poweroff";
     HandleLidSwitch = "suspend-then-hibernate";
     HandleLidSwitchExternalPower = "suspend";
     HandleLidSwitchDocked = "ignore";
