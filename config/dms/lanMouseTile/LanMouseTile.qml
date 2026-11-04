@@ -1,7 +1,7 @@
 // LanMouseTile.qml — a Control Center toggle for lan-mouse (cursor sharing
 // with the peer). Off stops the user unit, so nothing crosses the shared edge;
-// on starts it again. Stopping lasts until the next login, when
-// graphical-session.target pulls the unit back in.
+// on starts it. The unit isn't started at login, so the tile is how sharing
+// begins each session.
 //
 // Installed as a local plugin by modules/home/wm/dms-plugins.nix (only on
 // hosts with lanMouse.enable) and added to the Control Center by

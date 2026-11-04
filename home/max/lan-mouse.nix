@@ -2,12 +2,12 @@
 # Enabled per-host via the `lanMouse` hmArgs in flake.nix; the firewall port
 # is opened by hosts/common/optional/lan-mouse.nix on the same hosts.
 #
-# The daemon starts with the graphical session and, with activateOnStartup in
+# The daemon is off at login: start it from the Control Center's Lan Mouse
+# tile or `systemctl --user start lan-mouse`. With activateOnStartup in
 # flake.nix (set on both hosts since the link was confirmed 2026-11-03), the
-# peer is live immediately: pushing the cursor off the shared edge crosses
-# over. Turn it off with the Control Center's Lan Mouse tile (stops the
-# unit until the next login), `systemctl --user stop lan-mouse`, or deactivate
-# the peer in the GUI (`lan-mouse`) / `lan-mouse -f cli`.
+# peer is live as soon as the daemon is: pushing the cursor off the shared
+# edge crosses over. The tile (or `systemctl --user stop lan-mouse`) turns it
+# off again; the unit stops with the graphical session either way.
 #
 # If capture is ever stuck on the other machine, the release bind is the
 # default: LeftCtrl+LeftShift+LeftMeta+LeftAlt pressed together.
@@ -44,7 +44,8 @@
           // lib.optionalAttrs (lanMouse ? ips) { inherit (lanMouse) ips; };
         };
 
-    # Mirrors the upstream service/lan-mouse.service unit.
+    # Mirrors the upstream service/lan-mouse.service unit, minus its
+    # WantedBy=graphical-session.target — started on demand only (the tile).
     systemd.user.services.lan-mouse = {
       Unit = {
         Description = "Lan Mouse input sharing daemon";
@@ -55,7 +56,6 @@
         ExecStart = "${lib.getExe pkgs.lan-mouse} --daemon";
         Restart = "on-failure";
       };
-      Install.WantedBy = [ "graphical-session.target" ];
     };
   };
 }
