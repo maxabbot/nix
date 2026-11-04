@@ -206,8 +206,9 @@
   # driver bundle v1.01 (2026-06-05), with
   #   dolby_to_pipewire.py <xml> --target-sink <sink> --no-activate
   # The conf is the generator's output unchanged, bar the @irs@ placeholder:
-  # a WirePlumber smart filter, always on for the built-in analog sink and
-  # absent from the output menu, so volume keys still drive the card itself.
+  # a WirePlumber smart filter, always on for the built-in analog sink, so
+  # volume keys still drive the card itself. Its input node is still an
+  # Audio/Sink, so DMS would list it as a second output; dms.nix hides it.
   # HDMI, USB and Bluetooth bypass it; the headphone jack doesn't (it's a port
   # on the same sink), so wired headphones get the speaker EQ too. It can't
   # be bypassed at runtime — PipeWire won't let a client unload it — so A/B

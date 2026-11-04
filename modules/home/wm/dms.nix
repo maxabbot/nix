@@ -635,6 +635,14 @@ let
       "darkMode"
       "nightMode"
     ];
+    # Output-picker entries to hide, unioned into SessionData's own list so
+    # devices hidden in the GUI stay hidden. DMS lists every Audio/Sink node,
+    # so a WirePlumber smart filter's input shows up beside the card it feeds
+    # (hosts/framework/default.nix); picking it would move the volume keys off
+    # the card onto the filter.
+    hiddenOutputs = lib.optional (
+      osConfig.networking.hostName == "framework"
+    ) "effect_input.Dolby_Balanced";
     # Plugin tiles appended when missing — only on hosts with the plugin.
     # Once there, their width and other per-tile settings are DMS's to keep.
     controlCenterAdd =
@@ -832,6 +840,11 @@ in
       apply "${config.xdg.configHome}/DankMaterialShell/plugin_settings.json" \
         ${dmsPluginDecl} \
         '. * $d'
+
+      # DMS session.json: only the hidden output devices; the rest is its state.
+      apply "${config.xdg.stateHome}/DankMaterialShell/session.json" \
+        ${dmsDecl} \
+        '.hiddenOutputDeviceNames = ((.hiddenOutputDeviceNames // []) + $d.hiddenOutputs | unique)'
 
       # DMS: the theme keys merge the same way, but its bars can't — a barConfig
       # carries styling (spacing, transparency, corners…) alongside its widget
