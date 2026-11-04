@@ -1,8 +1,12 @@
 # modules/home/wm/kanshi.nix — Kanshi automatic display switching for docked laptop setups.
 #
-# Produces two profiles:
-#   undocked  — internal display only
-#   docked    — left 1440p | right 1440p, internal below (centred)
+# Produces three profiles:
+#   undocked    — internal display only
+#   docked      — left 1440p | right 1440p, internal below (centred)
+#   docked-lid  — docked with the internal display off. Both docked profiles
+#                 match the same outputs, so kanshi only picks docked by itself;
+#                 the lid switch binds in hyprland.lua switch between them
+#                 (kanshictl), and fail harmlessly when undocked.
 #
 # Connector names vary by dock/port. Discover them when docked:
 #   wlr-randr        (shows connected outputs and their exact names)
@@ -17,6 +21,23 @@ let
   k = cfg.kanshi;
 
   hasDocked = k.docked.left != null && k.docked.right != null;
+
+  externals = [
+    {
+      criteria = k.docked.left;
+      status = "enable";
+      mode = k.docked.leftMode;
+      position = "0,0";
+      scale = 1.0;
+    }
+    {
+      criteria = k.docked.right;
+      status = "enable";
+      mode = k.docked.rightMode;
+      position = k.docked.rightPosition;
+      scale = 1.0;
+    }
+  ];
 in
 {
   options.custom.hm.kanshi = {
@@ -99,27 +120,24 @@ in
         {
           profile = {
             name = "docked";
-            outputs = [
-              {
-                criteria = k.docked.left;
-                status = "enable";
-                mode = k.docked.leftMode;
-                position = "0,0";
-                scale = 1.0;
-              }
-              {
-                criteria = k.docked.right;
-                status = "enable";
-                mode = k.docked.rightMode;
-                position = k.docked.rightPosition;
-                scale = 1.0;
-              }
+            outputs = externals ++ [
               {
                 criteria = k.internal.output;
                 status = "enable";
                 mode = k.internal.mode;
                 position = k.docked.laptopPosition;
                 scale = k.internal.scale;
+              }
+            ];
+          };
+        }
+        {
+          profile = {
+            name = "docked-lid";
+            outputs = externals ++ [
+              {
+                criteria = k.internal.output;
+                status = "disable";
               }
             ];
           };

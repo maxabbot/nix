@@ -162,7 +162,7 @@ printf '[Sleep]\nHibernateDelaySec=2min\n' | sudo tee /etc/systemd/sleep.conf.d/
       the first timer wake on AC; after the second it returns to the session,
       lock screen lit. So nothing on AC uses it: the lid and (since
       2026-11-02) hypridle's idle action both plain-suspend when plugged in.
-- [ ] **Docked** (external monitor attached): closing the lid does nothing.
+- [x] **Docked** (external monitor attached): closing the lid does nothing.
 - [x] **Clean up:** `sudo rm /etc/systemd/sleep.conf.d/zz-test.conf`.
 
 ---
@@ -198,15 +198,17 @@ hyprctl getoption cursor:no_hardware_cursors
 journalctl --user -b -u kanshi | tail -5
 ```
 
-- [ ] **Hardware cursor.** The option reads `int: 2`. The cursor shows on
+- [x] **Hardware cursor.** The option reads `int: 2`. The cursor shows on
       every output, with no trails or flicker, including over fullscreen video
       and on the external monitors.
-- [ ] **Office dock.** kanshi applies `docked`. In `hyprctl monitors` the
+- [x] **Office dock.** kanshi applies `docked`. In `hyprctl monitors` the
       Philips `UK02150032264` sits at `0,0`, `UK02150032262` at `2560,0`, and
       `eDP-1` at `1840,1440`. At a different desk, take the descriptions from
       `hyprctl monitors` and replace `kanshi.docked` in `flake.nix`.
-- [ ] **Lid closed while docked.** The internal panel stays enabled, because
-      the docked profile turns it on. Note it if you'd rather it switched off.
+- [ ] **Lid closed while docked.** `kanshictl status` reads `docked-lid` and
+      `eDP-1` is off, with its windows moved to the externals; opening the lid
+      brings it back (`docked`). The lid switch binds in `hyprland.lua` do the
+      switching; logind itself ignores the lid while docked.
 
 ---
 
@@ -294,4 +296,4 @@ sudo systemd-cryptenroll /dev/disk/by-partlabel/disk-nvme-luks   # lists passwor
 - [x] `activateOnStartup = true` on both lan-mouse ends (section 8).
 - [x] `max-jobs` raised if RAM allows (section 9).
 - [x] `secureBoot.enable` uncommented and committed (section 10).
-- [ ] `kanshi.docked` descriptions updated if the desk differs (section 7).
+- [x] `kanshi.docked` descriptions updated if the desk differs (section 7).

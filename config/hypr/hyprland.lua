@@ -478,6 +478,13 @@ hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 -- screens are most likely to be dark.
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/dpms.sh on"),                            { locked = true, description = "Wake all screens" })
 
+-- Lid while docked: logind ignores it (HandleLidSwitchDocked), so switch the
+-- internal panel off and back on via kanshi's docked-lid profile. Undocked,
+-- the switch fails (no matching outputs) and logind suspends as usual. Hosts
+-- without kanshi or a lid never get here.
+hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("kanshictl switch docked-lid"), { locked = true, description = "Lid closed: internal panel off when docked" })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked"),     { locked = true, description = "Lid opened: internal panel back on when docked" })
+
 -- Screenshots
 -- `dms screenshot` goes straight to a region grab; the mode picker is the
 -- quickCapture plugin's menu, floating (modules/home/wm/dms-plugins.nix).
