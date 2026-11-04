@@ -1,7 +1,7 @@
 # modules/home/wm/kanshi.nix — Kanshi automatic display switching for docked laptop setups.
 #
 # Produces three profiles:
-#   undocked    — internal display only
+#   undocked    — internal display only (at its docked position)
 #   docked      — left 1440p | right 1440p, internal below (centred)
 #   docked-lid  — docked with the internal display off. Both docked profiles
 #                 match the same outputs, so kanshi only picks docked by itself;
@@ -116,7 +116,12 @@ in
                 criteria = k.internal.output;
                 status = "enable";
                 mode = k.internal.mode;
-                position = "0,0";
+                # Alone, its position is irrelevant, so keep the docked one.
+                # Hyprland restores each output's last kanshi position on
+                # replug: an undocked 0,0 here sits under the returning
+                # left monitor (also 0,0) until kanshi re-applies docked,
+                # long enough for Hyprland's overlap warning to fire.
+                position = if hasDocked then k.docked.laptopPosition else "0,0";
                 scale = k.internal.scale;
               }
             ];
