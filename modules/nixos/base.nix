@@ -249,7 +249,38 @@ in
       packages = with pkgs; [
         nerd-fonts.jetbrains-mono
         noto-fonts-color-emoji
+        # Common web fonts, so pages that name them get the real face instead
+        # of Inter (the sans-serif default) with different metrics.
+        noto-fonts
+        roboto
+        open-sans
       ];
+      # Fontconfig's metric aliases send Helvetica to TeX Gyre Heros, which
+      # renders thin in Chrome; Liberation Sans has the same metrics. Mac
+      # monospace names have no alias at all, so code fell back to Inter.
+      # prepend puts the face ahead of those aliases in the match list.
+      fontconfig.localConf = ''
+        <?xml version="1.0"?>
+        <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+        <fontconfig>
+          <match target="pattern">
+            <test name="family"><string>Helvetica</string></test>
+            <edit name="family" mode="prepend" binding="strong"><string>Liberation Sans</string></edit>
+          </match>
+          <match target="pattern">
+            <test name="family"><string>Menlo</string></test>
+            <edit name="family" mode="prepend" binding="strong"><string>JetBrainsMono Nerd Font Mono</string></edit>
+          </match>
+          <match target="pattern">
+            <test name="family"><string>Monaco</string></test>
+            <edit name="family" mode="prepend" binding="strong"><string>JetBrainsMono Nerd Font Mono</string></edit>
+          </match>
+          <match target="pattern">
+            <test name="family"><string>SF Mono</string></test>
+            <edit name="family" mode="prepend" binding="strong"><string>JetBrainsMono Nerd Font Mono</string></edit>
+          </match>
+        </fontconfig>
+      '';
     };
 
     # ── XDG portals (base — compositor modules add their own) ─────────────────
