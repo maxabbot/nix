@@ -97,6 +97,20 @@ end
 hl.on("monitor.added", calmHotplug)
 hl.on("monitor.removed", calmHotplug)
 
+-- A re-dock can leave the renumbered MST outputs enabled but dark (stale CRTCs
+-- in aquamarine). dock-kick.sh blanks and wakes externals it hasn't seen since
+-- they last connected, once hotplug settles. Seeded at start so the outputs
+-- present at login are never kicked. Does nothing on hosts without kanshi.
+local function dockKick()
+    hl.exec_cmd("bash ~/.config/hypr/scripts/dock-kick.sh")
+end
+
+hl.on("hyprland.start", function()
+    hl.exec_cmd("bash ~/.config/hypr/scripts/dock-kick.sh seed")
+end)
+hl.on("monitor.added", dockKick)
+hl.on("monitor.removed", dockKick)
+
 --------------------
 ---- SETTINGS ------
 --------------------
