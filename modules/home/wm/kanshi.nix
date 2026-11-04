@@ -97,6 +97,13 @@ in
   };
 
   config = lib.mkIf (k.enable && cfg.compositor == "hyprland") {
+    # kanshi only reads its config at start, so a rebuild that changes the
+    # profiles left the running daemon on the old set (kanshictl switch then
+    # fails with "Profile not found"). Restart it whenever the config changes.
+    systemd.user.services.kanshi.Unit.X-Restart-Triggers = [
+      config.xdg.configFile."kanshi/config".source
+    ];
+
     services.kanshi = {
       enable = true;
       # `settings` (list of sections) replaces the deprecated `profiles` attrset.
