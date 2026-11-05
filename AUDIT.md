@@ -38,9 +38,10 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 96cc62b | `resume-probe.sh` watched hyprlock, removed in 2249eb0; it now records logind's LockedHint and the DMS lock's quickshell process |
 | 02265e7 | framework opened KDE Connect (1714-1764) and Steam Remote Play on every network; KDE Connect is tailnet-only and Remote Play closed on the laptop (`machineType`) |
 | b475523 | Docs drift: SHORTCUTS (`z`, scratchpad, lid), PACKAGES (ncspot, sessionizer key), SHELLS (`wake-monitors.sh`), config-comparison (secrets, Secure Boot), TODO (SDDM), README, and the stale cross-references in `logitech.nix` and `lan-mouse.nix` |
-| this commit | `gaming-toggle.sh` hardcoded DP-3/DP-2; the bind now passes `monitors.lua`'s connectors. Its exit path also drew the cheat sheet over home-desktop's `wallpaperPortrait` (cave.jpg); it uses `wallpaper-redress.sh`, which picks the right one |
-| this commit | The system monitor pill ran `nvtop -s` every 2 s per bar; one shared `GpuStatsService` singleton now polls, every 10 s on battery and only while a pill is shown |
-| this commit | Cleanups: no-op opacity rules in `hyprland.lua`; `MOZ_ENABLE_WAYLAND` and `QT_AUTO_SCREEN_SCALE_FACTOR`; duplicate `wl-clipboard`, `enable32Bit` and `vulkan-loader`; `libva-utils` moved out of `extraPackages`; `max-jobs` left at NixOS's `"auto"` instead of a cap both hosts overrode |
+| 2668c0e | `gaming-toggle.sh` hardcoded DP-3/DP-2; the bind now passes `monitors.lua`'s connectors. Its exit path also drew the cheat sheet over home-desktop's `wallpaperPortrait` (cave.jpg); it uses `wallpaper-redress.sh`, which picks the right one |
+| 2668c0e | The system monitor pill ran `nvtop -s` every 2 s per bar; one shared `GpuStatsService` singleton now polls, every 10 s on battery and only while a pill is shown |
+| 2668c0e | Cleanups: no-op opacity rules in `hyprland.lua`; `MOZ_ENABLE_WAYLAND` and `QT_AUTO_SCREEN_SCALE_FACTOR`; duplicate `wl-clipboard`, `enable32Bit` and `vulkan-loader`; `libva-utils` moved out of `extraPackages`; `max-jobs` left at NixOS's `"auto"` instead of a cap both hosts overrode |
+| this commit | CI only evaluated, so the `--replace-fail` patches to DMS, its greeter and plugins broke only at local build time; flake `checks` now hold those 11 derivations and CI builds them (`nix flake check` without `--no-build`). CI's shellcheck also covers `config/scripts/autoclick` now |
 
 ## 2. Verified on hardware — not bugs
 
@@ -102,9 +103,6 @@ is deprecated in Home Manager, and `libreoffice.nix` already uses `run`.
 - 🟡 **Host identity inside shared code.** `dms.nix` checks
   `hostName == "framework"` twice (lock wallpaper, hidden Dolby output). Make
   them hmArgs or options.
-- 🟡 **CI only evaluates.** The dozens of `--replace-fail` patches to DMS and
-  its plugins only fail at local build time after a flake update. Building
-  just those derivations in CI is cheap (no unfree packages).
 - 🔵 **`mkHost` plumbing.** The `hostName` and `nixos-hardware` specialArgs are
   read by no module; each host restates `networking.hostName`, and
   `machineType` is given twice per host (specialArgs and hmArgs).

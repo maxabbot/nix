@@ -31,8 +31,11 @@ jobs:
       - name: Pre-fetch all flake inputs
         run: nix flake archive --json > /dev/null
 
+      # Evaluates both hosts and builds the `checks` output: the DMS shell,
+      # greeter and plugins, whose --replace-fail patches only fail at build
+      # time (see flake.nix). The hosts themselves aren't built.
       - name: Run flake checks
-        run: nix flake check --no-build
+        run: nix flake check
 
   nixfmt:
     runs-on: ubuntu-latest
@@ -62,8 +65,8 @@ jobs:
         run: sudo apt-get install -y shellcheck
 
       - name: Shellcheck scripts
-        # tmux-sessionizer is a bash script without the .sh extension
-        run: git ls-files '*.sh' 'config/scripts/tmux-sessionizer' | xargs -r shellcheck
+        # config/scripts/ holds bash scripts without the .sh extension
+        run: git ls-files '*.sh' 'config/scripts/*' | xargs -r shellcheck
 
   lint:
     runs-on: ubuntu-latest

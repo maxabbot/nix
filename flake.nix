@@ -191,6 +191,30 @@
     {
       formatter.${system} = mkPkgs.nixfmt-tree;
 
+      # Built by CI's `nix flake check`: every derivation that patches upstream
+      # files with --replace-fail — the DMS shell (modules/home/wm/dms.nix), its
+      # greeter (productivity.nix) and the plugins (dms-plugins.nix). A flake
+      # update that rewords a patched line then fails on GitHub instead of at
+      # the next nixup. framework carries every plugin; the local plugin
+      # directories aren't derivations, so there is nothing to build for them.
+      checks.${system} =
+        let
+          fw = inputs.self.nixosConfigurations.framework.config;
+          hm = fw.home-manager.users.max;
+          plugins = lib.filterAttrs (
+            name: file: lib.hasPrefix "DankMaterialShell/plugins/" name && lib.isDerivation file.source
+          ) hm.xdg.configFile;
+        in
+        {
+          dms-shell = lib.findFirst (
+            p: lib.getName p == "dms-shell"
+          ) (throw "checks: no dms-shell in framework's home.packages") hm.home.packages;
+          dms-greeter = fw.services.displayManager.dms-greeter.package;
+        }
+        // lib.mapAttrs' (
+          name: file: lib.nameValuePair "dms-plugin-${baseNameOf name}" file.source
+        ) plugins;
+
       devShells.${system}.default = mkPkgs.mkShell {
         name = "nixos-config";
         packages = with mkPkgs; [
