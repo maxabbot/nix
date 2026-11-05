@@ -9,33 +9,6 @@ let
   inherit (config.custom.base) username;
   hostSecrets = ../../../secrets/${config.networking.hostName}.yaml;
   hasIdentity = builtins.pathExists hostSecrets;
-
-  # ── DMS greeter package ─────────────────────────────────────────────────────
-  # The launcher (Modules/Greetd/assets/dms-greeter) ends its compositor with
-  # `hyprctl dispatch exit`, the hyprlang form, which Hyprland on Lua rejects.
-  # The greeter's Hyprland would then never exit, and greetd only starts the
-  # session once the greeter has gone. A store-path script sidesteps the
-  # quoting: the call sits inside a Lua string inside `sh -c "…"`.
-  greeterExit = pkgs.writeShellScript "dms-greeter-exit" ''
-    exec ${config.programs.hyprland.package}/bin/hyprctl dispatch 'hl.dsp.exit()'
-  '';
-  dmsGreeter = pkgs.dms-shell.overrideAttrs (old: {
-    postInstall = (old.postInstall or "") + ''
-      substituteInPlace "$out/share/quickshell/dms/Modules/Greetd/assets/dms-greeter" \
-        --replace-fail 'hyprctl dispatch exit' ${greeterExit}
-    '';
-  });
-
-  # The greeter reads a fixed-name override from its data dir; configFiles
-  # copies by basename, so the file has to carry that name. It is the host's
-  # lock-screen background (the lockWallpaper hmArg), so the greeter and the
-  # DMS lock match.
-  greeterWallpaper =
-    pkgs.runCommand "dms-greeter-wallpaper" { nativeBuildInputs = [ pkgs.imagemagick ]; }
-      ''
-        mkdir -p $out
-        magick ${config.home-manager.extraSpecialArgs.lockWallpaper} $out/greeter_wallpaper_override.jpg
-      '';
 in
 {
   # Password PAM service for the DMS lock screen. DMS uses /etc/pam.d/dankshell
@@ -90,12 +63,21 @@ in
     # nixpkgs' dms-greeter module: greetd runs the DMS greeter UI inside its own
     # short-lived Hyprland as the dms-greeter user. Before each start greetd
     # copies the user's DMS settings.json (so the Gruvbox custom theme, which
-    # it also copies) and session.json into /var/lib/dms-greeter.
+    # it also copies) and session.json into /var/lib/dms-greeter. The
+    # greeter's background is the settings' lockScreenWallpaperPath, so it
+    # matches the DMS lock (the lockWallpaper hmArg).
+    #
+    # 26.05's module predates DMS 2.0: its configHome reads the old
+    # DankMaterialShell dirs, so the files are listed at their 2.0 paths
+    # instead (missing ones are skipped). package is the overlay's 2.0 build.
     displayManager.dms-greeter = {
       enable = true;
-      package = dmsGreeter;
-      configHome = "/home/${username}";
-      configFiles = [ "${greeterWallpaper}/greeter_wallpaper_override.jpg" ];
+      package = pkgs.dms-shell;
+      configFiles = [
+        "/home/${username}/.config/dms/settings.json"
+        "/home/${username}/.local/state/dms/session.json"
+        "/home/${username}/.cache/dms/dms-colors.json"
+      ];
       compositor = {
         name = "hyprland";
         # Lua (Hyprland 0.55): the launcher spots `hl.` and appends the start

@@ -203,7 +203,7 @@
           fw = inputs.self.nixosConfigurations.framework.config;
           hm = fw.home-manager.users.max;
           plugins = lib.filterAttrs (
-            name: file: lib.hasPrefix "DankMaterialShell/plugins/" name && lib.isDerivation file.source
+            name: file: lib.hasPrefix "dms/plugins/" name && lib.isDerivation file.source
           ) hm.xdg.configFile;
         in
         {

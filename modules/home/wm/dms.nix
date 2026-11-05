@@ -107,20 +107,23 @@ let
             to = ''SessionService.idleInhibited ? "coffee" : "local_cafe"'';
           })
           [
-            "share/quickshell/dms/Modules/DankBar/Widgets/IdleInhibitor.qml"
+            "share/quickshell/dms/Modules/DBar/Widgets/IdleInhibitor.qml"
             "share/quickshell/dms/Modules/OSD/IdleInhibitorOSD.qml"
+            "share/quickshell/dms/Modules/ControlCenter/Details/IdleInhibitorDetail.qml"
+            "share/quickshell/dms/Modules/DIsland/IslandSystemSource.qml"
           ]
-      ++
-        map
-          (file: {
-            inherit file;
-            from = ''return "motion_sensor_active";'';
-            to = ''return "coffee";'';
-          })
-          [
-            "share/quickshell/dms/Modules/ControlCenter/Components/DragDropGrid.qml"
-            "share/quickshell/dms/Modules/DankBar/Widgets/ControlCenterButton.qml"
-          ]
+      ++ [
+        {
+          file = "share/quickshell/dms/Modules/DBar/Widgets/ControlCenterButton.qml";
+          from = ''return "motion_sensor_active";'';
+          to = ''return "coffee";'';
+        }
+        {
+          file = "share/quickshell/dms/Modules/ControlCenter/Widgets/IdleInhibitTile.qml";
+          from = ''iconName: "motion_sensor_active"'';
+          to = ''iconName: "coffee"'';
+        }
+      ]
       ++
         map
           (file: {
@@ -130,30 +133,26 @@ let
           })
           [
             "share/quickshell/dms/Modules/ControlCenter/Models/WidgetModel.qml"
-            "share/quickshell/dms/Modules/Settings/WidgetsTab.qml"
+            "share/quickshell/dms/Common/BarWidgetCatalog.qml"
+            "share/quickshell/dms/Modules/Settings/BarWidgetOptions/ControlCenterOptions.qml"
           ]
-      ++ [
-        {
-          file = "share/quickshell/dms/Modules/Settings/WidgetsTabSection.qml";
-          from = ''icon: "motion_sensor_active",'';
-          to = ''icon: "coffee",'';
-        }
-      ]
       # Not a dispatch fix: Noctalia-style hover tooltips on the bar. DMS only
       # has bar tooltips for vertical bars, and only on disk/focused-app. BasePill
       # (every bar widget's base) gains a tooltipText property and an instance
       # of config/dms/BarPillTooltip.qml, installed below; each widget then gets
       # a tooltipText binding inserted after its `id: root`. Empty = no tooltip.
+      # Since 2.0 BasePill is a shim over SurfaceWidgets/BarPill, so the
+      # property and the instance go there.
       ++ [
         {
-          file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
-          from = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n";
-          to = "    readonly property bool isMouseHovered: mouseArea.containsMouse\n    property string tooltipText: \"\"\n";
+          file = "share/quickshell/dms/Modules/SurfaceWidgets/BarPill.qml";
+          from = "    readonly property bool isMouseHovered: mouseArea.containsMouse || visualContent.hovered || edgeHovered\n";
+          to = "    readonly property bool isMouseHovered: mouseArea.containsMouse || visualContent.hovered || edgeHovered\n    property string tooltipText: \"\"\n";
         }
         {
-          file = "share/quickshell/dms/Modules/Plugins/BasePill.qml";
-          from = "    property bool _blurRegistered: false";
-          to = "    BarPillTooltip {\n        pill: root\n    }\n\n    property bool _blurRegistered: false";
+          file = "share/quickshell/dms/Modules/SurfaceWidgets/BarPill.qml";
+          from = "    property var _blurRegisteredWindow: null";
+          to = "    BarPillTooltip {\n        pill: root\n    }\n\n    property var _blurRegisteredWindow: null";
         }
         {
           # Not a dispatch fix: the tray as a drawer, as in Noctalia. DMS
@@ -162,12 +161,12 @@ let
           # hidden leaves only the chevron on the bar. Hiding/unhiding single
           # icons from DMS's tray menu, and 1.6's automatic overflow limit
           # (trayMaxVisibleItems, which can't go below 1), stop mattering.
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
           from = "readonly property var mainBarItemsRaw: visibleSortedTrayItems.slice(0, automaticVisibleItemLimit)";
           to = "readonly property var mainBarItemsRaw: []";
         }
         {
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
           from = "readonly property var hiddenBarItems: allSortedTrayItems.filter(item => hiddenBarItemKeys.indexOf(root.getTrayItemKey(item)) !== -1)";
           to = "readonly property var hiddenBarItems: allSortedTrayItems";
         }
@@ -176,9 +175,9 @@ let
           # upstream sizes it icon + 6px, but the expand_more glyph fills only
           # the middle half of its box. 70 percent of the icon size keeps the
           # glyph whole and the hover highlight with it (horizontal bars only).
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
-          from = "            Item {\n                width: root.trayItemSize\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                Rectangle {\n                    id: caretButton\n                    width: root.trayItemSize\n";
-          to = "            Item {\n                width: Math.round(Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale) * 0.7)\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                Rectangle {\n                    id: caretButton\n                    width: parent.width\n";
+          file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
+          from = "            Item {\n                width: root.trayItemSize\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                BarPillSurface {\n                    id: caretButton\n                    width: root.trayItemSize\n";
+          to = "            Item {\n                width: Math.round(Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale) * 0.7)\n                height: root.barThickness\n                visible: root.hasHiddenItems\n\n                BarPillSurface {\n                    id: caretButton\n                    width: parent.width\n";
         }
         {
           # The drawer behaves as one button, like any other pill: the whole
@@ -186,21 +185,23 @@ let
           # ripple (BasePill's MouseArea, whose clicked signal upstream leaves
           # unhandled here). The chevron's own MouseArea is disabled so clicks
           # and hover fall through to it, and its separate highlight is gone.
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+          # The handler mirrors the chevron's: the overflow popup has to be
+          # positioned and requested, not just flagged open.
+          file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
           from = "    enableBackgroundHover: false\n    enableCursor: false\n";
-          to = "    enableBackgroundHover: true\n    enableCursor: true\n    onClicked: if (hasHiddenItems) menuOpen = !menuOpen\n";
+          to = "    enableBackgroundHover: true\n    enableCursor: true\n    onClicked: {\n        if (!hasHiddenItems)\n            return;\n        if (!useOverflowPopup)\n            menuOpen = !menuOpen;\n        else if (menuOpen)\n            menuOpen = false;\n        else\n            _openOverflowAt(isVerticalOrientation ? caretButtonVert : caretButton);\n    }\n";
         }
       ]
       ++
         lib.concatMap
           (area: [
             {
-              file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
-              from = "color: ${area}.containsMouse ? BlurService.hoverColor(Theme.widgetBaseHoverColor) : Theme.withAlpha(BlurService.hoverColor(Theme.widgetBaseHoverColor), 0)";
+              file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
+              from = "color: Theme.withAlpha(Theme.onSurface, ${area}.pressed ? Theme.stateLayerPressed : ${area}.containsMouse ? Theme.stateLayerHover : 0)";
               to = "color: \"transparent\"";
             }
             {
-              file = "share/quickshell/dms/Modules/DankBar/Widgets/SystemTrayBar.qml";
+              file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
               from = "                        id: ${area}\n                        anchors.fill: parent\n";
               to = "                        id: ${area}\n                        enabled: false\n                        anchors.fill: parent\n";
             }
@@ -215,12 +216,12 @@ let
           # horizontal bars. 1.6 draws the icon itself (focusedWindowShowIcon),
           # but keeps the app name beside it; the name only shows now when no
           # icon resolved. The • separator follows it.
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
+          file = "share/quickshell/dms/Modules/DBar/Widgets/FocusedApp.qml";
           from = "                        visible: text.length > 0\n                    }\n\n                    StyledText {\n                        id: appSeparator\n";
           to = "                        visible: text.length > 0 && !horizontalAppIcon.visible && !horizontalSteamIcon.visible\n                    }\n\n                    StyledText {\n                        id: appSeparator\n";
         }
         {
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/FocusedApp.qml";
+          file = "share/quickshell/dms/Modules/DBar/Widgets/FocusedApp.qml";
           from = "                        visible: !compactMode && appText.text && titleText.text\n";
           to = "                        visible: !compactMode && appText.visible && titleText.text\n";
         }
@@ -245,12 +246,12 @@ let
           to = "                applyOutputsLive(outputsData, finish);\n";
         }
         {
-          # The include warning box offers to splice a require of outputs.lua
-          # into hyprland.lua, which is a store file here and doesn't need it
-          # now.
-          file = "share/quickshell/dms/Modules/Settings/DisplayConfig/IncludeWarningBox.qml";
-          from = "    visible: (showLegacy || showSetup) && DisplayConfigState.hasOutputBackend && !DisplayConfigState.checkingInclude\n";
-          to = "    visible: false\n";
+          # The include banner offers to splice a require of outputs.lua into
+          # hyprland.lua, which is a store file here and doesn't need it now.
+          # (2.0 shares the banner across tabs; only this instance is hidden.)
+          file = "share/quickshell/dms/Modules/Settings/DisplayConfigTab.qml";
+          from = "            include: DisplayConfigState.include\n            visibleCondition: DisplayConfigState.hasOutputBackend\n";
+          to = "            include: DisplayConfigState.include\n            visibleCondition: false\n";
         }
       ]
       # Not a dispatch fix: the Compositor tab's Hyprland Layout Overrides, the
@@ -299,14 +300,18 @@ let
                   }
                   if (SettingsData.hyprlandLayoutBorderSize >= 0)
                       applied.border_size = SettingsData.hyprlandLayoutBorderSize;
-                  if (SettingsData.hyprlandResizeOnBorder)
+                  if (SettingsData.hyprlandResizeOnBorder) {
                       applied.resize_on_border = true;
+                      // Same default-skip as upstream's generator.
+                      if (SettingsData.hyprlandBorderGrabArea !== 15)
+                          applied.extend_border_grab_area = SettingsData.hyprlandBorderGrabArea;
+                  }
                   if (SettingsData.hyprlandLayoutRadiusOverride >= 0)
                       applied.rounding = SettingsData.hyprlandLayoutRadiusOverride;
                   const dropped = Object.keys(_liveLayoutApplied).some(k => !(k in applied));
                   _liveLayoutApplied = applied;
 
-                  const general = ["gaps_in", "gaps_out", "border_size", "resize_on_border"].filter(k => k in applied).map(k => k + " = " + applied[k]);
+                  const general = ["gaps_in", "gaps_out", "border_size", "resize_on_border", "extend_border_grab_area"].filter(k => k in applied).map(k => k + " = " + applied[k]);
                   const decoration = "rounding" in applied ? ["rounding = " + applied.rounding] : [];
                   const apply = () => {
                       if (general.length === 0 && decoration.length === 0) {
@@ -338,23 +343,31 @@ let
           }
           {
             file = tab;
-            from = ''description: I18n.tr("Auto matches bar spacing; Off leaves gaps to your %1 config").arg("Hyprland")'';
-            to = ''description: "Custom applies live for this session; Auto and Off keep hyprland.lua's gaps"'';
+            from = ''title: I18n.tr("Layout overrides")'';
+            to = ''title: I18n.tr("Layout overrides") + " (this session)"'';
           }
           {
             file = tab;
-            from = ''title: I18n.tr("%1 Layout Overrides").arg("Hyprland")'';
-            to = ''title: I18n.tr("%1 Layout Overrides").arg("Hyprland") + " (this session)"'';
+            from = "                visible: CompositorService.isHyprland\n                tags: [\"hyprland\", \"xray\", \"blur\", \"background-effect\", \"performance\"]\n";
+            to = "                visible: false\n                tags: [\"hyprland\", \"xray\", \"blur\", \"background-effect\", \"performance\"]\n";
           }
           {
             file = tab;
-            from = "                    visible: CompositorService.isHyprland\n                    tags: [\"hyprland\", \"xray\", \"blur\", \"background-effect\", \"performance\"]\n";
-            to = "                    visible: false\n                    tags: [\"hyprland\", \"xray\", \"blur\", \"background-effect\", \"performance\"]\n";
+            from = "                visible: CompositorService.isHyprland && !SettingsData.connectedFrameModeActive\n                tags: [\"hyprland\", \"xray\", \"bar\", \"frame\", \"performance\"]\n";
+            to = "                visible: false\n                tags: [\"hyprland\", \"xray\", \"bar\", \"frame\", \"performance\"]\n";
+          }
+          # 2.0's tiling-layout card (dwindle/master/scrolling and their
+          # options) and window-opacity slider also only reach layout.lua;
+          # hyprland.lua owns both, so they're hidden rather than left inert.
+          {
+            file = tab;
+            from = "            visible: CompositorService.isHyprland\n\n            readonly property var layoutIds:";
+            to = "            visible: false\n\n            readonly property var layoutIds:";
           }
           {
             file = tab;
-            from = "                    visible: CompositorService.isHyprland && !SettingsData.connectedFrameModeActive\n";
-            to = "                    visible: false\n";
+            from = "                settingKey: \"hyprlandWindowOpacity\"\n";
+            to = "                settingKey: \"hyprlandWindowOpacity\"\n                visible: false\n";
           }
           # The cursor page (Settings → Theme & Colors → Cursor) had the same
           # write-a-file-nobody-loads-then-reload shape. Its theme and size
@@ -433,20 +446,6 @@ let
       )
       ++ [
         {
-          # Not a dispatch fix: album art in the bar's media pill. Upstream
-          # shows only a cava visualiser (or a note) before the title; the
-          # track's MPRIS art, when it loads, takes that slot as a small
-          # rounded thumbnail, and the visualiser returns for tracks without.
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/Media.qml";
-          from = "import Quickshell.Services.Mpris\n";
-          to = "import Quickshell.Services.Mpris\nimport Quickshell.Widgets\n";
-        }
-        {
-          file = "share/quickshell/dms/Modules/DankBar/Widgets/Media.qml";
-          from = "                    Item {\n                        width: 20\n                        height: 20\n                        anchors.verticalCenter: parent.verticalCenter\n\n                        AudioVisualization {\n                            anchors.fill: parent\n                            visible: CavaService.cavaAvailable && SettingsData.audioVisualizerEnabled\n                        }\n\n                        DankIcon {\n                            anchors.fill: parent\n                            name: \"music_note\"\n                            size: 20\n                            color: Theme.primary\n                            visible: !CavaService.cavaAvailable || !SettingsData.audioVisualizerEnabled\n                        }\n";
-          to = "                    Item {\n                        readonly property bool hasArt: artThumb.status === Image.Ready\n                        width: hasArt ? Math.round(root.widgetThickness * 0.75) : 20\n                        height: width\n                        anchors.verticalCenter: parent.verticalCenter\n\n                        ClippingRectangle {\n                            anchors.fill: parent\n                            radius: Theme.cornerRadius / 2\n                            color: \"transparent\"\n                            visible: parent.hasArt\n\n                            Image {\n                                id: artThumb\n                                anchors.fill: parent\n                                source: activePlayer ? (activePlayer.trackArtUrl || \"\") : \"\"\n                                fillMode: Image.PreserveAspectCrop\n                                sourceSize: Qt.size(96, 96)\n                                asynchronous: true\n                                smooth: true\n                                mipmap: true\n                            }\n                        }\n\n                        AudioVisualization {\n                            anchors.fill: parent\n                            visible: !parent.hasArt && CavaService.cavaAvailable && SettingsData.audioVisualizerEnabled\n                        }\n\n                        DankIcon {\n                            anchors.fill: parent\n                            name: \"music_note\"\n                            size: 20\n                            color: Theme.primary\n                            visible: !parent.hasArt && (!CavaService.cavaAvailable || !SettingsData.audioVisualizerEnabled)\n                        }\n";
-        }
-        {
           # Not a dispatch fix: plugin popouts lagged on every open. DankPopout's
           # contentLoader is only active while the popout shows, so each click
           # rebuilt the plugin's whole popout from scratch, and PluginPopout
@@ -475,48 +474,16 @@ let
         }
       ]
       # Not a dispatch fix: friendlier key names in the keybind overlay
-      # (Super+/). It prints Hyprland's raw names; mouse buttons and the wheel
-      # get words, as on the cheat-sheet wallpaper, and the XF86 media keys get
-      # Nerd Font icons (DMS's mono font has none, so those labels name the
-      # system Nerd Font).
-      ++ (
-        let
-          pad = lib.concatStrings (lib.genList (_: " ") 64);
-          cp = c: "String.fromCodePoint(0x${c})";
-          labels = lib.concatStringsSep ", " (
-            lib.mapAttrsToList (k: v: ''"${k}": ${v}'') {
-              "mouse:272" = ''"Drag"'';
-              "mouse:273" = ''"Right-drag"'';
-              WheelScrollDown = ''"Scroll down"'';
-              WheelScrollUp = ''"Scroll up"'';
-              XF86AudioRaiseVolume = cp "F075D";
-              XF86AudioLowerVolume = cp "F075E";
-              XF86AudioMute = cp "F0581";
-              XF86AudioPlay = cp "F040E";
-              XF86AudioNext = cp "F04AD";
-              XF86AudioPrev = cp "F04AE";
-              XF86MonBrightnessUp = cp "F00E0";
-              XF86MonBrightnessDown = cp "F00DE";
-            }
-          );
-        in
-        [
-          {
-            file = "share/quickshell/dms/Modals/KeybindsContent.qml";
-            from =
-              ''text: (modelData.key || "").replace(/\+/g, " + ")''
-              + "\n${pad}font.pixelSize: Theme.fontSizeSmall\n";
-            to =
-              lib.concatMapStrings (l: "${l}\n${pad}") [
-                "readonly property var keyLabels: ({ ${labels} })"
-                ''readonly property bool iconKey: (modelData.key || "").indexOf("XF86") !== -1''
-                ''text: (modelData.key || "").split("+").map(k => keyLabels[k] ?? k).join(" + ")''
-                ''font.family: iconKey ? "JetBrainsMono Nerd Font" : resolvedFontFamily''
-              ]
-              + "font.pixelSize: iconKey ? Theme.fontSizeLarge : Theme.fontSizeSmall\n";
-          }
-        ]
-      )
+      # (Super+/). 2.0 maps the wheel and the XF86 media keys to glyphs
+      # itself (KeyUtils.js's KEY_GLYPH_MAP), but prints the mouse buttons
+      # raw; they get words, as on the cheat-sheet wallpaper.
+      ++ [
+        {
+          file = "share/quickshell/dms/Common/KeyUtils.js";
+          from = "const KEY_GLYPH_MAP = {\n";
+          to = "const KEY_GLYPH_MAP = {\n    \"mouse:272\": \"Drag\",\n    \"mouse:273\": \"Right-drag\",\n";
+        }
+      ]
       # Not a dispatch fix: Settings as a dropdown. Upstream's is a movable,
       # maximisable window; here Hyprland places it under the bar at the top
       # right (the dms-settings-dropdown rule in hyprland.lua) and it closes
@@ -527,18 +494,27 @@ let
       ++ (
         let
           sm = "share/quickshell/dms/Modals/Settings/SettingsModal.qml";
+          hdr = "share/quickshell/dms/DCommon/Widgets/DWindowHeader.qml";
         in
         [
+          # No dragging it around, double-click maximise or maximise button.
+          # 2.0 moved those into DCommon's shared DWindowHeader, so the header
+          # gains an opt-in — a `pinned` flag on its controls object — that
+          # only the Settings window's controls set.
           {
-            # No dragging it around or double-click maximise from the header.
-            file = sm;
-            from = "                MouseArea {\n                    anchors.fill: parent\n                    onPressed: windowControls.tryStartMove()\n                    onDoubleClicked: windowControls.tryToggleMaximize()\n                }\n\n";
-            to = "";
+            file = hdr;
+            from = "        enabled: root.controls !== null && !root.compositorDecorated\n";
+            to = "        enabled: root.controls !== null && !root.compositorDecorated && !(root.controls?.pinned ?? false)\n";
+          }
+          {
+            file = hdr;
+            from = "            visible: !root.compositorDecorated && (root.controls?.canMaximize ?? false)\n";
+            to = "            visible: !root.compositorDecorated && (root.controls?.canMaximize ?? false) && !(root.controls?.pinned ?? false)\n";
           }
           {
             file = sm;
-            from = "                        visible: windowControls.canMaximize\n";
-            to = "                        visible: false\n";
+            from = "        id: windowControls\n        targetWindow: settingsModal\n";
+            to = "        id: windowControls\n        targetWindow: settingsModal\n        readonly property bool pinned: true\n";
           }
           {
             # Close on focus-out, keyed on the whole app rather than this
@@ -559,7 +535,7 @@ let
             to = ''
               onClosed: hide()
 
-                  readonly property var ownToplevel: ToplevelManager.toplevels.values.find(t => t.appId === "com.danklinux.dms" && t.title === settingsModal.title) ?? null
+                  readonly property var ownToplevel: ToplevelManager.toplevels.values.find(t => t.appId === "dev.duxlabs.shell" && t.title === settingsModal.title) ?? null
                   readonly property bool ownActivated: ownToplevel?.activated ?? false
                   property bool focusOutArmed: false
                   onOwnActivatedChanged: {
@@ -611,15 +587,34 @@ let
       )
       ++
         lib.mapAttrsToList
-          (widget: body: {
-            file = "share/quickshell/dms/Modules/DankBar/Widgets/${widget}.qml";
-            from = "BasePill {\n    id: root\n";
-            to =
-              "BasePill {\n    id: root\n\n"
-              + lib.concatMapStringsSep "\n" (l: lib.optionalString (l != "") "    ${l}") (
-                lib.splitString "\n" body
-              );
-          })
+          (
+            widget: body:
+            let
+              # 2.0's system-monitor widgets derive from MonitorPill (itself a
+              # BasePill), the rest from BasePill directly.
+              base =
+                if
+                  lib.elem widget [
+                    "RamMonitor"
+                    "CpuTemperature"
+                    "GpuTemperature"
+                    "DiskUsage"
+                  ]
+                then
+                  "MonitorPill"
+                else
+                  "BasePill";
+            in
+            {
+              file = "share/quickshell/dms/Modules/DBar/Widgets/${widget}.qml";
+              from = "${base} {\n    id: root\n";
+              to =
+                "${base} {\n    id: root\n\n"
+                + lib.concatMapStringsSep "\n" (l: lib.optionalString (l != "") "    ${l}") (
+                  lib.splitString "\n" body
+                );
+            }
+          )
           {
             RamMonitor = ''
               tooltipText: "Memory " + (DgopService.usedMemoryMB / 1024).toFixed(1) + " / " + (DgopService.totalMemoryMB / 1024).toFixed(1) + " GiB (" + Math.round(DgopService.memoryUsage) + "%)" + (DgopService.totalSwapKB > 0 ? "\nSwap " + (DgopService.usedSwapKB / 1048576).toFixed(1) + " / " + (DgopService.totalSwapKB / 1048576).toFixed(1) + " GiB" : "")
@@ -661,14 +656,24 @@ let
               tooltipText: !isVerticalOrientation && selectedMount ? (selectedMount.mount === "/" ? "Disk" : selectedMount.mount) + " · " + selectedMount.used + " of " + selectedMount.size + " used (" + selectedMount.percent + ")\n" + selectedMount.avail + " free" : ""
             '';
           }
+      # 2.0's Clock.qml doesn't import Quickshell, which the tooltip's
+      # SystemClock comes from; without it the clock, and with it the whole
+      # bar, fails to load.
+      ++ [
+        {
+          file = "share/quickshell/dms/Modules/DBar/Widgets/Clock.qml";
+          from = "import QtQuick\n";
+          to = "import QtQuick\nimport Quickshell\n";
+        }
+      ]
       # Not a dispatch fix: the lock screen blurs its wallpaper unconditionally
       # (no setting), which smears lockScreenWallpaperPath's logo into a glow.
       # The clock and password field already sit on their own surfaces.
       ++ [
         {
-          file = "share/quickshell/dms/Modules/Lock/LockScreenContent.qml";
-          from = "blurEnabled: true\n            blur: 0.8";
-          to = "blurEnabled: false\n            blur: 0.8";
+          file = "share/quickshell/dms/Modules/Lock/LockScreenBackground.qml";
+          from = "blurEnabled: true\n            blur: Theme.lockScreenBlur";
+          to = "blurEnabled: false\n            blur: Theme.lockScreenBlur";
         }
       ]
       # Not a dispatch fix: the Control Center's Bluetooth Scan button could
@@ -687,7 +692,7 @@ let
           detail = "share/quickshell/dms/Modules/ControlCenter/Details/BluetoothDetail.qml";
           closers = [
             "share/quickshell/dms/Modules/ControlCenter/ControlCenterPopout.qml"
-            "share/quickshell/dms/Modules/DankIsland/Activities/ControlCenterExpanded.qml"
+            "share/quickshell/dms/Modules/DIsland/Activities/ControlCenterExpanded.qml"
           ];
         in
         [
@@ -721,32 +726,16 @@ let
               }
             '';
           }
-          # Named devices first: upstream counts a name as real only if it has a
-          # space, so "WH-1000XM5" sank among the bare-MAC aliases ("7A-18-…")
-          # BlueZ gives unnamed devices. Treat anything that isn't a MAC as named.
+          # The page reads root.discovering everywhere (button, scan-only
+          # device list, "Scanning…" placeholder), so rebinding it covers them.
           {
-            file = "share/quickshell/dms/Services/BluetoothService.qml";
-            from = ''const aHasRealName = aName.includes(" ") && aName.length > 3;'';
-            to = "const aHasRealName = aName.length > 0 && !/^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i.test(aName);";
-          }
-          {
-            file = "share/quickshell/dms/Services/BluetoothService.qml";
-            from = ''const bHasRealName = bName.includes(" ") && bName.length > 3;'';
-            to = "const bHasRealName = bName.length > 0 && !/^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i.test(bName);";
+            file = detail;
+            from = "readonly property bool discovering: adapter?.discovering ?? false";
+            to = "readonly property bool discovering: BluetoothService.scanning";
           }
           {
             file = detail;
-            from = "BluetoothService.adapter?.discovering ?? false";
-            to = "BluetoothService.scanning";
-          }
-          {
-            file = detail;
-            from = "if (!BluetoothService.adapter?.discovering)";
-            to = "if (!BluetoothService.scanning)";
-          }
-          {
-            file = detail;
-            from = "BluetoothService.adapter.discovering = !BluetoothService.adapter.discovering;";
+            from = "root.adapter.discovering = !root.adapter.discovering;";
             to = "BluetoothService.setScanning(!BluetoothService.scanning);";
           }
         ]
@@ -771,9 +760,9 @@ let
             "$out/share/quickshell/dms/Widgets/BarPillTooltip.qml"
           # CPU + memory + GPU in one pill with usage gauges; replaces the
           # cpuUsage widget in place — see the header of the QML file.
-          chmod u+w "$out/share/quickshell/dms/Modules/DankBar/Widgets"
+          chmod u+w "$out/share/quickshell/dms/Modules/DBar/Widgets"
           install -Dm444 ${../../../config/dms/BarSystemMonitor.qml} \
-            "$out/share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml"
+            "$out/share/quickshell/dms/Modules/DBar/Widgets/CpuMonitor.qml"
           # Its GPU poll, one shared singleton rather than one per bar.
           chmod u+w "$out/share/quickshell/dms/Services"
           install -Dm444 ${../../../config/dms/GpuStatsService.qml} \
@@ -783,12 +772,13 @@ let
 
   # ── Bar layouts ─────────────────────────────────────────────────────────────
   # The main bar, and a trimmed one for portrait outputs. Declaring these means
-  # per-widget tweaks made in DMS's own GUI are overwritten on the next nixup —
-  # the arrays are replaced, not merged. DMS has no volume/network/bluetooth
+  # widgets added, removed or reordered in DMS's own GUI revert on the next
+  # nixup; per-widget options set there survive (keep() in the activation
+  # script below). DMS has no volume/network/bluetooth
   # bar widgets (they live behind its control centre button), and camera + mic
   # fold into one privacyIndicator.
   #
-  # DMS's own default barConfigs[0], copied verbatim from dms-shell 1.6.2's
+  # DMS's own default barConfigs[0], copied verbatim from dux-shell 2.0.0's
   # Common/settings/SettingsSpec.js. Only used to seed a settings.json that has
   # no barConfigs yet — see the activation script below.
   #
@@ -800,7 +790,7 @@ let
   # nothing renders at all.
   #
   # Re-check this against SettingsSpec.js when bumping dms-shell: keys added
-  # upstream after 1.6.2 would land undefined on a first-run seed.
+  # upstream after 2.0.0 would land undefined on a first-run seed.
   dmsDefaultBar = {
     id = "default";
     name = "Main Bar";
@@ -828,19 +818,26 @@ let
       "controlCenterButton"
     ];
     spacing = 4;
-    innerPadding = 4;
+    innerPadding = 2;
+    barInsetPadding = -1;
     barLengthPadding = 0;
-    attachToScreenEdge = false;
-    batteryColorMode = "theme";
+    barLengthMode = "full";
+    barLengthPercent = 80;
     bottomGap = 0;
+    attachToScreenEdge = false;
+    followInterfaceStyle = true;
     transparency = 1.0;
+    surfaceColor = "default";
+    surfaceCustomColor = "#6750A4";
+    widgetFollowInterfaceStyle = true;
     widgetTransparency = 1.0;
     squareCorners = false;
     noBackground = false;
+    widgetStyle = "pills";
     maximizeWidgetIcons = false;
     maximizeWidgetText = false;
-    removeWidgetPadding = false;
     widgetPadding = 8;
+    batteryColorMode = "theme";
     gothCornersEnabled = false;
     gothCornerRadiusOverride = false;
     gothCornerRadiusValue = 12;
@@ -855,25 +852,38 @@ let
     fontScale = 1.0;
     iconScale = 1.0;
     autoHide = false;
-    autoHideDelay = 250;
     autoHideStrict = false;
-    useOverlayLayer = false;
+    autoHideDelay = 250;
     showOnWindowsOpen = false;
     openOnOverview = false;
     visible = true;
     popupGapsAuto = true;
     popupGapsManual = 4;
     maximizeDetection = true;
+    useOverlayLayer = false;
     scrollEnabled = true;
-    scrollXBehavior = "column";
+    scrollXBehavior = "focusWindow";
     scrollYBehavior = "workspace";
+    middleClickAction = "none";
+    rightClickAction = "none";
+    clickActionFollowMouse = false;
     shadowIntensity = 0;
     shadowOpacity = 60;
     shadowColorMode = "default";
     shadowCustomColor = "#000000";
+    shadowDirectionMode = "inherit";
+    shadowDirection = "top";
     clickThrough = false;
     hoverPopouts = false;
     hoverPopoutDelay = 150;
+  };
+
+  # DMS ships unlabelled dots; number the workspaces instead. A per-widget
+  # option since 2.0 (the global showWorkspaceIndex is gone).
+  workspaceSwitcher = {
+    id = "workspaceSwitcher";
+    enabled = true;
+    showWorkspaceIndex = true;
   };
 
   dmsDeclared = {
@@ -885,18 +895,17 @@ let
       # SessionData once auto-location is on.
       useAutoLocation = true;
       weatherEnabled = true;
-      showWeather = true;
-      # DMS ships unlabelled dots; number the workspaces instead.
-      showWorkspaceIndex = true;
       # Exactly what DMS's "Disable Built-in Wallpapers" toggle writes: no screen
       # renders its own wallpaper layer, so a pick can't stack over awww.
       # dms-wallpaper-bridge forwards picks to awww instead.
       screenPreferences.wallpaper = [ ];
-      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/gruvbox-material.json";
+      customThemeFile = "${config.xdg.configHome}/dms/gruvbox-material.json";
 
       # ── Match Hyprland's window styling (config/hypr/hyprland.lua) ──────────
-      # Corners follow decoration.rounding.
-      cornerRadius = 10;
+      # Corners follow decoration.rounding (10). 2.0 sizes every radius from
+      # one strength instead of a pixel value; 31 is what its own migration
+      # makes of the old cornerRadius = 10, and gives 10px window corners.
+      radiusStrength = 31;
       # Popouts, control center and the Settings window see-through like kitty.
       # DMS's own blur needs ext-background-effect-v1, which Hyprland 0.55
       # lacks (`dms blur check` → unsupported), so blurEnabled stays off and
@@ -918,10 +927,8 @@ let
       # way in. The wallpaper is lock-only; the desktop's stays awww's.
       loginctlLockIntegration = true;
       lockScreenWallpaperPath = cfg.lockWallpaper;
+      # The greeter takes its background from this too (productivity.nix).
       lockScreenWallpaperFillMode = "Fill";
-      # The greeter shows its greeter_wallpaper_override.jpg (productivity.nix
-      # puts this same image there) only while this is non-empty.
-      greeterWallpaperPath = cfg.lockWallpaper;
       # Finger and password side by side: DMS runs its own fprintd PAM stack
       # in parallel with the password one (/etc/pam.d/dankshell, which has
       # pam_fprintd turned off on fprintd hosts — hosts/framework/default.nix).
@@ -936,16 +943,51 @@ let
       "darkMode"
       "nightMode"
     ];
+    # DMS's own default list (dux-shell 2.0.0's SettingsSpec.js), the drops
+    # above still in it. Only seeds a settings.json DMS hasn't saved one to:
+    # until then it shows this list, and filtering needs something to filter.
+    controlCenterDefault =
+      let
+        tile = id: w: {
+          inherit id w;
+          enabled = true;
+          h = 1;
+        };
+        small = id: w: tile id w // { small = true; };
+      in
+      [
+        (tile "user" 5)
+        (small "settings" 1)
+        (small "lock" 1)
+        (small "power" 1)
+        (tile "brightnessSlider" 4)
+        (tile "volumeSlider" 4)
+        (tile "wifi" 4)
+        (tile "bluetooth" 4)
+        (tile "audioOutput" 4)
+        (tile "audioInput" 4)
+        (tile "darkMode" 2)
+        (tile "nightMode" 2)
+        (tile "doNotDisturb" 2)
+        (tile "idleInhibitor" 2)
+        (tile "battery" 4)
+        (tile "diskUsage" 4)
+        (small "runningApps" 7)
+        (small "edit" 1)
+      ];
     # Output-picker entries to hide (custom.hm.dms.hiddenOutputs, below).
     inherit (cfg.dms) hiddenOutputs;
     # Plugin tiles appended when missing — only on hosts with the plugin.
-    # Once there, their width and other per-tile settings are DMS's to keep.
+    # Once there, their size and other per-tile settings are DMS's to keep.
+    # 2.0 lays tiles on a grid of cells: w = 4 is half its default 8 columns,
+    # the old width = 50.
     controlCenterAdd =
       map
         (id: {
           id = "plugin_${id}";
           enabled = true;
-          width = 50;
+          w = 4;
+          h = 1;
         })
         (
           dmsPlugins.barWidget "batteryPlus"
@@ -955,8 +997,10 @@ let
           ++ dmsPlugins.barWidget "dankClight"
         );
     # Tile order, re-applied on every nixup: a drag in DMS's edit mode lasts
-    # only until the next rebuild. Tiles not listed (added in the GUI) keep
-    # their relative order after these; listed ones a host lacks are skipped.
+    # only until the next rebuild. The listed tiles are sorted among the slots
+    # they already occupy; everything else (2.0's header row of user,
+    # settings, lock and power, the edit tile, tiles added in the GUI) stays
+    # where it is. Listed ones a host lacks are skipped.
     controlCenterOrder = [
       "volumeSlider"
       "brightnessSlider"
@@ -978,7 +1022,7 @@ let
       # plugin. They fit on the right now that Claude and Nix Monitor are
       # icon-sized; at full size they ran the right section into the centre.
       left = [
-        "workspaceSwitcher"
+        workspaceSwitcher
         "focusedWindow"
       ];
       # music sits with the clock, as in DMS's own default: in the right
@@ -1016,7 +1060,7 @@ let
       # behind them (its ignore_alpha 0.5 keeps the empty strip unblurred).
       barAlpha = 0;
       widgetAlpha = 0.85;
-      pLeft = [ "workspaceSwitcher" ];
+      pLeft = [ workspaceSwitcher ];
       pCenter = [ "clock" ];
       pRight = [
         "notificationButton"
@@ -1109,11 +1153,48 @@ in
     # unlike its settings.json this can be a plain store symlink rendered from
     # palette.nix.
     xdg.configFile = {
-      "DankMaterialShell/gruvbox-material.json".text =
+      "dms/gruvbox-material.json".text =
         renderTheme ../../../config/dms/gruvbox-material.json;
     }
     # DMS plugins: one store symlink per plugin directory — see dms-plugins.nix.
     // dmsPlugins.configFiles;
+
+    # ── 2.0's directory rename ───────────────────────────────────────────────
+    # DMS 2.0 moved its config/state/cache/data dirs from DankMaterialShell/
+    # to dms/, migrating on its first start (rename, then a symlink at the old
+    # path). That can't be left to it here: this activation writes into the
+    # new dirs first (plugin links, gruvbox-material.json, the settings.json
+    # merge below), and DMS's merge of two populated dirs leaves every
+    # conflicting file behind in the old one — settings.json included.
+    #
+    # So move them here, before any link is checked or written, the way DMS
+    # would. The moved tree's Home Manager links belong to the old generation
+    # and are dropped (the new one relinks what's still declared). The old
+    # path must not be a symlink while HM cleans the old generation: its
+    # `rmdir -p` of emptied parents would hit it and fail the activation. So
+    # the compat symlink DMS leaves for older plugins is only (re)made once
+    # the new generation is linked. Drop all this once no machine has a
+    # DankMaterialShell dir left.
+    home.activation.dmsLegacyDirsMove = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+      for base in "${config.xdg.configHome}" "${config.xdg.stateHome}" \
+                  "${config.xdg.cacheHome}" "${config.xdg.dataHome}"; do
+        old="$base/DankMaterialShell" new="$base/dms"
+        if [[ -L "$old" ]]; then
+          run rm "$old"
+        elif [[ -d "$old" && ! -e "$new" ]]; then
+          run mv "$old" "$new"
+          run find "$new" -type l -lname '*-home-manager-files/*' -delete
+        fi
+      done
+    '';
+    home.activation.dmsLegacyDirsLink = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      for base in "${config.xdg.configHome}" "${config.xdg.stateHome}" \
+                  "${config.xdg.cacheHome}" "${config.xdg.dataHome}"; do
+        if [[ -d "$base/dms" && ! -e "$base/DankMaterialShell" && ! -L "$base/DankMaterialShell" ]]; then
+          run ln -s dms "$base/DankMaterialShell"
+        fi
+      done
+    '';
 
     # Pointing DMS AT its scheme and layout has to be done differently:
     # settings.json is owned and rewritten by the shell itself, so it can't be a
@@ -1125,7 +1206,7 @@ in
         PartOf = [ "shell-dms.service" ];
       };
       Path = {
-        PathChanged = "${config.xdg.stateHome}/DankMaterialShell/session.json";
+        PathChanged = "${config.xdg.stateHome}/dms/session.json";
         Unit = "dms-wallpaper-bridge.service";
       };
     };
@@ -1158,12 +1239,12 @@ in
 
       # DMS plugin_settings.json: which plugins are on, plus a few settings.
       # Same plain merge — each plugin's other keys are whatever it saved.
-      apply "${config.xdg.configHome}/DankMaterialShell/plugin_settings.json" \
+      apply "${config.xdg.configHome}/dms/plugin_settings.json" \
         ${dmsPluginDecl} \
         '. * $d'
 
       # DMS session.json: only the hidden output devices; the rest is its state.
-      apply "${config.xdg.stateHome}/DankMaterialShell/session.json" \
+      apply "${config.xdg.stateHome}/dms/session.json" \
         ${dmsDecl} \
         '.hiddenOutputDeviceNames = ((.hiddenOutputDeviceNames // []) + $d.hiddenOutputs | unique)'
 
@@ -1172,24 +1253,36 @@ in
       # arrays, and replacing the array wholesale would discard all of it. So
       # rewrite the widget lists in place, and clone bar 0 for the portrait
       # output rather than authoring a second bar from scratch.
-      apply "${config.xdg.configHome}/DankMaterialShell/settings.json" \
+      #
+      # The widget lists are ours, but since 2.0 each entry can carry that
+      # widget's options (clock format, tray layout, …, moved there from
+      # global keys by DMS's own migration). keep() takes the declared list
+      # and, for each widget already on the bar, its saved entry, with any
+      # options declared here merged over it.
+      apply "${config.xdg.configHome}/dms/settings.json" \
         ${dmsDecl} \
-        '($d.settings) as $s
+        'def keep($old; $new):
+           $new | map(. as $w
+             | ($w | if type == "string" then {id: .} else . end) as $dw
+             | ([($old // [])[] | select(type == "object" and .id == $dw.id)] | first) as $e
+             | if $e == null then $w
+               elif ($w | type) == "string" then $e
+               else $e * $w end);
+         ($d.settings) as $s
          | . * $s
          # Never run → DMS falls back to its stock list, which has the dropped
-         # tiles in it, so seed that list (SettingsData.qml) before filtering.
+         # tiles in it, so seed that list before filtering.
          | .controlCenterWidgets = (
-             (.controlCenterWidgets // ([
-                "volumeSlider", "brightnessSlider", "wifi", "bluetooth",
-                "audioOutput", "audioInput", "nightMode", "darkMode"
-              ] | map({ id: ., enabled: true, width: 50 })))
+             (.controlCenterWidgets // $d.controlCenterDefault)
              | map(select(.id as $i | $d.controlCenterDrop | index($i) | not)))
          | reduce $d.controlCenterAdd[] as $w (.;
              if any(.controlCenterWidgets[]; .id == $w.id)
              then . else .controlCenterWidgets += [$w] end)
          | .controlCenterWidgets |= (. as $w
-             | [ $d.controlCenterOrder[] as $id | $w[] | select(.id == $id) ]
-             + [ $w[] | select(.id as $i | $d.controlCenterOrder | index($i) | not) ])
+             | [ $d.controlCenterOrder[] as $id | $w[] | select(.id == $id) ] as $sorted
+             | [ range(0; $w | length)
+                 | select($w[.].id as $i | $d.controlCenterOrder | index($i)) ] as $slots
+             | reduce range(0; $slots | length) as $k ($w; .[$slots[$k]] = $sorted[$k]))
          # barConfigs is written by DMS itself, not by the empty-object seed in
          # apply(), so on a machine where DMS has never run there was nothing
          # here to rewrite: the bar came up with stock widgets and DMSs own
@@ -1198,12 +1291,16 @@ in
          | if ((.barConfigs | type) == "array") and ((.barConfigs | length) > 0)
            then . else .barConfigs = [ $d.barDefault ] end
          | (.barConfigs[0] |= (
-               .transparency       = $d.bars.barAlpha
+             # 2.0: without these off, the bar and its pills take the popup
+             # and theme alphas instead of the two below.
+               .followInterfaceStyle       = false
+             | .widgetFollowInterfaceStyle = false
+             | .transparency       = $d.bars.barAlpha
              | .widgetTransparency = $d.bars.widgetAlpha
              | .screenPreferences = $d.bars.mainScreens
-             | .leftWidgets       = $d.bars.left
-             | .centerWidgets     = $d.bars.center
-             | .rightWidgets      = $d.bars.right))
+             | .leftWidgets       = keep(.leftWidgets; $d.bars.left)
+             | .centerWidgets     = keep(.centerWidgets; $d.bars.center)
+             | .rightWidgets      = keep(.rightWidgets; $d.bars.right)))
          | if ($d.bars.portraitScreens | length) > 0
            then
              (if any(.barConfigs[]; .id == "portrait")
@@ -1217,9 +1314,9 @@ in
                       # fallback is right for the main bar, not a second one.
                       | .showOnLastDisplay = false
                       | .screenPreferences = $d.bars.portraitScreens
-                      | .leftWidgets       = $d.bars.pLeft
-                      | .centerWidgets     = $d.bars.pCenter
-                      | .rightWidgets      = $d.bars.pRight )
+                      | .leftWidgets       = keep(.leftWidgets; $d.bars.pLeft)
+                      | .centerWidgets     = keep(.centerWidgets; $d.bars.pCenter)
+                      | .rightWidgets      = keep(.rightWidgets; $d.bars.pRight) )
                  else . end)
            else . end'
     '';

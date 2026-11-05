@@ -95,10 +95,10 @@ BasePill {
     // Icons are Nerd Font glyphs, not Material Symbols: Material has no RAM or
     // GPU icon (memory_alt / developer_board were the nearest), Nerd has a
     // RAM stick and an expansion card. DMS bundles FiraCode Nerd Font for its
-    // own StyledText; this loads the same file.
+    // own StyledText (under DCommon/ since 2.0); this loads the same file.
     FontLoader {
         id: nerdFont
-        source: Qt.resolvedUrl("../../../assets/fonts/nerd-fonts/FiraCodeNerdFont-Regular.ttf")
+        source: Qt.resolvedUrl("../../../DCommon/assets/fonts/nerd-fonts/FiraCodeNerdFont-Regular.ttf")
     }
 
     component StatIcon: Text {

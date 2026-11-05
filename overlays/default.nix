@@ -24,23 +24,25 @@ final: prev: {
   # DMS brightness slider, which already drives them over DDC/CI.
   clightd = prev.clightd.override { enableDdc = false; };
 
-  # 26.05 ships DMS 1.4.6; quickCapture and the current AvengeMedia plugins
-  # need >= 1.6. Unstable's recipe, built against this set's Qt/KDE libraries
-  # (same Qt as unstable today, but quickshell here is stable's, and QML
-  # plugins have to match the Qt that loads them).
+  # 26.05 ships DMS 1.4.6; the current plugin registry needs 2.0, which
+  # nixpkgs carries as dux-shell (DMS's new name; the binary is still `dms`).
+  # Kept under the dms-shell attribute so every consumer here, the greeter
+  # included, gets this build. Unstable's recipe, built against this set's
+  # Qt/KDE libraries (quickshell here is stable's, and QML plugins have to
+  # match the Qt that loads them). The Go toolchain stays unstable's: 2.0
+  # needs Go 1.27, and the Go side doesn't link Qt.
   #
-  # 1.6 bakes its QML into the binary (`withshell`) and extracts it at run
+  # DMS bakes its QML into the binary (`withshell`) and extracts it at run
   # time. Install the tree to share/quickshell/dms as well and point `dms` at
   # it — DMS's own flake does the same with -c. The env var rather than -c so
   # every subcommand, `dms ipc` included, resolves the same instance; and so
   # modules/home/wm/dms.nix can keep patching files under share/quickshell/dms.
-  # The copy comes from the embed dir (`make sync-shell` output): DankCommon
+  # The copy comes from the embed dir (`make sync-shell` output): DCommon
   # symlink resolved, PAM paths substituted, dev files stripped.
-  # Drop once nixpkgs stable carries >= 1.6.
+  # Drop once nixpkgs stable carries dux-shell >= 2.0.
   dms-shell =
-    (final.unstable.dms-shell.override {
+    (final.unstable.dux-shell.override {
       inherit (final)
-        buildGoModule
         kdePackages
         qt6
         fprintd

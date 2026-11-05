@@ -66,10 +66,11 @@ sudo systemctl restart greetd
 ### Login hangs after the password is accepted
 
 greetd starts the session only once the greeter has exited. The launcher stops
-its Hyprland with `hyprctl dispatch exit`, which Hyprland on Lua rejects, so
-`productivity.nix` patches that call to `hl.dsp.exit()` (the `dmsGreeter`
-override). After a dms-shell bump, check the substitution still applies — it is
-`--replace-fail`, so a reworded launcher fails the build rather than the login.
+its Hyprland with a dispatch; under 1.x that was `hyprctl dispatch exit`,
+which Hyprland on Lua rejects, and `productivity.nix` patched it. DMS 2.0's
+launcher sends `hl.dsp.exit()` itself when the greeter config is Lua (it spots
+`hl.` in `compositor.customConfig`), so the patch is gone. If a login hangs
+again, check `Modules/Greetd/assets/dms-greeter` still takes its Lua branch.
 
 ## Services
 

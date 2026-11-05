@@ -5,7 +5,7 @@
 # on the bar.
 #
 # Upstream's way is `dms plugins install`, an imperative git clone into
-# ~/.config/DankMaterialShell/plugins/. Instead each plugin is a store path
+# ~/.config/dms/plugins/. Instead each plugin is a store path
 # symlinked into that directory, so they're pinned by flake.lock and follow the
 # host: a plugin for a service the host doesn't run isn't installed there.
 # Plugins installed by hand still work alongside — the directory itself stays
@@ -142,7 +142,7 @@ let
     ' '
                     Image {
                         source: Qt.resolvedUrl("claude-code.svg")
-                        readonly property int logoSize: Math.max(14, Math.min(pill.height - 7, 20))
+                        readonly property int logoSize: Math.max(14, Math.min(root.widgetThickness - 7, 20))
                         sourceSize: Qt.size(logoSize * 2, logoSize * 2)
                         Layout.preferredWidth: logoSize
                         Layout.preferredHeight: logoSize
@@ -206,7 +206,9 @@ let
   # Pill icons: the NixOS snowflake (JetBrainsMono Nerd Font, installed
   # system-wide by base.nix) instead of a generic box, and a status icon
   # instead of a bare check — check_circle up to date, update behind, help
-  # when it can't compare. Colours are upstream's.
+  # when it can't compare. Colours are upstream's, except that DMS 2.0 dropped
+  # Theme.onSecondary (the Rebuild button's text, left undefined); onPrimary
+  # is the same dark-on-accent role.
   nixMonitor = pkgs.runCommand "dms-plugin-nixMonitor" { } ''
     cp -r ${registry.nixMonitor} $out
     chmod -R u+w $out
@@ -221,7 +223,8 @@ let
                     font.pixelSize: root.iconSize
     ' \
       --replace-fail 'name: "check"' \
-                     'name: root.canCompareVersions ? (root.isUpToDate ? "check_circle" : "update") : "help"'
+                     'name: root.canCompareVersions ? (root.isUpToDate ? "check_circle" : "update") : "help"' \
+      --replace-fail 'textColor: Theme.onSecondary' 'textColor: Theme.onPrimary'
   '';
 
   # Left-clicking a menu row copies the capture straight to the clipboard
@@ -325,7 +328,7 @@ let
 in
 {
   configFiles = lib.listToAttrs (
-    map (p: lib.nameValuePair "DankMaterialShell/plugins/${p.dir or p.id}" { source = p.src; }) plugins
+    map (p: lib.nameValuePair "dms/plugins/${p.dir or p.id}" { source = p.src; }) plugins
   );
 
   # Merged into plugin_settings.json, which DMS owns like settings.json.

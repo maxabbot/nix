@@ -314,7 +314,7 @@ hl.window_rule({ match = { title = "Picture-in-Picture" }, float = true })
 -- pickers, which share the class but carry their own titles.
 hl.window_rule({
     name      = "dms-settings-dropdown",
-    match     = { class = "com\\.danklinux\\.dms", title = "Settings" },
+    match     = { class = "dev\\.duxlabs\\.shell", title = "Settings" },
     float     = true,
     pin       = true,
     move      = "monitor_w-window_w-10 62",

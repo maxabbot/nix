@@ -3,8 +3,8 @@
 The desktop shell is DMS (DankMaterialShell): bar, notifications, launcher,
 control centre, settings and the rest. It runs as `shell-dms.service`, started
 with the graphical session and declared in `modules/home/wm/dms.nix`
-(`dms-shell` 1.6.2 — unstable's recipe on stable Qt, see
-`overlays/default.nix`). The panel keybinds in `config/hypr/hyprland.lua` call
+(DMS 2.0, which nixpkgs calls `dux-shell` — unstable's recipe on stable Qt,
+see `overlays/default.nix`). The panel keybinds in `config/hypr/hyprland.lua` call
 `dms ipc …` directly.
 
 Until 2026-09-30 this config also carried its own Quickshell panels and a
@@ -112,7 +112,8 @@ store size, generations, `nh os switch` and `nh clean user`.
 Gruvbox Material Dark from `config/stylix/palette.nix`: the template
 `config/dms/gruvbox-material.json` is rendered through
 `config/stylix/palette-subst.nix` at build time and deployed to
-`~/.config/DankMaterialShell/`.
+`~/.config/dms/`. (2.0 renamed its dirs from `DankMaterialShell/` to `dms/`;
+`dms.nix` moves them on activation and leaves the old name as a symlink.)
 
 DMS needs `currentThemeName = "custom"` before it reads `customThemeFile`.
 
@@ -157,11 +158,13 @@ Two more DMS widgets are patched after Noctalia's (a shell tried here earlier): 
 treats every icon as hidden, so the bar shows only DMS's overflow chevron and
 the icons open in its popup (a drawer); and the focused window shows its app
 icon instead of the app name on horizontal bars, falling back to the name when
-the icon can't be resolved. The media pill also shows the track's album art
-as a small thumbnail in place of the visualiser, when the player provides it.
+the icon can't be resolved. The media pill's album art is upstream's own since
+2.0 (`mediaShowCoverArt`, on by default), as are its lyrics.
 
 DMS ships `showWorkspaceIndex = false` — unlabelled dots — so it is declared
-on to number the workspaces.
+on to number the workspaces. Since 2.0 it is an option on the
+`workspaceSwitcher` widget entry, not a global key; the activation's `keep()`
+leaves options set on a bar widget in DMS's GUI in place.
 
 Weather needs a location, and DMS ships none. Auto-locate
 (`useAutoLocation`) geolocates by IP, which keeps a home address out of a
@@ -174,8 +177,8 @@ The bar is a transparent strip with widget capsules. DMS reads
 `barConfig.transparency` straight into the background alpha despite the name,
 so `0` is fully transparent; `widgetTransparency` is the pills' alpha.
 
-DMS (1.6.2+) persists its idle-inhibitor toggle as `idleInhibited` in
-`~/.local/state/DankMaterialShell/session.json`, so it keeps whatever you last
+DMS persists its idle-inhibitor toggle as `idleInhibited` in
+`~/.local/state/dms/session.json`, so it keeps whatever you last
 chose. Nothing forces it on at startup, since that would override an "off".
 
 DMS's inhibitor is a Wayland idle-inhibitor on its bar, and it doesn't survive
@@ -218,7 +221,7 @@ once after login instead of losing to the leaves.
 
 Declared in `modules/home/wm/dms-plugins.nix` rather than installed with
 `dms plugins install`: each plugin is a store path symlinked into
-`~/.config/DankMaterialShell/plugins/`, turned on through the same `jq` merge
+`~/.config/dms/plugins/`, turned on through the same `jq` merge
 into `plugin_settings.json`, and pinned by the `dms-plugin-registry` flake
 input (its `nix/default.nix` carries a rev and hash per plugin). Hand-installed
 plugins still work alongside.
