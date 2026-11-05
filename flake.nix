@@ -321,7 +321,7 @@
             compositor = "hyprland";
             # Same image as the Limine menu. 3480x2160 is ~16:10 like the panel,
             # so crop-fill only trims the docked 16:9 Philips top and bottom.
-            wallpaper = ./config/limine/gruvbox-rainbow-nix.png;
+            wallpaper = "${mkPkgs.gruvbox-wallpapers}/rainbow-nix.png";
             # Matches kanshi's "undocked" profile below, so there's no scale
             # flash while kanshi starts. primaryName stays unset so startup
             # workspaces/cursor aren't pinned to the laptop panel when docked.

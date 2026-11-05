@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Framework gear in six palette-coloured wedges, one tooth each, matching
-     config/limine/gruvbox-rainbow-nix.png (same canvas, background and colour
-     order). Template: @name@ placeholders are rendered from
-     config/stylix/palette.nix by palette-subst.nix, then rasterised at build
-     time. Gear outline: Wikimedia Commons "Framework Computer logo icon.svg". -->
+     the rainbow Nix snowflake (config/plymouth/nix-snowflake.svg: same colour
+     order; same canvas and background as its wallpaper). Template: @name@
+     placeholders are rendered from config/stylix/palette.nix by
+     palette-subst.nix, then rasterised by pkgs/gruvbox-wallpapers. Gear outline: Wikimedia Commons "Framework Computer logo icon.svg". -->
 <svg xmlns="http://www.w3.org/2000/svg" width="3480" height="2160" viewBox="0 0 3480 2160">
   <defs>
     <clipPath id="gear">

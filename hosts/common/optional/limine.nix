@@ -13,7 +13,7 @@
 #   3. Set `boot.loader.limine.secureBoot.enable = true` in that host's file and
 #      rebuild — Limine signs itself with the sbctl keys.
 #   4. Leave Setup Mode and turn Secure Boot on; `sbctl status` confirms.
-{ lib, ... }:
+{ lib, pkgs, ... }:
 let
   palette = import ../../../config/stylix/palette.nix;
   c = name: lib.removePrefix "#" palette.${name};
@@ -32,7 +32,7 @@ in
     maxGenerations = 5;
 
     style = {
-      wallpapers = [ ../../../config/limine/gruvbox-rainbow-nix.png ];
+      wallpapers = [ "${pkgs.gruvbox-wallpapers}/rainbow-nix.png" ];
       wallpaperStyle = "centered";
       backdrop = c "bg0Hard";
 

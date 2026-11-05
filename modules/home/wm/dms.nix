@@ -37,15 +37,11 @@ let
   };
 
   # Lock screen background: the rainbow Nix snowflake the Limine menu shows,
-  # or on framework the Framework gear done the same way (a palette template,
-  # rasterised here so the colours follow palette.nix).
-  lockWallpaper =
-    if osConfig.networking.hostName == "framework" then
-      pkgs.runCommand "gruvbox-rainbow-framework.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
-        rsvg-convert ${pkgs.writeText "gruvbox-rainbow-framework.svg" (renderTheme ../../../config/lock/gruvbox-rainbow-framework.svg)} -o $out
-      ''
-    else
-      ../../../config/limine/gruvbox-rainbow-nix.png;
+  # or on framework the Framework gear done the same way. Both rendered from
+  # the palette (pkgs/gruvbox-wallpapers).
+  lockWallpaper = "${pkgs.gruvbox-wallpapers}/rainbow-${
+    if osConfig.networking.hostName == "framework" then "framework" else "nix"
+  }.png";
 
   # Scripts here are deployed 0444 (see hyprland.nix), so invoke them through
   # bash rather than exec'ing directly — a direct exec dies with 126.
@@ -652,7 +648,7 @@ let
       # `loginctl lock-session` (Super+L, hypridle, before sleep) is the one
       # way in. The wallpaper is lock-only; the desktop's stays awww's.
       loginctlLockIntegration = true;
-      lockScreenWallpaperPath = "${lockWallpaper}";
+      lockScreenWallpaperPath = lockWallpaper;
       lockScreenWallpaperFillMode = "Fill";
       # Finger and password side by side: DMS runs its own fprintd PAM stack
       # in parallel with the password one (/etc/pam.d/dankshell, which has
