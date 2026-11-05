@@ -8,7 +8,7 @@
 # 42-logitech-unify-permissions.rules, early enough for its TAG+="uaccess" to be
 # picked up by 73-seat-late.rules, so the receiver's hidraw node is writable by
 # the logged-in user. (This is the same ordering trap as the Vial rules in
-# hosts/home-desktop/default.nix: services.udev.extraRules lands in
+# hosts/common/optional/keyboards.nix: services.udev.extraRules lands in
 # 99-local.rules, which runs far too late for uaccess.)
 #
 # Solaar re-applies its stored per-device settings each time a device connects,

@@ -11,7 +11,7 @@ A "what did I set up" reference. For keybinds see `docs/SHORTCUTS.md`, for struc
 - **zoxide** — replaces `cd`; learns your directories (`cd` still works)
 - **fzf** — fuzzy finder wired to `Ctrl+T` (files), `Alt+C` (dirs)
 - **atuin** — SQLite-backed shell history on `Ctrl+R` (fuzzy, cross-session)
-- **tmux** — `Ctrl+A` prefix, vim pane navigation, Gruvbox theme, sessionizer on `Ctrl+F`
+- **tmux** — `Ctrl+A` prefix, vim pane navigation, Gruvbox theme, sessionizer on `Prefix+f` (`Ctrl+F` in zsh)
 - **bat** — replaces `cat` and `less`; syntax highlighting, Gruvbox theme
 - **eza** — replaces `ls`; icons, git status, tree view via `lt`
 - **delta** — replaces git's diff output; side-by-side, line numbers, Gruvbox
@@ -117,7 +117,6 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 - **cava** — audio visualiser, Gruvbox gradient (`Super+Shift+C` opens it on the spare monitor)
 - **spotify-player** — Spotify TUI (`spt`); Spotify Connect device "max-tui"
-- **ncspot** — lightweight ncurses Spotify client
 - **wego** — terminal weather forecast graphs (`wttr` alias hits wttr.in instead)
 - **chafa** — render images/video as terminal graphics
 - **harlequin** — SQL IDE in the terminal (DuckDB/SQLite/Postgres)

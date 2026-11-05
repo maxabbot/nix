@@ -28,13 +28,11 @@ This repo's split is shallower than the references — features aren't composabl
 
 ## Secrets Management
 
-**This repo**: None yet. `sshKeys = [ ]`, and the same `hashedPassword` is committed in every host file (rotate it once secrets land — see TODO.md). The old empty `signingkey` stub was removed as dead code.
+**This repo**: `sops-nix` (`hosts/common/optional/sops.nix`) — `secrets/common.yaml` holds the login password hash, and per-host files hold each workstation's Syncthing identity; each host decrypts with its own plain age key. `sshKeys = [ ]` still. The old inline hash is in git history, so the password should be rotated (TODO.md).
 
 **Misterio77**: `sops-nix` — encrypted `secrets.yaml` per host, committed to git, decrypted at activation via age/GPG.
 
 **fufexan**: `agenix` — `secrets/*.age` files, same model.
-
-This is the most important gap. Real SSH keys, API tokens, and hashed passwords require one of these.
 
 ---
 
@@ -42,8 +40,8 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 
 | Feature | This repo | Misterio77 | fufexan |
 |---|---|---|---|
-| Secure boot | Ready (Limine `secureBoot` option, keys not yet enrolled) | lanzaboote | lanzaboote |
-| Secrets | No | sops-nix | agenix |
+| Secure boot | Limine `secureBoot` (on for framework, off on home-desktop) | lanzaboote | lanzaboote |
+| Secrets | sops-nix | sops-nix | agenix |
 | Impermanence | No | Yes (ephemeral btrfs root) | No |
 | Binary cache | No | Self-hosted (cache.m7.rs) | Cachix |
 | Hyprland config | Lua files (+ Nix-generated fragments) | Nix DSL | Lua files |
@@ -59,9 +57,6 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 ## What's Worth Adopting
 
 ### Still to do
-
-**High priority:**
-- **Secrets management** (sops-nix or agenix) — unblocks real deployment; SSH keys, API tokens, hashed passwords all require this
 
 **Per-host polish:**
 - **GPG commit signing** — both references sign commits; add a `signingkey` hmArg in `flake.nix` + `programs.gpg` in HM
@@ -81,4 +76,5 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **`statix` + `deadnix` in CI** — `lint` job in `.github/workflows/ci.yml`
 - **Dev shell** — `nix develop` gives nixfmt, statix, deadnix, nil; defined in `flake.nix`
 - **Specialisations on the laptops** — `powersave` boot entry in `hosts/framework/default.nix` (swaps power-profiles-daemon out for TLP, since ppd is its default)
-- **Secure boot** — Limine's `boot.loader.limine.secureBoot` ready; enable after running `sbctl create-keys` + `sbctl enroll-keys`
+- **Secrets management** — sops-nix, 2026-09-28 (`hosts/common/optional/sops.nix`)
+- **Secure boot** — Limine's `boot.loader.limine.secureBoot`, enrolled and on for framework (2026-11-03); home-desktop can follow with `sbctl create-keys` + `sbctl enroll-keys`

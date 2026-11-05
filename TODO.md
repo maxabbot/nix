@@ -50,7 +50,7 @@ nix run github:nix-community/nixos-anywhere -- \
 
 ## Post-install checklist
 
-- [ ] Hyprland starts, SDDM greeter appears on correct monitor
+- [ ] Hyprland starts, DMS greeter appears on correct monitor
 - [ ] DMS bar visible with correct Gruvbox colours
 - [ ] DMS launcher opens with `Super+D`
 - [ ] Gruvbox Material theme applied in GTK apps

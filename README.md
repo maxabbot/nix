@@ -29,7 +29,7 @@ modules/
     shell.nix                    #   Zsh, Starship, fzf, zoxide, atuin, tmux
     editor.nix                   #   Zed (primary) + VSCode (backup)
     apps.nix                     #   Kitty, btop, mpv, Zathura
-    theme.nix                    #   Icons, dark-mode prefs, MIME defaults (Stylix owns the rest)
+    theme.nix                    #   Dark-mode prefs, Thunar translucency, MIME defaults (Stylix owns the rest, icons included)
     wm/hyprland.nix              #   Hyprland (compositor-gated)
     wm/dms.nix                   #   DMS desktop shell: bar, panels, notifications (compositor-gated)
     wm/kanshi.nix                #   Docked/undocked display profiles (laptop)

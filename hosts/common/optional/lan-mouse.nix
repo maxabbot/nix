@@ -7,7 +7,7 @@
 #
 # lan-mouse 0.10 sends input events over plain unauthenticated UDP, so anyone
 # who can reach the port can type into the machine. It's opened on tailscale0
-# only: the peers find each other by MagicDNS name, the traffic rides
+# only: the peers are pinned by tailnet IP (lanMouse.ips), the traffic rides
 # WireGuard, and only this tailnet's own devices can reach it. On the LAN the
 # two still talk directly, since Tailscale picks the direct path.
 { config, ... }:

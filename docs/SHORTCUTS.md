@@ -33,7 +33,7 @@ Gruvbox Material Dark · @host@
 | Super + Scroll | Next / prev workspace |
 | Super + Alt + ← → | Move workspace to monitor ² |
 | Super + S | Toggle scratchpad |
-| Super + Shift + S | Send to scratchpad |
+| Super + Shift + S | Move to / from scratchpad |
 | Super + Grave | Dropdown terminal |
 | Super + Shift + Grave | btop panel |
 | **System** | |
@@ -78,7 +78,7 @@ Gruvbox Material Dark · @host@
 | Ctrl + R | History search (atuin) |
 | Ctrl + T | File search (fzf) |
 | Alt + C | cd into dir (fzf) |
-| `z <query>` | Jump to frecent dir |
+| `cd <query>` | Jump to frecent dir (zoxide) |
 | `nixup` | Rebuild NixOS (nh) |
 | `nix shell nixpkgs#X` | Ephemeral package |
 | `nix develop` | Enter dev shell |
@@ -104,4 +104,4 @@ Gruvbox Material Dark · @host@
 | Idle 5½ min | Screens blank |
 | Idle 15 min | Suspend |
 | Before suspend | Lock screen |
-| Lid close | Suspend ¹ |
+| Lid close | Suspend; hibernate after 2 h on battery ¹ |

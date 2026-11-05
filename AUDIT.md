@@ -1,139 +1,170 @@
-# Repository Audit — 2026-07-07
+# Repository Audit — 2026-11-05
 
-Scope: full repo on branch `quickshell-settings-expansion` (24 commits ahead of main —
-the Quickshell settings expansion + Waybar-first refactor).
-Previous audit (2026-06-10) is in git history; its findings were all remediated except
-the two carried forward below (S1, B-xorg).
-
-> **2026-07-18 update:** the history has since been squashed to a single init commit —
-> the branch and the 2026-06-10 audit referenced above no longer exist in git history.
-> Since this audit: `nix.gc` → `programs.nh.clean` (obsoleting the §3 note), Limine
-> replaced systemd-boot on the GUI hosts (lanzaboote input/file removed), and a
-> follow-up audit fixed accumulated doc drift plus two session bugs (missing polkit
-> agent, duplicate gammastep). S1 (secrets) and B-xorg remain open.
-
-Tooling results: `nix flake check --no-build` **passes** for all four hosts.
-`deadnix` clean. `shellcheck` clean on all scripts. `statix` reported four
-repeated-key warnings (fixed in this pass). `nix fmt` had drifted on two files
-(fixed).
+Scope: the whole repo on `main`, plus the running framework system. The
+2026-07-07 audit is in git history; its open items (secrets, xorg warnings) are
+carried forward below where they still apply. During this audit work-laptop
+(51b1c7e) and the vm host (20cb6c0) were removed, so two hosts remain:
+home-desktop and framework.
 
 Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 
-> **Remediation status (same day):** everything marked ✅ below was fixed in this
-> pass. Still open: S1 (secrets — needs an agenix/sops-nix decision + password
-> rotation), the xorg deprecation warnings (from a flake input, not our modules),
-> and the section-4 suggestions.
+## Tooling results
+
+- `nix flake check --no-build` passes for both hosts. The only warnings are
+  the nine *"The xorg package set has been deprecated"* ones, all from
+  `apollo-flake` on home-desktop.
+- statix, deadnix, shellcheck (every script, `config/scripts/autoclick`
+  included) and nixfmt-tree are clean. The NixOS and Home Manager `warnings`
+  lists are empty on both hosts.
+- framework's toplevel built from HEAD was identical to the running system.
+- Every palette `@token@` in the templates resolves; every MIME default names
+  a desktop file that exists.
+- No failed system or user units. The 91 quickshell coredumps on 2026-11-05
+  12:48–12:54 came from a nested-Hyprland greeter preview, not from config.
 
 ---
 
-## 1. Carried forward (still open)
+## 1. Fixed in this pass
 
-### 🔴 S1 — Password hash committed to the repo (same hash on all four hosts)
-Every host sets the identical yescrypt hash in `custom.base.hashedPassword`. Known,
-tracked in TODO.md — move to agenix/sops-nix (`hashedPasswordFile`) and rotate the
-password once secrets land, since the current hash is in git history.
+| Commit | Fix |
+|---|---|
+| 7eeda73 | delta was never git's pager: HM's `programs.delta.enableGitIntegration` defaults to false |
+| 7eeda73 | tmux `Prefix+f` ran the sessionizer through `run-shell`, which has no TTY, so fzf couldn't start; it uses `display-popup` now |
+| 7eeda73 | `alias cc="cargo check"` shadowed the C compiler; now `ck` |
+| 7eeda73 | Zed's nil formatter called a bare `nixfmt`, which is only on PATH in the devShell |
+| 96cc62b | direnv was hooked twice (system `programs.direnv` and HM); only HM's remains |
+| 96cc62b | `hyprland.lua` still loaded DMS's `outputs.lua`, superseded by the live-apply patch; any file DMS wrote would have overridden `monitors.lua` on reload |
+| 96cc62b | Nix Monitor's icon named "FiraCode Nerd Font", which isn't installed |
+| 96cc62b | `resume-probe.sh` watched hyprlock, removed in 2249eb0; it now records logind's LockedHint and the DMS lock's quickshell process |
+| 02265e7 | framework opened KDE Connect (1714-1764) and Steam Remote Play on every network; KDE Connect is tailnet-only and Remote Play closed on the laptop (`machineType`) |
+| this commit | Docs drift: SHORTCUTS (`z`, scratchpad, lid), PACKAGES (ncspot, sessionizer key), SHELLS (`wake-monitors.sh`), config-comparison (secrets, Secure Boot), TODO (SDDM), README, and the stale cross-references in `logitech.nix` and `lan-mouse.nix` |
 
-### 🟡 B-xorg — xorg deprecation warnings on home-desktop
-`nix flake check` still emits ~9 *"xorg.libX11 has been renamed to libx11"* warnings
-for home-desktop only. They come from a pinned flake input (most likely
-`apollo-flake`, the only home-desktop-only input with a package build), not from this
-repo's modules. Will become hard errors on a future nixpkgs; worth re-pinning or
-raising upstream when apollo-flake updates.
+## 2. Verified on hardware — not bugs
 
----
+Read from code and logs these looked plausible. On 2026-11-05 the user
+confirmed all three work:
 
-## 2. New findings — fixed in this pass
-
-### 🟡 F1 — ✅ FIXED — GUI apps installed on the headless `minimal` host
-`home/max/packages.nix` had no compositor gate, so `minimal` received spotify,
-cheese, qbittorrent, stremio and — worse — **built Wine-GE** on every host, because
-the Lutris runner (`xdg.dataFile."lutris/runners/wine/…"`) was unconditional while
-Lutris only ships with `gaming.nix`. Now: GUI packages gated on
-`compositor != "none"`, the Wine-GE runner gated on `osConfig.programs.steam.enable`
-(the gaming-host signal).
-
-### 🟡 F2 — ✅ FIXED (removed) — Dead workspace fast path in `qs_manager.sh`
-Nothing called `qs_manager.sh <number>` (all workspace switching goes through
-`hl.dsp.focus` binds and the patched Waybar), and the path used classic
-`hyprctl dispatch workspace N` syntax, which this Hyprland's Lua config parser
-silently rejects — dead *and* broken.
-
-### 🟡 F3 — ✅ FIXED (deleted) — Orphaned files
-- `config/hypr-scripts/clipboard-fuzzel.sh` — superseded by `ClipboardPanel.qml`
-  (`Super+V` routes through `qs_manager.sh toggle clipboard`); no callers.
-- `config/wlogout/{layout,style.css}` — wlogout was replaced by `PowerMenu.qml`;
-  nothing installed the package or deployed these files.
-- `waybar-refactor-plan.md` — completed plan for the already-shipped refactor.
-
-### 🟡 F4 — ✅ FIXED (rewritten) — QUICKSHELL.md / WAYBAR.md described the pre-refactor world
-Both docs still documented the deleted Quickshell bottom bar (`Bar.qml`,
-`BarButton.qml`, `Workspaces.qml`, `MediaPlayer.qml`), swaync/wlogout, the old
-`custom/sysinfo` Waybar module set, and bottom-anchored panels. Rewritten to match
-the current two-bar Waybar + tabbed-Settings architecture.
-
-### 🟡 F5 — ✅ FIXED — statix W20 (repeated attribute keys) in four files
-`modules/home/wm/hyprland.nix` (`services`), `hosts/work-laptop/default.nix`
-(`boot`), `hosts/common/optional/productivity.nix` (`programs`, `systemd`),
-`home/max/terminal-toys.nix` (`xdg`). All merged into single blocks. These were
-introduced after the June audit; the CI `lint` job doesn't gate this branch until it
-opens a PR.
-
-### 🔵 F6 — ✅ FIXED — Doc drift (smaller)
-- CLAUDE.md: optional-modules table was missing `stylix.nix` and `fan2go.nix`;
-  `home/max` file list was missing `terminal-toys.nix`; the "Live-editable script"
-  row was wrong (scripts are store symlinks — edits need `git add` + `nixup` +
-  a quickshell restart for QML); theme section now mentions Stylix ownership.
-- TODO.md: claimed work-laptop's `hardware-configuration.nix` was a placeholder —
-  it's real now (ThinkBook, portable USB SSD); only `minimal` remains a placeholder.
-- PACKAGES.md: still listed **Swaync** and **wlogout** (both replaced by Quickshell),
-  and credited `Ctrl+R` to fzf (atuin owns it now; atuin wasn't listed at all).
-- docs/SHORTCUTS.md: tmux split binds documented as `%`/`"` but shell.nix rebinds
-  them to `|`/`-`; sessionizer is `Prefix+f`.
-- README.md: module one-liners updated (atuin, VSCode, kanshi, Stylix split).
-
-### 🔵 F7 — ✅ FIXED — mpv/zathura installed twice
-`productivity.nix` `systemPackages` duplicated `mpv` and `zathura`, which Home
-Manager already installs (with config) via `programs.mpv` / `programs.zathura`.
-System copies removed. (base.nix's CLI overlaps — git/tmux/btop/etc. — are left
-alone deliberately: they keep root and other users functional.)
-
-### 🔵 F8 — ✅ FIXED — `nix fmt` drift in two files
-`home/max/desktop.nix` (one-line attrsets), `modules/home/wm/waybar.nix`. The CI
-nixfmt job would have failed the eventual PR.
+- Fingerprint unlock on the DMS lock screen. fprintd's "Device was already
+  claimed" at each lock is noise.
+- Nix Monitor's rebuild button (`nh os switch` with no terminal).
+- The docked kanshi layout survives `hyprctl reload`, so the reload fallbacks
+  in `dpms.sh` and `gaming-toggle.sh` need no `kanshictl reload` after them.
 
 ---
 
-## 3. Observations (no action taken — deliberate or low value)
+## 3. Open — security
 
-- **`base.nix` battery udev rule** uses `chmod 0666` on
-  `charge_control_end_threshold` — world-writable sysfs. Any local process can set
-  the charge limit. Low impact (it's a charge threshold, bounded by the kernel
-  driver), but `0664` + `GROUP="users"` would be tighter if it ever bothers you.
-- **Commit messages**: 5 of 24 commits on this branch are single-letter (`v`).
-  Same note as last audit — the history is the one place intent can't be
-  reconstructed from the working tree.
-- **`custom.base.fancontrol`** options remain in base.nix although home-desktop now
-  uses fan2go. Kept: the option is generic, documented, and another host could use it.
-- **`nix.gc` vs `programs.nh.clean`** — still on the old-style GC timer; works fine,
-  nh's clean is marginally nicer with nh profiles. Optional.
+### 🔴 S1 — Dead recipients and an unrotated password
+`secrets/common.yaml` is still encrypted to the removed vm key and to the old
+work-laptop key (`age16yfh…`), so either private key decrypts the current
+password hash. The hash that used to be inline is in public git history, and
+the rotation in TODO.md is unconfirmed. On home-desktop, where the admin key
+lives: `sops updatekeys secrets/common.yaml`, then `passwd` and `sops set` the
+new hash.
 
-## 4. Suggestions (unchanged from TODO.md)
+### 🟡 S2 — Broad pre-approvals in a public repo
+`.claude/settings.json` pre-approves `Bash(python3 *)`, `Bash(curl *)`,
+`Bash(nix *)` and `Bash(git *)`, which is arbitrary code and force-pushes
+without a prompt for anyone opening the repo in Claude Code. Narrow it, or
+move personal approvals to the gitignored `settings.local.json`. It also still
+allows `waybar --version`.
 
-1. **Secrets** — agenix or sops-nix for the password hash; rotate afterwards (S1).
-2. **Backups** — restic/borgbackup + systemd timer; syncthing doesn't cover disk failure.
-3. **nixos-hardware for work-laptop** — input is wired and passed as a specialArg;
-   no host consumes it yet.
-4. **GPG commit signing** — `signingkey` hmArg + `programs.gpg` in HM.
+### 🟡 S3 — `apollo-flake` pinned 396 days back
+A network-facing service (`capSysAdmin`, open firewall) on an unmaintained
+pin, and the source of the xorg warnings, which will become errors on a later
+nixpkgs. Check upstream, or nixpkgs' `sunshine` module.
+
+### 🔵 S4 — `input` group
+The user is in `input` (`base.nix`), so any process they run can read raw
+keystrokes. Only `autoclick` (theclicker) needs it; a uaccess udev rule for
+the NuPhy's event node would do instead. Undecided.
+
+### 🔵 S5 — Syncthing on the laptop
+`openDefaultPorts` opens 22000/21027 on every interface. Traffic is
+TLS-authenticated, so the risk is low; since every peer is on the tailnet,
+global discovery and relays could also be turned off.
+
+## 4. Open — bugs
+
+### 🟡 B1 — `gaming-toggle.sh` hardcodes home-desktop's connectors
+`MAIN_MON="DP-3"`, `SEC_MON="DP-2"`. framework imports `gaming.nix`, and on
+its exit path the script renders the portrait cheat sheet onto whatever is
+called DP-2, which on the dock can be a landscape external. Pass the names in
+from Nix the way `PORTRAIT_OUTPUTS` reaches `dms-wallpaper-bridge.sh`. (TODO's
+"Fix game mode" is also open.)
+
+### 🔵 B2 — Activation dry runs write a temp file
+`dms.nix`'s `apply()` runs `$DRY_RUN_CMD jq … > "$file.hm-tmp"`; under a dry
+run the redirect still writes the echoed command to `.hm-tmp`. `$DRY_RUN_CMD`
+is deprecated in Home Manager, and `libreoffice.nix` already uses `run`.
+
+## 5. Open — design
+
+- 🟡 **No backups or snapshots.** The biggest operational gap. The btrfs
+  `@home` subvolume makes btrbk or snapper cheap; restic to B2 can keep its
+  credentials in sops now.
+- 🟡 **Host identity inside shared code.** `dms.nix` checks
+  `hostName == "framework"` twice (lock wallpaper, hidden Dolby output), plus
+  B1's connectors. Make them hmArgs or options.
+- 🟡 **The system monitor pill polls too often.** `BarSystemMonitor.qml` runs
+  `nvtop -s` every 2 s in every bar instance (about 45 ms CPU each, measured):
+  three processes every 2 s on the docked laptop. Share the poll, slow it on
+  laptops, or read the xe sysfs counters directly.
+- 🟡 **CI only evaluates.** The dozens of `--replace-fail` patches to DMS and
+  its plugins only fail at local build time after a flake update. Building
+  just those derivations in CI is cheap (no unfree packages).
+- 🔵 **`mkHost` plumbing.** The `hostName` and `nixos-hardware` specialArgs are
+  read by no module; each host restates `networking.hostName`, and
+  `machineType` is given twice per host (specialArgs and hmArgs).
+- 🔵 **Duplicated settings.** The location is in both `flake.nix` and
+  `clight.nix` ("keep in sync"); `monitors.primary` and `kanshi.internal`
+  describe framework's panel twice.
+- 🔵 **Ignored defaults.** `nvidia ? false` and `kanshi ? {…}` in
+  `home/max/default.nix` are never used by the module system (as
+  `lan-mouse.nix`'s own comment explains).
+- 🔵 **DMS layout settings go nowhere.** DMS writes
+  `~/.config/hypr/dms/{layout,windowrules,cursor}.lua`, which `hyprland.lua`
+  doesn't load, so its gap, rounding and border settings silently do nothing.
+- 🔵 **`max-jobs = mkDefault 1` caps no host.** Both hosts override it, and the
+  "no disk swap" comment is stale. Default to `"auto"`.
+- 🔵 **OpenRGB on the laptop.** Package and udev rules come from
+  `productivity.nix` on both hosts; `services.hardware.openrgb` on
+  home-desktop alone would be the idiomatic form.
+- 🔵 **`claude-code-nix` has no `follows`**, adding another nixpkgs to the lock.
+- 🔵 **`wine-ge-custom` (GE-Proton8-26) is discontinued upstream**; Lutris can
+  use GE-Proton through umu instead.
+
+## 6. Open — style
+
+- `boot = { … }` appears twice in `hosts/framework/default.nix` (statix
+  doesn't flag two).
+- Literal hex for delta's diff tints in `home/max/git.nix`, against the
+  palette rule; add derived surfaces to `palette.nix` like `accentBg`.
+- No-op opacity rules for firefox, chromium and chrome in `hyprland.lua`.
+- Obsolete env vars: `MOZ_ENABLE_WAYLAND`, `QT_AUTO_SCREEN_SCALE_FACTOR`.
+- Declared twice: `wl-clipboard`, `hypridle`, `hardware.graphics.enable32Bit`;
+  `vulkan-loader` in systemPackages does nothing; `nvidia.nix` puts
+  `libva-utils` (a CLI tool) in `extraPackages` despite its comment.
+- `custom.base.fancontrol` options are used by no host.
+- `gaming-toggle.sh` lacks `set -euo pipefail`.
+- `config/sddm/` holds a wallpaper for a removed greeter.
+- Zed's default and commit-message model is still `claude-haiku-4-5`.
+
+## 7. Open — docs
+
+- PACKAGES.md is missing newer additions: Android Studio, WinBoat, LMMS 1.3
+  and Surge XT, snowsql/dbt, the PWAs, onedriver.
+- `hyprland.lua`'s header says `monitors.lua` returns only `primary`; it
+  returns `secondary` too.
 
 ---
 
 ## What's in good shape
 
-The flake evaluates clean for all hosts; CI (flake check, nixfmt, shellcheck,
-statix/deadnix) is in place and the devShell carries the same tools; module layering
-is consistent and every host-specific hack carries a *why* comment; all QML panels
-are referenced and the Settings tab wiring (Settings.qml ⇄ Shell.qml ⇄ qs_manager
-prep) is consistent; scripts are shellcheck-clean; flake inputs are fresh (all
-key inputs < 1 week old). The issues this time were almost entirely doc drift and
-leftovers from the bar refactor — the Nix architecture itself needed nothing
-structural.
+Both hosts evaluate and lint clean, and the running framework system matches
+HEAD. The layering is consistent: import composition for features, one option
+module, and Home Manager gated on the compositor. Nearly every host-specific
+workaround carries a comment explaining why. Secrets are on sops-nix, Secure
+Boot and TPM unlock are on for framework, and inputs are fresh apart from
+`apollo-flake`. The confirmed bugs were all small; the larger risks are
+operational: backups, the password rotation, and the dead sops recipients.

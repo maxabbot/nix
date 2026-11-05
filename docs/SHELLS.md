@@ -45,7 +45,7 @@ move — cover the overview and window switcher.
 Left as upstream: DMS's `dpmsOff`/`dpmsOn` now send
 `hl.dsp.dpms({ action = … })`, but `hl.dsp.dpms` has been seen to ignore its
 argument and toggle. Only DMS's own monitor-off timeouts call them, and those
-are 0 here; hypridle owns blanking (and `config/hypr-scripts/wake-monitors.sh`
+are 0 here; hypridle owns blanking (and `config/hypr-scripts/dpms.sh`
 the absolute "on").
 
 ### Monitor configuration
