@@ -195,7 +195,8 @@
       # files with --replace-fail — the DMS shell (modules/home/wm/dms.nix), its
       # greeter (productivity.nix) and the plugins (dms-plugins.nix). A flake
       # update that rewords a patched line then fails on GitHub instead of at
-      # the next nixup. framework carries every plugin; the local plugin
+      # the next nixup. CI only builds them when one of their inputs changed
+      # (the path list in .github/workflows/ci.yml — keep it in step). framework carries every plugin; the local plugin
       # directories aren't derivations, so there is nothing to build for them.
       checks.${system} =
         let

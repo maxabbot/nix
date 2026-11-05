@@ -21,6 +21,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history, so the change detection below can diff against the
+          # push's previous head or the PR's base.
+          fetch-depth: 0
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v16
@@ -31,10 +35,33 @@ jobs:
       - name: Pre-fetch all flake inputs
         run: nix flake archive --json > /dev/null
 
-      # Evaluates both hosts and builds the `checks` output: the DMS shell,
-      # greeter and plugins, whose --replace-fail patches only fail at build
-      # time (see flake.nix). The hosts themselves aren't built.
-      - name: Run flake checks
+      # The `checks` output (the DMS shell, greeter and plugins, whose
+      # --replace-fail patches only fail at build time; see flake.nix) takes
+      # ~8 minutes to build, so only build it when something it's built from
+      # changed. With no usable base (a new branch, a force-push) build anyway.
+      - name: Did the checks' inputs change?
+        id: changed
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          build=true
+          if git cat-file -e "$BASE^{commit}" 2>/dev/null \
+            && git diff --quiet "$BASE" HEAD -- \
+              flake.nix flake.lock overlays/ \
+              modules/home/wm/dms.nix modules/home/wm/dms-plugins.nix config/dms/ \
+              hosts/common/optional/productivity.nix .github/workflows/ci.yml; then
+            build=false
+          fi
+          echo "build=$build" >>"$GITHUB_OUTPUT"
+          echo "build the checks: $build"
+
+      # Both steps evaluate both hosts; neither builds the hosts themselves.
+      - name: Run flake checks (evaluate only)
+        if: steps.changed.outputs.build != 'true'
+        run: nix flake check --no-build
+
+      - name: Run flake checks (and build the DMS derivations)
+        if: steps.changed.outputs.build == 'true'
         run: nix flake check
 
   nixfmt:
