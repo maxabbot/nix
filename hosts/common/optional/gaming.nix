@@ -77,12 +77,11 @@
     vkbasalt
     vulkan-tools
     vulkan-validation-layers
-    vulkan-loader
     glmark2
   ];
 
+  # 32-bit graphics (hardware.graphics.enable32Bit) come with programs.steam.
   boot.extraModulePackages = [ config.boot.kernelPackages.xpadneo ];
-  hardware.graphics.enable32Bit = true;
   services.udev.packages = [ pkgs.steam ];
 
   boot.kernel.sysctl = {

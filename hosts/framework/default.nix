@@ -125,11 +125,6 @@
     kernel.sysctl."vm.dirty_writeback_centisecs" = 1500;
   };
 
-  # ── Nix builds ───────────────────────────────────────────────────────────────
-  # base.nix caps max-jobs at 1 for the RAM-constrained hosts; 32 GB (30.6 GiB
-  # usable) is comfortable for parallel builds (home-desktop uses "auto" at 62 GiB).
-  nix.settings.max-jobs = "auto";
-
   # ── Fonts ────────────────────────────────────────────────────────────────────
   # Microsoft core fonts (Georgia, Times New Roman, Arial, …) — the CV build's
   # Puppeteer render expects Georgia, same as home-desktop. Merges with

@@ -13,15 +13,11 @@
 // dms-shell.
 //
 // CPU and memory come from dgop via DgopService. The GPU comes from
-// `nvtop -s` (a one-shot JSON snapshot, ~0.2s; nvtop is installed on every
-// host by productivity.nix), polled every 2s. It reads NVIDIA, AMD and Intel
-// alike and needs no root, so laptops get their integrated GPU. With several
-// GPUs the discrete one (NVIDIA/AMD by name) wins, else the first listed.
-// Intel iGPUs report no temperature, so there the segment is just the gauge.
-// If nvtop fails or lists nothing, polling stops and the segment stays hidden.
+// GpuStatsService (config/dms/GpuStatsService.qml): one shared `nvtop -s`
+// poll for every bar, slower on battery. Intel iGPUs report no temperature,
+// so there the segment is just the gauge; if nvtop fails, it stays hidden.
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import qs.Common
 import qs.Modules.Plugins
 import qs.Services
@@ -35,10 +31,10 @@ BasePill {
 
     signal cpuClicked
 
-    property bool gpuAvailable: false
-    property string gpuName: ""
-    property real gpuUsage: 0
-    property real gpuTemp: 0 // 0 = not reported
+    readonly property bool gpuAvailable: GpuStatsService.available
+    readonly property string gpuName: GpuStatsService.name
+    readonly property real gpuUsage: GpuStatsService.usage
+    readonly property real gpuTemp: GpuStatsService.temp // 0 = not reported
 
     readonly property real iconSize: Theme.barIconSize(root.barThickness, undefined, root.barConfig?.maximizeWidgetIcons, root.barConfig?.iconScale)
     readonly property real textSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
@@ -67,45 +63,13 @@ BasePill {
         return s;
     }
 
-    Component.onCompleted: DgopService.addRef(["cpu", "memory", "diskmounts"])
-    Component.onDestruction: DgopService.removeRef(["cpu", "memory", "diskmounts"])
-
-    Process {
-        id: gpuProc
-        command: ["nvtop", "-s"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let gpus = [];
-                try {
-                    gpus = JSON.parse(text);
-                } catch (e) {
-                    return;
-                }
-                if (!Array.isArray(gpus) || gpus.length === 0) {
-                    if (!root.gpuAvailable)
-                        gpuTimer.running = false;
-                    return;
-                }
-                const gpu = gpus.find(g => /NVIDIA|AMD|Radeon/i.test(g.device_name || "")) || gpus[0];
-                root.gpuName = gpu.device_name || "";
-                root.gpuUsage = parseFloat(gpu.gpu_util) || 0;
-                root.gpuTemp = parseFloat(gpu.temp) || 0;
-                root.gpuAvailable = true;
-            }
-        }
-        onExited: exitCode => {
-            if (exitCode !== 0 && !root.gpuAvailable)
-                gpuTimer.running = false;
-        }
+    Component.onCompleted: {
+        DgopService.addRef(["cpu", "memory", "diskmounts"]);
+        GpuStatsService.addRef();
     }
-
-    Timer {
-        id: gpuTimer
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: gpuProc.running = true
+    Component.onDestruction: {
+        DgopService.removeRef(["cpu", "memory", "diskmounts"]);
+        GpuStatsService.removeRef();
     }
 
     // Vertical gauge: a track the height of the icon, filled from the bottom.

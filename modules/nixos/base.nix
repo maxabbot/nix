@@ -302,16 +302,14 @@ in
       ];
       auto-optimise-store = true;
       download-buffer-size = 268435456; # 256 MiB
-      # Cap concurrent builds. These hosts have limited RAM and no disk swap;
-      # unbounded parallelism (max-jobs = auto) lets several heavy C++ builds
-      # run at once and the kernel OOM-killer kills a build → rebuild fails.
-      # One job at a time keeps peak memory bounded (cores = 0 still lets that
-      # single build use every core). mkDefault so a roomier host can raise it.
-      max-jobs = lib.mkDefault 1;
+      # max-jobs stays at NixOS's "auto" (one job per core): both hosts have
+      # the RAM for it (32 and 62 GiB). A small-RAM host should cap it, and
+      # bring `cores` down to match — parallel heavy C++ builds are how the
+      # 16 GB work-laptop hit the OOM killer.
     };
 
     # Compressed RAM swap. Gives memory pressure somewhere to spill during large
-    # rebuilds without a disk partition (works on the portable USB-booted hosts).
+    # rebuilds; on framework it fills before the @swap swapfile does.
     zramSwap.enable = true;
   };
 }

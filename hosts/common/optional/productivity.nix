@@ -192,15 +192,13 @@ in
   hardware.uinput.enable = true;
 
   # ── Wayland session variables ─────────────────────────────────────────────────
-  environment.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
-    MOZ_ENABLE_WAYLAND = "1";
-  };
+  # (Firefox-based browsers default to Wayland, so no MOZ_ENABLE_WAYLAND.)
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  # wl-clipboard comes from base.nix.
   environment.systemPackages = with pkgs; [
     grim
     awww # wallpaper daemon — NOT "swww"
-    wl-clipboard
     nwg-look
     playerctl
     brightnessctl

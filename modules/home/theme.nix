@@ -66,12 +66,10 @@ in
 
     # ── Session variables ─────────────────────────────────────────────────────────
     home.sessionVariables = {
-      QT_AUTO_SCREEN_SCALE_FACTOR = "1";
       QT_QPA_PLATFORM = "wayland;xcb";
       QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
       GDK_SCALE = "1";
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
-      # MOZ_ENABLE_WAYLAND is set system-wide in productivity.nix
       _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 

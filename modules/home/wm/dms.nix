@@ -601,6 +601,10 @@ let
           chmod u+w "$out/share/quickshell/dms/Modules/DankBar/Widgets"
           install -Dm444 ${../../../config/dms/BarSystemMonitor.qml} \
             "$out/share/quickshell/dms/Modules/DankBar/Widgets/CpuMonitor.qml"
+          # Its GPU poll, one shared singleton rather than one per bar.
+          chmod u+w "$out/share/quickshell/dms/Services"
+          install -Dm444 ${../../../config/dms/GpuStatsService.qml} \
+            "$out/share/quickshell/dms/Services/GpuStatsService.qml"
         '';
       });
 

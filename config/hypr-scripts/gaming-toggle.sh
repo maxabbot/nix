@@ -21,9 +21,11 @@
 
 GAMING_STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprland-gaming-mode"
 
-# home-desktop connectors.
-MAIN_MON="DP-3"      # AOC 1440p @ 165
-SEC_MON="DP-2"       # rotated 4K portrait, carries the shortcuts cheat sheet
+# The host's primary (gaming) and secondary connectors, passed by hyprland.lua's
+# Super+Shift+G bind from the Nix-generated monitors.lua. Either can be empty:
+# a host with no secondary, or none pinned as primary.
+MAIN_MON="${1:-}"
+SEC_MON="${2:-}"
 
 # Outputs Hyprland knows about but is not currently driving — i.e. the ones
 # this script disabled. `monitors all` lists disabled outputs, plain `monitors`
@@ -67,14 +69,16 @@ if [ -f "$GAMING_STATE_FILE" ]; then
 
     # awww keeps its per-output images across a disable/enable cycle (a DPMS
     # cycle, by contrast, drops them), so only redress the desktop if something
-    # actually came back bare: leaves on every output, then the portrait
-    # cheat-sheet back over the secondary. Backgrounded — it re-renders through
-    # headless Chrome and shouldn't hold up the toggle.
+    # actually came back bare: the host wallpaper on every output, then the
+    # secondary's own back over it. wallpaper-redress.sh decides what that is
+    # — the host's portrait image, else the cheat-sheet — and leaves a
+    # secondary that isn't rotated alone. Backgrounded — the cheat-sheet can
+    # re-render through headless Chrome and shouldn't hold up the toggle.
     live_count=$(hyprctl monitors -j | jq 'length')
     dressed_count=$(awww query 2>/dev/null | grep -c 'displaying: image:')
     if [ "${dressed_count:-0}" -lt "${live_count:-0}" ]; then
         awww img ~/.config/hypr/wallpaper.png --resize crop --transition-type wipe --transition-fps 60
-        bash ~/.config/hypr/scripts/shortcuts-wallpaper.sh "$SEC_MON" &
+        bash ~/.config/hypr/scripts/wallpaper-redress.sh "$SEC_MON" &
         disown
     fi
 
@@ -83,9 +87,9 @@ if [ -f "$GAMING_STATE_FILE" ]; then
 else
     # Enter gaming mode
 
-    # Resolve the gaming panel. If DP-3 isn't there (cable out, or this script
-    # running on another host) fall back to whatever holds focus — anything
-    # rather than disabling every output and leaving a headless session.
+    # Resolve the gaming panel. If the primary isn't there (cable out, or none
+    # pinned) fall back to whatever holds focus — anything rather than
+    # disabling every output and leaving a headless session.
     target="$MAIN_MON"
     if ! hyprctl monitors -j | jq -e --arg t "$target" 'any(.[]; .name == $t)' >/dev/null; then
         target=$(hyprctl monitors -j | jq -r 'first(.[] | select(.focused) | .name) // empty')

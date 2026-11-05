@@ -48,10 +48,12 @@
     extraPackages = with pkgs; [
       nvidia-vaapi-driver
       libva
-      libva-utils
     ];
     extraPackages32 = with pkgs.pkgsi686Linux; [ libva ];
   };
+
+  # vainfo — should report the nvidia-vaapi-driver backend.
+  environment.systemPackages = [ pkgs.libva-utils ];
 
   boot = {
     # No kernel pin: base.nix's linuxPackages_latest (7.3) is used. The old

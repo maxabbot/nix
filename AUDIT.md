@@ -37,7 +37,10 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 96cc62b | Nix Monitor's icon named "FiraCode Nerd Font", which isn't installed |
 | 96cc62b | `resume-probe.sh` watched hyprlock, removed in 2249eb0; it now records logind's LockedHint and the DMS lock's quickshell process |
 | 02265e7 | framework opened KDE Connect (1714-1764) and Steam Remote Play on every network; KDE Connect is tailnet-only and Remote Play closed on the laptop (`machineType`) |
-| this commit | Docs drift: SHORTCUTS (`z`, scratchpad, lid), PACKAGES (ncspot, sessionizer key), SHELLS (`wake-monitors.sh`), config-comparison (secrets, Secure Boot), TODO (SDDM), README, and the stale cross-references in `logitech.nix` and `lan-mouse.nix` |
+| b475523 | Docs drift: SHORTCUTS (`z`, scratchpad, lid), PACKAGES (ncspot, sessionizer key), SHELLS (`wake-monitors.sh`), config-comparison (secrets, Secure Boot), TODO (SDDM), README, and the stale cross-references in `logitech.nix` and `lan-mouse.nix` |
+| this commit | `gaming-toggle.sh` hardcoded DP-3/DP-2; the bind now passes `monitors.lua`'s connectors. Its exit path also drew the cheat sheet over home-desktop's `wallpaperPortrait` (cave.jpg); it uses `wallpaper-redress.sh`, which picks the right one |
+| this commit | The system monitor pill ran `nvtop -s` every 2 s per bar; one shared `GpuStatsService` singleton now polls, every 10 s on battery and only while a pill is shown |
+| this commit | Cleanups: no-op opacity rules in `hyprland.lua`; `MOZ_ENABLE_WAYLAND` and `QT_AUTO_SCREEN_SCALE_FACTOR`; duplicate `wl-clipboard`, `enable32Bit` and `vulkan-loader`; `libva-utils` moved out of `extraPackages`; `max-jobs` left at NixOS's `"auto"` instead of a cap both hosts overrode |
 
 ## 2. Verified on hardware — not bugs
 
@@ -86,13 +89,6 @@ global discovery and relays could also be turned off.
 
 ## 4. Open — bugs
 
-### 🟡 B1 — `gaming-toggle.sh` hardcodes home-desktop's connectors
-`MAIN_MON="DP-3"`, `SEC_MON="DP-2"`. framework imports `gaming.nix`, and on
-its exit path the script renders the portrait cheat sheet onto whatever is
-called DP-2, which on the dock can be a landscape external. Pass the names in
-from Nix the way `PORTRAIT_OUTPUTS` reaches `dms-wallpaper-bridge.sh`. (TODO's
-"Fix game mode" is also open.)
-
 ### 🔵 B2 — Activation dry runs write a temp file
 `dms.nix`'s `apply()` runs `$DRY_RUN_CMD jq … > "$file.hm-tmp"`; under a dry
 run the redirect still writes the echoed command to `.hm-tmp`. `$DRY_RUN_CMD`
@@ -104,12 +100,8 @@ is deprecated in Home Manager, and `libreoffice.nix` already uses `run`.
   `@home` subvolume makes btrbk or snapper cheap; restic to B2 can keep its
   credentials in sops now.
 - 🟡 **Host identity inside shared code.** `dms.nix` checks
-  `hostName == "framework"` twice (lock wallpaper, hidden Dolby output), plus
-  B1's connectors. Make them hmArgs or options.
-- 🟡 **The system monitor pill polls too often.** `BarSystemMonitor.qml` runs
-  `nvtop -s` every 2 s in every bar instance (about 45 ms CPU each, measured):
-  three processes every 2 s on the docked laptop. Share the poll, slow it on
-  laptops, or read the xe sysfs counters directly.
+  `hostName == "framework"` twice (lock wallpaper, hidden Dolby output). Make
+  them hmArgs or options.
 - 🟡 **CI only evaluates.** The dozens of `--replace-fail` patches to DMS and
   its plugins only fail at local build time after a flake update. Building
   just those derivations in CI is cheap (no unfree packages).
@@ -125,8 +117,6 @@ is deprecated in Home Manager, and `libreoffice.nix` already uses `run`.
 - 🔵 **DMS layout settings go nowhere.** DMS writes
   `~/.config/hypr/dms/{layout,windowrules,cursor}.lua`, which `hyprland.lua`
   doesn't load, so its gap, rounding and border settings silently do nothing.
-- 🔵 **`max-jobs = mkDefault 1` caps no host.** Both hosts override it, and the
-  "no disk swap" comment is stale. Default to `"auto"`.
 - 🔵 **OpenRGB on the laptop.** Package and udev rules come from
   `productivity.nix` on both hosts; `services.hardware.openrgb` on
   home-desktop alone would be the idiomatic form.
@@ -140,13 +130,9 @@ is deprecated in Home Manager, and `libreoffice.nix` already uses `run`.
   doesn't flag two).
 - Literal hex for delta's diff tints in `home/max/git.nix`, against the
   palette rule; add derived surfaces to `palette.nix` like `accentBg`.
-- No-op opacity rules for firefox, chromium and chrome in `hyprland.lua`.
-- Obsolete env vars: `MOZ_ENABLE_WAYLAND`, `QT_AUTO_SCREEN_SCALE_FACTOR`.
-- Declared twice: `wl-clipboard`, `hypridle`, `hardware.graphics.enable32Bit`;
-  `vulkan-loader` in systemPackages does nothing; `nvidia.nix` puts
-  `libva-utils` (a CLI tool) in `extraPackages` despite its comment.
 - `custom.base.fancontrol` options are used by no host.
-- `gaming-toggle.sh` lacks `set -euo pipefail`.
+- `gaming-toggle.sh` lacks `set -euo pipefail`. Adding it needs care: its
+  `grep -c` legitimately exits 1 on zero matches.
 - `config/sddm/` holds a wallpaper for a removed greeter.
 - Zed's default and commit-message model is still `claude-haiku-4-5`.
 

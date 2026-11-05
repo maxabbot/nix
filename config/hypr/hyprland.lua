@@ -340,12 +340,6 @@ local function scratchpadRule(name)
 end
 scratchpadRule("magic")
 
--- Opacity
-hl.window_rule({ match = { class = "firefox" },      opacity = "1.0 override 1.0 override" })
-hl.window_rule({ match = { class = "chromium" },     opacity = "1.0 override 1.0 override" })
-hl.window_rule({ match = { class = "google-chrome" },opacity = "1.0 override 1.0 override" })
-
-
 --------------------
 ---- KEYBINDS ------
 --------------------
@@ -517,7 +511,8 @@ hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),        { locked = tr
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),    { locked = true, description = "Prev track" })
 
 -- Gaming toggle
-hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/gaming-toggle.sh"), { description = "Toggle gaming mode" })
+-- The connectors come from monitors.lua, so the script works on any host.
+hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/gaming-toggle.sh " .. mon.primary .. " " .. mon.secondary), { description = "Toggle gaming mode" })
 
 -- Mouse binds
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
