@@ -162,7 +162,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - **Gamescope** — micro-compositor for resolution scaling / VRR
 - **MangoHud** — in-game performance overlay
 - **Heroic** — GOG / Epic Games launcher
-- **Lutris** — multi-platform game manager
+- **Lutris** — multi-platform game manager; GE-Proton (the Steam build) is offered as a wine version, run through umu
 - **itch** — itch.io client
 - **ProtonUp-Qt** — Proton GE version manager
 - **protontricks** — Winetricks wrapper for Steam games

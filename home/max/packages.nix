@@ -8,9 +8,9 @@
 let
   gui = config.custom.hm.compositor != "none";
   # Lutris ships with gaming.nix, which also enables Steam — use that as the
-  # "gaming host" signal so Wine-GE isn't built on the laptop/headless hosts.
+  # "gaming host" signal so GE-Proton is only pulled in where Lutris is.
   gaming = osConfig.programs.steam.enable;
-  wineGe = pkgs.wine-ge-custom;
+  protonGe = pkgs.proton-ge-bin;
 in
 {
   programs.nix-index = {
@@ -19,8 +19,14 @@ in
   };
   programs.nix-index-database.comma.enable = true;
 
-  # Expose Wine-GE as a Lutris runner — Lutris scans ~/.local/share/lutris/runners/wine/
-  xdg.dataFile."lutris/runners/wine/${wineGe.version}" = lib.mkIf gaming { source = wineGe; };
+  # GE-Proton as a Lutris wine version — nixpkgs' proton-ge-bin, the build
+  # Steam gets from gaming.nix. Lutris lists any directory under
+  # ~/.local/share/lutris/runners/wine/ that holds a `proton` script and runs
+  # it through umu (umu-launcher, gaming.nix). Replaces wine-ge-custom, whose
+  # GE-Proton8-26 was the last Wine-GE release before it was discontinued.
+  xdg.dataFile."lutris/runners/wine/${protonGe.version}" = lib.mkIf gaming {
+    source = protonGe.steamcompattool;
+  };
 
   # Steam's Linux client downloads slowly over HTTP/2 and under-opens connections;
   # these dev-cfg flags (read at startup, needs a full Steam restart) fix both.

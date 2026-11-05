@@ -1,8 +1,6 @@
 # Custom package overlays — add local derivations or override upstream packages.
 # Each attribute is available as pkgs.<name> throughout the entire flake.
 final: prev: {
-  wine-ge-custom = final.callPackage ../pkgs/wine-ge-custom { };
-
   # Rainbow Nix / Framework logo wallpapers rendered from the palette (Limine,
   # the DMS lock).
   gruvbox-wallpapers = final.callPackage ../pkgs/gruvbox-wallpapers { };

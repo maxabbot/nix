@@ -72,6 +72,9 @@
     protontricks
     heroic
     lutris
+    # `umu-run`, which Lutris needs to run Proton builds — the GE-Proton wine
+    # version home/max/packages.nix exposes to it.
+    umu-launcher
     itch
     goverlay
     vkbasalt

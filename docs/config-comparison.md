@@ -63,7 +63,7 @@ This repo's split is shallower than the references — features aren't composabl
 - **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); `framework` uses its platform module
 
 **Only matters with multiple real hosts:**
-- **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) so far
+- **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries small local derivations (the palette wallpapers, claude-account) so far
 
 **Advanced / optional:**
 - **Impermanence** — ephemeral root forces explicit declaration of all persistent state; very clean but requires upfront planning
