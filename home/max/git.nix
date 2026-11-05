@@ -58,6 +58,9 @@ in
 
   programs.delta = {
     enable = true;
+    # Defaults to false since delta moved out of programs.git: without it delta
+    # is only a binary, and git keeps paging through less.
+    enableGitIntegration = true;
     options = {
       navigate = true;
       light = false;

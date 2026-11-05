@@ -266,7 +266,8 @@ in
         "nil" = {
           initialization_options = {
             formatting = {
-              command = [ "nixfmt" ];
+              # Store path: nixfmt is only on PATH inside the devShell.
+              command = [ (lib.getExe pkgs.nixfmt) ];
             };
           };
         };

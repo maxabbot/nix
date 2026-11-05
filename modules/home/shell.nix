@@ -121,7 +121,8 @@ in
         cb = "cargo build";
         cr = "cargo run";
         ct = "cargo test";
-        cc = "cargo check";
+        # ck, not cc: cc is the C compiler
+        ck = "cargo check";
         cu = "cargo update";
 
         # Node / npm
@@ -503,9 +504,9 @@ in
         bind -r K resize-pane -U 5
         bind -r L resize-pane -R 5
 
-        # Sessionizer
-        bind   f run-shell "tmux-sessionizer"
-        bind C-f run-shell "tmux-sessionizer"
+        # Sessionizer — in a popup: run-shell has no TTY, so fzf can't start
+        bind   f display-popup -E "tmux-sessionizer"
+        bind C-f display-popup -E "tmux-sessionizer"
 
         # Reload config
         bind r source-file ${config.xdg.configHome}/tmux/tmux.conf \; display "Config reloaded"
