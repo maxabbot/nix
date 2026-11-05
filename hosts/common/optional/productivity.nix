@@ -27,13 +27,14 @@ let
   });
 
   # The greeter reads a fixed-name override from its data dir; configFiles
-  # copies by basename, so the file has to carry that name. The leaves are the
-  # desktop's default wallpaper too (sharedHmArgs).
+  # copies by basename, so the file has to carry that name. It is the host's
+  # lock-screen background (the lockWallpaper hmArg), so the greeter and the
+  # DMS lock match.
   greeterWallpaper =
     pkgs.runCommand "dms-greeter-wallpaper" { nativeBuildInputs = [ pkgs.imagemagick ]; }
       ''
         mkdir -p $out
-        magick ${../../../config/wallpapers/leaves-wall.png} $out/greeter_wallpaper_override.jpg
+        magick ${config.home-manager.extraSpecialArgs.lockWallpaper} $out/greeter_wallpaper_override.jpg
       '';
 in
 {
