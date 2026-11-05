@@ -59,8 +59,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Native Claude Code binary — updates hourly, ahead of nixpkgs
-    claude-code-nix.url = "github:sadjow/claude-code-nix";
+    # Native Claude Code binary — updates hourly, ahead of nixpkgs. It's the
+    # upstream binary fetched and autoPatchelf'd, so following our unstable
+    # set costs no compiling (and no Cachix is configured here anyway) and
+    # keeps a third nixpkgs out of flake.lock.
+    claude-code-nix = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     # DMS plugin registry — only its nix/default.nix package set is used
     # (pinned revs + hashes per plugin; see modules/home/wm/dms-plugins.nix).

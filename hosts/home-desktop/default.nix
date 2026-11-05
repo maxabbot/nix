@@ -107,6 +107,12 @@
   # DMS brightness slider can drive external-monitor brightness via ddcutil.
   hardware.i2c.enable = true;
 
+  # ── RGB ──────────────────────────────────────────────────────────────────────
+  # OpenRGB for the board/RAM/peripheral lighting: the package plus its udev
+  # rules (device access for the logged-in user). The SMBus devices it drives
+  # sit on the i2c buses enabled above. Desktop-only — the laptop has no RGB.
+  services.udev.packages = [ pkgs.openrgb-with-all-plugins ];
+
   boot = {
     # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ─────────────────────
     # Mainline it87 doesn't support this chip; the out-of-tree driver does.
@@ -147,6 +153,7 @@
   environment.systemPackages = [
     pkgs.sops
     pkgs.age
+    pkgs.openrgb-with-all-plugins # RGB, above
   ];
 
   # networking.hostName comes from mkHost (flake.nix).

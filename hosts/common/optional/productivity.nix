@@ -169,7 +169,6 @@ in
     # ── Flatpak ─────────────────────────────────────────────────────────────────
     flatpak.enable = true;
     # ── Misc services ───────────────────────────────────────────────────────────
-    udev.packages = [ pkgs.openrgb-with-all-plugins ];
     gvfs.enable = true;
     tumbler.enable = true;
   };
@@ -236,7 +235,6 @@ in
       else
         nvtopPackages.intel
     )
-    openrgb-with-all-plugins
     glances
     veracrypt
     kdePackages.qtstyleplugin-kvantum
