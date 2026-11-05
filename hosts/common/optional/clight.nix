@@ -89,12 +89,13 @@
     };
   };
 
-  home-manager.users.${config.custom.base.username}.xdg.configFile."autostart/clight.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Clight
-    Hidden=true
-  '';
+  home-manager.users.${config.custom.base.username}.xdg.configFile."autostart/clight.desktop".text =
+    ''
+      [Desktop Entry]
+      Type=Application
+      Name=Clight
+      Hidden=true
+    '';
 
   # Clight's day/night timing (capture intervals) — and its module asserts on
   # these. Christchurch, as `location` in flake.nix sharedHmArgs (gammastep's);
