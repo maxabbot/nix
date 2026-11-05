@@ -37,16 +37,25 @@ let
       [[ ''${#ifaces[@]} -gt 0 ]] || exit 0
 
       # iwd drops scan results nl80211 would otherwise keep, so ask it for a
-      # fresh scan and read the cache straight after. "Already scanning" and
+      # fresh scan and read the cache while it's full. "Already scanning" and
       # "radio off" both fail here harmlessly.
       for i in "''${ifaces[@]}"; do
         iwctl station "$i" scan >/dev/null 2>&1 || true
       done
-      sleep 5
 
-      aps=$(for i in "''${ifaces[@]}"; do iw dev "$i" scan dump; done |
-        awk '/^BSS / { b = substr($2, 1, 17) } /signal:/ { printf "%s %d\n", b, $2 }' |
-        sort -u)
+      # The full result set (~30 APs in town) only lasts ~3-4 s before iwd
+      # flushes the kernel cache down to its own few BSSes; a single read after
+      # a fixed sleep landed after the flush, BeaconDB 404'd on the leftovers,
+      # and the fix was deleted. So sample across the window and keep every AP
+      # seen (strongest reading per BSSID).
+      aps=$(for _ in $(seq 12); do
+          sleep 0.5
+          for i in "''${ifaces[@]}"; do iw dev "$i" scan dump; done
+        done |
+        awk '/^BSS / { b = substr($2, 1, 17) }
+             /signal:/ { s = int($2); if (!(b in m) || s > m[b]) m[b] = s }
+             END { for (b in m) printf "%s %d\n", b, m[b] }' |
+        sort)
       # BeaconDB needs two or more APs; fewer is wifi off, not "somewhere new".
       [[ $(grep -c . <<<"$aps") -ge 2 ]] || exit 0
 
