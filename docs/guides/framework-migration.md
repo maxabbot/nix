@@ -245,11 +245,20 @@ user. It should work, since the guest is plain Windows 11, but it's untested.
 - **Storage on btrfs:** make the install folder and `chattr +C` it **before**
   WinBoat creates the disk image (it only applies to new files). Otherwise the
   image fragments badly under copy-on-write. Offline dedup won't help either.
-- **Home share:** WinBoat mounts the Linux home into the guest. Keep the Power
-  BI repo (PBIR/TMDL) on the guest's own disk and sync through git; working
-  over the share is slow, and file watching and Desktop's reload are flaky.
+- **Shared folder:** WinBoat can mount the whole Linux home into the guest,
+  but that hands Windows `~/.ssh`, browser profiles and `~/SyncDrive`, so
+  setup left it off. Instead (2026-11-05, works) a dedicated `~/WinShare` is
+  mounted as the container's `/shared`: one line under `volumes:` in
+  `~/.winboat/podman-compose.yml` (`- /home/max/WinShare:/shared`), then
+  recreate the container as for the USB fix. The guest sees it at
+  `\\host.lan\Data`. The container's Samba writes files `0666` and folders
+  `2777` owned by the mapped UID (`100999` on the host), so they stay editable
+  from Linux despite the odd owner. It's for copying in and out: keep the
+  Power BI repo (PBIR/TMDL) on the guest's own disk and sync through git, since
+  working over the share is slow and file watching and Desktop's reload are
+  flaky. WinBoat drops the line if it regenerates the compose file.
 - **Claude Code:** to edit report files and have `pbi-cli` connect to the
-  model, run both inside the guest. Claude Code on Linux against the share
+  model, run both inside the guest. Claude Code on Linux against `~/WinShare`
   only suits the PBIR file-editing part.
 - **Network:** SQL Server, Snowflake and VPN access follow the guest's network,
   so the VPN client or Tailscale may need installing inside it.
