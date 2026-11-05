@@ -13,6 +13,7 @@
 {
   imports = [
     ../../modules/home/default.nix
+    ./claude.nix
     ./git.nix
     ./cli.nix
     ./desktop.nix
