@@ -5,15 +5,16 @@
   ...
 }:
 let
+  renderTheme = import ../../config/stylix/palette-subst.nix { inherit lib; };
+
   statusline = pkgs.writeShellApplication {
     name = "claude-statusline";
     runtimeInputs = [
       pkgs.jq
       pkgs.git
       pkgs.coreutils
-      pkgs.gnugrep
     ];
-    text = builtins.readFile ../../config/claude/statusline.sh;
+    text = renderTheme ../../config/claude/statusline.sh;
   };
 
   declared = pkgs.writeText "claude-settings-declared.json" (
