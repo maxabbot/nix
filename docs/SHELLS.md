@@ -69,12 +69,27 @@ edit `hyprland.lua`, is hidden. Lasting changes belong in
 
 ### Compositor layout settings
 
-The same goes for DMS's other Hyprland pages: gaps, rounding and border
-width (Settings → Compositor), its window rules and the cursor write
-`~/.config/hypr/dms/{layout,windowrules,cursor}.lua`, which `hyprland.lua`
-doesn't load either. Unlike the Displays page these aren't patched to apply
-live, so changing them does nothing; `hyprland.lua` owns them (gaps 5/10,
-rounding 10, border 2).
+Settings → Compositor → Hyprland Layout Overrides had the same problem as
+the Displays page, plus a side effect: upstream writes
+`~/.config/hypr/dms/layout.lua`, which `hyprland.lua` never loads, then runs
+`hyprctl reload`. The page changed nothing, and every regeneration (any
+change to the bar's spacing, the corner radius or the page's settings — 13
+on framework on 2026-11-05) reloaded Hyprland, dropping session-only state
+such as the Displays page's live changes.
+
+`dms.nix` patches `HyprlandService.qml` so only explicit overrides apply,
+live over `hyprctl eval`: Custom gaps, the radius and border-size toggles,
+and resize-on-border. Auto and Off keep `hyprland.lua`'s values (gaps 5/10,
+rounding 10, border 2), and with no overrides set DMS no longer touches
+Hyprland at all. Turning an override off reloads once to restore
+`hyprland.lua`'s value. Like the Displays page it's session-only; DMS
+re-applies overrides when it next starts. The two Xray toggles are hidden:
+their layer rules can't be undone live, and `hyprland.lua` owns the `dms:*`
+blur rules.
+
+DMS's window rules and cursor pages still write
+`~/.config/hypr/dms/{windowrules,cursor}.lua`, which nothing loads, so those
+do nothing.
 
 ### NixOS
 

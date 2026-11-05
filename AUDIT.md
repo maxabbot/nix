@@ -45,7 +45,8 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 6c3e2ce | CI builds the checks only when a file they're built from changed; other pushes evaluate only |
 | ce41270 | Output-neutral refactor (both toplevels byte-identical): `dms.nix`'s `hostName == "framework"` checks became the `lockWallpaper` hmArg and `custom.hm.dms.hiddenOutputs`; `mkHost` sets `networking.hostName` and forwards `machineType`, dropping the unused specialArgs; one `location` in `base.nix` for Clight and gammastep; kanshi's internal panel defaults from `monitors.primary`; ignored `? defaults` and the unused `custom.base.fancontrol` removed |
 | 9e633e2 | OpenRGB on home-desktop only; `claude-code-nix` follows `nixpkgs-unstable` (one fewer nixpkgs in the lock) |
-| this commit | HM activation uses `run` instead of the deprecated `$DRY_RUN_CMD`, and a dry run no longer writes `.hm-tmp` files (B2). Style: framework's second `boot` block, delta's literal hex (now palette `diffAddBg`/`diffDelBg`), `config/sddm/` (wallpaper moved to `config/wallpapers/`), `hyprland.lua`'s header. Docs: PACKAGES.md's missing apps, SHELLS.md on DMS's layout pages |
+| 20b1f9f | HM activation uses `run` instead of the deprecated `$DRY_RUN_CMD`, and a dry run no longer writes `.hm-tmp` files (B2). Style: framework's second `boot` block, delta's literal hex (now palette `diffAddBg`/`diffDelBg`), `config/sddm/` (wallpaper moved to `config/wallpapers/`), `hyprland.lua`'s header. Docs: PACKAGES.md's missing apps, SHELLS.md on DMS's layout pages |
+| this commit | DMS's Hyprland Layout Overrides wrote an unloaded `layout.lua` and ran `hyprctl reload` on every regeneration (13 on 2026-11-05), dropping live session state. Explicit overrides now apply live over `hyprctl eval`; Auto/Off keep `hyprland.lua`'s values, and with none set DMS no longer reloads Hyprland. The unusable Xray toggles are hidden |
 
 ## 2. Verified on hardware — not bugs
 
@@ -101,11 +102,9 @@ None known.
 - 🟡 **No backups or snapshots.** The biggest operational gap. The btrfs
   `@home` subvolume makes btrbk or snapper cheap; restic to B2 can keep its
   credentials in sops now.
-- 🔵 **DMS layout settings go nowhere.** DMS writes
-  `~/.config/hypr/dms/{layout,windowrules,cursor}.lua`, which `hyprland.lua`
-  doesn't load, so its gap, rounding and border settings do nothing.
-  Documented in docs/SHELLS.md; patching them to apply live, as the Displays
-  page is, would be the fix.
+- 🔵 **DMS's window-rules and cursor pages go nowhere.** They write
+  `~/.config/hypr/dms/{windowrules,cursor}.lua`, which nothing loads
+  (docs/SHELLS.md). The layout page now applies live; these could follow.
 - 🔵 **`wine-ge-custom` (GE-Proton8-26) is discontinued upstream**; Lutris can
   use GE-Proton through umu instead.
 

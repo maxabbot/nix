@@ -252,6 +252,113 @@ let
           from = "    visible: (showLegacy || showSetup) && DisplayConfigState.hasOutputBackend && !DisplayConfigState.checkingInclude\n";
           to = "    visible: false\n";
         }
+      ]
+      # Not a dispatch fix: the Compositor tab's Hyprland Layout Overrides, the
+      # same story as the Displays page. Upstream writes
+      # ~/.config/hypr/dms/layout.lua, which hyprland.lua never loads, and then
+      # runs `hyprctl reload` — so the page changed nothing, and every
+      # regeneration (bar spacing, corner radius, startup) reloaded Hyprland
+      # and dropped the session's live state, the Displays page's included.
+      # Now only explicit overrides (Custom gaps, the radius and border
+      # toggles, resize-on-border) apply, live over `hyprctl eval`; Auto and Off
+      # keep hyprland.lua's values. Turning an override off reloads once to
+      # restore them. Session-only, like the Displays page. The Xray toggles
+      # are hidden: their layer rules can't be undone live, and hyprland.lua
+      # owns the dms:* blur rules.
+      ++ (
+        let
+          hs = "share/quickshell/dms/Services/HyprlandService.qml";
+          tab = "share/quickshell/dms/Modules/Settings/CompositorLayoutTab.qml";
+          # '' strings drop their common indent; the service's members sit at 4.
+          indent =
+            s:
+            lib.concatMapStringsSep "\n" (l: lib.optionalString (l != "") "    ${l}") (lib.splitString "\n" s);
+        in
+        [
+          {
+            file = hs;
+            from = "    function doGenerateLayoutConfig() {\n";
+            to = indent ''
+              property var _liveLayoutApplied: ({})
+
+              function applyLayoutLive(requestRevision) {
+                  const finish = () => {
+                      _layoutAppliedRevision = Math.max(_layoutAppliedRevision, requestRevision);
+                      layoutGenerationRunning = false;
+                      if (layoutGenerationPending)
+                          layoutGenerationAction.schedule();
+                  };
+                  if (typeof SettingsData === "undefined") {
+                      finish();
+                      return;
+                  }
+                  const applied = {};
+                  if (SettingsData.hyprlandLayoutGapsOverride >= 0) {
+                      applied.gaps_in = SettingsData.hyprlandLayoutGapsOverride;
+                      applied.gaps_out = SettingsData.hyprlandLayoutGapsOutOverride >= 0 ? SettingsData.hyprlandLayoutGapsOutOverride : SettingsData.hyprlandLayoutGapsOverride;
+                  }
+                  if (SettingsData.hyprlandLayoutBorderSize >= 0)
+                      applied.border_size = SettingsData.hyprlandLayoutBorderSize;
+                  if (SettingsData.hyprlandResizeOnBorder)
+                      applied.resize_on_border = true;
+                  if (SettingsData.hyprlandLayoutRadiusOverride >= 0)
+                      applied.rounding = SettingsData.hyprlandLayoutRadiusOverride;
+                  const dropped = Object.keys(_liveLayoutApplied).some(k => !(k in applied));
+                  _liveLayoutApplied = applied;
+
+                  const general = ["gaps_in", "gaps_out", "border_size", "resize_on_border"].filter(k => k in applied).map(k => k + " = " + applied[k]);
+                  const decoration = "rounding" in applied ? ["rounding = " + applied.rounding] : [];
+                  const apply = () => {
+                      if (general.length === 0 && decoration.length === 0) {
+                          finish();
+                          return;
+                      }
+                      const lua = "hl.config({ general = { " + general.join(", ") + " }, decoration = { " + decoration.join(", ") + " } })";
+                      Proc.runCommand("hypr-live-layout", ["hyprctl", "eval", lua], (output, exitCode) => {
+                          if (exitCode !== 0)
+                              log.warn("Live layout apply failed:", output);
+                          finish();
+                      });
+                  };
+                  if (dropped)
+                      reloadConfig(() => apply());
+                  else
+                      apply();
+              }
+
+              function doGenerateLayoutConfig() {
+            '';
+          }
+          {
+            # Hand over before the layout.lua write; the rest of the function
+            # is left in place but no longer reached.
+            file = hs;
+            from = "        layoutGenerationRunning = true;\n";
+            to = "        layoutGenerationRunning = true;\n        applyLayoutLive(requestRevision);\n        return;\n";
+          }
+          {
+            file = tab;
+            from = ''description: I18n.tr("Auto matches bar spacing; Off leaves gaps to your %1 config").arg("Hyprland")'';
+            to = ''description: "Custom applies live for this session; Auto and Off keep hyprland.lua's gaps"'';
+          }
+          {
+            file = tab;
+            from = ''title: I18n.tr("%1 Layout Overrides").arg("Hyprland")'';
+            to = ''title: I18n.tr("%1 Layout Overrides").arg("Hyprland") + " (this session)"'';
+          }
+          {
+            file = tab;
+            from = "                    visible: CompositorService.isHyprland\n                    tags: [\"hyprland\", \"xray\", \"blur\", \"background-effect\", \"performance\"]\n";
+            to = "                    visible: false\n                    tags: [\"hyprland\", \"xray\", \"blur\", \"background-effect\", \"performance\"]\n";
+          }
+          {
+            file = tab;
+            from = "                    visible: CompositorService.isHyprland && !SettingsData.connectedFrameModeActive\n";
+            to = "                    visible: false\n";
+          }
+        ]
+      )
+      ++ [
         {
           # Not a dispatch fix: album art in the bar's media pill. Upstream
           # shows only a cava visualiser (or a note) before the title; the
