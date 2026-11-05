@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  machineType,
   ...
 }:
 let
@@ -50,11 +51,30 @@ in
       withUWSM = true;
       xwayland.enable = true;
     };
-
-    # KDE Connect — phone integration (daemon + firewall ports 1714-1764).
-    # Surfaced on the DMS bar and control centre by the dankKDEConnect plugin.
-    kdeconnect.enable = true;
   };
+
+  # ── KDE Connect ───────────────────────────────────────────────────────────────
+  # Phone integration, surfaced on the DMS bar and control centre by the
+  # dankKDEConnect plugin; lan-mouse's clipboard hand-off rides on it too.
+  # Installed below rather than with programs.kdeconnect, which opens 1714-1764
+  # on every interface with no way to scope it. The desktop keeps them open
+  # for LAN discovery. A laptop joins networks that aren't ours, so there they
+  # are open on the tailnet only — and since broadcast discovery doesn't cross
+  # Tailscale, its peers are added once by tailnet IP (KDE Connect → Add
+  # devices by IP, on either side).
+  networking.firewall =
+    let
+      kdeConnect = {
+        allowedTCPPortRanges = [
+          {
+            from = 1714;
+            to = 1764;
+          }
+        ];
+        allowedUDPPortRanges = kdeConnect.allowedTCPPortRanges;
+      };
+    in
+    if machineType == "laptop" then { interfaces.tailscale0 = kdeConnect; } else kdeConnect;
 
   services = {
     # ── Display manager (DMS greeter on greetd) ────────────────────────────────
@@ -224,6 +244,7 @@ in
     kdePackages.qtstyleplugin-kvantum
     papirus-icon-theme
     quickshell # DMS's runtime — `dms run` finds it on PATH
+    kdePackages.kdeconnect-kde # firewall above
     theclicker # autoclicker CLI (x11/wayland, evdev/uinput); wrapped as `autoclick`
   ];
 

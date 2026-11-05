@@ -1,9 +1,17 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  machineType,
+  ...
+}:
 {
   programs = {
     steam = {
       enable = true;
-      remotePlay.openFirewall = true;
+      # Hosting Remote Play needs its ports open, which is fine on the desktop's
+      # home LAN but not on a laptop that joins any network in front of it. The
+      # laptop streams from home-desktop with Moonlight (moonlight.nix) instead.
+      remotePlay.openFirewall = machineType != "laptop";
       dedicatedServer.openFirewall = false;
       gamescopeSession.enable = true;
       extraCompatPackages = [ pkgs.proton-ge-bin ];

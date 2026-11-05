@@ -36,8 +36,8 @@
             hostname = lanMouse.peer;
             activate_on_startup = lanMouse.activateOnStartup or false;
             # Clipboard hand-off: when the cursor crosses to the peer, push this
-            # machine's clipboard to it over KDE Connect (paired via
-            # productivity.nix's programs.kdeconnect; device name = hostname).
+            # machine's clipboard to it over KDE Connect (productivity.nix —
+            # tailnet-only on the laptop; device name = hostname).
             # Fails soft (logged by the daemon) if the peer isn't paired yet.
             enter_hook = "${lib.getExe' pkgs.kdePackages.kdeconnect-kde "kdeconnect-cli"} --send-clipboard --name ${lanMouse.peer}";
           }

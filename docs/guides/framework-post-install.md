@@ -216,6 +216,9 @@ journalctl --user -b -u kanshi | tail -5
 
 ```bash
 sudo iptables -S nixos-fw | grep 4242      # on both machines
+# framework's KDE Connect ports are tailnet-only, and LAN discovery can't
+# reach them: first add home-desktop by IP (KDE Connect → Add devices by IP →
+# 100.111.189.79), then pair
 kdeconnect-cli --pair -n home-desktop      # accept the request on home-desktop
 kdeconnect-cli -l
 systemctl --user status lan-mouse
