@@ -44,6 +44,7 @@ in
       nix-diff
       nixpkgs-review
       nil
+      android-tools # adb/fastboot — USB access via systemd uaccess, no group needed
 
       # ── Data wrangling (CSV/JSON/parquet reconciliation, statement parsing) ──────
       visidata # interactive TUI table explorer (CSV/JSON/xlsx/parquet)
