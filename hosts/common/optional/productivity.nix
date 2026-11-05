@@ -112,7 +112,9 @@ in
     # DMS's auto-location asks GeoClue2 first and falls back to ip-api.com,
     # which times out from some networks — then the weather widget never
     # loads. GeoClue locates by nearby wifi APs (BeaconDB), which also follows
-    # a laptop between cities, with an IP lookup as its own fallback.
+    # a laptop between cities, with an IP lookup as its own fallback. That wifi
+    # source needs wpa_supplicant: iwd hosts import geoclue-iwd.nix, and a
+    # host without wifi pins enableStatic (home-desktop).
     geoclue2.enable = true;
     # ── Syncthing ───────────────────────────────────────────────────────────────
     syncthing = {

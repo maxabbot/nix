@@ -156,6 +156,18 @@
     pkgs.openrgb-with-all-plugins # RGB, above
   ];
 
+  # ── Location ─────────────────────────────────────────────────────────────────
+  # Wired, and Spark's GeoIP says Auckland, so GeoClue (DMS's auto-located
+  # weather, gammastep) gets a fixed Christchurch instead — city centre, which
+  # is all the weather needs. The laptop locates by wifi (geoclue-iwd.nix).
+  services.geoclue2 = {
+    enableStatic = true;
+    staticLatitude = -43.532;
+    staticLongitude = 172.636;
+    staticAltitude = 10.0;
+    staticAccuracy = 5000.0;
+  };
+
   # networking.hostName comes from mkHost (flake.nix).
 
   system.stateVersion = "24.11";

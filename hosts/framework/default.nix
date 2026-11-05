@@ -42,6 +42,7 @@
     ../common/optional/clight.nix
     ../common/optional/moonlight.nix
     ../common/optional/tailscale.nix
+    ../common/optional/geoclue-iwd.nix
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
     ../common/optional/sops.nix
