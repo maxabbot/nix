@@ -356,6 +356,79 @@ let
             from = "                    visible: CompositorService.isHyprland && !SettingsData.connectedFrameModeActive\n";
             to = "                    visible: false\n";
           }
+          # The cursor page (Settings → Theme & Colors → Cursor) had the same
+          # write-a-file-nobody-loads-then-reload shape. Its theme and size
+          # are Stylix's (the session's XCURSOR_*) and its hide options would
+          # be hyprland.lua's, so it follows the layout page: explicit
+          # settings apply live — a theme or size through `hyprctl setcursor`,
+          # the hide options through `hyprctl eval` — and going back to the
+          # defaults restores the session's cursor, reloading only when a hide
+          # option is turned off.
+          {
+            file = hs;
+            from = "    function generateCursorConfig() {\n";
+            to = indent ''
+              property var _liveCursorApplied: ({})
+              property string _liveCursorTheme: ""
+
+              function applyCursorLive() {
+                  const s = typeof SettingsData !== "undefined" ? SettingsData.cursorSettings : null;
+                  const custom = s && s.theme && s.theme !== "System Default" ? s.theme : "";
+                  const size = (s && s.size) || 24;
+                  const sessionTheme = Quickshell.env("XCURSOR_THEME") || "";
+                  const sessionSize = Quickshell.env("XCURSOR_SIZE") || "24";
+                  // "" while the session's own cursor is in effect.
+                  const themeKey = custom || size !== 24 ? (custom || sessionTheme) + ":" + size : "";
+                  const cursor = {};
+                  const h = s && s.hyprland;
+                  if (h && h.hideOnKeyPress)
+                      cursor.hide_on_key_press = true;
+                  if (h && h.hideOnTouch)
+                      cursor.hide_on_touch = true;
+                  if (h && h.inactiveTimeout > 0)
+                      cursor.inactive_timeout = h.inactiveTimeout;
+                  const dropped = Object.keys(_liveCursorApplied).some(k => !(k in cursor));
+                  const themeChanged = themeKey !== _liveCursorTheme;
+                  _liveCursorApplied = cursor;
+                  _liveCursorTheme = themeKey;
+
+                  const setTheme = () => {
+                      const name = themeKey ? (custom || sessionTheme) : sessionTheme;
+                      if (name)
+                          Proc.runCommand("hyprctl-setcursor", ["hyprctl", "setcursor", name, themeKey ? String(size) : sessionSize], () => {});
+                  };
+                  const apply = () => {
+                      const keys = Object.keys(cursor);
+                      if (keys.length === 0)
+                          return;
+                      const lua = "hl.config({ cursor = { " + keys.map(k => k + " = " + cursor[k]).join(", ") + " } })";
+                      Proc.runCommand("hypr-live-cursor", ["hyprctl", "eval", lua], (output, exitCode) => {
+                          if (exitCode !== 0)
+                              log.warn("Live cursor apply failed:", output);
+                      });
+                  };
+                  if (dropped) {
+                      reloadConfig(() => {
+                          apply();
+                          if (themeKey)
+                              setTheme();
+                      });
+                  } else {
+                      apply();
+                      if (themeChanged)
+                          setTheme();
+                  }
+              }
+
+              function generateCursorConfig() {
+            '';
+          }
+          {
+            # Hand over before the cursor.lua write.
+            file = hs;
+            from = "        if (!canWriteLuaConfig(\"cursor\"))\n            return;\n";
+            to = "        if (!canWriteLuaConfig(\"cursor\"))\n            return;\n        applyCursorLive();\n        return;\n";
+          }
         ]
       )
       ++ [

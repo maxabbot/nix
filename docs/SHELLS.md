@@ -87,9 +87,19 @@ re-applies overrides when it next starts. The two Xray toggles are hidden:
 their layer rules can't be undone live, and `hyprland.lua` owns the `dms:*`
 blur rules.
 
-DMS's window rules and cursor pages still write
-`~/.config/hypr/dms/{windowrules,cursor}.lua`, which nothing loads, so those
-do nothing.
+The cursor page (Theme & Colors → Cursor) had the same write-then-reload
+shape over a `cursor.lua` nothing loaded, and gets the same treatment: an
+explicit theme or size applies through `hyprctl setcursor`, the hide options
+(on key press, on touch, after inactivity) through `hyprctl eval`, and going
+back to the defaults restores the session's (Stylix's) cursor. Session-only.
+
+The Window Rules page is different. Its rules are additions, not values
+something in Nix declares, so `hyprland.lua` loads
+`~/.config/hypr/dms/windowrules.lua`, after its own rules so DMS's win. The
+require is wrapped (`pcall(function() require("dms.windowrules") end)`): the
+file doesn't exist until DMS first runs, after Hyprland, and DMS's page greps
+for the literal `require("dms.windowrules")` to report the rules as active.
+DMS ships one rule there by default, which floats every DMS window.
 
 ### NixOS
 

@@ -341,6 +341,15 @@ local function scratchpadRule(name)
 end
 scratchpadRule("magic")
 
+-- Rules added in DMS (Settings → Window Rules), kept in
+-- ~/.config/hypr/dms/windowrules.lua. Unlike DMS's outputs/layout files these
+-- are additions nothing here declares, so they're loaded — after the rules
+-- above, so they win. pcall, because the file is absent until DMS first runs
+-- (Hyprland starts before it) and a broken one mustn't take the config down;
+-- wrapped in a function so the literal require("dms.windowrules") is there for
+-- DMS's page, which greps for it to report the rules as loaded.
+pcall(function() require("dms.windowrules") end)
+
 --------------------
 ---- KEYBINDS ------
 --------------------
