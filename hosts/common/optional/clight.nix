@@ -97,11 +97,6 @@
       Hidden=true
     '';
 
-  # Clight's day/night timing (capture intervals) — and its module asserts on
-  # these. Christchurch, as `location` in flake.nix sharedHmArgs (gammastep's);
-  # keep the two in sync.
-  location = {
-    latitude = -43.53;
-    longitude = 172.64;
-  };
+  # Clight's day/night timing (capture intervals) reads the system `location`,
+  # set once in base.nix — its module asserts on it.
 }

@@ -22,6 +22,13 @@ let
 
   hasDocked = k.docked.left != null && k.docked.right != null;
 
+  # The internal panel defaults to the host's monitors.primary string
+  # ("NAME,MODE,POSITION,SCALE"), so "undocked" matches the static Hyprland
+  # declaration and the panel is only described once.
+  primary = map lib.strings.trim (lib.splitString "," cfg.monitors.primary);
+  fromPrimary =
+    n: fallback: if cfg.monitors.primary != null then builtins.elemAt primary n else fallback;
+
   externals = [
     {
       criteria = k.docked.left;
@@ -46,17 +53,21 @@ in
     internal = {
       output = lib.mkOption {
         type = lib.types.str;
-        default = "eDP-1";
+        default = fromPrimary 0 "eDP-1";
+        defaultText = lib.literalMD "the connector in `custom.hm.monitors.primary`, else `eDP-1`";
         description = "Connector name of the laptop's internal display.";
       };
       mode = lib.mkOption {
         type = lib.types.str;
-        default = "1920x1200@60";
+        default = fromPrimary 1 "1920x1200@60";
+        defaultText = lib.literalMD "the mode in `custom.hm.monitors.primary`, else `1920x1200@60`";
         description = "Mode string for the internal display.";
       };
       scale = lib.mkOption {
         type = lib.types.float;
-        default = 1.0;
+        # + 0.0: monitors strings write integral scales as "2", and the type is float.
+        default = builtins.fromJSON (fromPrimary 3 "1") + 0.0;
+        defaultText = lib.literalMD "the scale in `custom.hm.monitors.primary`, else `1.0`";
       };
     };
 

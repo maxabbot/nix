@@ -36,13 +36,6 @@ let
       ;
   };
 
-  # Lock screen background: the rainbow Nix snowflake the Limine menu shows,
-  # or on framework the Framework gear done the same way. Both rendered from
-  # the palette (pkgs/gruvbox-wallpapers).
-  lockWallpaper = "${pkgs.gruvbox-wallpapers}/rainbow-${
-    if osConfig.networking.hostName == "framework" then "framework" else "nix"
-  }.png";
-
   # Scripts here are deployed 0444 (see hyprland.nix), so invoke them through
   # bash rather than exec'ing directly — a direct exec dies with 126.
   scriptsDir = "${config.home.homeDirectory}/.config/hypr/scripts";
@@ -744,7 +737,7 @@ let
       # `loginctl lock-session` (Super+L, hypridle, before sleep) is the one
       # way in. The wallpaper is lock-only; the desktop's stays awww's.
       loginctlLockIntegration = true;
-      lockScreenWallpaperPath = lockWallpaper;
+      lockScreenWallpaperPath = cfg.lockWallpaper;
       lockScreenWallpaperFillMode = "Fill";
       # Finger and password side by side: DMS runs its own fprintd PAM stack
       # in parallel with the password one (/etc/pam.d/dankshell, which has
@@ -760,14 +753,8 @@ let
       "darkMode"
       "nightMode"
     ];
-    # Output-picker entries to hide, unioned into SessionData's own list so
-    # devices hidden in the GUI stay hidden. DMS lists every Audio/Sink node,
-    # so a WirePlumber smart filter's input shows up beside the card it feeds
-    # (hosts/framework/default.nix); picking it would move the volume keys off
-    # the card onto the filter.
-    hiddenOutputs = lib.optional (
-      osConfig.networking.hostName == "framework"
-    ) "effect_input.Dolby_Balanced";
+    # Output-picker entries to hide (custom.hm.dms.hiddenOutputs, below).
+    inherit (cfg.dms) hiddenOutputs;
     # Plugin tiles appended when missing — only on hosts with the plugin.
     # Once there, their width and other per-tile settings are DMS's to keep.
     controlCenterAdd =
@@ -890,6 +877,26 @@ let
   };
 in
 {
+  options.custom.hm = {
+    lockWallpaper = lib.mkOption {
+      type = lib.types.path;
+      description = "DMS lock-screen background. Set per host through the `lockWallpaper` hmArg (default in sharedHmArgs, flake.nix).";
+    };
+
+    dms.hiddenOutputs = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Audio sink node names to hide from DMS's output picker, unioned into
+        its session.json list so devices hidden in the GUI stay hidden. DMS
+        lists every Audio/Sink node, so a WirePlumber smart filter's input
+        shows up beside the card it feeds; picking it would move the volume
+        keys off the card onto the filter. Set by the host that defines the
+        filter, next to it.
+      '';
+    };
+  };
+
   config = lib.mkIf (cfg.compositor == "hyprland") {
     home.packages = [
       dms-shell

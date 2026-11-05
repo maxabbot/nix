@@ -8,7 +8,12 @@
 # fprintd, acpilight, the headphone-noise and Ethernet-card udev rules — comes
 # from nixos-hardware's `framework-intel-core-ultra-series3` module, imported
 # from flake.nix alongside disko. Don't restate any of it here.
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ./hardware-configuration.nix
@@ -270,7 +275,8 @@
     # The conf is the generator's output unchanged, bar the @irs@ placeholder:
     # a WirePlumber smart filter, always on for the built-in analog sink, so
     # volume keys still drive the card itself. Its input node is still an
-    # Audio/Sink, so DMS would list it as a second output; dms.nix hides it.
+    # Audio/Sink, so DMS would list it as a second output; it's hidden from
+    # DMS's output picker just after this block.
     # HDMI, USB and Bluetooth bypass it; the headphone jack doesn't (it's a port
     # on the same sink), so wired headphones get the speaker EQ too. It can't
     # be bypassed at runtime — PipeWire won't let a client unload it — so A/B
@@ -321,6 +327,12 @@
       HandleLidSwitchDocked = "ignore";
     };
   };
+
+  # The Dolby filter's input node (Speakers above) stays out of DMS's output
+  # picker; see custom.hm.dms.hiddenOutputs in modules/home/wm/dms.nix.
+  home-manager.users.${config.custom.base.username}.custom.hm.dms.hiddenOutputs = [
+    "effect_input.Dolby_Balanced"
+  ];
 
   # The hibernate half of the lid's suspend-then-hibernate (Lid / suspend above).
   systemd.sleep.settings.Sleep = {
@@ -373,8 +385,8 @@
   # iwd handles roaming between APs noticeably better than wpa_supplicant, which
   # matters on a machine that moves between home and the office. NetworkManager
   # (base.nix) stays in charge of profiles; iwd is only the wifi backend.
+  # (networking.hostName comes from mkHost in flake.nix.)
   networking = {
-    hostName = "framework";
     networkmanager.wifi.backend = lib.mkDefault "iwd";
     wireless.iwd.enable = true;
   };

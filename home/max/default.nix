@@ -1,13 +1,14 @@
+# No `? default`s in this signature: HM resolves these args before signature
+# defaults could apply, so every one is set in sharedHmArgs (flake.nix).
 {
   compositor,
   monitors,
   inputs,
-  nvidia ? false,
+  nvidia,
   wallpaper,
   wallpaperPortrait,
-  kanshi ? {
-    enable = false;
-  },
+  lockWallpaper,
+  kanshi,
   ...
 }:
 {
@@ -32,6 +33,7 @@
       kanshi
       wallpaper
       wallpaperPortrait
+      lockWallpaper
       ;
   };
 

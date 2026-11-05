@@ -37,12 +37,9 @@
   ];
 
   # ── Base ─────────────────────────────────────────────────────────────────────
-  custom.base = {
-    enable = true;
-    # Fan control moved to fan2go (../common/optional/fan2go.nix) for moving-average
-    # temperature smoothing — fancontrol only point-sampled and hunted on CPU spikes.
-    fancontrol.enable = false;
-  };
+  # Fan control is fan2go (../common/optional/fan2go.nix), for moving-average
+  # temperature smoothing — fancontrol only point-sampled and hunted on CPU spikes.
+  custom.base.enable = true;
 
   # ── Steam gamescope session (greeter "Steam" entry) ──────────────────────────
   # gaming.nix enables gamescopeSession but leaves args empty, so gamescope
@@ -113,7 +110,7 @@
   boot = {
     # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ─────────────────────
     # Mainline it87 doesn't support this chip; the out-of-tree driver does.
-    # Required for pwmconfig / fancontrol to see PWM controls.
+    # Required for fan2go (and pwmconfig) to see the PWM controls.
     extraModulePackages = [ config.boot.kernelPackages.it87 ];
     kernelModules = [ "it87" ];
 
@@ -152,8 +149,7 @@
     pkgs.age
   ];
 
-  # ── Networking ───────────────────────────────────────────────────────────────
-  networking.hostName = "home-desktop";
+  # networking.hostName comes from mkHost (flake.nix).
 
   system.stateVersion = "24.11";
 }

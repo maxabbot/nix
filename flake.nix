@@ -117,11 +117,6 @@
           email = "abbot.max.nz@gmail.com";
         };
         nvidia = false;
-        # Christchurch NZ — drives gammastep/night-light timing in desktop.nix.
-        location = {
-          latitude = -43.53;
-          longitude = 172.64;
-        };
         kanshi = {
           enable = false;
         };
@@ -131,6 +126,9 @@
         # Image for a rotated secondary monitor; null keeps the rendered
         # SHORTCUTS.md cheat-sheet there.
         wallpaperPortrait = null;
+        # DMS lock-screen background (modules/home/wm/dms.nix): the rainbow Nix
+        # snowflake the Limine menu shows, rendered from the palette.
+        lockWallpaper = "${mkPkgs.gruvbox-wallpapers}/rainbow-nix.png";
         # Software KVM (home/max/lan-mouse.nix) — the module-system ignores
         # function-signature defaults for HM args, so the off-default lives here.
         lanMouse = {
@@ -148,8 +146,10 @@
         };
       };
 
-      # Builds a NixosSystem with Home Manager wired in.
-      # hmArgs are passed as extraSpecialArgs to the HM user config.
+      # Builds a NixosSystem with Home Manager wired in. hostName becomes
+      # networking.hostName; machineType ("desktop" | "laptop") reaches both
+      # NixOS and HM modules as an argument. hmArgs are passed as
+      # extraSpecialArgs to the HM user config.
       mkHost =
         {
           hostName,
@@ -160,18 +160,12 @@
         lib.nixosSystem {
           inherit system;
           pkgs = mkPkgs;
-          specialArgs = {
-            inherit
-              inputs
-              nixos-hardware
-              hostName
-              machineType
-              ;
-          };
+          specialArgs = { inherit inputs machineType; };
           modules = modules ++ [
             inputs.sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
             {
+              networking.hostName = hostName;
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
@@ -180,7 +174,7 @@
                   sharedHmArgs
                   // hmArgs
                   // {
-                    inherit inputs;
+                    inherit inputs machineType;
                   };
                 users.max = import ./home/max;
               };
@@ -238,7 +232,6 @@
             disko.nixosModules.disko
           ];
           hmArgs = {
-            machineType = "desktop";
             compositor = "hyprland";
             nvidia = true;
             wallpaper = ./config/wallpapers/waterfall-3.jpg;
@@ -282,10 +275,10 @@
             nixos-hardware.nixosModules.framework-intel-core-ultra-series3
           ];
           hmArgs = {
-            machineType = "laptop";
             compositor = "hyprland";
-            # 2.8K 120 Hz internal panel at 2x — the static Hyprland declaration
-            # matches kanshi's "undocked" profile below, so there's no scale flash
+            # 2.8K 120 Hz internal panel at 2x. kanshi's internal output, mode
+            # and scale default to this string, so its "undocked" profile
+            # matches the static Hyprland declaration and there's no scale flash
             # while kanshi starts. Confirm the connector and modes on first boot
             # with `wlr-randr` (the panel is eDP-1 on every Framework 13 so far).
             monitors = {
@@ -293,6 +286,8 @@
               primaryName = "eDP-1";
               secondary = null;
             };
+            # The Framework gear rather than the Nix snowflake on the lock screen.
+            lockWallpaper = "${mkPkgs.gruvbox-wallpapers}/rainbow-framework.png";
             # Kanshi manages the docked/undocked layout automatically.
             # The docked profile is the office desk (two Philips 276B1s,
             # matched by EDID serial, so the dock's connector numbering doesn't
@@ -300,11 +295,6 @@
             # `hyprctl monitors`.
             kanshi = {
               enable = true;
-              internal = {
-                output = "eDP-1";
-                mode = "2880x1920@120";
-                scale = 2.0;
-              };
               docked = {
                 left = "Philips Consumer Electronics Company PHL 276B1 UK02150032264";
                 right = "Philips Consumer Electronics Company PHL 276B1 UK02150032262";
