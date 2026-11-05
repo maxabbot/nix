@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   inputs,
@@ -7,6 +8,20 @@
 let
   renderTheme = import ../../config/stylix/palette-subst.nix { inherit lib; };
 
+  # Starship's folder icons (modules/home/shell.nix), as the status line's
+  # name/icon bash array pairs, so the two never drift apart
+  dirSubstitutions = lib.concatStringsSep " " (
+    lib.concatLists (
+      lib.mapAttrsToList (
+        name: icon:
+        map lib.escapeShellArg [
+          name
+          icon
+        ]
+      ) (config.programs.starship.settings.directory.substitutions or { })
+    )
+  );
+
   statusline = pkgs.writeShellApplication {
     name = "claude-statusline";
     runtimeInputs = [
@@ -14,7 +29,9 @@ let
       pkgs.git
       pkgs.coreutils
     ];
-    text = renderTheme ../../config/claude/statusline.sh;
+    text = builtins.replaceStrings [ "@dirSubstitutions@" ] [ dirSubstitutions ] (
+      renderTheme ../../config/claude/statusline.sh
+    );
   };
 
   declared = pkgs.writeText "claude-settings-declared.json" (

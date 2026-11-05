@@ -6,7 +6,8 @@
 # what this prints.
 #
 # A palette-subst.nix template, rendered by home/max/claude.nix: colours are
-# @name-hex@ placeholders, never literal hex.
+# @name-hex@ placeholders, never literal hex. claude.nix also fills in the
+# folder icons (the substitutions array) from Starship's own config.
 set -euo pipefail
 
 input=$(cat)
@@ -29,19 +30,15 @@ seg() {
   printf '%s\033[0m' "$3"
 }
 
-# ~ for $HOME, and only the last three components behind …/ (Starship's
-# truncation_length / truncation_symbol)
-dir=${cwd/#"$HOME"/\~}
-IFS=/ read -ra parts <<<"$dir"
-if ((${#parts[@]} > 3)); then
-  dir="…/${parts[-3]}/${parts[-2]}/${parts[-1]}"
-fi
-
-# Git in one call: porcelain v2 --branch carries the branch, the upstream's
-# ahead/behind counts and the file states. --no-optional-locks: this runs on
+# Git: porcelain v2 --branch carries the branch, the upstream's ahead/behind
+# counts and the file states in one call. --no-optional-locks: this runs on
 # every refresh, alongside the session's own git.
-branch='' gitstate=''
+branch='' gitstate='' top='' prefix=''
 if [[ -n $cwd ]] && status=$(git -C "$cwd" --no-optional-locks status --porcelain=v2 --branch 2>/dev/null); then
+  # Where the repo is, for the directory below
+  mapfile -t loc < <(git -C "$cwd" rev-parse --show-toplevel --show-prefix 2>/dev/null)
+  top=${loc[0]-} prefix=${loc[1]-}
+
   oid='' ab='' conflicted='' deleted='' renamed='' modified='' staged='' untracked=''
   while read -r kind xy rest; do
     case $kind in
@@ -79,6 +76,30 @@ if [[ -n $cwd ]] && status=$(git -C "$cwd" --no-optional-locks status --porcelai
     fi
   fi
 fi
+
+# The directory, built the way Starship's directory module builds it:
+# - inside a git repo other than ~, the path starts at the repo's folder name
+#   (truncate_to_repo, on by default); anywhere else $HOME becomes ~
+# - then the folder icons, swapped in for their names anywhere in the path
+# - then only the last three components (truncation_length; a leading / doesn't
+#   count), behind …/ whenever the result isn't a full path (truncation_symbol)
+substitutions=(@dirSubstitutions@) # name/icon pairs
+if [[ -n $top && $top != "$HOME" ]]; then
+  prefix=${prefix%/}
+  dir=${top##*/}${prefix:+/$prefix}
+elif [[ $cwd == "$HOME" || $cwd == "$HOME"/* ]]; then
+  dir=\~${cwd#"$HOME"}
+else
+  dir=$cwd
+fi
+for ((i = 0; i < ${#substitutions[@]}; i += 2)); do
+  dir=${dir//"${substitutions[i]}"/"${substitutions[i + 1]}"}
+done
+IFS=/ read -ra parts <<<"${dir#/}"
+if ((${#parts[@]} > 3)); then
+  dir="${parts[-3]}/${parts[-2]}/${parts[-1]}"
+fi
+[[ -z $dir || $dir == '~'* || $dir == /* ]] || dir="…/$dir"
 
 user_colour=$text
 ((EUID == 0)) && user_colour=$red
