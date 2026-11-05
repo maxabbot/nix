@@ -54,7 +54,7 @@ in
     };
   };
 
-  # ── KDE Connect ───────────────────────────────────────────────────────────────
+  # ── KDE Connect and Syncthing ports ──────────────────────────────────────────
   # Phone integration, surfaced on the DMS bar and control centre by the
   # dankKDEConnect plugin; lan-mouse's clipboard hand-off rides on it too.
   # Installed below rather than with programs.kdeconnect, which opens 1714-1764
@@ -63,19 +63,27 @@ in
   # are open on the tailnet only — and since broadcast discovery doesn't cross
   # Tailscale, its peers are added once by tailnet IP (KDE Connect → Add
   # devices by IP, on either side).
+  #
+  # Syncthing's 22000 (TCP, and UDP for QUIC) follows the same split, in place
+  # of services.syncthing.openDefaultPorts, which opens it on every interface.
+  # Its peers reach each other by tailnet name (the devices below), so its
+  # discovery port 21027 isn't needed.
   networking.firewall =
     let
-      kdeConnect = {
-        allowedTCPPortRanges = [
-          {
-            from = 1714;
-            to = 1764;
-          }
-        ];
-        allowedUDPPortRanges = kdeConnect.allowedTCPPortRanges;
+      kdeConnect = [
+        {
+          from = 1714;
+          to = 1764;
+        }
+      ];
+      ports = {
+        allowedTCPPortRanges = kdeConnect;
+        allowedUDPPortRanges = kdeConnect;
+        allowedTCPPorts = [ 22000 ];
+        allowedUDPPorts = [ 22000 ];
       };
     in
-    if machineType == "laptop" then { interfaces.tailscale0 = kdeConnect; } else kdeConnect;
+    if machineType == "laptop" then { interfaces.tailscale0 = ports; } else ports;
 
   services = {
     # ── Display manager (DMS greeter on greetd) ────────────────────────────────
@@ -136,12 +144,22 @@ in
       # sharing a cert would be a single device.
       cert = lib.mkIf hasIdentity config.sops.secrets."syncthing/cert-pem".path;
       key = lib.mkIf hasIdentity config.sops.secrets."syncthing/key-pem".path;
-      openDefaultPorts = true; # 22000 sync + 21027/udp LAN discovery
+      # Ports: the firewall block above (tailnet-only on the laptop).
       # Flake is authoritative, as on the homelab: GUI-added devices/folders
       # are reverted on rebuild. Device IDs are public, not secrets.
       overrideDevices = true;
       overrideFolders = true;
       settings = {
+        # Every peer is on the tailnet and named below, so nothing needs
+        # finding: no announcing this device to Syncthing's public discovery
+        # servers or the local network, no relays, and no UPnP asking the
+        # router to forward 22000 in from the internet.
+        options = {
+          globalAnnounceEnabled = false;
+          localAnnounceEnabled = false;
+          relaysEnabled = false;
+          natEnabled = false;
+        };
         devices = {
           # ID derived from the homelab's sops-held cert; its ID is stable across
           # reinstalls. Reached by MagicDNS over the tailnet (nixos-homelab repo).
@@ -152,10 +170,24 @@ in
               "dynamic"
             ];
           };
-          home-desktop.id = "SJMUANY-4V4KATR-SBM36YJ-XZET74T-RECLCYD-PNC6JXD-OSO4R4A-A4GEPQC";
           # Both workstation IDs are stable: their cert/key live in sops
           # (secrets/<host>.yaml), so a reinstall rejoins as the same device.
-          framework.id = "TTXBUEW-AA4YQVU-DEC4GOP-2D7QAD7-VBN4F3X-RJPTKUL-JYUUDRO-7AEDPAN";
+          # Dialled by MagicDNS name like the homelab; with discovery off,
+          # these are how the two find each other.
+          home-desktop = {
+            id = "SJMUANY-4V4KATR-SBM36YJ-XZET74T-RECLCYD-PNC6JXD-OSO4R4A-A4GEPQC";
+            addresses = [
+              "tcp://home-desktop:22000"
+              "dynamic"
+            ];
+          };
+          framework = {
+            id = "TTXBUEW-AA4YQVU-DEC4GOP-2D7QAD7-VBN4F3X-RJPTKUL-JYUUDRO-7AEDPAN";
+            addresses = [
+              "tcp://framework:22000"
+              "dynamic"
+            ];
+          };
         };
         folders.syncdrive = {
           path = "/home/${username}/SyncDrive";
