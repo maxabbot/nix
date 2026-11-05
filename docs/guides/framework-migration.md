@@ -218,6 +218,18 @@ user. It should work, since the guest is plain Windows 11, but it's untested.
   mode installs fine on the framework. Setup pulled the `dockur/windows` image,
   built the disk and finished the unattended Windows install in about 25
   minutes, with no changes beyond `winboat.nix`.
+- **USB device snapshot:** WinBoat's generated `~/.winboat/podman-compose.yml`
+  passes `/dev/bus/usb` into the container, and Podman expands it into the
+  device nodes present when the container is created. After a dock, undock or
+  replug renumbers the bus, start fails with `crun: cannot stat
+  /dev/bus/usb/NNN/NNN`. Windows itself is fine. Fix (2026-11-05): delete the
+  `- /dev/bus/usb` line (passthrough doesn't work under Podman anyway), then
+  recreate the container from `~/.winboat`: `podman rm WinBoat` and
+  `podman-compose -f podman-compose.yml up -d` (`podman-compose` is only on
+  WinBoat's wrapped PATH, so call it by store path). The disk image lives in
+  the install folder, not the container, so this loses nothing. WinBoat may
+  restore the line when its settings change; check the file first if the
+  error returns.
 - **Not Docker:** switching to real Docker would mean dropping `podman.nix`'s
   `dockerCompat`, since NixOS won't enable both. If Podman mode fails, use the
   libvirt VM rather than reshuffling container runtimes.
