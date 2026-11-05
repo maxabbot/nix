@@ -123,6 +123,14 @@ let
           from = ''iconName: "motion_sensor_active"'';
           to = ''iconName: "coffee"'';
         }
+        {
+          # No edit pencil in the Control Center: its layout is declared in
+          # this file. DMS re-adds the tile to any saved list without it
+          # (ensureEditButton), so it stays in the list and is never shown.
+          file = "share/quickshell/dms/Modules/ControlCenter/utils/widgets.js";
+          from = "function isShown(widget) {\n    switch (widget?.id) {\n";
+          to = "function isShown(widget) {\n    switch (widget?.id) {\n    case EDIT_ID:\n        return false;\n";
+        }
       ]
       ++
         map
@@ -941,12 +949,11 @@ let
     # the gammastep service. Filtered out of whatever list DMS has saved rather
     # than replacing it, so tiles added and per-tile tweaks made in its GUI
     # (the brightness slider's DDC device) survive.
-    # Edit (DMS's edit-mode entry) and running apps go too: the layout is
-    # declared here, and the window list is the launcher's job.
+    # Running apps goes too: the window list is the launcher's job. (The edit
+    # pencil can't be dropped — DMS re-adds it — so it's hidden by a patch.)
     controlCenterDrop = [
       "darkMode"
       "nightMode"
-      "edit"
       "runningApps"
     ];
     # DMS's own default list (dux-shell 2.0.0's SettingsSpec.js), the drops
