@@ -186,10 +186,12 @@ let
           # unhandled here). The chevron's own MouseArea is disabled so clicks
           # and hover fall through to it, and its separate highlight is gone.
           # The handler mirrors the chevron's: the overflow popup has to be
-          # positioned and requested, not just flagged open.
+          # positioned and requested, not just flagged open. It anchors on the
+          # pill itself: since 2.0 the chevrons live in Loader-built components,
+          # out of reach by id (and the chevron is the whole pill anyway).
           file = "share/quickshell/dms/Modules/DBar/Widgets/SystemTrayBar.qml";
           from = "    enableBackgroundHover: false\n    enableCursor: false\n";
-          to = "    enableBackgroundHover: true\n    enableCursor: true\n    onClicked: {\n        if (!hasHiddenItems)\n            return;\n        if (!useOverflowPopup)\n            menuOpen = !menuOpen;\n        else if (menuOpen)\n            menuOpen = false;\n        else\n            _openOverflowAt(isVerticalOrientation ? caretButtonVert : caretButton);\n    }\n";
+          to = "    enableBackgroundHover: true\n    enableCursor: true\n    onClicked: {\n        if (!hasHiddenItems)\n            return;\n        if (!useOverflowPopup)\n            menuOpen = !menuOpen;\n        else if (menuOpen)\n            menuOpen = false;\n        else\n            _openOverflowAt(root);\n    }\n";
         }
       ]
       ++
