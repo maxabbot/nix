@@ -66,7 +66,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 - Wired as a NixOS module via `home-manager.nixosModules.home-manager`.
 - `mkHost` passes `hmArgs` to `home-manager.extraSpecialArgs`. **Do not** add `extraSpecialArgs` inside a host's `default.nix` — this conflicts with `mkHost` and is a recurring footgun.
 - Shared args (git name/email) live in `sharedHmArgs` in `flake.nix`; per-host args override via `sharedHmArgs // hmArgs`.
-- `home/max/` is split into feature files: `default.nix` (entry), `claude.nix` (Claude Code's theme + status line, merged into `~/.claude/settings.json` on activation — Claude Code rewrites that file, so it isn't a symlink, and an in-app `/theme` change reverts on rebuild), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `libreoffice.nix`, `packages.nix`, `terminal-toys.nix`.
+- `home/max/` is split into feature files: `default.nix` (entry), `claude.nix` (Claude Code: the package + `sox` for voice mode, and its theme + status line, merged into `~/.claude/settings.json` on activation — Claude Code rewrites that file, so it isn't a symlink, and an in-app `/theme` change reverts on rebuild), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `libreoffice.nix`, `packages.nix`, `terminal-toys.nix`.
 - Setting `compositor = "none"` skips Hyprland and the DMS shell entirely via `mkIf`.
 - The desktop shell is DMS (DankMaterialShell): `modules/home/wm/dms.nix` (package patches, declared settings/bars, `shell-dms.service`) and `modules/home/wm/dms-plugins.nix`; design notes in `docs/SHELLS.md`.
 

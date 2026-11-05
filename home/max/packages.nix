@@ -3,7 +3,6 @@
   lib,
   config,
   osConfig,
-  inputs,
   ...
 }:
 let
@@ -40,13 +39,11 @@ in
       mkcert
       pandoc # renders SHORTCUTS.md → HTML for the cheat-sheet wallpaper
       ffmpeg-full
-      sox # audio record/play CLI (`rec`/`play`) — Claude Code voice mode
       imagemagick
       nix-tree
       nix-diff
       nixpkgs-review
       nil
-      inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
 
       # ── Data wrangling (CSV/JSON/parquet reconciliation, statement parsing) ──────
       visidata # interactive TUI table explorer (CSV/JSON/xlsx/parquet)

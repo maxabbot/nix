@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 let
   statusline = pkgs.writeShellApplication {
     name = "claude-statusline";
@@ -23,6 +28,11 @@ let
   );
 in
 {
+  home.packages = [
+    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    pkgs.sox # audio record/play CLI (`rec`/`play`) — Claude Code voice mode
+  ];
+
   # Claude Code owns ~/.claude/settings.json (/model, /effort, permission grants
   # all write to it), so it can't be a store symlink. Merge in only the declared
   # keys and leave the rest alone — which also means a /theme change in the app
