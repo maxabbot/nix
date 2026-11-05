@@ -48,7 +48,10 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 20b1f9f | HM activation uses `run` instead of the deprecated `$DRY_RUN_CMD`, and a dry run no longer writes `.hm-tmp` files (B2). Style: framework's second `boot` block, delta's literal hex (now palette `diffAddBg`/`diffDelBg`), `config/sddm/` (wallpaper moved to `config/wallpapers/`), `hyprland.lua`'s header. Docs: PACKAGES.md's missing apps, SHELLS.md on DMS's layout pages |
 | d84e6c4 | DMS's Hyprland Layout Overrides wrote an unloaded `layout.lua` and ran `hyprctl reload` on every regeneration (13 on 2026-11-05), dropping live session state. Explicit overrides now apply live over `hyprctl eval`; Auto/Off keep `hyprland.lua`'s values, and with none set DMS no longer reloads Hyprland. The unusable Xray toggles are hidden |
 | 2cd7c44 | DMS's cursor page wrote an unloaded `cursor.lua` (then reloaded Hyprland); it now applies live like the layout page. Its Window Rules page wrote `windowrules.lua` that nothing loaded; `hyprland.lua` now loads it after its own rules (DMS reports them active) |
-| this commit | The discontinued Wine-GE runner (`wine-ge-custom`, GE-Proton8-26) is gone; Lutris gets nixpkgs' GE-Proton (the Steam build) as a wine version, run through `umu-launcher` |
+| 580f364 | The discontinued Wine-GE runner (`wine-ge-custom`, GE-Proton8-26) is gone; Lutris gets nixpkgs' GE-Proton (the Steam build) as a wine version, run through `umu-launcher` |
+| 091eabe | S3: Apollo (pinned 0.4.7-alpha.1, its latest release) had CVE-2026-32253, a client-certificate validation bypass that let an untrusted client pass as paired. Apollo merged the fix to master but never released it; `gaming-streaming.nix` now applies it as a patch |
+| 14f28ff | S5: Syncthing's port is tailnet-only on the laptop (open on home-desktop's LAN), the workstations dial each other by tailnet name, and global/local discovery, relays and UPnP router forwarding are off |
+| 731ca18 | Style: `gaming-toggle.sh` runs with `set -uo pipefail` (not `-e`, on purpose — see its header), tested on both paths against stub tools. Zed's `claude-haiku-4-5` is the newest Haiku Zed offers, so no change |
 
 ## 2. Verified on hardware — not bugs
 
@@ -80,20 +83,10 @@ without a prompt for anyone opening the repo in Claude Code. Narrow it, or
 move personal approvals to the gitignored `settings.local.json`. It also still
 allows `waybar --version`.
 
-### 🟡 S3 — `apollo-flake` pinned 396 days back
-A network-facing service (`capSysAdmin`, open firewall) on an unmaintained
-pin, and the source of the xorg warnings, which will become errors on a later
-nixpkgs. Check upstream, or nixpkgs' `sunshine` module.
-
 ### 🔵 S4 — `input` group
 The user is in `input` (`base.nix`), so any process they run can read raw
 keystrokes. Only `autoclick` (theclicker) needs it; a uaccess udev rule for
 the NuPhy's event node would do instead. Undecided.
-
-### 🔵 S5 — Syncthing on the laptop
-`openDefaultPorts` opens 22000/21027 on every interface. Traffic is
-TLS-authenticated, so the risk is low; since every peer is on the tailnet,
-global discovery and relays could also be turned off.
 
 ## 4. Open — bugs
 
@@ -107,10 +100,7 @@ None known.
 
 ## 6. Open — style
 
-- `gaming-toggle.sh` lacks `set -euo pipefail`. Adding it needs care: its
-  `grep -c` legitimately exits 1 on zero matches.
-- Zed's default and commit-message model is still `claude-haiku-4-5`; newer
-  IDs weren't verifiable against Zed's hosted model list from here.
+None known.
 
 ## 7. Open — docs
 
@@ -124,6 +114,6 @@ Both hosts evaluate and lint clean, and CI builds the patched DMS packages
 whenever something they're built from changes. The layering is consistent: import composition for features, one option
 module, and Home Manager gated on the compositor. Nearly every host-specific
 workaround carries a comment explaining why. Secrets are on sops-nix, Secure
-Boot and TPM unlock are on for framework, and inputs are fresh apart from
-`apollo-flake`. The confirmed bugs were all small; the larger risks are
+Boot and TPM unlock are on for framework, and inputs are fresh; `apollo-flake`
+tracks Apollo's last release, patched for its one known CVE. The confirmed bugs were all small; the larger risks are
 operational: backups, the password rotation, and the dead sops recipients.

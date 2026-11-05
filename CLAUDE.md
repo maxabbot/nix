@@ -36,7 +36,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `db-gui.nix` | DBeaver, Beekeeper, mycli, litecli |
 | `duckdb.nix` | DuckDB |
 | `cloud-tools.nix` | kubectl, helm, opentofu, AWS/Azure/GCP CLIs |
-| `productivity.nix` | Hyprland, the DMS greeter (nixpkgs `dms-greeter` on greetd, in its own Lua Hyprland; hosts append monitor/cursor lines to `compositor.customConfig`; the package is patched so the launcher's `hyprctl dispatch exit` speaks Lua), PipeWire, core desktop apps, syncthing. Syncthing: flake-authoritative (`overrideDevices`/`overrideFolders`, so GUI changes revert on rebuild), one folder `~/SyncDrive` shared with the homelab (hub, tailnet) and the workstations; each workstation's cert/key comes from `secrets/<hostname>.yaml` when that file exists (hosts without one generate their own), so device IDs survive a reinstall. Peers/folders are mirrored in the nixos-homelab repo — change both |
+| `productivity.nix` | Hyprland, the DMS greeter (nixpkgs `dms-greeter` on greetd, in its own Lua Hyprland; hosts append monitor/cursor lines to `compositor.customConfig`; the package is patched so the launcher's `hyprctl dispatch exit` speaks Lua), PipeWire, core desktop apps, syncthing. Syncthing: flake-authoritative (`overrideDevices`/`overrideFolders`, so GUI changes revert on rebuild), one folder `~/SyncDrive` shared with the homelab (hub, tailnet) and the workstations, every peer dialled by tailnet name with discovery, relays and UPnP off (its port is tailnet-only on the laptop, like KDE Connect's); each workstation's cert/key comes from `secrets/<hostname>.yaml` when that file exists (hosts without one generate their own), so device IDs survive a reinstall. Peers/folders are mirrored in the nixos-homelab repo — change both |
 | `stylix.nix` | Stylix theming (base16 Gruvbox Material, fonts, cursor) |
 | `creative-apps.nix` | GIMP, Inkscape, Krita; LMMS 1.3 (upstream AppImage via `lmms-appimage` flake input, not nixpkgs' stale 1.2.2) + Surge XT for LV2 synths |
 | `streaming-tools.nix` | OBS, Shotcut, RustDesk, gpu-screen-recorder |
@@ -48,7 +48,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `cuda.nix` | CUDA / cuDNN stack |
 | `gaming.nix` | Steam, Gamemode, Gamescope, Mangohud, controllers |
 | `wine.nix` | Wine (WoW64 staging), winetricks, DXVK |
-| `gaming-streaming.nix` | Apollo (Sunshine fork) — the streaming *host*; imports `moonlight.nix` so a host is also a client. Desktop-only: `capSysAdmin` + `openFirewall` |
+| `gaming-streaming.nix` | Apollo (Sunshine fork) — the streaming *host*; imports `moonlight.nix` so a host is also a client. Desktop-only: `capSysAdmin` + `openFirewall`. Carries `apollo-cve-2026-32253.patch` (client-cert validation fix Apollo merged but never released) — drop it once `apollo-flake` builds a fixed Apollo |
 | `moonlight.nix` | Moonlight — the streaming *client* alone, no service and no firewall hole (framework) |
 | `fan2go.nix` | Moving-average fan control (home-desktop; replaces fancontrol) |
 | `lan-mouse.nix` | Software KVM between home-desktop and framework: opens its port on `tailscale0` only (asserts `tailscale.nix`), peers are pinned by tailnet IP (`ips` in `lanMouse` — lan-mouse's own resolver returns nothing for MagicDNS names). Config in `home/max/lan-mouse.nix` + `lanMouse` hmArgs; on/off from the Control Center's Lan Mouse tile (`config/dms/lanMouseTile/`) |
