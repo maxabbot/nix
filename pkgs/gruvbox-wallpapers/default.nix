@@ -2,8 +2,7 @@
 # config/stylix/palette.nix so they follow the palette like everything else.
 #
 #   rainbow-nix.png        Nix snowflake (config/plymouth/nix-snowflake.svg, the
-#                          boot splash's logo). Limine menu, the DMS lock, and
-#                          work-laptop's desktop.
+#                          boot splash's logo). Limine menu and the DMS lock.
 #   rainbow-framework.png  Framework gear in six wedges, same colour order
 #                          (config/lock/). framework's DMS lock.
 #

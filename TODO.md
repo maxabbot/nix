@@ -10,7 +10,7 @@ Install prep and the full test list: [`docs/guides/framework-post-install.md`](d
 
 ### Hardware configuration
 
-All four hosts have a real `hardware-configuration.nix` (framework's landed 2026-11-02). For a new host, generate it on first install:
+All three hosts have a real `hardware-configuration.nix` (framework's landed 2026-11-02). For a new host, generate it on first install:
 
 ```bash
 sudo nixos-generate-config --root /mnt
@@ -84,4 +84,4 @@ nix run github:nix-community/nixos-anywhere -- \
 - [ ] **GPG commit signing** — `programs.gpg` in HM + `signingkey` in flake
 - [ ] **Backups** — `restic` → Backblaze B2 (home-desktop + framework); BTRFS snapshots don't cover disk failure. B2 credentials want secrets management first
 - [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05. `release-26.05` exists now, but its Zen target lacks master's `opacityHex`, so it paints Zen solid (checked 2026-10-27, see `flake.nix`). Once a release branch carries it, pin that and drop the two `enableReleaseChecks = false` lines plus the kmscon/regreet `disabledModules` workaround in `hosts/common/optional/stylix.nix`
-- [x] **Decide what `plymouth.nix` is for** — imported on all four hosts, themed by Stylix instead of the adi1090x "spin" theme.
+- [x] **Decide what `plymouth.nix` is for** — imported on all three hosts, themed by Stylix instead of the adi1090x "spin" theme.

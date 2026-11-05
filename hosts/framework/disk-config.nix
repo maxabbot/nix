@@ -19,7 +19,7 @@ _: {
     # The disk name determines the GPT partlabels (disk-nvme-*) that the boot
     # mounts resolve through — keep it unique across machines so this drive
     # never collides with another disko-installed disk (disk-main-* on
-    # home-desktop, disk-usbssd-* on the portable work-laptop SSD).
+    # home-desktop).
     disk.nvme = {
       type = "disk";
       device = "/dev/nvme0n1";

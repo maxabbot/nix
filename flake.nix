@@ -1,5 +1,5 @@
 {
-  description = "NixOS system configuration — home-desktop / framework / work-laptop / vm";
+  description = "NixOS system configuration — home-desktop / framework / vm";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -269,7 +269,7 @@
               secondary = null;
             };
             # Kanshi manages the docked/undocked layout automatically.
-            # The docked profile is work-laptop's office desk (two Philips 276B1s,
+            # The docked profile is the office desk (two Philips 276B1s,
             # matched by EDID serial, so the dock's connector numbering doesn't
             # matter). A different desk needs its own descriptions from
             # `hyprctl monitors`.
@@ -298,61 +298,6 @@
               position = "left";
               ips = [ "100.111.189.79" ];
               activateOnStartup = true;
-            };
-          };
-        };
-
-        # Development laptop — no GPU/gaming
-        work-laptop = mkHost {
-          hostName = "work-laptop";
-          machineType = "laptop";
-          modules = [
-            ./hosts/work-laptop
-            disko.nixosModules.disko
-            # Meteor Lake (Core Ultra 7 155U) iGPU support: i915 in initrd for
-            # early KMS, intel-media-driver, intel-compute-runtime, vpl-gpu-rt.
-            # There is no ThinkBook board module upstream, and meteor-lake is not
-            # exported as a named nixosModules output — hence the path import
-            # rather than the `nixos-hardware.nixosModules.*` form used above.
-            (nixos-hardware + "/common/cpu/intel/meteor-lake")
-          ];
-          hmArgs = {
-            machineType = "laptop";
-            compositor = "hyprland";
-            # Same image as the Limine menu. 3480x2160 is ~16:10 like the panel,
-            # so crop-fill only trims the docked 16:9 Philips top and bottom.
-            wallpaper = "${mkPkgs.gruvbox-wallpapers}/rainbow-nix.png";
-            # Matches kanshi's "undocked" profile below, so there's no scale
-            # flash while kanshi starts. primaryName stays unset so startup
-            # workspaces/cursor aren't pinned to the laptop panel when docked.
-            monitors = {
-              primary = "eDP-1,1920x1200@60,0x0,1.25";
-              secondary = null;
-            };
-            # Kanshi manages the docked/undocked layout automatically.
-            # The two Philips 276B1s are the same model, but each reports its own
-            # serial in the EDID description, so match on that (see
-            # `hyprctl monitors`) rather than the DP-x connector — dock connector
-            # numbers are handed out per hotplug and aren't stable across replugs.
-            kanshi = {
-              enable = true;
-              internal = {
-                output = "eDP-1"; # Lenovo internal panel — almost universal
-                mode = "1920x1200@60";
-                # 1.25 divides the panel evenly → logical 1536x960.
-                scale = 1.25;
-              };
-              docked = {
-                left = "Philips Consumer Electronics Company PHL 276B1 UK02150032264";
-                right = "Philips Consumer Electronics Company PHL 276B1 UK02150032262";
-                # Both panels top out at 74.97 Hz over the dock.
-                leftMode = "2560x1440@74.97Hz";
-                rightMode = "2560x1440@74.97Hz";
-                # rightPosition defaults to "2560,0" (left monitor width)
-                # Centred below 2×2560 externals at the 1536-wide logical size:
-                # (5120 - 1536) / 2 = 1792.
-                laptopPosition = "1792,1440";
-              };
             };
           };
         };

@@ -4,7 +4,7 @@ final: prev: {
   wine-ge-custom = final.callPackage ../pkgs/wine-ge-custom { };
 
   # Rainbow Nix / Framework logo wallpapers rendered from the palette (Limine,
-  # the DMS lock, work-laptop's desktop).
+  # the DMS lock).
   gruvbox-wallpapers = final.callPackage ../pkgs/gruvbox-wallpapers { };
 
   # Papirus ships blue folders, which clash with Gruvbox. The package's own

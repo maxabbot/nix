@@ -65,7 +65,7 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 
 **Per-host polish:**
 - **GPG commit signing** — both references sign commits; add a `signingkey` hmArg in `flake.nix` + `programs.gpg` in HM
-- **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); `framework` and `work-laptop` both use one. There is no ThinkBook board module upstream, so `work-laptop` imports `common/cpu/intel/meteor-lake` by path (it isn't a named `nixosModules` output) for its Meteor Lake iGPU stack
+- **`nixos-hardware` modules** — low value for `home-desktop` (everything already configured manually); `framework` uses its platform module
 
 **Only matters with multiple real hosts:**
 - **Binary cache / Cachix** — worth it once custom derivations take time to build; `pkgs/` only carries wine-ge-custom (prebuilt) so far
@@ -80,5 +80,5 @@ This is the most important gap. Real SSH keys, API tokens, and hashed passwords 
 - **`nix-index` + `comma`** — `nix-index-database` flake input; `, <pkg>` to run anything; configured in `home/max/packages.nix`
 - **`statix` + `deadnix` in CI** — `lint` job in `.github/workflows/ci.yml`
 - **Dev shell** — `nix develop` gives nixfmt, statix, deadnix, nil; defined in `flake.nix`
-- **Specialisations on the laptops** — `powersave` boot entry in `hosts/work-laptop/default.nix` and `hosts/framework/default.nix` (the latter also swaps power-profiles-daemon out for TLP, since that's its default)
+- **Specialisations on the laptops** — `powersave` boot entry in `hosts/framework/default.nix` (swaps power-profiles-daemon out for TLP, since ppd is its default)
 - **Secure boot** — Limine's `boot.loader.limine.secureBoot` ready; enable after running `sbctl create-keys` + `sbctl enroll-keys`

@@ -45,7 +45,7 @@
 
   # ── Base ─────────────────────────────────────────────────────────────────────
   # powerManagement is left at base.nix's default (power-profiles-daemon) rather
-  # than work-laptop's TLP: the DMS battery popout's profile buttons (batteryPlus)
+  # than TLP: the DMS battery popout's profile buttons (batteryPlus)
   # need power-profiles-daemon, and
   # nixos-hardware's laptop module already backs off TLP when ppd is on. The
   # powersave specialisation below is where TLP's finer-grained knobs live, for
@@ -53,9 +53,9 @@
   custom.base.enable = true;
 
   # ── Specialisations ───────────────────────────────────────────────────────────
-  # Boot menu shows a "powersave" entry for aggressive battery conservation —
-  # same idea as work-laptop's, but this host defaults to power-profiles-daemon,
-  # so the specialisation has to swap the daemon out rather than just retune it.
+  # Boot menu shows a "powersave" entry for aggressive battery conservation.
+  # This host defaults to power-profiles-daemon, so the specialisation has to
+  # swap the daemon out for TLP rather than just retune it.
   # Setting custom.base.powerManagement flips both services at once (base.nix
   # derives `power-profiles-daemon.enable` and `tlp.enable` from it).
   #

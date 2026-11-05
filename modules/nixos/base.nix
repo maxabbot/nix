@@ -117,7 +117,7 @@ in
       fwupd.enable = true;
       timesyncd.enable = lib.mkDefault true;
       power-profiles-daemon.enable = cfg.powerManagement == "power-profiles-daemon";
-      # TLP settings live in the host file (see work-laptop); base only enables it.
+      # TLP settings live in the host file (see framework's powersave); base only enables it.
       tlp.enable = cfg.powerManagement == "tlp";
       gnome.gnome-keyring.enable = true;
       # gpg-agent is the ssh agent (enableSSHSupport below, and ~/.ssh/config

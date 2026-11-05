@@ -263,7 +263,7 @@ hl.window_rule({ match = { class = "gamescope" },                   immediate = 
 -- pattern covers it; native ports set their own class and need an entry each.
 -- To add one, run `hyprctl clients` while the game is open and copy its class
 -- verbatim — these are whole-string regexes, so a prefix alone never matches.
--- Skipped on hosts with no fixed primary (work-laptop, kanshi-owned).
+-- Skipped on hosts with no fixed primary (kanshi-owned).
 local gameClasses = {
     "steam_app_.*", -- every Proton-launched Steam title
     "gamescope", -- anything run inside a gamescope session

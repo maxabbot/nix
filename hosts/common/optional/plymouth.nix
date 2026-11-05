@@ -11,8 +11,8 @@
 # palette-subst.nix templates.
 #
 # The splash needs a KMS driver in the initrd or it only appears late (or not
-# at all): nvidia.nix adds the NVIDIA modules, nixos-hardware loads xe on
-# framework, and work-laptop's hardware config has i915.
+# at all): nvidia.nix adds the NVIDIA modules and nixos-hardware loads xe on
+# framework.
 #
 # systemd stage 1 on every host: Plymouth runs as a unit from the start and
 # carries through to stage 2 without a restart, and units that only exist in

@@ -294,8 +294,8 @@ let
   }
   # Replaces the built-in battery pill: same icon + percent, but its popout
   # (and Control Center tile) adds UPower's charge history, health/drain stats
-  # and power profiles. The profile buttons need power-profiles-daemon, so on
-  # work-laptop they do nothing.
+  # and power profiles. The profile buttons need power-profiles-daemon, so under
+  # TLP (framework's powersave entry) they do nothing.
   ++ lib.optional isLaptop {
     id = "batteryPlus";
     src = registry.batteryPlus;

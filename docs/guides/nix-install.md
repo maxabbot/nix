@@ -124,5 +124,3 @@ cp /mnt/EFI/limine/BOOTX64.EFI /mnt/EFI/BOOT/BOOTX64.EFI
 umount /mnt
 reboot
 ```
-
-(work-laptop's USB install already lives at the fallback path — `efiInstallAsRemovable` — see the efibootmgr note in `hosts/work-laptop/default.nix` to re-pin its NVRAM entry.)
