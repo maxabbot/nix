@@ -204,14 +204,14 @@
   #     hands gnome-keyring no password, so the login keyring stays locked.
   #     The greeter reads /etc/pam.d/greetd to decide whether to offer the
   #     finger, so with it off there it asks for the password alone.
-  #   - hyprlock, which talks to fprintd itself (the auth block that
-  #     modules/home/apps.nix adds on fprintd hosts), so the finger and the
-  #     password field work at the same time. Both at once would fight over
-  #     the reader.
+  #   - dankshell (the DMS lock's password stack): the lock runs its own
+  #     fprintd stack alongside it (enableFprint, modules/home/wm/dms.nix), so
+  #     the finger and the password field work at the same time. Both at once
+  #     would fight over the reader.
   security.pam.services = {
     login.fprintAuth = false;
     greetd.fprintAuth = false;
-    hyprlock.fprintAuth = false;
+    dankshell.fprintAuth = false;
   };
 
   # ── Bootloader ───────────────────────────────────────────────────────────────

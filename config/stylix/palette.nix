@@ -7,7 +7,7 @@
 # gruvbox-material accent names. The base16 slot each value fills is noted
 # so the mapping in stylix.nix stays auditable.
 #
-# Plain-text configs (hyprlock.conf, shortcuts.css, hyprland.lua, the DMS theme
+# Plain-text configs (shortcuts.css, hyprland.lua, plymouth, the DMS theme
 # JSON)
 # are rendered from this palette at build time via palette-subst.nix — write
 # @name@ / @name-hex@ / @name-rgb@ placeholders there, never literal hex.

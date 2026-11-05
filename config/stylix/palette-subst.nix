@@ -4,7 +4,7 @@
 #
 #   @name@       → "#d4be98"        (CSS / QML)
 #   @name-hex@   → "d4be98"         (hyprland rgba(RRGGBBAA))
-#   @name-rgb@   → "212, 190, 152"  (hyprlock rgba(r, g, b, a))
+#   @name-rgb@   → "212, 190, 152"  (plymouth set_background(r, g, b))
 #
 # Usage: renderTheme = import ./palette-subst.nix { inherit lib; };
 #        xdg.configFile."foo".text = renderTheme ./foo.conf;

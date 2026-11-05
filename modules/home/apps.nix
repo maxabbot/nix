@@ -1,5 +1,5 @@
 # modules/home/apps.nix — Terminal emulator, file manager, media, and misc apps.
-# GUI apps (kitty, mpv, zathura, hyprlock config, freetube) are
+# GUI apps (kitty, mpv, zathura, freetube) are
 # gated on a compositor being configured; CLI tools (btop, fastfetch,
 # tmux-sessionizer) apply everywhere.
 {
@@ -12,7 +12,6 @@
 let
   gui = config.custom.hm.compositor != "none";
   palette = import ../../config/stylix/palette.nix;
-  renderTheme = import ../../config/stylix/palette-subst.nix { inherit lib; };
 in
 {
   programs = {
@@ -227,14 +226,6 @@ in
   xdg.configFile = {
     # ── Fastfetch system info ───────────────────────────────────────────────────
     "fastfetch/config.jsonc".source = ../../config/fastfetch/config.jsonc;
-    # ── Hyprlock lockscreen config (palette placeholders rendered at build) ──────
-    "hypr/hyprlock.conf" = lib.mkIf gui {
-      text =
-        renderTheme ../../config/hypr/hyprlock.conf
-        + lib.optionalString osConfig.services.fprintd.enable (
-          "\n" + renderTheme ../../config/hypr/hyprlock-fingerprint.conf
-        );
-    };
     # ── Thunar "Open Terminal Here" ─────────────────────────────────────────────
     # Thunar runs `exo-open --launch TerminalEmulator`. Without xfce4-settings'
     # xfce4-mime-helper, libexo reads this key as a desktop-file id and

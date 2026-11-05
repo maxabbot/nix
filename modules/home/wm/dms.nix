@@ -36,6 +36,17 @@ let
       ;
   };
 
+  # Lock screen background: the rainbow Nix snowflake the Limine menu shows,
+  # or on framework the Framework gear done the same way (a palette template,
+  # rasterised here so the colours follow palette.nix).
+  lockWallpaper =
+    if osConfig.networking.hostName == "framework" then
+      pkgs.runCommand "gruvbox-rainbow-framework.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
+        rsvg-convert ${pkgs.writeText "gruvbox-rainbow-framework.svg" (renderTheme ../../../config/lock/gruvbox-rainbow-framework.svg)} -o $out
+      ''
+    else
+      ../../../config/limine/gruvbox-rainbow-nix.png;
+
   # Scripts here are deployed 0444 (see hyprland.nix), so invoke them through
   # bash rather than exec'ing directly — a direct exec dies with 126.
   scriptsDir = "${config.home.homeDirectory}/.config/hypr/scripts";
@@ -481,6 +492,16 @@ let
               tooltipText: !isVerticalOrientation && selectedMount ? (selectedMount.mount === "/" ? "Disk" : selectedMount.mount) + " · " + selectedMount.used + " of " + selectedMount.size + " used (" + selectedMount.percent + ")\n" + selectedMount.avail + " free" : ""
             '';
           }
+      # Not a dispatch fix: the lock screen blurs its wallpaper unconditionally
+      # (no setting), which smears lockScreenWallpaperPath's logo into a glow.
+      # The clock and password field already sit on their own surfaces.
+      ++ [
+        {
+          file = "share/quickshell/dms/Modules/Lock/LockScreenContent.qml";
+          from = "blurEnabled: true\n            blur: 0.8";
+          to = "blurEnabled: false\n            blur: 0.8";
+        }
+      ]
     )).overrideAttrs
       (old: {
         postInstall = old.postInstall + ''
@@ -625,6 +646,18 @@ let
       blurBorderColor = "custom";
       blurBorderCustomColor = palette.yellow;
       blurBorderOpacity = 0.93;
+
+      # ── Lock screen ─────────────────────────────────────────────────────────
+      # DMS is the locker: it answers logind's Lock signal itself, so
+      # `loginctl lock-session` (Super+L, hypridle, before sleep) is the one
+      # way in. The wallpaper is lock-only; the desktop's stays awww's.
+      loginctlLockIntegration = true;
+      lockScreenWallpaperPath = "${lockWallpaper}";
+      lockScreenWallpaperFillMode = "Fill";
+      # Finger and password side by side: DMS runs its own fprintd PAM stack
+      # in parallel with the password one (/etc/pam.d/dankshell, which has
+      # pam_fprintd turned off on fprintd hosts — hosts/framework/default.nix).
+      enableFprint = osConfig.services.fprintd.enable;
     };
     # Control Center tiles to strip. Dark Mode would flip DMS off the fixed
     # Gruvbox Material Dark scheme; Night Mode is a second gamma client racing

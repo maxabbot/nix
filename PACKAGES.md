@@ -35,10 +35,10 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 - **Hyprland** — tiling Wayland compositor; monitor layout generated from Nix per-host
 - **DMS (DankMaterialShell)** — the desktop shell: bar (plus a slim one on portrait monitors), notifications, OSD, launcher (`Super+D`), control centre, settings, power menu, clipboard history; see `docs/SHELLS.md`
-- **SDDM** — display manager (SilentSDDM theme); KWin Wayland greeter on DP-3 only (home-desktop)
+- **DMS greeter** — display manager (nixpkgs `dms-greeter` on greetd, in its own Hyprland); DP-3 only on home-desktop
 - **Kitty** — terminal; JetBrainsMono Nerd Font 13pt, Gruvbox palette, tab bar
 - **awww** — wallpaper daemon
-- **hyprlock** — lockscreen; triggered on idle (5 min) and suspend
+- **DMS lock** — lockscreen (DankMaterialShell's own, via `loginctl lock-session`); triggered on idle (5 min), suspend and Super+L
 - **hypridle** — idle daemon; locks at 5 min, suspends at 15 min
 - **Gammastep** — night light; shared lat/long from `flake.nix` (Christchurch), 6500K day → 3500K night
 - **Thunar** — file manager (`Super+E`); archive plugin, thumbnail support via tumbler

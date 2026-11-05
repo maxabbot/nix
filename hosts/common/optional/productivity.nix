@@ -36,9 +36,10 @@ let
       '';
 in
 {
-  # Dedicated PAM service for hyprlock — without it, unlock falls back to
-  # /etc/pam.d/su (works, but logs an error and skips e.g. fprint integration).
-  security.pam.services.hyprlock = { };
+  # Password PAM service for the DMS lock screen. DMS uses /etc/pam.d/dankshell
+  # when it exists; without it, it writes its own copy of the login stack into
+  # ~/.local/state on first lock, which would drift from the system's.
+  security.pam.services.dankshell = { };
 
   programs = {
     # ── Hyprland ────────────────────────────────────────────────────────────────
@@ -181,7 +182,6 @@ in
     awww # wallpaper daemon — NOT "swww"
     wl-clipboard
     nwg-look
-    hyprlock
     playerctl
     brightnessctl
     hyprpicker # eyedropper colour picker (Super+Shift+P → color-picker.sh)

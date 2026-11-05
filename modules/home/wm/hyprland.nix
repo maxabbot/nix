@@ -23,11 +23,12 @@ let
   # finishes, and nvidia-resume.service — which restores the preserved VRAM
   # allocations — is only ordered After= that same unit, so it has not even
   # started when hypridle acts on the signal. Waking and re-rendering inside
-  # that window can wedge a hyprlock that survived the suspend: its resource
-  # gatherer stops completing, it commits no further frames, and
+  # that window can wedge a lock screen that survived the suspend (it was
+  # hyprlock then): its resource gatherer stops completing, it commits no
+  # further frames, and
   # ext-session-lock then obliges the compositor to paint black. Screens lit,
   # nothing on them, no crash to show for it, and after_sleep_cmd's pidof guard
-  # keeps the wedged instance rather than replacing it (seen 2026-09-03 16:25;
+  # kept the wedged instance rather than replacing it (seen 2026-09-03 16:25;
   # the identical resume 70 minutes earlier was fine, hence a race).
   #
   # Two phases, because the job is still queued when the signal lands: up to 1 s
@@ -68,7 +69,7 @@ let
   # light the screens back up and undo the whole point. dpms.sh on re-arms input
   # wake on the far side once nothing is left blanked.
   #
-  # The sleep gives hyprlock time to come up first: it renders on frame callbacks,
+  # The sleep gives the lock screen time to come up first: it renders on frame callbacks,
   # which a blanked output stops delivering, and a half-initialised lock screen on
   # resume would be a worse bug than the one being chased. On the idle path this
   # is a no-op anyway — idle-off blanked them at 330s and every dpms.sh verb only
@@ -463,13 +464,13 @@ in
         enable = true;
         settings = {
           general = {
-            # pidof guard: don't spawn a second hyprlock if one is already up
-            # (lock at 5min then loginctl lock-session at suspend = duplicate = crash).
-            lock_cmd = "pidof hyprlock || hyprlock";
+            # No lock_cmd: the DMS lock answers logind's Lock signal itself
+            # (loginctlLockIntegration, modules/home/wm/dms.nix), so the
+            # `loginctl lock-session` calls here are what lock. A lock_cmd too
+            # would race it for the session lock.
             before_sleep_cmd = blankBeforeSleep;
-            # pidof guard here too: killing the live hyprlock on resume made
-            # Hyprland flash its red "lockscreen died" fallback screen every wake.
-            # dpms.sh, not `hyprctl dispatch dpms on` — dispatch args are Lua, so
+            # The lock taken before sleep is still up on resume; nothing to
+            # relaunch. dpms.sh, not `hyprctl dispatch dpms on` — dispatch args are Lua, so
             # the bare `on` is a parse error and the screens stay black.
             #
             # waitForNvidiaResume is the ordering fix — see the comment on it.
@@ -482,7 +483,7 @@ in
               resumeProbe
               + waitForNvidiaResume
               + awaitBlankBeforeSleep
-              + "bash ~/.config/hypr/scripts/dpms.sh on; pidof hyprlock || hyprlock";
+              + "bash ~/.config/hypr/scripts/dpms.sh on";
           };
           listener = [
             {
@@ -490,7 +491,7 @@ in
               on-timeout = unlessCaffeine "loginctl lock-session";
             }
             # Blank the screens shortly after the lock rather than leaving them
-            # lit until the 15-minute suspend. 30s of grace after hyprlock
+            # lit until the 15-minute suspend. 30s of grace after the lock
             # appears, so the screen doesn't die out from under you mid-password.
             #
             # `idle-off`, not `off`: it no-ops while gaming mode owns the DPMS

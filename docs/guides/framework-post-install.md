@@ -110,18 +110,18 @@ avahi-browse -rt _ipp._tcp | grep -E "hostname|address" | head
 ```bash
 fprintd-enroll                      # right index finger; -f <finger> for others
 fprintd-verify
-grep -c fprintd /etc/pam.d/{login,hyprlock,sudo,polkit-1}
+grep -c fprintd /etc/pam.d/{login,greetd,dankshell,sudo,polkit-1}
 ```
 
-- [x] **PAM wiring.** The counts read `login:0`, `hyprlock:0`, `sudo:1` and
-      `polkit-1:1`.
+- [ ] **PAM wiring.** The counts read `login:0`, `greetd:0`, `dankshell:0`,
+      `sudo:1` and `polkit-1:1`.
 - [x] **sudo.** `sudo -k; sudo true` asks for a finger. Left alone, it falls
       back to the password after the reader's 30 s timeout.
 - [x] **Polkit.** `pkexec true` opens the polkit-gnome dialog (DMS's own agent
       is switched off), and it takes the finger too.
-- [x] **hyprlock.** Lock with `Super+L`. A line under the password box reads
-      "(Scan fingerprint to unlock)". The finger unlocks, and typing the
-      password works straight away without waiting for the reader.
+- [ ] **Lock screen.** Lock with `Super+L` (DMS's lock, on the rainbow
+      Framework gear). The finger unlocks, and typing the password works
+      straight away without waiting for the reader.
 - [x] **Greeter and TTY.** Both take the password only, with no wait for the
       reader first.
 - [x] **Keyring unlocked.** After a greeter login,
@@ -142,10 +142,10 @@ systemctl hibernate
       (negative) PRIO.
 - [x] **Idle.** The hypridle line ends in `systemctl suspend-then-hibernate`.
 - [x] **Hibernate.** The machine powers off. On power-on you get the LUKS
-      prompt, then the same session behind hyprlock with windows intact.
+      prompt, then the same session behind the lock screen with windows intact.
       `journalctl -b -g "sleep operation"` shows `'hibernate'`.
 - [x] **Plain suspend.** `systemctl suspend`, then wake from the keyboard:
-      both the screen and hyprlock come back.
+      both the screen and the lock screen come back.
 
 **suspend-then-hibernate.** The real delay is 2 h, so shorten it for the test
 with a drop-in, which systemd-sleep reads on each run:

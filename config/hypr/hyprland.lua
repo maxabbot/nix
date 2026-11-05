@@ -199,8 +199,8 @@ hl.config({
         mouse_move_enables_dpms  = true,
         key_press_enables_dpms   = true,
         vrr                      = 2,
-        -- If hyprlock dies, allow a fresh instance to re-take the session lock
-        -- instead of dropping to Hyprland's "lockscreen app died" failsafe.
+        -- If the lock screen (DMS) dies, let its restart re-take the session
+        -- lock instead of dropping to Hyprland's "lockscreen app died" failsafe.
         allow_session_lock_restore = true,
     },
 })
@@ -473,7 +473,7 @@ hl.bind(mainMod .. " + grave",         termPad, { description = "Scratchpad: Ter
 hl.bind(mainMod .. " + SHIFT + grave", btopPad, { description = "Scratchpad: btop" })
 
 -- System
-hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"),                                                          { description = "Lock" })
+hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("loginctl lock-session"),                                             { description = "Lock" })
 hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl suspend"),                                                 { description = "Suspend" })
 -- Panels are DMS's, over its IPC. The wallpaper picker hands its picks to awww
 -- (dms-wallpaper-bridge.sh), so awww stays the only wallpaper layer.
@@ -488,7 +488,7 @@ hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 
 -- Escape hatch for the idle DPMS listener and the pre-suspend blank: both can
 -- leave wake-on-input disarmed, so a blanked screen otherwise has no way back.
--- locked = true so it still fires over hyprlock, which is exactly when the
+-- locked = true so it still fires over the lock screen, which is exactly when the
 -- screens are most likely to be dark.
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/dpms.sh on"),                            { locked = true, description = "Wake all screens" })
 
