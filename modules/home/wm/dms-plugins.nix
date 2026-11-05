@@ -183,8 +183,8 @@ let
       updateInterval = 300;
     }
   );
-  # Pill icons: the NixOS snowflake (Nerd Font, which DMS already loads
-  # app-wide for StyledText) instead of a generic box, and a status icon
+  # Pill icons: the NixOS snowflake (JetBrainsMono Nerd Font, installed
+  # system-wide by base.nix) instead of a generic box, and a status icon
   # instead of a bare check — check_circle up to date, update behind, help
   # when it can't compare. Colours are upstream's.
   nixMonitor = pkgs.runCommand "dms-plugin-nixMonitor" { } ''
@@ -197,7 +197,7 @@ let
                     size: root.iconSize
     ' 'Text {
                     text: "\uf313" // nf-linux-nixos
-                    font.family: "FiraCode Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: root.iconSize
     ' \
       --replace-fail 'name: "check"' \

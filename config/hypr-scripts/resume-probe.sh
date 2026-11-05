@@ -7,7 +7,8 @@
 #
 #   - dpms.sh routes every hyprctl through `>/dev/null 2>&1 || true`, so what it
 #     decided (and whether it decided to do nothing) leaves no trace at all.
-#   - hyprlock only logs on events. It was quiet for the whole 88 minutes it held
+#   - hyprlock (the locker until 2249eb0) only logs on events. It was quiet for
+#     the whole 88 minutes it held
 #     the lock, so its silence after a resume says nothing either way — which is
 #     exactly the inference that sent the first diagnosis down the wrong path.
 #   - Hyprland's own log lives in $XDG_RUNTIME_DIR and dies with the reboot. It
@@ -15,12 +16,13 @@
 #     never survives.
 #
 # The open question this is built to answer: when the compositor is painting but
-# showing nothing, is hyprlock failing to commit its lock surfaces, or is every
-# client's buffer stale after the VRAM restore? Those look identical from the
-# outside, because the lock covers everything. They do not look identical here:
-# a live hyprlock keeps burning CPU and forking a shell every second for
-# hyprlock.conf's `cmd[update:1000]` clock, so a stalled event loop shows up as
-# CPU ticks that stop advancing while the compositor keeps answering hyprctl.
+# showing nothing, is the lock client failing to commit its lock surfaces, or is
+# every client's buffer stale after the VRAM restore? Those look identical from
+# the outside, because the lock covers everything. They do not look identical
+# here: a live lock client's event loop keeps ticking (hyprlock's 1 s clock
+# then; now the DMS lock, drawn by shell-dms's quickshell, with its clock and
+# bar timers), so a stalled event loop shows up as CPU ticks that stop
+# advancing while the compositor keeps answering hyprctl.
 #
 # Deliberately NOT `set -e`. This runs against a session that is already broken,
 # where commands failing is the expected case and the failures are the evidence;
@@ -69,15 +71,25 @@ cpu_ticks() {
     printf '%s' "$((${12:-0} + ${13:-0}))"
 }
 
+# The DMS lock has no process of its own: shell-dms's quickshell child draws
+# it, so that process's CPU ticks are the event-loop witness. LockedHint is
+# logind's view of the session lock, which the DMS lock sets and clears.
 lock_state() {
-    local pid
-    pid=$(pidof hyprlock 2>/dev/null | awk '{print $1}')
-    if [ -z "$pid" ]; then
-        printf 'hyprlock: ABSENT'
+    local session locked main qs
+    session=$(timeout 2 loginctl show-user "$(id -un)" -p Display --value 2>/dev/null)
+    locked=$(timeout 2 loginctl show-session "$session" -p LockedHint --value 2>/dev/null)
+    main=$(timeout 2 systemctl --user show -p MainPID --value shell-dms.service 2>/dev/null)
+    if [ -z "$main" ] || [ "$main" = 0 ]; then
+        printf 'lock: locked=%s shell-dms: NOT RUNNING' "${locked:-?}"
         return
     fi
-    printf 'hyprlock: pid=%s cpu_ticks=%s children=%s' \
-        "$pid" "$(cpu_ticks "$pid")" "$(pgrep -P "$pid" 2>/dev/null | wc -l)"
+    qs=$(pgrep -P "$main" quickshell 2>/dev/null | head -n1)
+    if [ -z "$qs" ]; then
+        printf 'lock: locked=%s shell-dms=%s quickshell: ABSENT' "${locked:-?}" "$main"
+        return
+    fi
+    printf 'lock: locked=%s shell-dms=%s quickshell: pid=%s cpu_ticks=%s' \
+        "${locked:-?}" "$main" "$qs" "$(cpu_ticks "$qs")"
 }
 
 monitors() {

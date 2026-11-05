@@ -40,7 +40,8 @@
     (python3Packages.dbt-core.withAdapters (a: [ a.dbt-snowflake ]))
   ];
 
-  programs.direnv.enable = true;
+  # direnv (with nix-direnv) is per-user in home/max/cli.nix. Enabling it here
+  # too adds a second `direnv hook zsh` to /etc/zshrc.
 
   # Gives downloaded, dynamically linked binaries the /lib64 loader they expect,
   # e.g. uv-managed Pythons and the native binaries npm packages ship (esbuild,

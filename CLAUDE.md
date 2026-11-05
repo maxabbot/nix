@@ -28,7 +28,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 
 | File | Purpose |
 |---|---|
-| `development.nix` | Language runtimes, dev tools, direnv (sshd configured but disabled) |
+| `development.nix` | Language runtimes, dev tools, nix-ld (sshd configured but disabled; direnv is per-user in `home/max/cli.nix`) |
 | `podman.nix` | Podman + Docker compat |
 | `expo.nix` | Android Studio, and opens Metro's port (8081/tcp) so a phone on the LAN can load an Expo dev build (home-desktop only — Metro serves app source). Toolchains stay in per-project flakes; adb USB access comes from systemd's uaccess rules |
 | `libvirt.nix` | libvirt / QEMU-KVM |
