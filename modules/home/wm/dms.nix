@@ -919,6 +919,9 @@ let
       loginctlLockIntegration = true;
       lockScreenWallpaperPath = cfg.lockWallpaper;
       lockScreenWallpaperFillMode = "Fill";
+      # The greeter shows its greeter_wallpaper_override.jpg (productivity.nix
+      # puts this same image there) only while this is non-empty.
+      greeterWallpaperPath = cfg.lockWallpaper;
       # Finger and password side by side: DMS runs its own fprintd PAM stack
       # in parallel with the password one (/etc/pam.d/dankshell, which has
       # pam_fprintd turned off on fprintd hosts — hosts/framework/default.nix).
