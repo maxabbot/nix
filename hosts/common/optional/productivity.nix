@@ -2,17 +2,40 @@
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 let
   inherit (config.custom.base) username;
   hostSecrets = ../../../secrets/${config.networking.hostName}.yaml;
   hasIdentity = builtins.pathExists hostSecrets;
+
+  # ── DMS greeter package ─────────────────────────────────────────────────────
+  # The launcher (Modules/Greetd/assets/dms-greeter) ends its compositor with
+  # `hyprctl dispatch exit`, the hyprlang form, which Hyprland on Lua rejects.
+  # The greeter's Hyprland would then never exit, and greetd only starts the
+  # session once the greeter has gone. A store-path script sidesteps the
+  # quoting: the call sits inside a Lua string inside `sh -c "…"`.
+  greeterExit = pkgs.writeShellScript "dms-greeter-exit" ''
+    exec ${config.programs.hyprland.package}/bin/hyprctl dispatch 'hl.dsp.exit()'
+  '';
+  dmsGreeter = pkgs.dms-shell.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      substituteInPlace "$out/share/quickshell/dms/Modules/Greetd/assets/dms-greeter" \
+        --replace-fail 'hyprctl dispatch exit' ${greeterExit}
+    '';
+  });
+
+  # The greeter reads a fixed-name override from its data dir; configFiles
+  # copies by basename, so the file has to carry that name. Same wallpaper as
+  # the SDDM greeter had.
+  greeterWallpaper =
+    pkgs.runCommand "dms-greeter-wallpaper" { nativeBuildInputs = [ pkgs.imagemagick ]; }
+      ''
+        mkdir -p $out
+        magick ${../../../config/sddm/leaves-wall.png} $out/greeter_wallpaper_override.jpg
+      '';
 in
 {
-  imports = [ inputs.silentSDDM.nixosModules.default ];
-
   # Dedicated PAM service for hyprlock — without it, unlock falls back to
   # /etc/pam.d/su (works, but logs an error and skips e.g. fprint integration).
   security.pam.services.hyprlock = { };
@@ -30,84 +53,37 @@ in
     # KDE Connect — phone integration (daemon + firewall ports 1714-1764).
     # Surfaced on the DMS bar and control centre by the dankKDEConnect plugin.
     kdeconnect.enable = true;
-
-    silentSDDM = {
-      enable = true;
-      theme = "gruvbox";
-
-      backgrounds = {
-        wallpaper = ../../../config/sddm/leaves-wall.png;
-      };
-
-      settings = {
-        # ── Background — gruvbox preset has use-background-color = true which
-        # overrides the image; must explicitly disable it here.
-        "LoginScreen" = {
-          background = "leaves-wall.png";
-          use-background-color = false;
-          blur = 8;
-        };
-        "LockScreen" = {
-          background = "leaves-wall.png";
-          use-background-color = false;
-          blur = 28;
-        };
-
-        # ── Login panel — right side so wallpaper is visible ──────────────────
-        "LoginScreen.LoginArea" = {
-          position = "right";
-        };
-
-        # ── Lock screen clock — 24h ───────────────────────────────────────────
-        "LockScreen.Clock" = {
-          format = "HH:mm";
-        };
-        "LockScreen.Date" = {
-          locale = "en_NZ";
-        };
-
-      };
-    };
   };
 
   services = {
-    # ── Display manager (SDDM via SilentSDDM) ──────────────────────────────────
-    # silentSDDM module handles enable/theme/extraPackages/QML2_IMPORT_PATH.
-    # Do NOT use sugar-dark — it depends on Qt5 QtGraphicalEffects which
-    # doesn't exist in Qt6 (SDDM 0.21+). Stylix has no SDDM target.
-    # Do NOT set wayland.compositor — the nixpkgs default ("weston") handles
-    # mouse/keyboard correctly in VMs; kwin is GPU-heavy and breaks input.
-    # kdePackages.breeze must be in extraPackages so breeze_cursors is findable
-    # on disk — silentSDDM's module only ships its own propagatedBuildInputs.
-    displayManager.sddm = {
-      extraPackages = [ pkgs.kdePackages.breeze ];
-      settings = {
-        Theme = {
-          CursorTheme = "breeze_cursors";
-          CursorSize = "24";
-        };
-        # ── Greeter cursor (the actual fix) ────────────────────────────────────
-        # The KWin greeter compositor draws the pointer, but SDDM starts it
-        # through sddm-helper, which RESETS the environment and injects ONLY the
-        # string in sddm.conf's [General] GreeterEnvironment. Neither the systemd
-        # unit's env nor sddm.extraPackages reaches KWin — so it can't find
-        # breeze_cursors and logs "Unable to load any cursor theme", drawing
-        # nothing. (kcminputrc below supplies the theme NAME; this supplies the
-        # search PATH to the files.)
-        # silentSDDM's module hardcodes GreeterEnvironment (QML2_IMPORT_PATH +
-        # QT_IM_MODULE), so mkForce over it, re-adding those two and appending
-        # the cursor vars. QML2_IMPORT_PATH uses the stable /run/current-system
-        # symlink.
-        General.GreeterEnvironment = lib.mkForce (
-          lib.concatStringsSep "," [
-            "QML2_IMPORT_PATH=/run/current-system/sw/share/sddm/themes/silent/components/"
-            "QT_IM_MODULE=qtvirtualkeyboard"
-            "XCURSOR_PATH=${pkgs.kdePackages.breeze}/share/icons"
-            "XCURSOR_THEME=breeze_cursors"
-            "XCURSOR_SIZE=24"
-            "KWIN_FORCE_SW_CURSOR=1"
-          ]
-        );
+    # ── Display manager (DMS greeter on greetd) ────────────────────────────────
+    # nixpkgs' dms-greeter module: greetd runs the DMS greeter UI inside its own
+    # short-lived Hyprland as the dms-greeter user. Before each start greetd
+    # copies the user's DMS settings.json (so the Gruvbox custom theme, which
+    # it also copies) and session.json into /var/lib/dms-greeter.
+    displayManager.dms-greeter = {
+      enable = true;
+      package = dmsGreeter;
+      configHome = "/home/${username}";
+      configFiles = [ "${greeterWallpaper}/greeter_wallpaper_override.jpg" ];
+      compositor = {
+        name = "hyprland";
+        # Lua (Hyprland 0.55): the launcher spots `hl.` and appends the start
+        # hook that runs the greeter, but leaves the rest — DMS_RUN_GREETER,
+        # the logo — to a custom config. Hosts append monitor rules. The
+        # cursor is Stylix's, as in the session; the greeter user's
+        # environment has no XCURSOR_PATH of its own.
+        customConfig = ''
+          hl.env("DMS_RUN_GREETER", "1")
+          hl.env("XCURSOR_PATH", "${config.stylix.cursor.package}/share/icons")
+          hl.env("XCURSOR_THEME", "${config.stylix.cursor.name}")
+          hl.env("XCURSOR_SIZE", "${toString config.stylix.cursor.size}")
+          hl.config({
+              misc = {
+                  disable_hyprland_logo = true,
+              },
+          })
+        '';
       };
     };
     # ── PipeWire audio stack ────────────────────────────────────────────────────
@@ -188,17 +164,6 @@ in
   # ~/SyncDrive — the one folder Syncthing shares (add it in the GUI or under
   # services.syncthing.settings.folders). Created here so it exists on every host.
   systemd.tmpfiles.rules = [ "d /home/${username}/SyncDrive 0755 ${username} users -" ];
-
-  # KWin reads cursor theme/size from kcminputrc, not from sddm.conf [Theme].
-  system.activationScripts.sddmCursorConfig = {
-    deps = [ "users" ];
-    text = ''
-      mkdir -p /var/lib/sddm/.config
-      printf '[Mouse]\ncursorTheme=breeze_cursors\ncursorSize=24\n' \
-        > /var/lib/sddm/.config/kcminputrc
-      chown sddm:sddm /var/lib/sddm/.config/kcminputrc
-    '';
-  };
 
   # /dev/uinput for synthetic input (theclicker autoclicker emits clicks through a
   # virtual device). TAG+="uaccess" grants the active-session user access; the

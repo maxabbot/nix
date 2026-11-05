@@ -120,8 +120,10 @@
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="pci", ATTR{device}!="0xe476", TEST=="power/control", ATTR{power/control}="auto"
   '';
-  boot.kernelParams = [ "nmi_watchdog=0" ];
-  boot.kernel.sysctl."vm.dirty_writeback_centisecs" = 1500;
+  boot = {
+    kernelParams = [ "nmi_watchdog=0" ];
+    kernel.sysctl."vm.dirty_writeback_centisecs" = 1500;
+  };
 
   # ── Nix builds ───────────────────────────────────────────────────────────────
   # base.nix caps max-jobs at 1 for the RAM-constrained hosts; 32 GB (30.6 GiB
@@ -191,41 +193,6 @@
     ];
   };
 
-  # ── Speakers ─────────────────────────────────────────────────────────────────
-  # nixos-hardware ships `hardware.framework.laptop13.audioEnhancement` (a
-  # PipeWire filter chain: bass extension, loudness compensation, EQ). Left OFF
-  # deliberately — upstream tuned it for the classic Framework 13 chassis and
-  # says the Pro's speakers need different values, so enabling it here would
-  # apply the wrong EQ curve.
-  #
-  # Instead: Framework's own Windows tuning (Dolby DAX3, "Balanced" voicing),
-  # rebuilt as a PipeWire filter chain — FIR speaker correction, PEQ,
-  # multiband compressor, regulator, limiter. Generated once by
-  # speaker-tuning-to-easyeffects (a113b2e) from
-  # DEV_0285_SUBSYS_F111000F_PCI_SUBSYS_000FF111.xml in Framework's Windows
-  # driver bundle v1.01 (2026-06-05), with
-  #   dolby_to_pipewire.py <xml> --target-sink <sink> --no-activate
-  # The conf is the generator's output unchanged, bar the @irs@ placeholder:
-  # a WirePlumber smart filter, always on for the built-in analog sink, so
-  # volume keys still drive the card itself. Its input node is still an
-  # Audio/Sink, so DMS would list it as a second output; dms.nix hides it.
-  # HDMI, USB and Bluetooth bypass it; the headphone jack doesn't (it's a port
-  # on the same sink), so wired headphones get the speaker EQ too. It can't
-  # be bypassed at runtime — PipeWire won't let a client unload it — so A/B
-  # means a rebuild. (Tried as a selectable virtual sink to compare; the
-  # Dolby version won, 2026-11-03.) The conf is marked nofail: if an LV2
-  # plugin is missing, PipeWire just plays unprocessed.
-  services.pipewire = {
-    extraLv2Packages = [ pkgs.lsp-plugins ];
-    configPackages = [
-      (pkgs.writeTextDir "share/pipewire/pipewire.conf.d/60-dolby-speakers.conf" (
-        builtins.replaceStrings [ "@irs@" ] [ "${../../config/pipewire/Dolby_Balanced.irs}" ] (
-          builtins.readFile ../../config/pipewire/Dolby_Balanced.conf
-        )
-      ))
-    ];
-  };
-
   # ── Fingerprint reader ───────────────────────────────────────────────────────
   # services.fprintd comes from nixos-hardware. Enrol once per finger with
   # `fprintd-enroll`, then verify with `fprintd-verify`.
@@ -233,24 +200,19 @@
   # Every PAM service's fprintAuth defaults to on, which puts pam_fprintd ahead
   # of the password: it waits for a finger, or its timeout, before the password
   # is tried. Kept for sudo and polkit; off for:
-  #   - login, which SDDM's stack substacks: a fingerprint login hands
-  #     gnome-keyring no password, so the login keyring stays locked.
+  #   - login (the TTY) and greetd (the DMS greeter): a fingerprint login
+  #     hands gnome-keyring no password, so the login keyring stays locked.
+  #     The greeter reads /etc/pam.d/greetd to decide whether to offer the
+  #     finger, so with it off there it asks for the password alone.
   #   - hyprlock, which talks to fprintd itself (the auth block that
   #     modules/home/apps.nix adds on fprintd hosts), so the finger and the
   #     password field work at the same time. Both at once would fight over
   #     the reader.
   security.pam.services = {
     login.fprintAuth = false;
+    greetd.fprintAuth = false;
     hyprlock.fprintAuth = false;
   };
-
-  # ── Login greeter ────────────────────────────────────────────────────────────
-  # KWin (SDDM's greeter compositor) auto-scales the panel to 1.7x, and
-  # SilentSDDM multiplies its own sizes by that devicePixelRatio again
-  # (Config.automaticScale) — so every widget came out ~1.7x too big. Scale the
-  # theme back by the same factor. Shallow-merges with productivity.nix's
-  # silentSDDM.settings (type `attrs`), so only the General section is set here.
-  programs.silentSDDM.settings.General.scale = 0.6;
 
   # ── Bootloader ───────────────────────────────────────────────────────────────
   # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
@@ -295,30 +257,77 @@
     initrd.luks.devices.cryptroot.crypttabExtraOpts = [ "tpm2-device=auto" ];
   };
 
-  # ── Lid / suspend ────────────────────────────────────────────────────────────
-  # Closing the lid on battery suspends, then hibernates to the @swap swapfile
-  # (disk-config.nix) after HibernateDelaySec, so a laptop left shut in a bag
-  # doesn't drain flat. On AC it only suspends. hypridle's 15-minute idle
-  # suspend follows HandleLidSwitch (modules/home/wm/hyprland.nix), and
-  # HibernateOnACPower = false holds its countdown while plugged in, so a
-  # docked machine left idle stays suspended. DMS's power menu stays plain
-  # suspend.
-  #
-  # No resume= or resume_offset: when systemd-sleep hibernates it records the
-  # swapfile's location in the HibernateLocation EFI variable, and the systemd
-  # initrd resumes from it once LUKS is unlocked. Secure Boot won't block it
-  # either: the kernel is built without the lockdown LSM.
-  #
-  # Power button: a tap suspends (logind's default is poweroff, and the button
-  # doubles as the fingerprint reader, so it gets brushed); holding it for
-  # logind's long-press threshold (~5 s) powers off.
-  services.logind.settings.Login = {
-    HandlePowerKey = "suspend";
-    HandlePowerKeyLongPress = "poweroff";
-    HandleLidSwitch = "suspend-then-hibernate";
-    HandleLidSwitchExternalPower = "suspend";
-    HandleLidSwitchDocked = "ignore";
+  services = {
+    # ── Speakers ───────────────────────────────────────────────────────────────
+    # nixos-hardware ships `hardware.framework.laptop13.audioEnhancement` (a
+    # PipeWire filter chain: bass extension, loudness compensation, EQ). Left OFF
+    # deliberately — upstream tuned it for the classic Framework 13 chassis and
+    # says the Pro's speakers need different values, so enabling it here would
+    # apply the wrong EQ curve.
+    #
+    # Instead: Framework's own Windows tuning (Dolby DAX3, "Balanced" voicing),
+    # rebuilt as a PipeWire filter chain — FIR speaker correction, PEQ,
+    # multiband compressor, regulator, limiter. Generated once by
+    # speaker-tuning-to-easyeffects (a113b2e) from
+    # DEV_0285_SUBSYS_F111000F_PCI_SUBSYS_000FF111.xml in Framework's Windows
+    # driver bundle v1.01 (2026-06-05), with
+    #   dolby_to_pipewire.py <xml> --target-sink <sink> --no-activate
+    # The conf is the generator's output unchanged, bar the @irs@ placeholder:
+    # a WirePlumber smart filter, always on for the built-in analog sink, so
+    # volume keys still drive the card itself. Its input node is still an
+    # Audio/Sink, so DMS would list it as a second output; dms.nix hides it.
+    # HDMI, USB and Bluetooth bypass it; the headphone jack doesn't (it's a port
+    # on the same sink), so wired headphones get the speaker EQ too. It can't
+    # be bypassed at runtime — PipeWire won't let a client unload it — so A/B
+    # means a rebuild. (Tried as a selectable virtual sink to compare; the
+    # Dolby version won, 2026-11-03.) The conf is marked nofail: if an LV2
+    # plugin is missing, PipeWire just plays unprocessed.
+    pipewire = {
+      extraLv2Packages = [ pkgs.lsp-plugins ];
+      configPackages = [
+        (pkgs.writeTextDir "share/pipewire/pipewire.conf.d/60-dolby-speakers.conf" (
+          builtins.replaceStrings [ "@irs@" ] [ "${../../config/pipewire/Dolby_Balanced.irs}" ] (
+            builtins.readFile ../../config/pipewire/Dolby_Balanced.conf
+          )
+        ))
+      ];
+    };
+
+    # ── Login greeter ──────────────────────────────────────────────────────────
+    # Same panel mode and 2x scale as the session (hmArgs primary in flake.nix),
+    # so the greeter doesn't come up at Hyprland's guess. Appended to
+    # productivity.nix's greeter config.
+    displayManager.dms-greeter.compositor.customConfig = ''
+      hl.monitor({ output = "eDP-1", mode = "2880x1920@120", position = "0x0", scale = 2 })
+    '';
+
+    # ── Lid / suspend ──────────────────────────────────────────────────────────
+    # Closing the lid on battery suspends, then hibernates to the @swap swapfile
+    # (disk-config.nix) after HibernateDelaySec, so a laptop left shut in a bag
+    # doesn't drain flat. On AC it only suspends. hypridle's 15-minute idle
+    # suspend follows HandleLidSwitch (modules/home/wm/hyprland.nix), and
+    # HibernateOnACPower = false holds its countdown while plugged in, so a
+    # docked machine left idle stays suspended. DMS's power menu stays plain
+    # suspend.
+    #
+    # No resume= or resume_offset: when systemd-sleep hibernates it records the
+    # swapfile's location in the HibernateLocation EFI variable, and the systemd
+    # initrd resumes from it once LUKS is unlocked. Secure Boot won't block it
+    # either: the kernel is built without the lockdown LSM.
+    #
+    # Power button: a tap suspends (logind's default is poweroff, and the button
+    # doubles as the fingerprint reader, so it gets brushed); holding it for
+    # logind's long-press threshold (~5 s) powers off.
+    logind.settings.Login = {
+      HandlePowerKey = "suspend";
+      HandlePowerKeyLongPress = "poweroff";
+      HandleLidSwitch = "suspend-then-hibernate";
+      HandleLidSwitchExternalPower = "suspend";
+      HandleLidSwitchDocked = "ignore";
+    };
   };
+
+  # The hibernate half of the lid's suspend-then-hibernate (Lid / suspend above).
   systemd.sleep.settings.Sleep = {
     HibernateDelaySec = "2h";
     HibernateOnACPower = false;

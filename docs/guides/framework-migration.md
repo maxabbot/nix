@@ -18,7 +18,7 @@ does, except these, all deliberate:
 | `nvidia.nix`, `cuda.nix`, `fan2go.nix`, `it87` | No NVIDIA GPU; a laptop has no case fans to manage |
 | `gaming-streaming.nix` | Gets `moonlight.nix` (client only) instead of the Apollo host |
 | `expo.nix` | Home-desktop only: Metro serves app source on the LAN |
-| Gamescope DP-3 args, SDDM monitor config, Windows chainload | Specific to the desktop's monitors and disk |
+| Gamescope DP-3 args, greeter monitor rule, Windows chainload | Specific to the desktop's monitors and disk |
 
 Framework-only: `nixos-hardware`, LUKS + TPM, hibernate, 80% charge limit,
 powersave specialisation, fingerprint login, kanshi docking.

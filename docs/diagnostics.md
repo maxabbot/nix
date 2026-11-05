@@ -46,58 +46,30 @@ cat /sys/class/drm/card1-DP-2/modes | head -5
 cat /sys/class/drm/card1-DP-3/modes | head -5
 ```
 
-## SDDM
+## Greeter (DMS on greetd)
 
 ```bash
-# Check if our kwinoutputconfig.json was written
-sudo cat /var/lib/sddm/.config/kwinoutputconfig.json
+# greetd status and logs — the unit is greetd.service (aliased display-manager)
+systemctl status greetd
+journalctl -b -u greetd | tail -40
 
-# What files SDDM's KWin has written
-sudo ls -la /var/lib/sddm/.config/
-sudo ls -la /var/lib/sddm/.local/share/ 2>/dev/null
+# The greeter's Hyprland and quickshell log under their own identifier
+journalctl -b -t dms-greeter/hyprland | tail -40
 
-# SDDM service status and logs
-# NB: the unit is `display-manager.service`, NOT `sddm.service`.
-# `sddm` matches nothing — see the greeter-cursor note below for why that matters.
-systemctl status display-manager
-journalctl -b -u display-manager | tail -40
+# What greetd copied in before the greeter started (settings, theme, wallpaper)
+sudo ls -la /var/lib/dms-greeter/
 
-# Restart SDDM (returns to login screen — kills current session)
-sudo systemctl restart display-manager
+# Restart the greeter (returns to login screen — kills current session)
+sudo systemctl restart greetd
 ```
 
-### Greeter cursor is invisible (KWin compositor)
+### Login hangs after the password is accepted
 
-Symptom in the journal (search the whole boot, not just the unit — KWin logs
-under the `sddm-helper-start-wayland` identifier):
-
-```bash
-journalctl -b | grep -iE "kwin|cursor"
-# kwin_core: Failed to load cursor theme "breeze_cursors"
-# kwin_core: Unable to load any cursor theme
-```
-
-Root cause: SDDM starts the greeter session — **including the `kwin_wayland`
-compositor that draws the pointer** — via `sddm-helper`, which **resets the
-environment** and injects only what's in sddm.conf's `[General]
-GreeterEnvironment`. So NONE of these reach KWin: the `display-manager.service`
-systemd env, `sddm.extraPackages` (that only wires the greeter *binary's*
-wrapper), or a `sddm.service` (which doesn't exist). With no `XCURSOR_PATH` on
-the greeter env KWin can't find `breeze_cursors`, draws no cursor at all, and
-`KWIN_FORCE_SW_CURSOR` can't help (no image to draw).
-
-Fix (in `hosts/common/optional/productivity.nix`): put the cursor vars into
-`displayManager.sddm.settings.General.GreeterEnvironment`. silentSDDM's module
-hardcodes that string (QML2_IMPORT_PATH + QT_IM_MODULE), so override with
-`lib.mkForce`, re-adding those two and appending `XCURSOR_PATH`/`XCURSOR_THEME`/
-`XCURSOR_SIZE`/`KWIN_FORCE_SW_CURSOR`. `kcminputrc` (via the `sddmCursorConfig`
-activation script) supplies the theme NAME; GreeterEnvironment supplies the PATH.
-
-```bash
-# Confirm the cursor vars are in the generated greeter env
-grep GreeterEnvironment /etc/sddm.conf.d/00-nixos.conf
-# After a greeter restart, the "Unable to load any cursor theme" lines should be gone.
-```
+greetd starts the session only once the greeter has exited. The launcher stops
+its Hyprland with `hyprctl dispatch exit`, which Hyprland on Lua rejects, so
+`productivity.nix` patches that call to `hl.dsp.exit()` (the `dmsGreeter`
+override). After a dms-shell bump, check the substitution still applies — it is
+`--replace-fail`, so a reworded launcher fails the build rather than the login.
 
 ## Services
 

@@ -1,4 +1,4 @@
-# plymouth.nix — Boot splash between the Limine menu and SDDM, on every host.
+# plymouth.nix — Boot splash between the Limine menu and the greeter, on every host.
 # Gruvbox bg0 with a spinning NixOS snowflake, matching Limine and the greeter.
 # On framework the systemd initrd hands the LUKS passphrase prompt to it, so
 # the unlock screen is themed too.

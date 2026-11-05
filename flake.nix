@@ -50,11 +50,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    silentSDDM = {
-      url = "github:uiriansan/SilentSDDM";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # LMMS 1.3 packaged from the upstream AppImage — nixpkgs still ships the
     # outdated 1.2.2 stable release, whose LV2 plugin support (Carla/Surge XT)
     # is incomplete. Pre-release: project files saved with it aren't openable

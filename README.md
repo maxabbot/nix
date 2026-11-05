@@ -21,7 +21,7 @@ hosts/
   work-laptop/                   # ThinkBook 14 2-in-1 G4 IML on a USB SSD (TLP, powersave specialisation)
   vm/                            # home-desktop stack in a QEMU/virtio VM
   common/optional/               # Import-composition feature files
-    productivity.nix             #   Hyprland, SDDM, PipeWire, Syncthing
+    productivity.nix             #   Hyprland, DMS greeter, PipeWire, Syncthing
     nvidia.nix                   #   NVIDIA open driver (RTX 40-series)
     gaming.nix                   #   Steam, Gamemode, Gamescope, controllers
     development.nix              #   Language runtimes, dev tools

@@ -43,8 +43,8 @@
   environment.systemPackages = with pkgs; [
     # Big Picture's "Switch to Desktop" calls SteamOS's steamos-session-select,
     # which doesn't exist on NixOS — the button silently does nothing inside the
-    # SDDM "Steam" (gamescope) session. Shim it to shut Steam down cleanly, which
-    # ends the gamescope session and returns to the SDDM greeter, where the
+    # greeter's "Steam" (gamescope) session. Shim it to shut Steam down cleanly,
+    # which ends the gamescope session and returns to the greeter, where the
     # desktop (Hyprland) session can be picked.
     (writeShellScriptBin "steamos-session-select" ''
       steam -shutdown

@@ -16,7 +16,7 @@ in
   # Drop both offending modules outright — neither feature is used here.
   #   kmscon:  services.kmscon.config      → renamed to extraConfig in 26.05
   #   regreet: programs.regreet            → moved to services.displayManager.regreet
-  #            in unstable (we use SDDM anyway)
+  #            in unstable (we use the DMS greeter anyway)
   disabledModules = [
     "${inputs.stylix}/modules/kmscon/nixos.nix"
     "${inputs.stylix}/modules/regreet/nixos.nix"

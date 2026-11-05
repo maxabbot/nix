@@ -41,8 +41,8 @@ fails, note it in `TODO.md` with the command and its output.
       2560×1440 and up), with a `NixOS` and a `powersave` entry.
 - [ ] **LUKS prompt.** It's themed by plymouth and takes the passphrase you
       typed during the install.
-- [ ] **SDDM greeter.** It should come up at a readable size: it runs on
-      KWin, which picks a scale from the panel. If it's tiny, that needs config.
+- [ ] **DMS greeter.** It should come up at a readable size: its Hyprland
+      pins the panel at 2x (`hosts/framework/default.nix`).
 - [ ] **TTY font.** On `Ctrl+Alt+F2` the kernel picks its large Terminus font
       by itself. `Ctrl+Alt+F1` goes back.
 - [x] **Log in with the password.** It comes from `max-password-hash` in
@@ -122,9 +122,9 @@ grep -c fprintd /etc/pam.d/{login,hyprlock,sudo,polkit-1}
 - [x] **hyprlock.** Lock with `Super+L`. A line under the password box reads
       "(Scan fingerprint to unlock)". The finger unlocks, and typing the
       password works straight away without waiting for the reader.
-- [x] **SDDM and TTY.** Both take the password only, with no wait for the
+- [x] **Greeter and TTY.** Both take the password only, with no wait for the
       reader first.
-- [x] **Keyring unlocked.** After an SDDM login,
+- [x] **Keyring unlocked.** After a greeter login,
       `busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.Secret.Collection Locked`
       prints `b false`.
 
