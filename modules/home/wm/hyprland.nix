@@ -17,6 +17,23 @@ let
   # always run with.
   softwareCursor = machineType != "laptop";
 
+  # Every wallpaper in the repo, by the name it gets in ~/Pictures/Wallpapers
+  # (see wallpaperDir). The host's own picks are folded in by name, so one
+  # that is already listed isn't copied twice.
+  wallpaperSeeds = lib.listToAttrs (
+    map (src: lib.nameValuePair (builtins.unsafeDiscardStringContext (baseNameOf src)) src) (
+      [
+        ../../../config/sddm/leaves-wall.png
+        ../../../config/wallpapers/waterfall-3.jpg
+        ../../../config/wallpapers/cave.jpg
+        "${pkgs.gruvbox-wallpapers}/rainbow-nix.png"
+        "${pkgs.gruvbox-wallpapers}/rainbow-framework.png"
+        cfg.wallpaper
+      ]
+      ++ lib.optional (cfg.wallpaperPortrait != null) cfg.wallpaperPortrait
+    )
+  );
+
   # Hold the resume path until the GPU is back, then wake the outputs.
   #
   # logind emits PrepareForSleep(false) as soon as systemd-suspend.service
@@ -345,15 +362,23 @@ in
     home.activation = {
       # ── Wallpaper directory ──────────────────────────────────────────────────
       # DMS's wallpaper picker defaults here, and it didn't exist, so the picker
-      # listed nothing. Seeded with a real copy of the wallpaper rather than an HM
-      # symlink, and only when the directory is first created, so deleting the
-      # image later isn't undone by the next nixup.
+      # listed nothing. Seeded with real copies of every wallpaper in the repo
+      # rather than HM symlinks, each once per machine: .seeded records what has
+      # been offered, so an image deleted later isn't undone by the next nixup,
+      # while one added to wallpaperSeeds still arrives.
       wallpaperDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         dir="${config.home.homeDirectory}/Pictures/Wallpapers"
-        if [ ! -d "$dir" ]; then
-          $DRY_RUN_CMD mkdir -p "$dir"
-          $DRY_RUN_CMD install -m 0644 ${cfg.wallpaper} "$dir/${baseNameOf cfg.wallpaper}"
-        fi
+        seeded="$dir/.seeded"
+        $DRY_RUN_CMD mkdir -p "$dir"
+        ${lib.concatStrings (
+          lib.mapAttrsToList (name: src: ''
+            if ! grep -qxF ${lib.escapeShellArg name} "$seeded" 2>/dev/null; then
+              [ -e "$dir/"${lib.escapeShellArg name} ] \
+                || $DRY_RUN_CMD install -m 0644 ${src} "$dir/"${lib.escapeShellArg name}
+              [ -n "''${DRY_RUN_CMD:-}" ] || printf '%s\n' ${lib.escapeShellArg name} >> "$seeded"
+            fi
+          '') wallpaperSeeds
+        )}
       '';
 
       # ── Syncthing Tray connection ────────────────────────────────────────────

@@ -254,9 +254,11 @@ DP-2. Patched here until 1.6 flattened the loop.
 
 **Wallpaper directory.** `~/Pictures/Wallpapers` is what DMS's picker
 defaults to, and it didn't exist, so it listed nothing. An
-activation in `hyprland.nix` now creates it and seeds a real copy of the leaves.
-It only seeds on first
-creation, so removing the image isn't undone by the next `nixup`.
+activation in `hyprland.nix` now creates it and seeds real copies of every
+wallpaper in the repo (`wallpaperSeeds`: leaves, waterfall, cave, and the
+rainbow Nix and Framework logos). Each is seeded once per machine and noted in
+the folder's `.seeded`, so removing an image isn't undone by the next `nixup`,
+but a newly added one still arrives.
 
 **Harmless log noise:** DMS failing to register as polkit agent
 (polkit-gnome already is), `$SWAYSOCK`/`$I3SOCK` unset, no `dms-colors.json`
