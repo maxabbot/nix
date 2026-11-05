@@ -16,7 +16,13 @@
   # obs-studio comes from streaming-tools.nix (imported alongside this module).
   services.apollo = {
     enable = true;
-    package = inputs.apollo-flake.packages.x86_64-linux.default;
+    # apollo-flake's newest commit builds Apollo 0.4.7-alpha.1 (2025), its
+    # latest release, which still has CVE-2026-32253: an untrusted client
+    # certificate could pass as an authorized, paired client. Apollo merged
+    # the fix to master (#1496) but hasn't released it, so carry it here.
+    package = inputs.apollo-flake.packages.x86_64-linux.default.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./apollo-cve-2026-32253.patch ];
+    });
     capSysAdmin = true;
     openFirewall = true;
   };
