@@ -334,6 +334,77 @@ let
 '
   '';
 
+  # Battery levels of peripherals the shell doesn't show: the MX Ergo S (via
+  # Solaar's library), Bluetooth devices, headsets. Its pill hides itself when
+  # no device reports a battery. The daemon runs its helper with a bare
+  # `python3`; this one carries what the helper imports — Solaar's
+  # logitech_receiver, dbus-python and pygobject (BlueZ/D-Bus), pyudev
+  # (instant re-read on plug/dock). The pill's percentage is swapped for the
+  # system monitor's gauge (config/dms/BarSystemMonitor.qml), keeping the
+  # plugin's level colours; the popout still lists exact percentages.
+  # Solaar vendors hid_parser, which its own
+  # propagated hid-parser also provides, hence ignoreCollisions.
+  deviceBatteriesPython =
+    (pkgs.python3.withPackages (ps: [
+      (ps.toPythonModule pkgs.solaar)
+      ps.dbus-python
+      ps.pygobject3
+      ps.pyudev
+    ])).override
+      { ignoreCollisions = true; };
+  deviceBatteries = pkgs.runCommand "dms-plugin-deviceBatteries" { } ''
+    cp -r ${registry.deviceBatteries} $out
+    chmod -R u+w $out
+    substituteInPlace $out/DeviceBatteriesDaemon.qml \
+      --replace-fail 'command: ["python3", root.helper' \
+                     'command: ["${lib.getExe deviceBatteriesPython}", root.helper'
+    substituteInPlace $out/DeviceBatteries.qml \
+      --replace-fail 'StyledText {
+                    text: root.lowest ? root.lowest.percent + "%" : ""
+                    font.pixelSize: root.textSize
+                    color: root.levelColor(root.lowest)
+                    anchors.verticalCenter: parent.verticalCenter
+                }' \
+                     'Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.max(3, Math.round(root.iconSize * 0.22))
+                    height: Math.round(root.iconSize * 0.85)
+                    radius: width / 2
+                    color: Theme.withAlpha(Theme.surfaceText, 0.18)
+                    visible: root.lowest !== null
+
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: parent.height * Math.max(0, Math.min(1, (root.lowest?.percent ?? 0) / 100))
+                        radius: parent.radius
+                        color: root.levelColor(root.lowest)
+                    }
+                }' \
+      --replace-fail 'StyledText {
+                    text: root.lowest ? root.lowest.percent : ""
+                    font.pixelSize: root.textSize
+                    color: root.levelColor(root.lowest)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }' \
+                     'Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: Math.max(3, Math.round(root.iconSize * 0.22))
+                    height: Math.round(root.iconSize * 0.85)
+                    radius: width / 2
+                    color: Theme.withAlpha(Theme.surfaceText, 0.18)
+                    visible: root.lowest !== null
+
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: parent.height * Math.max(0, Math.min(1, (root.lowest?.percent ?? 0) / 100))
+                        radius: parent.radius
+                        color: root.levelColor(root.lowest)
+                    }
+                }'
+  '';
+
   # dir: directory name under plugins/ (only NixMonitor's matters — see above).
   # Launcher plugins (nixPackageRunner, dankHyprlandWindows) add a launcher
   # provider and have no bar pill.
@@ -398,7 +469,13 @@ let
   ++ lib.optional isLaptop {
     id = "batteryPlus";
     src = registry.batteryPlus;
-  };
+  }
+  ++ [
+    {
+      id = "deviceBatteries";
+      src = deviceBatteries;
+    }
+  ];
 
   has = id: lib.any (p: p.id == id) plugins;
 in

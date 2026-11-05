@@ -1067,6 +1067,7 @@ let
       ++ dmsPlugins.barWidget "dankKDEConnect"
       ++ dmsPlugins.barWidget "claudeUsage"
       ++ [ "privacyIndicator" ]
+      ++ dmsPlugins.barWidget "deviceBatteries"
       ++ dmsPlugins.barWidget "batteryPlus"
       ++ [
         "systemTray"

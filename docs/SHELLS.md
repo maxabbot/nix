@@ -234,10 +234,11 @@ plugins still work alongside.
 | `nixPackageRunner` | launcher — `nix search` / `nix run` | all |
 | `dankHyprlandWindows` | launcher — window switcher | all |
 | `dankscale` | control centre (its bar pill unused) — tap toggles Tailscale, the chevron opens the bar popout as a detail page (patched in), Tailscale | tailscale hosts |
+| `deviceBatteries` | bar — lowest peripheral battery (UPower: Bluetooth mice/headsets; Solaar's library for receiver-only Logitech), hidden when no device reports one; its helper runs on a Python env with Solaar, dbus-python, pygobject and pyudev (patched in for the bare `python3`) | all |
 
 The main bar reads workspaces · focused window | music · clock · weather |
 system monitor · `dankKDEConnect` (icon patched to `phonelink`) · `claudeUsage`
-(logo + two rings, no percentages) · privacy · battery · tray… Dankscale, Nix
+(logo + two rings, no percentages) · privacy · device batteries (only with a device) · battery · tray… Dankscale, Nix
 Monitor and the idle inhibitor are Control Center tiles instead. The
 centre has an odd count with the clock in the middle, which DMS's "index"
 centring mode pins to the exact centre. The plugin pills only fit on the right
