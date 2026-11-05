@@ -12,7 +12,6 @@ keys:
   - &admin age1yx8x4zy40xuh2e4hjcu735s5edlv2n4kq597nzfx3xntrxqppfkqqr8vea
   - &home-desktop age1q5w9yuv39yuc3gpd30cwgfgt8ckp5nmrm669s3ppvhgmdk2d8yrqeyw9t2
   - &framework age160ut708amyjck93v88j6cv0pnhmtmhc5reul0he5k4vqcfzpcslqzgxp7p
-  - &vm age1l4gyppnz3cev0ztmssmls5rgxsyz6jxu9hqcq38xz7hd8we59cwq2l9ucg
 
 creation_rules:
   # Shared by every host (the login password hash).
@@ -22,7 +21,6 @@ creation_rules:
           - *admin
           - *home-desktop
           - *framework
-          - *vm
 
   # Per-host Syncthing identity (cert + key define the device ID). Only that
   # host and admin can decrypt: two hosts sharing a cert would be one device.

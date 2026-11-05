@@ -8,7 +8,6 @@ Declarative, reproducible NixOS workstations using **Nix Flakes** and **Home Man
 |------|---------|------------|----------|
 | `home-desktop` | Gaming workstation (i7-13700K, RTX 40-series) | Hyprland | full stack |
 | `framework`    | Framework 13 Pro (Core Ultra X7 358H, Arc Xe3) | Hyprland | full stack minus NVIDIA/CUDA; LUKS root |
-| `vm`           | home-desktop stack in a QEMU/virtio VM | Hyprland | no NVIDIA/CUDA/fancontrol |
 
 ## Structure
 
@@ -17,7 +16,6 @@ flake.nix                        # inputs, mkHost helper, devShells
 hosts/
   home-desktop/                  # RTX 40-series gaming workstation
   framework/                     # Framework 13 Pro (Panther Lake, LUKS + btrfs, powersave specialisation)
-  vm/                            # home-desktop stack in a QEMU/virtio VM
   common/optional/               # Import-composition feature files
     productivity.nix             #   Hyprland, DMS greeter, PipeWire, Syncthing
     nvidia.nix                   #   NVIDIA open driver (RTX 40-series)

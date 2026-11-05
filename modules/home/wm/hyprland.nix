@@ -11,10 +11,9 @@ let
   cfg = config.custom.hm;
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
 
-  # The laptops' Intel iGPUs get the hardware cursor plane: a software cursor
+  # The laptop's Intel iGPU gets the hardware cursor plane: a software cursor
   # recomposites the output on every pointer move, which costs battery.
-  # NVIDIA (home-desktop) and the QEMU guest keep the software cursor they have
-  # always run with.
+  # NVIDIA (home-desktop) keeps the software cursor it has always run with.
   softwareCursor = machineType != "laptop";
 
   # Every wallpaper in the repo, by the name it gets in ~/Pictures/Wallpapers

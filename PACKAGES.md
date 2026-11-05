@@ -106,7 +106,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - kubectl, kubectx, helm, opentofu, awscli2, azure-cli, google-cloud-sdk, doctl
 - `granted` (`assume` — multi-account AWS role switching), `aws-sam-cli` (local Lambda/API GW), `awslogs` (tail CloudWatch), `localstack` (local AWS emulation), `steampipe` (query AWS as SQL)
 - `visidata` (TUI table explorer), `miller`/`mlr` (CSV/JSON reshaping), `dasel` (jq across formats), `qsv` (fast CSV ops)
-- DBeaver, Beekeeper Studio, mycli, litecli · DuckDB (home-desktop & vm only)
+- DBeaver, Beekeeper Studio, mycli, litecli · DuckDB
 - `gh` — GitHub CLI
 - `nix-tree`, `nix-diff`, `nixpkgs-review`, `nil` — Nix dev tools
 - `claude-code` — AI assistant CLI
@@ -125,7 +125,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ---
 
-## Creative (home-desktop & vm)
+## Creative
 
 | App | Purpose |
 |-----|---------|
@@ -135,7 +135,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ---
 
-## Streaming & Content (home-desktop & vm; Apollo/Moonlight home-desktop only)
+## Streaming & Content (Apollo host on home-desktop only)
 
 | App | Purpose |
 |-----|---------|
@@ -149,7 +149,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 
 ---
 
-## Gaming (home-desktop & vm)
+## Gaming
 
 - **Steam** — Proton GE pre-installed, Gamescope session available
 - **Gamemode** — CPU governor boost on game launch (renice 10)

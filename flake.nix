@@ -1,5 +1,5 @@
 {
-  description = "NixOS system configuration — home-desktop / framework / vm";
+  description = "NixOS system configuration — home-desktop / framework";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -298,25 +298,6 @@
               position = "left";
               ips = [ "100.111.189.79" ];
               activateOnStartup = true;
-            };
-          };
-        };
-
-        # Home-desktop stack in a QEMU VM — no NVIDIA/CUDA/fancontrol
-        vm = mkHost {
-          hostName = "vm";
-          machineType = "desktop";
-          modules = [
-            ./hosts/vm
-            disko.nixosModules.disko
-          ];
-          hmArgs = {
-            machineType = "desktop";
-            compositor = "hyprland";
-            monitors = {
-              primary = "Virtual-1,1920x1080@60,0x0,1";
-              secondary = null;
-              primaryName = "Virtual-1";
             };
           };
         };

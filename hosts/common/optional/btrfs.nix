@@ -1,5 +1,5 @@
 # btrfs.nix — for hosts whose disko layout is btrfs with /nix on its own
-# subvolume (all four).
+# subvolume (both hosts).
 #
 # The retry is a systemd-initrd unit, so it relies on the systemd stage 1 that
 # plymouth.nix turns on for every host.

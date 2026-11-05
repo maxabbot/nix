@@ -1,4 +1,4 @@
-# hosts/common/optional/sops.nix — sops-nix secrets (all three hosts).
+# hosts/common/optional/sops.nix — sops-nix secrets (both hosts).
 #
 # Secrets live encrypted in secrets/*.yaml; recipients are in .sops.yaml. Each
 # host decrypts at activation with its own age key at /var/lib/sops-nix/key.txt
