@@ -291,6 +291,10 @@
               primary = "eDP-1,2880x1920@120,0x0,2";
               primaryName = "eDP-1";
               secondary = null;
+              # Any other screen (a hot desk, a TV): its preferred mode at auto
+              # scale, centred above the panel like the office desk. kanshi's
+              # generic "external" profiles keep this and handle the lid.
+              fallback = ",preferred,auto-center-up,auto";
             };
             # The Framework gear rather than the Nix snowflake on the lock screen.
             lockWallpaper = "${mkPkgs.gruvbox-wallpapers}/rainbow-framework.png";

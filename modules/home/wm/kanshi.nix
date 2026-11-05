@@ -7,6 +7,12 @@
 #                 match the same outputs, so kanshi only picks docked by itself;
 #                 the lid switch binds in hyprland.lua switch between them
 #                 (kanshictl), and fail harmlessly when undocked.
+#   external    — the internal display plus any one other output (a hot desk,
+#                 a TV). Only eDP-1 is pinned: the other keeps what Hyprland's
+#                 catch-all rule (monitors.fallback) gave it — preferred mode,
+#                 auto scale, centred above. kanshi prefers the exact profiles,
+#                 and the docked pair is three outputs, so this never shadows it.
+#   external-lid — the same with the internal display off, for the lid binds.
 #
 # Connector names vary by dock/port. Discover them when docked:
 #   wlr-randr        (shows connected outputs and their exact names)
@@ -161,6 +167,43 @@ in
               {
                 criteria = k.internal.output;
                 status = "disable";
+              }
+            ];
+          };
+        }
+      ]
+      # Internal first, so the wildcard can only take the other output. The
+      # non-lid profile comes first: kanshi picks the first match by itself.
+      ++ [
+        {
+          profile = {
+            name = "external";
+            outputs = [
+              {
+                criteria = k.internal.output;
+                status = "enable";
+                mode = k.internal.mode;
+                position = if hasDocked then k.docked.laptopPosition else "0,0";
+                scale = k.internal.scale;
+              }
+              {
+                criteria = "*";
+                status = "enable";
+              }
+            ];
+          };
+        }
+        {
+          profile = {
+            name = "external-lid";
+            outputs = [
+              {
+                criteria = k.internal.output;
+                status = "disable";
+              }
+              {
+                criteria = "*";
+                status = "enable";
               }
             ];
           };

@@ -147,8 +147,10 @@ let
       scale = builtins.elemAt parts 3;
       hasTransform = builtins.length parts >= 6;
       transformVal = if hasTransform then builtins.elemAt parts 5 else "";
+      # "auto" is a string to Lua; a numeric scale stays a number.
+      scaleVal = if builtins.match "[0-9.]+" scale != null then scale else ''"${scale}"'';
     in
-    ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale}${lib.optionalString hasTransform ", transform = ${transformVal}"} })'';
+    ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scaleVal}${lib.optionalString hasTransform ", transform = ${transformVal}"} })'';
 
   # Workspaces are intentionally NOT pinned to monitors: with no
   # hl.workspace_rule() monitor binds, all 1–9 are a shared dynamic pool,
@@ -189,9 +191,14 @@ let
 
     ${lib.optionalString (cfg.monitors.secondary != null) (monitorToLua cfg.monitors.secondary)}
     ${lib.optionalString (cfg.monitors.primary != null) (monitorToLua cfg.monitors.primary)}
-    ${lib.optionalString (
-      cfg.monitors.primary == null
-    ) ''hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })''}
+    ${
+      if cfg.monitors.fallback != null then
+        monitorToLua cfg.monitors.fallback
+      else
+        lib.optionalString (
+          cfg.monitors.primary == null
+        ) ''hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })''
+    }
 
     -- Consumed by hyprland.lua: cursor.default_monitor (spawn cursor on
     -- primary) and the startup workspace placement (primary/secondary).
@@ -321,6 +328,16 @@ in
         type = lib.types.nullOr lib.types.str;
         default = null;
         description = "Secondary monitor string, e.g. DP-2,3840x2160@60,0x0,1,transform,3";
+      };
+      fallback = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = ''
+          Catch-all rule for outputs not named above, as a monitor string with an
+          empty name, e.g. ",preferred,auto-center-up,auto". When null, only a
+          host with no primary gets one (preferred, auto, 1); others leave
+          unknown outputs to Hyprland's built-in default.
+        '';
       };
     };
   };
