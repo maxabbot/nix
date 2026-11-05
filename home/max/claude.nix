@@ -49,6 +49,7 @@ in
   home.packages = [
     inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
     pkgs.sox # audio record/play CLI (`rec`/`play`) — Claude Code voice mode
+    pkgs.claude-account # swap between saved logins (pkgs/claude-account)
   ];
 
   # Claude Code owns ~/.claude/settings.json (/model, /effort, permission grants

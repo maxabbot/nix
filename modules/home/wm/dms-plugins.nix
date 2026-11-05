@@ -96,11 +96,31 @@ let
     url = "https://cdn.jsdelivr.net/npm/simple-icons@16.32.0/icons/claudecode.svg";
     hash = "sha256-92kb7a5tceOeQUNvOeRTQwwe4h9jBaWWmExwpXhqu9o=";
   };
+  #
+  # The popout also gets an account switcher (config/dms/ClaudeAccounts.qml):
+  # the logins saved with pkgs/claude-account, a tap swaps Claude Code to one
+  # and refetches the usage, which follows the same credentials file.
   claudeUsage = pkgs.runCommand "dms-plugin-claudeUsage" { } ''
     cp -r ${registry.claudeUsage} $out
     chmod -R u+w $out
     sed 's|<svg |<svg fill="#D97757" |' ${claudeCodeLogo} > $out/claude-code.svg
+    substitute ${../../../config/dms/ClaudeAccounts.qml} $out/ClaudeAccounts.qml \
+      --replace-fail '@claudeAccount@' '${lib.getExe pkgs.claude-account}'
     substituteInPlace $out/ClaudeUsageWidget.qml \
+      --replace-fail '    function minutesOld() { return data.minutesOld() }' \
+                     '    function minutesOld() { return data.minutesOld() }
+        function refreshUsage() { data.refresh() }' \
+      --replace-fail 'popoutHeight: 220' 'popoutHeight: 330' \
+      --replace-fail '                    color: mins > root.staleMinutes ? Theme.warning : Theme.surfaceTextMedium
+                        font.pixelSize: Theme.fontSizeSmall
+                    }' '                    color: mins > root.staleMinutes ? Theme.warning : Theme.surfaceTextMedium
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+
+                    ClaudeAccounts {
+                        width: parent.width
+                        onSwitched: root.refreshUsage()
+                    }' \
       --replace-fail 'text: "✳ --"' 'text: "--"' \
       --replace-fail 'implicitWidth: row.implicitWidth + Theme.spacingM * 2' \
                      'implicitWidth: row.implicitWidth + Theme.spacingS * 2' \

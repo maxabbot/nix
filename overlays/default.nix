@@ -7,6 +7,10 @@ final: prev: {
   # the DMS lock).
   gruvbox-wallpapers = final.callPackage ../pkgs/gruvbox-wallpapers { };
 
+  # Swap Claude Code between saved logins; also driven by the claudeUsage
+  # widget's popout (modules/home/wm/dms-plugins.nix).
+  claude-account = final.callPackage ../pkgs/claude-account { };
+
   # Papirus ships blue folders, which clash with Gruvbox. The package's own
   # `color` argument runs papirus-folders at build time; paleorange sits
   # closest to the palette's yellow. Overridden here rather than at the use

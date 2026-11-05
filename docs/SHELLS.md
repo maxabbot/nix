@@ -217,7 +217,7 @@ plugins still work alongside.
 |---|---|---|
 | `nixMonitor` | bar — snowflake-only pill; popout has store size (sum of narSize, not `df`), generations, `nh os switch` / `nh clean user` | all |
 | `dankKDEConnect` | bar + control centre | all |
-| `claudeUsage` | bar — Claude Code limits, via `api.anthropic.com` only; patched to lead with the Claude Code logo (Simple Icons, pinned) and tightened | all |
+| `claudeUsage` | bar — Claude Code limits, via `api.anthropic.com` only; patched to lead with the Claude Code logo (Simple Icons, pinned) and tightened; its popout gains an account switcher (`config/dms/ClaudeAccounts.qml`) over the logins saved with `claude-account` | all |
 | `nixPackageRunner` | launcher — `nix search` / `nix run` | all |
 | `dankHyprlandWindows` | launcher — window switcher | all |
 | `dankscale` | bar + control centre, Tailscale | tailscale hosts |
