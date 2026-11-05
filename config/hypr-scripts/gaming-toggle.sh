@@ -19,6 +19,12 @@
 # whatever was actually running. Start games however you like; this only sets
 # the desktop up around them and puts it back afterwards.
 
+# Deliberately not `set -e`: each direction has to run to the end. A failed
+# hyprctl call halfway through entering would otherwise leave the shell
+# stopped and the other outputs disabled, and the `grep -c` below exits 1
+# whenever it counts zero, which is a normal answer here.
+set -uo pipefail
+
 GAMING_STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprland-gaming-mode"
 
 # The host's primary (gaming) and secondary connectors, passed by hyprland.lua's
