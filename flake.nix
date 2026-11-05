@@ -128,7 +128,7 @@
         };
         # Desktop wallpaper (modules/home/wm/hyprland.nix), set by awww on every
         # output at login.
-        wallpaper = ./config/sddm/leaves-wall.png;
+        wallpaper = ./config/wallpapers/leaves-wall.png;
         # Image for a rotated secondary monitor; null keeps the rendered
         # SHORTCUTS.md cheat-sheet there.
         wallpaperPortrait = null;

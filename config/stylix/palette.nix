@@ -45,4 +45,6 @@
   # stylix.nix maps base16 by explicit name, so these are never picked up as
   # part of the scheme.
   accentBg = "#544834"; # bg0→yellow 25%, selected row / text selection (DMS primaryContainer)
+  diffAddBg = "#1e4920"; # dark green fill, added lines (delta, home/max/git.nix)
+  diffDelBg = "#4a1020"; # dark red fill, removed lines (delta)
 }

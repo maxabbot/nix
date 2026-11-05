@@ -40,7 +40,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - **awww** — wallpaper daemon
 - **DMS lock** — lockscreen (DankMaterialShell's own, via `loginctl lock-session`); triggered on idle (5 min), suspend and Super+L
 - **hypridle** — idle daemon; locks at 5 min, suspends at 15 min
-- **Gammastep** — night light; shared lat/long from `flake.nix` (Christchurch), 6500K day → 3500K night
+- **Gammastep** — night light; lat/long from the system `location` in `base.nix` (Christchurch, shared with Clight), 6500K day → 3500K night
 - **Thunar** — file manager (`Super+E`); archive plugin, thumbnail support via tumbler
 - **Yazi** — terminal file manager
 - **Syncthing** — file sync daemon; web UI at `localhost:8384`
@@ -74,10 +74,12 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 | Veracrypt | Encrypted volumes |
 | rclone | Cloud storage sync |
 | nvtop | GPU monitor |
-| OpenRGB | RGB lighting control |
 | btop | System monitor (Gruvbox, vim keys) |
 | glances | System monitor (all-in-one overview) |
 | fastfetch | System info |
+| OneDrive | `onedriver` FUSE mount, files on demand (`onedriver-launcher` once per machine) |
+| Web apps | Teams, Google Chat, WhatsApp, Outlook, OneDrive, Immich as Chrome `--app` windows (`pwas.nix`) |
+| OpenRGB | RGB lighting control (home-desktop only) |
 
 ---
 
@@ -101,6 +103,9 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 - `shellcheck`, `cloc`, `tig`, `sqlite`, `pgcli`
 - `curlie` (httpie-style curl), `bruno` (API client), `mkcert`
 - `ffmpeg`, `imagemagick`, `pandoc`
+- `snowsql` (Snowflake CLI), `dbt` with the Snowflake adapter
+- Android Studio, plus Metro's port 8081 open for Expo dev builds (home-desktop only, `expo.nix`)
+- WinBoat — Windows 11 guest whose apps run as native windows over RDP, for Power BI (framework only, `winboat.nix`)
 - `quickemu` / `quickgui` — VM management without libvirt
 - Podman + Docker-compat aliases (`d ps`, `d images`, etc.)
 - kubectl, kubectx, helm, opentofu, awscli2, azure-cli, google-cloud-sdk, doctl
@@ -131,6 +136,8 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 | GIMP | Image editor |
 | Inkscape | Vector graphics |
 | Krita | Digital painting |
+| LMMS 1.3 | Music production (upstream AppImage, not nixpkgs' 1.2.2) |
+| Surge XT | LV2 synth for LMMS |
 
 ---
 

@@ -950,21 +950,27 @@ in
     home.activation.shellSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       apply() {
         local file="$1" decl="$2" prog="$3"
-        $DRY_RUN_CMD mkdir -p "$(dirname "$file")"
+        # The merge ends in output redirects, which HM's `run` can't hold back
+        # on a dry run, so a dry run only says what it would do.
+        if [[ -v DRY_RUN ]]; then
+          echo "would merge $decl into $file"
+          return
+        fi
+        mkdir -p "$(dirname "$file")"
         # DMS loads JSON over its Store property defaults, so seeding an empty
         # object is enough when it has never run.
-        [ -s "$file" ] || $DRY_RUN_CMD sh -c "echo '{}' > '$file'"
-        $DRY_RUN_CMD ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
-          > "$file.hm-tmp" && $DRY_RUN_CMD mv "$file.hm-tmp" "$file"
+        [ -s "$file" ] || echo '{}' > "$file"
+        ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
+          > "$file.hm-tmp" && mv "$file.hm-tmp" "$file"
       }
 
       # Stale compiled QML: see `stamp` in dms-plugins.nix. Deleting the cache
       # under a running shell is safe; it recompiles on its next start.
       qmlStamp="${config.xdg.cacheHome}/quickshell/dms-plugins.stamp"
       if [ "$(cat "$qmlStamp" 2>/dev/null)" != "${dmsPlugins.stamp}" ]; then
-        $DRY_RUN_CMD rm -f "${config.xdg.cacheHome}"/quickshell/qmlcache/*.qmlc
-        $DRY_RUN_CMD mkdir -p "$(dirname "$qmlStamp")"
-        $DRY_RUN_CMD sh -c "echo ${dmsPlugins.stamp} > '$qmlStamp'"
+        run rm -f "${config.xdg.cacheHome}"/quickshell/qmlcache/*.qmlc
+        run mkdir -p "$(dirname "$qmlStamp")"
+        [[ -v DRY_RUN ]] || echo ${dmsPlugins.stamp} > "$qmlStamp"
       fi
 
       # DMS plugin_settings.json: which plugins are on, plus a few settings.

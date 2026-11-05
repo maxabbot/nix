@@ -67,10 +67,10 @@ in
       side-by-side = true;
       line-numbers = true;
       syntax-theme = "gruvbox-dark";
-      # Dark diff-fill tints, hand-picked — the palette has no background-tint
-      # slots for added/removed lines.
-      "plus-style" = "syntax \"#1e4920\"";
-      "minus-style" = "syntax \"#4a1020\"";
+      # Dark diff-fill tints: derived surfaces in the palette, since
+      # gruvbox-material has no background tint for added/removed lines.
+      "plus-style" = "syntax \"${palette.diffAddBg}\"";
+      "minus-style" = "syntax \"${palette.diffDelBg}\"";
       "file-style" = "bold \"${palette.blue}\"";
       "hunk-header-style" = "file line-number syntax";
     };

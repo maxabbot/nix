@@ -67,6 +67,15 @@ HDR, colour management) go nowhere. The include warning box, which offers to
 edit `hyprland.lua`, is hidden. Lasting changes belong in
 `monitors.lua` / the host config.
 
+### Compositor layout settings
+
+The same goes for DMS's other Hyprland pages: gaps, rounding and border
+width (Settings → Compositor), its window rules and the cursor write
+`~/.config/hypr/dms/{layout,windowrules,cursor}.lua`, which `hyprland.lua`
+doesn't load either. Unlike the Displays page these aren't patched to apply
+live, so changing them does nothing; `hyprland.lua` owns them (gaps 5/10,
+rounding 10, border 2).
+
 ### NixOS
 
 DMS's SystemUpdater knows `yay`, `paru`, `pacman` and `dnf` across the arch and

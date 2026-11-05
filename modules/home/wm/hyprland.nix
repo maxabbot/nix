@@ -22,7 +22,7 @@ let
   wallpaperSeeds = lib.listToAttrs (
     map (src: lib.nameValuePair (builtins.unsafeDiscardStringContext (baseNameOf src)) src) (
       [
-        ../../../config/sddm/leaves-wall.png
+        ../../../config/wallpapers/leaves-wall.png
         ../../../config/wallpapers/waterfall-3.jpg
         ../../../config/wallpapers/cave.jpg
         "${pkgs.gruvbox-wallpapers}/rainbow-nix.png"
@@ -296,7 +296,7 @@ in
 
     wallpaper = lib.mkOption {
       type = lib.types.path;
-      default = ../../../config/sddm/leaves-wall.png;
+      default = ../../../config/wallpapers/leaves-wall.png;
       description = "Desktop wallpaper image, deployed to ~/.config/hypr/wallpaper.png and set by awww.";
     };
 
@@ -368,13 +368,13 @@ in
       wallpaperDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         dir="${config.home.homeDirectory}/Pictures/Wallpapers"
         seeded="$dir/.seeded"
-        $DRY_RUN_CMD mkdir -p "$dir"
+        run mkdir -p "$dir"
         ${lib.concatStrings (
           lib.mapAttrsToList (name: src: ''
             if ! grep -qxF ${lib.escapeShellArg name} "$seeded" 2>/dev/null; then
               [ -e "$dir/"${lib.escapeShellArg name} ] \
-                || $DRY_RUN_CMD install -m 0644 ${src} "$dir/"${lib.escapeShellArg name}
-              [ -n "''${DRY_RUN_CMD:-}" ] || printf '%s\n' ${lib.escapeShellArg name} >> "$seeded"
+                || run install -m 0644 ${src} "$dir/"${lib.escapeShellArg name}
+              [[ -v DRY_RUN ]] || printf '%s\n' ${lib.escapeShellArg name} >> "$seeded"
             fi
           '') wallpaperSeeds
         )}
@@ -396,13 +396,13 @@ in
           if [ -r "$stConfig" ]; then
             apiKey=$(${pkgs.gnused}/bin/sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' "$stConfig")
             before=$(cat "$ini" 2>/dev/null || true)
-            $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\size' 1
-            $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\1\syncthingUrl' \
+            run $crudini --set "$ini" tray 'connections\size' 1
+            run $crudini --set "$ini" tray 'connections\1\syncthingUrl' \
               'http://${osConfig.services.syncthing.guiAddress}'
-            $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\1\apiKey' "@ByteArray($apiKey)"
-            $DRY_RUN_CMD $crudini --set "$ini" tray 'connections\1\autoConnect' true
+            run $crudini --set "$ini" tray 'connections\1\apiKey' "@ByteArray($apiKey)"
+            run $crudini --set "$ini" tray 'connections\1\autoConnect' true
             if [ "$before" != "$(cat "$ini" 2>/dev/null || true)" ]; then
-              $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user try-restart syncthingtray.service || true
+              run ${pkgs.systemd}/bin/systemctl --user try-restart syncthingtray.service || true
             fi
           else
             echo "syncthingtray: $stConfig not readable yet; connection set on next activation"

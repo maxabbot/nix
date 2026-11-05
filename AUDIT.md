@@ -42,6 +42,10 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 2668c0e | The system monitor pill ran `nvtop -s` every 2 s per bar; one shared `GpuStatsService` singleton now polls, every 10 s on battery and only while a pill is shown |
 | 2668c0e | Cleanups: no-op opacity rules in `hyprland.lua`; `MOZ_ENABLE_WAYLAND` and `QT_AUTO_SCREEN_SCALE_FACTOR`; duplicate `wl-clipboard`, `enable32Bit` and `vulkan-loader`; `libva-utils` moved out of `extraPackages`; `max-jobs` left at NixOS's `"auto"` instead of a cap both hosts overrode |
 | ea585ed | CI only evaluated, so the `--replace-fail` patches to DMS, its greeter and plugins broke only at local build time; flake `checks` now hold those 11 derivations and CI builds them (`nix flake check` without `--no-build`) whenever a file they're built from changed; other pushes only evaluate. CI's shellcheck also covers `config/scripts/autoclick` now |
+| 6c3e2ce | CI builds the checks only when a file they're built from changed; other pushes evaluate only |
+| ce41270 | Output-neutral refactor (both toplevels byte-identical): `dms.nix`'s `hostName == "framework"` checks became the `lockWallpaper` hmArg and `custom.hm.dms.hiddenOutputs`; `mkHost` sets `networking.hostName` and forwards `machineType`, dropping the unused specialArgs; one `location` in `base.nix` for Clight and gammastep; kanshi's internal panel defaults from `monitors.primary`; ignored `? defaults` and the unused `custom.base.fancontrol` removed |
+| 9e633e2 | OpenRGB on home-desktop only; `claude-code-nix` follows `nixpkgs-unstable` (one fewer nixpkgs in the lock) |
+| this commit | HM activation uses `run` instead of the deprecated `$DRY_RUN_CMD`, and a dry run no longer writes `.hm-tmp` files (B2). Style: framework's second `boot` block, delta's literal hex (now palette `diffAddBg`/`diffDelBg`), `config/sddm/` (wallpaper moved to `config/wallpapers/`), `hyprland.lua`'s header. Docs: PACKAGES.md's missing apps, SHELLS.md on DMS's layout pages |
 
 ## 2. Verified on hardware — not bugs
 
@@ -90,63 +94,38 @@ global discovery and relays could also be turned off.
 
 ## 4. Open — bugs
 
-### 🔵 B2 — Activation dry runs write a temp file
-`dms.nix`'s `apply()` runs `$DRY_RUN_CMD jq … > "$file.hm-tmp"`; under a dry
-run the redirect still writes the echoed command to `.hm-tmp`. `$DRY_RUN_CMD`
-is deprecated in Home Manager, and `libreoffice.nix` already uses `run`.
+None known.
 
 ## 5. Open — design
 
 - 🟡 **No backups or snapshots.** The biggest operational gap. The btrfs
   `@home` subvolume makes btrbk or snapper cheap; restic to B2 can keep its
   credentials in sops now.
-- 🟡 **Host identity inside shared code.** `dms.nix` checks
-  `hostName == "framework"` twice (lock wallpaper, hidden Dolby output). Make
-  them hmArgs or options.
-- 🔵 **`mkHost` plumbing.** The `hostName` and `nixos-hardware` specialArgs are
-  read by no module; each host restates `networking.hostName`, and
-  `machineType` is given twice per host (specialArgs and hmArgs).
-- 🔵 **Duplicated settings.** The location is in both `flake.nix` and
-  `clight.nix` ("keep in sync"); `monitors.primary` and `kanshi.internal`
-  describe framework's panel twice.
-- 🔵 **Ignored defaults.** `nvidia ? false` and `kanshi ? {…}` in
-  `home/max/default.nix` are never used by the module system (as
-  `lan-mouse.nix`'s own comment explains).
 - 🔵 **DMS layout settings go nowhere.** DMS writes
   `~/.config/hypr/dms/{layout,windowrules,cursor}.lua`, which `hyprland.lua`
-  doesn't load, so its gap, rounding and border settings silently do nothing.
-- 🔵 **OpenRGB on the laptop.** Package and udev rules come from
-  `productivity.nix` on both hosts; `services.hardware.openrgb` on
-  home-desktop alone would be the idiomatic form.
-- 🔵 **`claude-code-nix` has no `follows`**, adding another nixpkgs to the lock.
+  doesn't load, so its gap, rounding and border settings do nothing.
+  Documented in docs/SHELLS.md; patching them to apply live, as the Displays
+  page is, would be the fix.
 - 🔵 **`wine-ge-custom` (GE-Proton8-26) is discontinued upstream**; Lutris can
   use GE-Proton through umu instead.
 
 ## 6. Open — style
 
-- `boot = { … }` appears twice in `hosts/framework/default.nix` (statix
-  doesn't flag two).
-- Literal hex for delta's diff tints in `home/max/git.nix`, against the
-  palette rule; add derived surfaces to `palette.nix` like `accentBg`.
-- `custom.base.fancontrol` options are used by no host.
 - `gaming-toggle.sh` lacks `set -euo pipefail`. Adding it needs care: its
   `grep -c` legitimately exits 1 on zero matches.
-- `config/sddm/` holds a wallpaper for a removed greeter.
-- Zed's default and commit-message model is still `claude-haiku-4-5`.
+- Zed's default and commit-message model is still `claude-haiku-4-5`; newer
+  IDs weren't verifiable against Zed's hosted model list from here.
 
 ## 7. Open — docs
 
-- PACKAGES.md is missing newer additions: Android Studio, WinBoat, LMMS 1.3
-  and Surge XT, snowsql/dbt, the PWAs, onedriver.
-- `hyprland.lua`'s header says `monitors.lua` returns only `primary`; it
-  returns `secondary` too.
+None known.
 
 ---
 
 ## What's in good shape
 
-Both hosts evaluate and lint clean, and the running framework system matches
-HEAD. The layering is consistent: import composition for features, one option
+Both hosts evaluate and lint clean, and CI builds the patched DMS packages
+whenever something they're built from changes. The layering is consistent: import composition for features, one option
 module, and Home Manager gated on the compositor. Nearly every host-specific
 workaround carries a comment explaining why. Secrets are on sops-nix, Secure
 Boot and TPM unlock are on for framework, and inputs are fresh apart from

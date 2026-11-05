@@ -27,13 +27,13 @@ let
   });
 
   # The greeter reads a fixed-name override from its data dir; configFiles
-  # copies by basename, so the file has to carry that name. Same wallpaper as
-  # the SDDM greeter had.
+  # copies by basename, so the file has to carry that name. The leaves are the
+  # desktop's default wallpaper too (sharedHmArgs).
   greeterWallpaper =
     pkgs.runCommand "dms-greeter-wallpaper" { nativeBuildInputs = [ pkgs.imagemagick ]; }
       ''
         mkdir -p $out
-        magick ${../../../config/sddm/leaves-wall.png} $out/greeter_wallpaper_override.jpg
+        magick ${../../../config/wallpapers/leaves-wall.png} $out/greeter_wallpaper_override.jpg
       '';
 in
 {

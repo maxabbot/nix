@@ -125,10 +125,7 @@
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="pci", ATTR{device}!="0xe476", TEST=="power/control", ATTR{power/control}="auto"
   '';
-  boot = {
-    kernelParams = [ "nmi_watchdog=0" ];
-    kernel.sysctl."vm.dirty_writeback_centisecs" = 1500;
-  };
+  # (The NMI watchdog and writeback settings are in the boot block below.)
 
   # ── Fonts ────────────────────────────────────────────────────────────────────
   # Microsoft core fonts (Georgia, Times New Roman, Arial, …) — the CV build's
@@ -218,6 +215,11 @@
   # Limine (themed menu + generation cap) comes from ../common/optional/limine.nix.
   # No Windows chainload entry — this disk is Linux-only (see disk-config.nix).
   boot = {
+    # Idle power (see that section above): no NMI watchdog, and dirty pages
+    # flushed every 15 s rather than 5 so the NVMe sleeps longer.
+    kernelParams = [ "nmi_watchdog=0" ];
+    kernel.sysctl."vm.dirty_writeback_centisecs" = 1500;
+
     loader.efi.canTouchEfiVariables = true;
 
     # Required for the LUKS passphrase prompt: the systemd initrd unlocks
