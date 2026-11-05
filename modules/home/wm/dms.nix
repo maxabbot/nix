@@ -522,31 +522,44 @@ let
             file = "share/quickshell/dms/Services/BluetoothService.qml";
             from = "    readonly property bool discovering: (adapter && adapter.discovering) ?? false\n";
             to = ''
-                  readonly property bool discovering: (adapter && adapter.discovering) ?? false
-                  property bool scanRequested: false
-                  readonly property bool scanning: bluetoothBridgeAvailable ? scanRequested : discovering
-                  // The backend's discovery session dies with its D-Bus connection.
-                  onBluetoothBridgeAvailableChanged: if (!bluetoothBridgeAvailable) scanRequested = false
+              readonly property bool discovering: (adapter && adapter.discovering) ?? false
+              property bool scanRequested: false
+              readonly property bool scanning: bluetoothBridgeAvailable ? scanRequested : discovering
+              // The backend's discovery session dies with its D-Bus connection.
+              onBluetoothBridgeAvailableChanged: if (!bluetoothBridgeAvailable) scanRequested = false
 
-                  function setScanning(on) {
-                      if (!bluetoothBridgeAvailable) {
-                          if (adapter)
-                              adapter.discovering = on;
-                          return;
-                      }
-                      scanRequested = on;
-                      DMSService.sendRequest(on ? "bluetooth.startDiscovery" : "bluetooth.stopDiscovery", {
-                          "adapter": adapter?.dbusPath ?? ""
-                      }, response => {
-                          // "In progress" / "No discovery started" mean we already have what we asked for.
-                          if (!response.error || /progress|No discovery/i.test(response.error))
-                              return;
-                          log.warn("Failed to " + (on ? "start" : "stop") + " Bluetooth discovery:", response.error);
-                          if (on)
-                              scanRequested = false;
-                      });
+              function setScanning(on) {
+                  if (!bluetoothBridgeAvailable) {
+                      if (adapter)
+                          adapter.discovering = on;
+                      return;
                   }
+                  scanRequested = on;
+                  DMSService.sendRequest(on ? "bluetooth.startDiscovery" : "bluetooth.stopDiscovery", {
+                      "adapter": adapter?.dbusPath ?? ""
+                  }, response => {
+                      // "In progress" / "No discovery started" mean we already have what we asked for.
+                      if (!response.error || /progress|No discovery/i.test(response.error))
+                          return;
+                      log.warn("Failed to " + (on ? "start" : "stop") + " Bluetooth discovery:", response.error);
+                      if (on)
+                          scanRequested = false;
+                  });
+              }
             '';
+          }
+          # Named devices first: upstream counts a name as real only if it has a
+          # space, so "WH-1000XM5" sank among the bare-MAC aliases ("7A-18-…")
+          # BlueZ gives unnamed devices. Treat anything that isn't a MAC as named.
+          {
+            file = "share/quickshell/dms/Services/BluetoothService.qml";
+            from = ''const aHasRealName = aName.includes(" ") && aName.length > 3;'';
+            to = "const aHasRealName = aName.length > 0 && !/^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i.test(aName);";
+          }
+          {
+            file = "share/quickshell/dms/Services/BluetoothService.qml";
+            from = ''const bHasRealName = bName.includes(" ") && bName.length > 3;'';
+            to = "const bHasRealName = bName.length > 0 && !/^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i.test(bName);";
           }
           {
             file = detail;
