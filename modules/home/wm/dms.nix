@@ -498,6 +498,85 @@ let
           to = "blurEnabled: false\n            blur: 0.8";
         }
       ]
+      # Not a dispatch fix: the Control Center's Bluetooth Scan button could
+      # stop working for a whole session. It wrote quickshell's
+      # adapter.discovering, whose setter no-ops StartDiscovery whenever its
+      # cached Discovering flag is already true and sends StopDiscovery from a
+      # D-Bus connection that never started one ("No discovery started"). Once
+      # that flag went stale (or another client was scanning), the button showed
+      # "Scanning…", found nothing, and a click couldn't recover it; only an
+      # outside scan (bluetoothctl) resynced it. Scan through the DMS backend
+      # instead, which holds its own BlueZ discovery session, and drive the UI
+      # from what we asked for rather than the adapter-global flag. Without the
+      # backend it falls back to upstream's behaviour.
+      ++ (
+        let
+          detail = "share/quickshell/dms/Modules/ControlCenter/Details/BluetoothDetail.qml";
+          closers = [
+            "share/quickshell/dms/Modules/ControlCenter/ControlCenterPopout.qml"
+            "share/quickshell/dms/Modules/DankIsland/Activities/ControlCenterExpanded.qml"
+          ];
+        in
+        [
+          {
+            file = "share/quickshell/dms/Services/BluetoothService.qml";
+            from = "    readonly property bool discovering: (adapter && adapter.discovering) ?? false\n";
+            to = ''
+                  readonly property bool discovering: (adapter && adapter.discovering) ?? false
+                  property bool scanRequested: false
+                  readonly property bool scanning: bluetoothBridgeAvailable ? scanRequested : discovering
+                  // The backend's discovery session dies with its D-Bus connection.
+                  onBluetoothBridgeAvailableChanged: if (!bluetoothBridgeAvailable) scanRequested = false
+
+                  function setScanning(on) {
+                      if (!bluetoothBridgeAvailable) {
+                          if (adapter)
+                              adapter.discovering = on;
+                          return;
+                      }
+                      scanRequested = on;
+                      DMSService.sendRequest(on ? "bluetooth.startDiscovery" : "bluetooth.stopDiscovery", {
+                          "adapter": adapter?.dbusPath ?? ""
+                      }, response => {
+                          // "In progress" / "No discovery started" mean we already have what we asked for.
+                          if (!response.error || /progress|No discovery/i.test(response.error))
+                              return;
+                          log.warn("Failed to " + (on ? "start" : "stop") + " Bluetooth discovery:", response.error);
+                          if (on)
+                              scanRequested = false;
+                      });
+                  }
+            '';
+          }
+          {
+            file = detail;
+            from = "BluetoothService.adapter?.discovering ?? false";
+            to = "BluetoothService.scanning";
+          }
+          {
+            file = detail;
+            from = "if (!BluetoothService.adapter?.discovering)";
+            to = "if (!BluetoothService.scanning)";
+          }
+          {
+            file = detail;
+            from = "BluetoothService.adapter.discovering = !BluetoothService.adapter.discovering;";
+            to = "BluetoothService.setScanning(!BluetoothService.scanning);";
+          }
+        ]
+        ++ lib.concatMap (file: [
+          {
+            inherit file;
+            from = "if (BluetoothService.adapter && BluetoothService.adapter.discovering)";
+            to = "if (BluetoothService.scanning)";
+          }
+          {
+            inherit file;
+            from = "BluetoothService.adapter.discovering = false;";
+            to = "BluetoothService.setScanning(false);";
+          }
+        ]) closers
+      )
     )).overrideAttrs
       (old: {
         postInstall = old.postInstall + ''
