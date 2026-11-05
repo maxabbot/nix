@@ -52,6 +52,7 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 091eabe | S3: Apollo (pinned 0.4.7-alpha.1, its latest release) had CVE-2026-32253, a client-certificate validation bypass that let an untrusted client pass as paired. Apollo merged the fix to master but never released it; `gaming-streaming.nix` now applies it as a patch |
 | 14f28ff | S5: Syncthing's port is tailnet-only on the laptop (open on home-desktop's LAN), the workstations dial each other by tailnet name, and global/local discovery, relays and UPnP router forwarding are off |
 | 731ca18 | Style: `gaming-toggle.sh` runs with `set -uo pipefail` (not `-e`, on purpose — see its header), tested on both paths against stub tools. Zed's `claude-haiku-4-5` is the newest Haiku Zed offers, so no change |
+| this commit | S2: `.claude/settings.json` (public repo) no longer pre-approves `git *`, `nix *`, `python3 *`, `curl *` or `gh api *`; read-only `git`, `nix` and `gh run` subcommands replace them. The broad rules live in the gitignored `.claude/settings.local.json` on machines that want them |
 
 ## 2. Verified on hardware — not bugs
 
@@ -75,13 +76,6 @@ password hash. The hash that used to be inline is in public git history, and
 the rotation in TODO.md is unconfirmed. On home-desktop, where the admin key
 lives: `sops updatekeys secrets/common.yaml`, then `passwd` and `sops set` the
 new hash.
-
-### 🟡 S2 — Broad pre-approvals in a public repo
-`.claude/settings.json` pre-approves `Bash(python3 *)`, `Bash(curl *)`,
-`Bash(nix *)` and `Bash(git *)`, which is arbitrary code and force-pushes
-without a prompt for anyone opening the repo in Claude Code. Narrow it, or
-move personal approvals to the gitignored `settings.local.json`. It also still
-allows `waybar --version`.
 
 ### 🔵 S4 — `input` group
 The user is in `input` (`base.nix`), so any process they run can read raw
