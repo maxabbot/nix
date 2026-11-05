@@ -228,19 +228,20 @@ plugins still work alongside.
 
 | Plugin | Kind | Hosts |
 |---|---|---|
-| `nixMonitor` | bar — snowflake-only pill; popout has store size (sum of narSize, not `df`), generations, `nh os switch` / `nh clean user` | all |
+| `nixMonitor` | control centre — a tile patched in (upstream is bar-only): generations · store size, highlighted past the GC threshold, opening upstream's popout as its detail page, which has store size (sum of narSize, not `df`), generations, `nh os switch` / `nh clean user` | all |
 | `dankKDEConnect` | bar + control centre | all |
 | `claudeUsage` | bar — Claude Code limits, via `api.anthropic.com` only; patched to lead with the Claude Code logo (Simple Icons, pinned) and tightened; its popout gains an account switcher (`config/dms/ClaudeAccounts.qml`) over the logins saved with `claude-account` | all |
 | `nixPackageRunner` | launcher — `nix search` / `nix run` | all |
 | `dankHyprlandWindows` | launcher — window switcher | all |
-| `dankscale` | bar + control centre, Tailscale | tailscale hosts |
+| `dankscale` | control centre (its bar pill unused) — tap toggles Tailscale, the chevron opens the bar popout as a detail page (patched in), Tailscale | tailscale hosts |
 
 The main bar reads workspaces · focused window | music · clock · weather |
 system monitor · `dankKDEConnect` (icon patched to `phonelink`) · `claudeUsage`
-(logo + two rings, no percentages) · `dankscale` · `nixMonitor` · tray… The
+(logo + two rings, no percentages) · privacy · battery · tray… Dankscale, Nix
+Monitor and the idle inhibitor are Control Center tiles instead. The
 centre has an odd count with the clock in the middle, which DMS's "index"
 centring mode pins to the exact centre. The plugin pills only fit on the right
-once Claude and Nix Monitor were cut down to icon size; at full size they ran
+once Claude was cut down to icon size; at full size it ran
 that section into the centre group.
 
 A rebuild that changes any plugin clears `~/.cache/quickshell/qmlcache`: Qt
@@ -249,7 +250,7 @@ across rebuilds (same `plugins/<id>/` path, store mtime 1970), so DMS otherwise
 keeps running the old version of an edited plugin.
 
 Every plugin comes from the `dms-plugin-registry` input's Nix package set.
-`dankHyprlandWindows` is patched to pass windows through `hl.get_window()`. `nixMonitor`'s pill is patched to show the NixOS snowflake (and a status icon
+`dankHyprlandWindows` is patched to pass windows through `hl.get_window()`. `nixMonitor`'s pill (unused, as above) is patched to show the NixOS snowflake (and a status icon
 when update checking is on — it is off here, with generations and store size,
 via `plugin_settings.json`). `nixMonitor` reads its commands from
 `plugins/NixMonitor/config.json`, which is built into the plugin directory.

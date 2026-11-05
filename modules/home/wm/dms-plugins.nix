@@ -209,6 +209,11 @@ let
   # when it can't compare. Colours are upstream's, except that DMS 2.0 dropped
   # Theme.onSecondary (the Rebuild button's text, left undefined); onPrimary
   # is the same dark-on-accent role.
+  #
+  # It lives in Quick Settings rather than the bar, which upstream has no tile
+  # for: the tile shows generations and store size, highlights when the store
+  # passes the GC threshold or nixpkgs is ahead, and opens upstream's own
+  # popout (minus its close button) as the detail page.
   nixMonitor = pkgs.runCommand "dms-plugin-nixMonitor" { } ''
     cp -r ${registry.nixMonitor} $out
     chmod -R u+w $out
@@ -224,7 +229,38 @@ let
     ' \
       --replace-fail 'name: "check"' \
                      'name: root.canCompareVersions ? (root.isUpToDate ? "check_circle" : "update") : "help"' \
-      --replace-fail 'textColor: Theme.onSecondary' 'textColor: Theme.onPrimary'
+      --replace-fail 'textColor: Theme.onSecondary' 'textColor: Theme.onPrimary' \
+      --replace-fail '    popoutWidth: 450' '    ccWidgetIcon: "ac_unit"
+    ccWidgetPrimaryText: "Nix"
+    ccWidgetSecondaryText: root.isLoading ? "Loading…" : root.generationCount + " gens · " + root.storeSize + (root.canCompareVersions && !root.isUpToDate ? " · update" : "")
+    ccWidgetIsActive: root.storeSizeGB > root.gcThresholdGB || (root.canCompareVersions && !root.isUpToDate)
+    ccWidgetIsToggle: false
+    ccDetailHeight: 500
+    ccDetailContent: Component {
+        Rectangle {
+            width: parent.width
+            height: Math.min(parent.height, nixDetail.implicitHeight + Theme.spacingL * 2)
+            radius: Theme.cornerRadius
+            color: Theme.nestedSurface
+            border.color: Theme.outlineMedium
+            border.width: Theme.layerOutlineWidth
+            clip: true
+
+            Loader {
+                id: nixDetail
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Theme.spacingL
+                sourceComponent: root.popoutContent
+                onLoaded: item.showCloseButton = false
+            }
+        }
+    }
+
+    popoutWidth: 450'
+    ${lib.getExe pkgs.jq} '.capabilities += ["control-center"]' $out/plugin.json > plugin.json
+    cp plugin.json $out/plugin.json
   '';
 
   # Left-clicking a menu row copies the capture straight to the clipboard
@@ -256,6 +292,46 @@ let
     }
 
     RecordingRegionBorder {'
+  '';
+
+  # Dankscale sits in Quick Settings, not the bar (dms.nix), but upstream's
+  # tile is only a connect toggle: its panel (devices, exit nodes, Taildrop,
+  # accounts) was the bar pill's popout. The tile's chevron now opens that
+  # popout as its detail page. The popout only holds Tailscale's detail
+  # subscription while its bar popout is visible (parentPopout), which a
+  # Quick Settings page never sets, so the page takes and drops it itself.
+  dankscale = pkgs.runCommand "dms-plugin-dankscale" { } ''
+    cp -r ${registry.dankscale} $out
+    chmod -R u+w $out
+    substituteInPlace $out/Tailscale.qml \
+      --replace-fail '    onCcWidgetToggled: TailscaleService.toggleConnection()
+' '    onCcWidgetToggled: TailscaleService.toggleConnection()
+    ccDetailHeight: 480
+    ccDetailContent: Component {
+        Rectangle {
+            width: parent.width
+            height: Math.min(parent.height, tsDetail.implicitHeight + Theme.spacingL * 2)
+            radius: Theme.cornerRadius
+            color: Theme.nestedSurface
+            border.color: Theme.outlineMedium
+            border.width: Theme.layerOutlineWidth
+            clip: true
+
+            Component.onCompleted: TailscaleService.acquireDetails()
+            Component.onDestruction: TailscaleService.releaseDetails()
+
+            Loader {
+                id: tsDetail
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Theme.spacingL
+                sourceComponent: root.popoutContent
+                onLoaded: item.showCloseButton = false
+            }
+        }
+    }
+'
   '';
 
   # dir: directory name under plugins/ (only NixMonitor's matters — see above).
@@ -313,7 +389,7 @@ let
   }
   ++ lib.optional osConfig.services.tailscale.enable {
     id = "dankscale";
-    src = registry.dankscale;
+    src = dankscale;
   }
   # Replaces the built-in battery pill: same icon + percent, but its popout
   # (and Control Center tile) adds UPower's charge history, health/drain stats

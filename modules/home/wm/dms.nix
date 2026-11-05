@@ -941,9 +941,13 @@ let
     # the gammastep service. Filtered out of whatever list DMS has saved rather
     # than replacing it, so tiles added and per-tile tweaks made in its GUI
     # (the brightness slider's DDC device) survive.
+    # Edit (DMS's edit-mode entry) and running apps go too: the layout is
+    # declared here, and the window list is the launcher's job.
     controlCenterDrop = [
       "darkMode"
       "nightMode"
+      "edit"
+      "runningApps"
     ];
     # DMS's own default list (dux-shell 2.0.0's SettingsSpec.js), the drops
     # above still in it. Only seeds a settings.json DMS hasn't saved one to:
@@ -983,26 +987,33 @@ let
     # Once there, their size and other per-tile settings are DMS's to keep.
     # 2.0 lays tiles on a grid of cells: w = 4 is half its default 8 columns,
     # the old width = 50.
+    # Idle inhibitor is built in (dropped from the bar for it); Dankscale and
+    # Nix Monitor moved here from the bar too.
     controlCenterAdd =
       map
         (id: {
-          id = "plugin_${id}";
+          inherit id;
           enabled = true;
           w = 4;
           h = 1;
         })
         (
-          dmsPlugins.barWidget "batteryPlus"
-          ++ dmsPlugins.barWidget "quickCapture"
-          ++ dmsPlugins.barWidget "keybindsTile"
-          ++ dmsPlugins.barWidget "lanMouseTile"
-          ++ dmsPlugins.barWidget "dankClight"
+          [ "idleInhibitor" ]
+          ++ map (id: "plugin_${id}") (
+            dmsPlugins.barWidget "batteryPlus"
+            ++ dmsPlugins.barWidget "dankscale"
+            ++ dmsPlugins.barWidget "nixMonitor"
+            ++ dmsPlugins.barWidget "quickCapture"
+            ++ dmsPlugins.barWidget "keybindsTile"
+            ++ dmsPlugins.barWidget "lanMouseTile"
+            ++ dmsPlugins.barWidget "dankClight"
+          )
         );
     # Tile order, re-applied on every nixup: a drag in DMS's edit mode lasts
-    # only until the next rebuild. The listed tiles are sorted among the slots
-    # they already occupy; everything else (2.0's header row of user,
-    # settings, lock and power, the edit tile, tiles added in the GUI) stays
-    # where it is. Listed ones a host lacks are skipped.
+    # only until the next rebuild. The listed tiles are gathered into one run,
+    # in this order, where the first of them sits; tiles before that (2.0's
+    # header row of user, settings, lock and power) stay put, and the rest
+    # (tiles added in the GUI) follow the run in their own order. Listed ones a host lacks are skipped.
     controlCenterOrder = [
       "volumeSlider"
       "brightnessSlider"
@@ -1011,6 +1022,9 @@ let
       "audioOutput"
       "audioInput"
       "plugin_batteryPlus"
+      "idleInhibitor"
+      "plugin_dankscale"
+      "plugin_nixMonitor"
       "plugin_quickCapture"
       "plugin_keybindsTile"
       "plugin_lanMouseTile"
@@ -1021,8 +1035,8 @@ let
       mainScreens = if outputs.hasPortrait then outputs.landscapeOutputs else [ "all" ];
       portraitScreens = outputs.portraitOutputs;
       # Plugin pills (dms-plugins.nix) are each [ ] on a host without that
-      # plugin. They fit on the right now that Claude and Nix Monitor are
-      # icon-sized; at full size they ran the right section into the centre.
+      # plugin. They fit on the right now that Claude is icon-sized;
+      # at full size they ran the right section into the centre.
       left = [
         workspaceSwitcher
         "focusedWindow"
@@ -1045,12 +1059,9 @@ let
       ]
       ++ dmsPlugins.barWidget "dankKDEConnect"
       ++ dmsPlugins.barWidget "claudeUsage"
-      ++ dmsPlugins.barWidget "dankscale"
-      ++ dmsPlugins.barWidget "nixMonitor"
       ++ [ "privacyIndicator" ]
       ++ dmsPlugins.barWidget "batteryPlus"
       ++ [
-        "idleInhibitor"
         "systemTray"
         "notificationButton"
         "controlCenterButton"
@@ -1282,9 +1293,12 @@ in
              then . else .controlCenterWidgets += [$w] end)
          | .controlCenterWidgets |= (. as $w
              | [ $d.controlCenterOrder[] as $id | $w[] | select(.id == $id) ] as $sorted
-             | [ range(0; $w | length)
-                 | select($w[.].id as $i | $d.controlCenterOrder | index($i)) ] as $slots
-             | reduce range(0; $slots | length) as $k ($w; .[$slots[$k]] = $sorted[$k]))
+             | ([ range(0; $w | length)
+                  | select($w[.].id as $i | $d.controlCenterOrder | index($i)) ] | first) as $p
+             | if $p == null then $w
+               else $w[:$p] + $sorted
+                 + [ $w[$p:][] | select(.id as $i | $d.controlCenterOrder | index($i) | not) ]
+               end)
          # barConfigs is written by DMS itself, not by the empty-object seed in
          # apply(), so on a machine where DMS has never run there was nothing
          # here to rewrite: the bar came up with stock widgets and DMSs own
