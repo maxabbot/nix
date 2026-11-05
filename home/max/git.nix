@@ -27,7 +27,12 @@ in
       rebase.autoStash = true;
       rerere.enabled = true;
       credential = {
-        "https://github.com".helper = "!${pkgs.gh}/bin/gh auth git-credential";
+        # Pin the personal account; work.inc overrides the username under
+        # ~/Projects/work/ so gh hands git that account's token instead.
+        "https://github.com" = {
+          helper = "!${pkgs.gh}/bin/gh auth git-credential";
+          username = "maxabbot";
+        };
         "https://gist.github.com".helper = "!${pkgs.gh}/bin/gh auth git-credential";
       };
       safe.directory = "/etc/nixos";
