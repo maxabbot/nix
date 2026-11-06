@@ -1256,7 +1256,8 @@ let
       ]
       ++ dmsPlugins.barWidget "dankKDEConnect"
       ++ dmsPlugins.barWidget "claudeUsage"
-      ++ [ "privacyIndicator" ]
+      # No privacyIndicator: the island's privacy group shows mic/camera/
+      # screen-share use.
       ++ dmsPlugins.barWidget "deviceBatteries"
       ++ dmsPlugins.barWidget "batteryPlus"
       # No notificationButton: the island's notifications group shows the
