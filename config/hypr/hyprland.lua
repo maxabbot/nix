@@ -29,8 +29,7 @@ hl.on("hyprland.start", function()
     require("wallpaper")
     hl.exec_cmd("playerctld")
     -- nm-applet + syncthingtray + the polkit agent are systemd user services
-    -- (modules/home/wm/hyprland.nix); gammastep is one too (HM
-    -- services.gammastep) — exec'ing them here starts duplicates.
+    -- (modules/home/wm/hyprland.nix) — exec'ing them here starts duplicates.
     -- The shell (DMS: bar, notifications, panels) is NOT exec'd here either:
     -- it is shell-dms.service, started with the graphical session. See
     -- modules/home/wm/dms.nix.

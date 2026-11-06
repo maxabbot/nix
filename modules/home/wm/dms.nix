@@ -131,6 +131,38 @@ let
           from = "function isShown(widget) {\n    switch (widget?.id) {\n";
           to = "function isShown(widget) {\n    switch (widget?.id) {\n    case EDIT_ID:\n        return false;\n";
         }
+        # Night Mode's tile on top of its sunset schedule (session.json, below):
+        # a daytime tap forces it warm until sunset, a night-time tap turns it
+        # off until sunrise, a second tap cancels either. Upstream's tile only
+        # toggles the master switch, which under the schedule does nothing
+        # visible by day. The overrides are in-memory; the service re-asserts
+        # them after resume (startAutomation, the gamma re-enable) and the
+        # excluded-app pause leaves a suppressed night alone.
+        {
+          file = "share/quickshell/dms/Services/NightModeService.qml";
+          from = "    property bool nightModePaused: false\n";
+          to = "    property bool nightModePaused: false\n    // Tile overrides on top of the schedule (modules/home/wm/dms.nix):\n    // forced = warm now until the next transition (sunset); suppressed = off\n    // until the next transition (sunrise). Not persisted.\n    property bool nightModeForced: false\n    property bool nightModeSuppressed: false\n    property real nightModeOverrideUntil: 0\n    readonly property bool nightModeWarmNow: nightModeEnabled && (nightModeForced || (!gammaIsDay && !nightModeSuppressed))\n\n    function toggleNightModeNow() {\n        if (!nightModeEnabled || !SessionData.nightModeAutoEnabled) {\n            toggleNightMode();\n            return;\n        }\n        if (nightModeForced || nightModeSuppressed) {\n            _clearNightModeOverride();\n            return;\n        }\n        nightModeOverrideUntil = Date.parse(gammaNextTransition) || (Date.now() + 12 * 3600 * 1000);\n        if (gammaIsDay) {\n            nightModeForced = true;\n            applyNightModeDirectly();\n        } else {\n            nightModeSuppressed = true;\n            _setNightModeEnabled(false, true);\n        }\n    }\n\n    function _clearNightModeOverride() {\n        const wasSuppressed = nightModeSuppressed;\n        nightModeForced = false;\n        nightModeSuppressed = false;\n        nightModeOverrideUntil = 0;\n        if (!wasSuppressed) {\n            startAutomation();\n            return;\n        }\n        _setNightModeEnabled(!nightModePaused, true, success => {\n            if (!success)\n                return;\n            startAutomation();\n            handleNightModeExceptions();\n        });\n    }\n\n    // Minute polling against the wall clock rather than one long Timer, whose\n    // monotonic interval doesn't advance across suspend.\n    Timer {\n        interval: 60000\n        repeat: true\n        running: root.nightModeOverrideUntil > 0\n        onTriggered: {\n            if (Date.now() >= root.nightModeOverrideUntil)\n                root._clearNightModeOverride();\n        }\n    }\n";
+        }
+        {
+          file = "share/quickshell/dms/Services/NightModeService.qml";
+          from = "    function startAutomation() {\n        if (!automationAvailable) {\n            return;\n        }\n";
+          to = "    function startAutomation() {\n        if (!automationAvailable) {\n            return;\n        }\n        if (nightModeForced) {\n            applyNightModeDirectly();\n            return;\n        }\n";
+        }
+        {
+          file = "share/quickshell/dms/Services/NightModeService.qml";
+          from = "    function handleNightModeExceptions() {\n        if (!nightModeEnabled)\n            return;\n";
+          to = "    function handleNightModeExceptions() {\n        if (!nightModeEnabled || nightModeSuppressed)\n            return;\n";
+        }
+        {
+          file = "share/quickshell/dms/Services/NightModeService.qml";
+          from = "_setNightModeEnabled(!nightModePaused, true, success => {\n                    if (!success)\n                        return;\n                    evaluateNightMode();";
+          to = "_setNightModeEnabled(!nightModePaused && !nightModeSuppressed, true, success => {\n                    if (!success)\n                        return;\n                    evaluateNightMode();";
+        }
+        {
+          file = "share/quickshell/dms/Modules/ControlCenter/Widgets/NightModeTile.qml";
+          from = "    iconName: NightModeService.nightModeEnabled ? \"nightlight\" : \"dark_mode\"\n    title: I18n.tr(\"Night mode\")\n    active: NightModeService.nightModeEnabled || false\n    available: NightModeService.automationAvailable\n\n    onClicked: NightModeService.toggleNightMode()\n";
+          to = "    // A daytime force hands over to the schedule at sunset, which keeps it\n    // warm through the night: from the user's side it lasts until sunrise.\n    readonly property string _nextSunrise: {\n        let t = Date.parse(NightModeService.gammaSunriseTime) || 0;\n        while (t > 0 && t <= Date.now())\n            t += 86400000;\n        return t > 0 ? Qt.formatTime(new Date(t), SettingsData.use24HourClock ? \"HH:mm\" : \"h:mm AP\") : \"\";\n    }\n    readonly property string _overrideTime: Qt.formatTime(new Date(NightModeService.nightModeOverrideUntil || Date.parse(NightModeService.gammaNextTransition)), SettingsData.use24HourClock ? \"HH:mm\" : \"h:mm AP\")\n\n    iconName: NightModeService.nightModeWarmNow ? \"nightlight\" : \"dark_mode\"\n    title: I18n.tr(\"Night mode\")\n    subtitle: {\n        if (!NightModeService.nightModeEnabled)\n            return I18n.tr(\"Off\");\n        if (!SessionData.nightModeAutoEnabled)\n            return SessionData.nightModeTemperature + \"K\";\n        if (NightModeService.nightModeForced)\n            return _nextSunrise ? \"On until \" + _nextSunrise : I18n.tr(\"On\");\n        if (NightModeService.nightModeSuppressed)\n            return \"Off until \" + _overrideTime;\n        return (NightModeService.gammaIsDay ? \"From \" : \"Until \") + _overrideTime;\n    }\n    active: NightModeService.nightModeWarmNow\n    available: NightModeService.automationAvailable\n\n    onClicked: NightModeService.toggleNightModeNow()\n";
+        }
       ]
       ++
         map
@@ -898,7 +930,30 @@ let
 
   dmsDeclared = {
     barDefault = dmsDefaultBar;
+    # Merged into session.json (DMS keeps Night Mode there, not in settings).
+    # Night Mode is the night light (gammastep is gone): on, warming to 3500K
+    # between sunset and sunrise at the system location (base.nix), 6500K by
+    # day. Its Quick Settings tile is patched to override the schedule (the
+    # NightModeService patch above); `dms ipc call night disable` is the
+    # master off, until the next rebuild switches it back on.
+    session = {
+      nightModeEnabled = true;
+      nightModeAutoEnabled = true;
+      nightModeAutoMode = "location";
+      nightModeUseIPLocation = false;
+      inherit (osConfig.location) latitude longitude;
+      nightModeTemperature = 3500;
+      nightModeHighTemperature = 6500;
+    };
     settings = {
+      # Night Mode lifts for fullscreen windows (games, video) and for the
+      # colour-critical apps (creative-apps.nix), matched by desktop id.
+      nightModeExcludeFullscreen = true;
+      nightModeExcludedApps = [
+        "gimp"
+        "org.kde.krita"
+        "org.inkscape.Inkscape"
+      ];
       currentThemeName = "custom";
       currentThemeCategory = "custom";
       # As above: DMS resolves and caches the coordinates into its own
@@ -945,15 +1000,13 @@ let
       enableFprint = osConfig.services.fprintd.enable;
     };
     # Control Center tiles to strip. Dark Mode would flip DMS off the fixed
-    # Gruvbox Material Dark scheme; Night Mode is a second gamma client racing
-    # the gammastep service. Filtered out of whatever list DMS has saved rather
+    # Gruvbox Material Dark scheme. Filtered out of whatever list DMS has saved rather
     # than replacing it, so tiles added and per-tile tweaks made in its GUI
     # (the brightness slider's DDC device) survive.
     # Running apps goes too: the window list is the launcher's job. (The edit
     # pencil can't be dropped — DMS re-adds it — so it's hidden by a patch.)
     controlCenterDrop = [
       "darkMode"
-      "nightMode"
       "runningApps"
     ];
     # DMS's own default list (dux-shell 2.0.0's SettingsSpec.js), the drops
@@ -1005,7 +1058,10 @@ let
           h = 1;
         })
         (
-          [ "idleInhibitor" ]
+          [
+            "idleInhibitor"
+            "nightMode"
+          ]
           ++ map (id: "plugin_${id}") (
             dmsPlugins.barWidget "batteryPlus"
             ++ dmsPlugins.barWidget "dankscale"
@@ -1030,6 +1086,7 @@ let
       "audioInput"
       "plugin_batteryPlus"
       "idleInhibitor"
+      "nightMode"
       "plugin_dankscale"
       "plugin_nixMonitor"
       "plugin_quickCapture"
@@ -1264,10 +1321,12 @@ in
         ${dmsPluginDecl} \
         '. * $d'
 
-      # DMS session.json: only the hidden output devices; the rest is its state.
+      # DMS session.json: the hidden output devices and Night Mode; the rest
+      # is its state.
       apply "${config.xdg.stateHome}/dms/session.json" \
         ${dmsDecl} \
-        '.hiddenOutputDeviceNames = ((.hiddenOutputDeviceNames // []) + $d.hiddenOutputs | unique)'
+        '.hiddenOutputDeviceNames = ((.hiddenOutputDeviceNames // []) + $d.hiddenOutputs | unique)
+         | . * $d.session'
 
       # DMS: the theme keys merge the same way, but its bars can't — a barConfig
       # carries styling (spacing, transparency, corners…) alongside its widget

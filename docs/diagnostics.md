@@ -80,7 +80,6 @@ systemctl --failed
 
 # Logs for a specific unit
 journalctl -b -u xdg-desktop-portal-hyprland.service | tail -20
-journalctl -b -u gammastep.service | tail -20
 
 # User-level failed units (run as max, not root)
 systemctl --user --failed

@@ -158,7 +158,7 @@
 
   # ── Location ─────────────────────────────────────────────────────────────────
   # Wired, and Spark's GeoIP says Auckland, so GeoClue (DMS's auto-located
-  # weather, gammastep) gets a fixed Christchurch instead — city centre, which
+  # weather) gets a fixed Christchurch instead — city centre, which
   # is all the weather needs. The laptop locates by wifi (geoclue-iwd.nix).
   services.geoclue2 = {
     enableStatic = true;

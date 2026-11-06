@@ -1,7 +1,4 @@
-{
-  osConfig,
-  ...
-}:
+{ ... }:
 {
   xdg.desktopEntries = {
     sunshine = {
@@ -21,15 +18,5 @@
     };
   };
 
-  services.gammastep = {
-    enable = true;
-    provider = "manual";
-    # The system location (base.nix), shared with Clight.
-    inherit (osConfig.location) latitude longitude;
-    temperature = {
-      day = 6500;
-      night = 3500;
-    };
-  };
-
+  # Night light is DMS's Night Mode (modules/home/wm/dms.nix), not gammastep.
 }

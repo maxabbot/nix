@@ -78,8 +78,8 @@ in
     # ── Locale & timezone ──────────────────────────────────────────────────────
     time.timeZone = cfg.timezone;
     i18n.defaultLocale = "en_US.UTF-8";
-    # Christchurch NZ. Clight's day/night timing (clight.nix) and gammastep's
-    # night light (home/max/desktop.nix, via osConfig) both read this.
+    # Christchurch NZ. Clight's day/night timing (clight.nix) and DMS Night
+    # Mode's sunset schedule (modules/home/wm/dms.nix, via osConfig) read this.
     location = {
       latitude = -43.53;
       longitude = 172.64;

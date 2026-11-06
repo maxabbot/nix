@@ -9,7 +9,7 @@
 # Only the backlight module does anything. Clight also does gamma, dimming,
 # DPMS, keyboard backlight and screen-content compensation; each of those
 # already has an owner here or wasn't wanted:
-#   • gamma    — gammastep (home/max/desktop.nix)
+#   • gamma    — DMS Night Mode (modules/home/wm/dms.nix)
 #   • dimmer/dpms — hypridle
 #   • keyboard — would also switch the keyboard backlight off after 15 s idle
 #   • screen   — samples screen content; light level alone
