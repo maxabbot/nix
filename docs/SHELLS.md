@@ -228,6 +228,12 @@ the site:
   "Activate" default-action button relabelled "Open" (`NotificationCard.qml`,
   `IslandNotificationSource.qml`).
 
+- **One island per event.** Every output's bar hosts its own island, and each
+  showed its own copy of a notification or OSD (as DMS's standalone popups did
+  on its defaults). `notificationFocusedMonitor = true` limits notifications
+  to the focused output's island, and a patch (`IslandBarHost.qml`) gives the
+  OSDs the same check.
+
 Two settings read backwards: `islandNotificationPopups = false` is what routes
 notifications *into* the island, and `islandSystemOsd = true` gives it the
 OSDs.
@@ -363,6 +369,5 @@ but a newly added one still arrives.
 `hl.dsp.exit()`, DMS's log-out path. Correct by the API's shape, but verifying
 it costs the session.
 
-The island on home-desktop: the portrait bar's island, and whether one
-notification or OSD pops the islands on both outputs at once (each bar hosts
-its own). Built and evaluated, not yet run there.
+The island on home-desktop's portrait bar. Built and evaluated, not yet run
+there.

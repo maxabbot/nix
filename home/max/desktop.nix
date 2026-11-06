@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   xdg.desktopEntries = {
     sunshine = {
       name = "Sunshine";

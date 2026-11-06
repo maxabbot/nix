@@ -301,37 +301,37 @@ let
   # subscription while its bar popout is visible (parentPopout), which a
   # Quick Settings page never sets, so the page takes and drops it itself.
   dankscale = pkgs.runCommand "dms-plugin-dankscale" { } ''
-    cp -r ${registry.dankscale} $out
-    chmod -R u+w $out
-    substituteInPlace $out/Tailscale.qml \
-      --replace-fail '    onCcWidgetToggled: TailscaleService.toggleConnection()
-' '    onCcWidgetToggled: TailscaleService.toggleConnection()
-    ccDetailHeight: 480
-    ccDetailContent: Component {
-        Rectangle {
-            width: parent.width
-            height: Math.min(parent.height, tsDetail.implicitHeight + Theme.spacingL * 2)
-            radius: Theme.cornerRadius
-            color: Theme.nestedSurface
-            border.color: Theme.outlineMedium
-            border.width: Theme.layerOutlineWidth
-            clip: true
+        cp -r ${registry.dankscale} $out
+        chmod -R u+w $out
+        substituteInPlace $out/Tailscale.qml \
+          --replace-fail '    onCcWidgetToggled: TailscaleService.toggleConnection()
+    ' '    onCcWidgetToggled: TailscaleService.toggleConnection()
+        ccDetailHeight: 480
+        ccDetailContent: Component {
+            Rectangle {
+                width: parent.width
+                height: Math.min(parent.height, tsDetail.implicitHeight + Theme.spacingL * 2)
+                radius: Theme.cornerRadius
+                color: Theme.nestedSurface
+                border.color: Theme.outlineMedium
+                border.width: Theme.layerOutlineWidth
+                clip: true
 
-            Component.onCompleted: TailscaleService.acquireDetails()
-            Component.onDestruction: TailscaleService.releaseDetails()
+                Component.onCompleted: TailscaleService.acquireDetails()
+                Component.onDestruction: TailscaleService.releaseDetails()
 
-            Loader {
-                id: tsDetail
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: Theme.spacingL
-                sourceComponent: root.popoutContent
-                onLoaded: item.showCloseButton = false
+                Loader {
+                    id: tsDetail
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: Theme.spacingL
+                    sourceComponent: root.popoutContent
+                    onLoaded: item.showCloseButton = false
+                }
             }
         }
-    }
-'
+    '
   '';
 
   # Battery levels of peripherals the shell doesn't show: the MX Ergo S (via

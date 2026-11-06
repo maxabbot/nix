@@ -134,6 +134,16 @@ let
           to = "transparency: SettingsData.popupTransparency";
         }
         {
+          # Every bar hosts an island, and each showed its own copy of a
+          # volume or brightness OSD. The island's notifications already
+          # honour "focused monitor only" (notificationFocusedMonitor, set
+          # below); give its OSDs the same check, so one change pops one
+          # island, on the output you're working on.
+          file = "share/quickshell/dms/Modules/DIsland/IslandBarHost.qml";
+          from = ''enabled: root.setting("islandSystemOsd") && root.barConfig?.visible !== false'';
+          to = ''enabled: root.setting("islandSystemOsd") && root.barConfig?.visible !== false && NotificationService.isFocusedScreen(root.screen)'';
+        }
+        {
           # …and it only reads that alpha with its own chrome. In a normal bar
           # DMS draws it as "band" chrome, an extension of the bar strip that
           # paints the strip's colour, which is fully transparent here. Own
@@ -1142,6 +1152,10 @@ let
       weatherEnabled = true;
       # 2.0's Wellbeing (screen time) logs per-app usage; not wanted.
       wellbeingEnabled = false;
+      # Notifications on the focused output's island only, not one copy per
+      # output (every bar hosts an island). The OSDs follow the same setting
+      # (IslandBarHost.qml patch above).
+      notificationFocusedMonitor = true;
       # Events come from dcal (home/max/calendar.nix). "auto" would also probe
       # for khal, which isn't installed.
       calendarBackend = "dankcal";
@@ -1413,8 +1427,7 @@ in
     # unlike its settings.json this can be a plain store symlink rendered from
     # palette.nix.
     xdg.configFile = {
-      "dms/gruvbox-material.json".text =
-        renderTheme ../../../config/dms/gruvbox-material.json;
+      "dms/gruvbox-material.json".text = renderTheme ../../../config/dms/gruvbox-material.json;
     }
     # DMS plugins: one store symlink per plugin directory — see dms-plugins.nix.
     // dmsPlugins.configFiles;
@@ -1435,31 +1448,148 @@ in
     # the compat symlink DMS leaves for older plugins is only (re)made once
     # the new generation is linked. Drop all this once no machine has a
     # DankMaterialShell dir left.
-    home.activation.dmsLegacyDirsMove = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-      for base in "${config.xdg.configHome}" "${config.xdg.stateHome}" \
-                  "${config.xdg.cacheHome}" "${config.xdg.dataHome}"; do
-        old="$base/DankMaterialShell" new="$base/dms"
-        if [[ -L "$old" ]]; then
-          run rm "$old"
-        elif [[ -d "$old" && ! -e "$new" ]]; then
-          run mv "$old" "$new"
-          run find "$new" -type l -lname '*-home-manager-files/*' -delete
-        fi
-      done
-    '';
-    home.activation.dmsLegacyDirsLink = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      for base in "${config.xdg.configHome}" "${config.xdg.stateHome}" \
-                  "${config.xdg.cacheHome}" "${config.xdg.dataHome}"; do
-        if [[ -d "$base/dms" && ! -e "$base/DankMaterialShell" && ! -L "$base/DankMaterialShell" ]]; then
-          run ln -s dms "$base/DankMaterialShell"
-        fi
-      done
-    '';
+    home.activation = {
+      dmsLegacyDirsMove = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+        for base in "${config.xdg.configHome}" "${config.xdg.stateHome}" \
+                    "${config.xdg.cacheHome}" "${config.xdg.dataHome}"; do
+          old="$base/DankMaterialShell" new="$base/dms"
+          if [[ -L "$old" ]]; then
+            run rm "$old"
+          elif [[ -d "$old" && ! -e "$new" ]]; then
+            run mv "$old" "$new"
+            run find "$new" -type l -lname '*-home-manager-files/*' -delete
+          fi
+        done
+      '';
+      dmsLegacyDirsLink = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+        for base in "${config.xdg.configHome}" "${config.xdg.stateHome}" \
+                    "${config.xdg.cacheHome}" "${config.xdg.dataHome}"; do
+          if [[ -d "$base/dms" && ! -e "$base/DankMaterialShell" && ! -L "$base/DankMaterialShell" ]]; then
+            run ln -s dms "$base/DankMaterialShell"
+          fi
+        done
+      '';
 
-    # Pointing DMS AT its scheme and layout has to be done differently:
-    # settings.json is owned and rewritten by the shell itself, so it can't be a
-    # store symlink (it would lose every setting it saves). Merge in only the
-    # keys we declare and leave the rest alone.
+      # Pointing DMS AT its scheme and layout has to be done differently:
+      # settings.json is owned and rewritten by the shell itself, so it can't be a
+      # store symlink (it would lose every setting it saves). Merge in only the
+      # keys we declare and leave the rest alone.
+      shellSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        apply() {
+          local file="$1" decl="$2" prog="$3"
+          # The merge ends in output redirects, which HM's `run` can't hold back
+          # on a dry run, so a dry run only says what it would do.
+          if [[ -v DRY_RUN ]]; then
+            echo "would merge $decl into $file"
+            return
+          fi
+          mkdir -p "$(dirname "$file")"
+          # DMS loads JSON over its Store property defaults, so seeding an empty
+          # object is enough when it has never run.
+          [ -s "$file" ] || echo '{}' > "$file"
+          ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
+            > "$file.hm-tmp" && mv "$file.hm-tmp" "$file"
+        }
+
+        # Stale compiled QML: see `stamp` in dms-plugins.nix. Deleting the cache
+        # under a running shell is safe; it recompiles on its next start.
+        qmlStamp="${config.xdg.cacheHome}/quickshell/dms-plugins.stamp"
+        if [ "$(cat "$qmlStamp" 2>/dev/null)" != "${dmsPlugins.stamp}" ]; then
+          run rm -f "${config.xdg.cacheHome}"/quickshell/qmlcache/*.qmlc
+          run mkdir -p "$(dirname "$qmlStamp")"
+          [[ -v DRY_RUN ]] || echo ${dmsPlugins.stamp} > "$qmlStamp"
+        fi
+
+        # DMS plugin_settings.json: which plugins are on, plus a few settings.
+        # Same plain merge — each plugin's other keys are whatever it saved.
+        apply "${config.xdg.configHome}/dms/plugin_settings.json" \
+          ${dmsPluginDecl} \
+          '. * $d'
+
+        # DMS session.json: the hidden output devices and Night Mode; the rest
+        # is its state.
+        apply "${config.xdg.stateHome}/dms/session.json" \
+          ${dmsDecl} \
+          '.hiddenOutputDeviceNames = ((.hiddenOutputDeviceNames // []) + $d.hiddenOutputs | unique)
+           | . * $d.session'
+
+        # DMS: the theme keys merge the same way, but its bars can't — a barConfig
+        # carries styling (spacing, transparency, corners…) alongside its widget
+        # arrays, and replacing the array wholesale would discard all of it. So
+        # rewrite the widget lists in place, and clone bar 0 for the portrait
+        # output rather than authoring a second bar from scratch.
+        #
+        # The widget lists are ours, but since 2.0 each entry can carry that
+        # widget's options (clock format, tray layout, …, moved there from
+        # global keys by DMS's own migration). keep() takes the declared list
+        # and, for each widget already on the bar, its saved entry, with any
+        # options declared here merged over it.
+        apply "${config.xdg.configHome}/dms/settings.json" \
+          ${dmsDecl} \
+          'def keep($old; $new):
+             $new | map(. as $w
+               | ($w | if type == "string" then {id: .} else . end) as $dw
+               | ([($old // [])[] | select(type == "object" and .id == $dw.id)] | first) as $e
+               | if $e == null then $w
+                 elif ($w | type) == "string" then $e
+                 else $e * $w end);
+           ($d.settings) as $s
+           | . * $s
+           # Never run → DMS falls back to its stock list, which has the dropped
+           # tiles in it, so seed that list before filtering.
+           | .controlCenterWidgets = (
+               (.controlCenterWidgets // $d.controlCenterDefault)
+               | map(select(.id as $i | $d.controlCenterDrop | index($i) | not)))
+           | reduce $d.controlCenterAdd[] as $w (.;
+               if any(.controlCenterWidgets[]; .id == $w.id)
+               then . else .controlCenterWidgets += [$w] end)
+           | .controlCenterWidgets |= (. as $w
+               | [ $d.controlCenterOrder[] as $id | $w[] | select(.id == $id) ] as $sorted
+               | ([ range(0; $w | length)
+                    | select($w[.].id as $i | $d.controlCenterOrder | index($i)) ] | first) as $p
+               | if $p == null then $w
+                 else $w[:$p] + $sorted
+                   + [ $w[$p:][] | select(.id as $i | $d.controlCenterOrder | index($i) | not) ]
+                 end)
+           # barConfigs is written by DMS itself, not by the empty-object seed in
+           # apply(), so on a machine where DMS has never run there was nothing
+           # here to rewrite: the bar came up with stock widgets and DMSs own
+           # transparency 1.0, i.e. opaque. Seed the default entry DMS would have
+           # written so the overrides below always land on a complete barConfig.
+           | if ((.barConfigs | type) == "array") and ((.barConfigs | length) > 0)
+             then . else .barConfigs = [ $d.barDefault ] end
+           | (.barConfigs[0] |= (
+               # 2.0: without these off, the bar and its pills take the popup
+               # and theme alphas instead of the two below.
+                 .followInterfaceStyle       = false
+               | .widgetFollowInterfaceStyle = false
+               | .transparency       = $d.bars.barAlpha
+               | .widgetTransparency = $d.bars.widgetAlpha
+               | .screenPreferences = $d.bars.mainScreens
+               | .leftWidgets       = keep(.leftWidgets; $d.bars.left)
+               | .centerWidgets     = keep(.centerWidgets; $d.bars.center)
+               | .rightWidgets      = keep(.rightWidgets; $d.bars.right)))
+           | if ($d.bars.portraitScreens | length) > 0
+             then
+               (if any(.barConfigs[]; .id == "portrait")
+                then . else .barConfigs += [.barConfigs[0] | .id = "portrait"] end)
+               | .barConfigs |= map(
+                   if .id == "portrait"
+                   then ( .name             = "Portrait"
+                        # Without this the portrait bar falls back onto the
+                        # only remaining screen whenever DP-2 is unplugged
+                        # (DankBar.qml:168), stacking two bars on DP-3. The
+                        # fallback is right for the main bar, not a second one.
+                        | .showOnLastDisplay = false
+                        | .screenPreferences = $d.bars.portraitScreens
+                        | .leftWidgets       = keep(.leftWidgets; $d.bars.pLeft)
+                        | .centerWidgets     = keep(.centerWidgets; $d.bars.pCenter)
+                        | .rightWidgets      = keep(.rightWidgets; $d.bars.pRight) )
+                   else . end)
+             else . end'
+      '';
+    };
+
     systemd.user.paths.dms-wallpaper-bridge = {
       Unit = {
         Description = "Watch DMS session state for wallpaper picks";
@@ -1470,121 +1600,6 @@ in
         Unit = "dms-wallpaper-bridge.service";
       };
     };
-
-    home.activation.shellSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      apply() {
-        local file="$1" decl="$2" prog="$3"
-        # The merge ends in output redirects, which HM's `run` can't hold back
-        # on a dry run, so a dry run only says what it would do.
-        if [[ -v DRY_RUN ]]; then
-          echo "would merge $decl into $file"
-          return
-        fi
-        mkdir -p "$(dirname "$file")"
-        # DMS loads JSON over its Store property defaults, so seeding an empty
-        # object is enough when it has never run.
-        [ -s "$file" ] || echo '{}' > "$file"
-        ${pkgs.jq}/bin/jq --argjson d "$(cat "$decl")" "$prog" "$file" \
-          > "$file.hm-tmp" && mv "$file.hm-tmp" "$file"
-      }
-
-      # Stale compiled QML: see `stamp` in dms-plugins.nix. Deleting the cache
-      # under a running shell is safe; it recompiles on its next start.
-      qmlStamp="${config.xdg.cacheHome}/quickshell/dms-plugins.stamp"
-      if [ "$(cat "$qmlStamp" 2>/dev/null)" != "${dmsPlugins.stamp}" ]; then
-        run rm -f "${config.xdg.cacheHome}"/quickshell/qmlcache/*.qmlc
-        run mkdir -p "$(dirname "$qmlStamp")"
-        [[ -v DRY_RUN ]] || echo ${dmsPlugins.stamp} > "$qmlStamp"
-      fi
-
-      # DMS plugin_settings.json: which plugins are on, plus a few settings.
-      # Same plain merge — each plugin's other keys are whatever it saved.
-      apply "${config.xdg.configHome}/dms/plugin_settings.json" \
-        ${dmsPluginDecl} \
-        '. * $d'
-
-      # DMS session.json: the hidden output devices and Night Mode; the rest
-      # is its state.
-      apply "${config.xdg.stateHome}/dms/session.json" \
-        ${dmsDecl} \
-        '.hiddenOutputDeviceNames = ((.hiddenOutputDeviceNames // []) + $d.hiddenOutputs | unique)
-         | . * $d.session'
-
-      # DMS: the theme keys merge the same way, but its bars can't — a barConfig
-      # carries styling (spacing, transparency, corners…) alongside its widget
-      # arrays, and replacing the array wholesale would discard all of it. So
-      # rewrite the widget lists in place, and clone bar 0 for the portrait
-      # output rather than authoring a second bar from scratch.
-      #
-      # The widget lists are ours, but since 2.0 each entry can carry that
-      # widget's options (clock format, tray layout, …, moved there from
-      # global keys by DMS's own migration). keep() takes the declared list
-      # and, for each widget already on the bar, its saved entry, with any
-      # options declared here merged over it.
-      apply "${config.xdg.configHome}/dms/settings.json" \
-        ${dmsDecl} \
-        'def keep($old; $new):
-           $new | map(. as $w
-             | ($w | if type == "string" then {id: .} else . end) as $dw
-             | ([($old // [])[] | select(type == "object" and .id == $dw.id)] | first) as $e
-             | if $e == null then $w
-               elif ($w | type) == "string" then $e
-               else $e * $w end);
-         ($d.settings) as $s
-         | . * $s
-         # Never run → DMS falls back to its stock list, which has the dropped
-         # tiles in it, so seed that list before filtering.
-         | .controlCenterWidgets = (
-             (.controlCenterWidgets // $d.controlCenterDefault)
-             | map(select(.id as $i | $d.controlCenterDrop | index($i) | not)))
-         | reduce $d.controlCenterAdd[] as $w (.;
-             if any(.controlCenterWidgets[]; .id == $w.id)
-             then . else .controlCenterWidgets += [$w] end)
-         | .controlCenterWidgets |= (. as $w
-             | [ $d.controlCenterOrder[] as $id | $w[] | select(.id == $id) ] as $sorted
-             | ([ range(0; $w | length)
-                  | select($w[.].id as $i | $d.controlCenterOrder | index($i)) ] | first) as $p
-             | if $p == null then $w
-               else $w[:$p] + $sorted
-                 + [ $w[$p:][] | select(.id as $i | $d.controlCenterOrder | index($i) | not) ]
-               end)
-         # barConfigs is written by DMS itself, not by the empty-object seed in
-         # apply(), so on a machine where DMS has never run there was nothing
-         # here to rewrite: the bar came up with stock widgets and DMSs own
-         # transparency 1.0, i.e. opaque. Seed the default entry DMS would have
-         # written so the overrides below always land on a complete barConfig.
-         | if ((.barConfigs | type) == "array") and ((.barConfigs | length) > 0)
-           then . else .barConfigs = [ $d.barDefault ] end
-         | (.barConfigs[0] |= (
-             # 2.0: without these off, the bar and its pills take the popup
-             # and theme alphas instead of the two below.
-               .followInterfaceStyle       = false
-             | .widgetFollowInterfaceStyle = false
-             | .transparency       = $d.bars.barAlpha
-             | .widgetTransparency = $d.bars.widgetAlpha
-             | .screenPreferences = $d.bars.mainScreens
-             | .leftWidgets       = keep(.leftWidgets; $d.bars.left)
-             | .centerWidgets     = keep(.centerWidgets; $d.bars.center)
-             | .rightWidgets      = keep(.rightWidgets; $d.bars.right)))
-         | if ($d.bars.portraitScreens | length) > 0
-           then
-             (if any(.barConfigs[]; .id == "portrait")
-              then . else .barConfigs += [.barConfigs[0] | .id = "portrait"] end)
-             | .barConfigs |= map(
-                 if .id == "portrait"
-                 then ( .name             = "Portrait"
-                      # Without this the portrait bar falls back onto the
-                      # only remaining screen whenever DP-2 is unplugged
-                      # (DankBar.qml:168), stacking two bars on DP-3. The
-                      # fallback is right for the main bar, not a second one.
-                      | .showOnLastDisplay = false
-                      | .screenPreferences = $d.bars.portraitScreens
-                      | .leftWidgets       = keep(.leftWidgets; $d.bars.pLeft)
-                      | .centerWidgets     = keep(.centerWidgets; $d.bars.pCenter)
-                      | .rightWidgets      = keep(.rightWidgets; $d.bars.pRight) )
-                 else . end)
-           else . end'
-    '';
 
     systemd.user.services = {
       shell-dms = shellUnit;

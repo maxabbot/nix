@@ -208,7 +208,7 @@
         in
         {
           dms-shell = lib.findFirst (
-            p: lib.getName p == "dms-shell"
+            p: lib.getName p == "dux-shell"
           ) (throw "checks: no dms-shell in framework's home.packages") hm.home.packages;
           dms-greeter = fw.services.displayManager.dms-greeter.package;
         }
