@@ -231,6 +231,11 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 5,  bezier = "easeOu
 -- their soft shadows or the empty surface around them.
 hl.layer_rule({ match = { namespace = "dms:.*" },                 blur = true,  ignore_alpha = 0.5 })
 hl.layer_rule({ match = { namespace = "dms:.*:background" },      blur = false })
+-- The bar's layer grows and shrinks to hold the Dynamic Island as it opens
+-- and closes; animated, Hyprland stretches the old bar buffer to each new
+-- size, so every pill squashes and springs back. DMS animates the island
+-- itself, so the bar needs no compositor animation.
+hl.layer_rule({ match = { namespace = "^dms:bar$" },              no_anim = true })
 
 ---------------------
 ---- WINDOW RULES ---
@@ -512,9 +517,14 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),         { locked = true, description = "Volume down" })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),         { locked = true, description = "Mute" })
 
--- Brightness
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set +10%"), { locked = true, description = "Brightness up" })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -n$(( $(brightnessctl max) * 3 / 100 )) set 10%-"), { locked = true, description = "Brightness down" })
+-- Brightness, through DMS so the change is marked as the user's: DMS shows
+-- its OSD only for its own changes and for unexplained ones, and Clight's
+-- auto-brightness (clight.nix) would otherwise pop the island every few
+-- seconds — so external changes are silenced in dms.nix, and these keys are
+-- what still gets an OSD. DMS floors the panel at 3% raw (patched in dms.nix,
+-- like Clight's curves); brightnessctl is the fallback when the shell is down.
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("dms ipc call brightness increment 10 backlight:intel_backlight || brightnessctl set +10%"), { locked = true, description = "Brightness up" })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("dms ipc call brightness decrement 10 backlight:intel_backlight || brightnessctl -n$(( $(brightnessctl max) * 3 / 100 )) set 10%-"), { locked = true, description = "Brightness down" })
 
 -- Media
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })

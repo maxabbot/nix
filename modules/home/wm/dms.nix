@@ -124,6 +124,88 @@ let
           to = ''iconName: "coffee"'';
         }
         {
+          # The Dynamic Island's surface takes the bar strip's alpha, which is
+          # 0 here (bars.barAlpha), so the expanded island had no background
+          # at all: the windows behind showed between its cards, unblurred
+          # (below hyprland.lua's ignore_alpha 0.5). Give it the popouts'
+          # alpha instead, so it reads like every other DMS panel.
+          file = "share/quickshell/dms/Modules/DIsland/IslandBarHost.qml";
+          from = "transparency: SettingsData.barTransparency(root.barConfig)";
+          to = "transparency: SettingsData.popupTransparency";
+        }
+        {
+          # …and it only reads that alpha with its own chrome. In a normal bar
+          # DMS draws it as "band" chrome, an extension of the bar strip that
+          # paints the strip's colour, which is fully transparent here. Own
+          # chrome, as on island-layout bars, draws its own surface at the
+          # alpha above. Frame-hosted bars keep their connected "none" chrome.
+          file = "share/quickshell/dms/Modules/DBar/DBarBody.qml";
+          from = ''usesConnectedFrameChrome && frameHosted ? "none" : "band"'';
+          to = ''usesConnectedFrameChrome && frameHosted ? "none" : "own"'';
+        }
+        {
+          # A bar hosting the island hops from the Top layer to Overlay while
+          # the island is open, and back on close. Each hop blanks the whole
+          # bar for a frame on Hyprland, so every open and close flickered.
+          # Keep it on Top: the open island still sits above every window,
+          # it just no longer draws over fullscreen ones, which hide the bar
+          # anyway.
+          file = "share/quickshell/dms/Modules/DBar/DBarWindow.qml";
+          from = "barWindow.usesOverlayLayer || (!isIsland && islandChrome.sheetOut) ? WlrLayer.Overlay";
+          to = "barWindow.usesOverlayLayer ? WlrLayer.Overlay";
+        }
+        {
+          # The same bar also grows its layer surface to the open island's
+          # height and shrinks it back on close, and Hyprland shows some of
+          # those resizes as one empty frame of bar. Size it for the island
+          # for good instead (islandHost.hostThickness is a constant: the
+          # tallest island panel). Clicks are unaffected: the input mask
+          # (DBarWindow.qml) is the bar strip plus the island, not the window.
+          file = "share/quickshell/dms/Modules/DBar/DBarBody.qml";
+          from = "Math.max(barSurfaceThickness, islandSheetOut ? islandHost.hostThickness : 0)";
+          to = "Math.max(barSurfaceThickness, islandHost ? islandHost.hostThickness : 0)";
+        }
+        {
+          # No brightness OSD for changes DMS didn't make. Clight
+          # (clight.nix) moves the panel every few seconds, and each move
+          # popped the island's brightness face. The brightness keys go
+          # through `dms ipc call brightness` (hyprland.lua), which DMS marks
+          # as its own (pendingOsdDevices), so they keep their OSD. Still
+          # emitted, with showOsd false, for anything else listening.
+          file = "share/quickshell/dms/Services/BrightnessService.qml";
+          from = "        if (suppressOsd) {\n            return;\n        }\n        brightnessChanged(true);\n    }";
+          to = "        brightnessChanged(false);\n    }";
+        }
+      ]
+      # Chrome (and its PWAs) labels every notification's default action
+      # "Activate": that's the click-the-notification action (focus the app,
+      # open the item), listed as a button for servers that need it. Show it
+      # as "Open", DMS's own label for an unlabelled action. Both places that
+      # draw action buttons: the card (popups, center) and the island's face.
+      ++ [
+        {
+          file = "share/quickshell/dms/Modules/Notifications/NotificationCard.qml";
+          from = ''text: (modelData.text || I18n.tr("Open"))'';
+          to = ''text: ((modelData.identifier === "default" ? "" : modelData.text) || I18n.tr("Open"))'';
+        }
+        {
+          file = "share/quickshell/dms/Modules/DIsland/IslandNotificationSource.qml";
+          from = "(actions[0].text || I18n.tr(";
+          to = ''((actions[0].identifier === "default" ? "" : actions[0].text) || I18n.tr('';
+        }
+      ]
+      ++ [
+        {
+          # The panel's floor matches Clight's curves (clight.nix) and the
+          # old brightnessctl binding: 3% of the hardware range. DMS's scale
+          # is offset (raw = (pct - 1) / 99 * max, measured), so its own
+          # floor of 1% is raw 0, a black panel, and 4% is raw 3.03%.
+          # Applies to the DMS slider too.
+          file = "share/quickshell/dms/Services/BrightnessService.qml";
+          from = "    function brightnessMinimum(deviceInfo) {\n        if (!deviceInfo";
+          to = "    function brightnessMinimum(deviceInfo) {\n        if (deviceInfo?.class === \"backlight\")\n            return 4;\n        if (!deviceInfo";
+        }
+        {
           # No edit pencil in the Control Center: its layout is declared in
           # this file. DMS re-adds the tile to any saved list without it
           # (ensureEditButton), so it stays in the list and is never shown.
@@ -928,6 +1010,54 @@ let
     showWorkspaceIndex = true;
   };
 
+  # 2.0's Dynamic Island, the centre of both bars. Hosted in a normal bar it
+  # leaves notification popups and OSDs to the bar by default; these hand
+  # both to the island instead (IslandBarHost.qml). islandNotificationPopups
+  # reads backwards: true keeps DMS's standalone popups, false routes them
+  # through the island (SettingsData.dankIslandHandlesNotifications).
+  island = {
+    id = "island";
+    enabled = true;
+    islandNotificationPopups = false;
+    islandSystemOsd = true;
+    # A new notification bubbles out into the full card (title, body,
+    # actions) instead of only swapping the pill to "app · summary".
+    islandNotificationExpand = true;
+    # Critically damped (2·√(stiffness·mass) ≈ 47.3 at DMS's default 560):
+    # the stock 37 overshoots and wobbles as it settles. No overshoot, like
+    # the Hyprland animations (hyprland.lua).
+    islandSpringDamping = 48;
+    # The compact face's groups, in order: those before the clock sit left of
+    # it, the rest right. DMS's default (SettingsData._islandHomeLayoutDefault)
+    # with weather switched on, right of the clock where the weather pill was.
+    islandHomeLayout =
+      map
+        (id: {
+          inherit id;
+          enabled = true;
+        })
+        [
+          "media"
+          "clock"
+          "weather"
+          "notifications"
+          "privacy"
+        ]
+      ++
+        map
+          (id: {
+            inherit id;
+            enabled = false;
+          })
+          [
+            "workspaces"
+            "status"
+            "volume"
+            "brightness"
+            "tray"
+          ];
+  };
+
   dmsDeclared = {
     barDefault = dmsDefaultBar;
     # Merged into session.json (DMS keeps Night Mode there, not in settings).
@@ -1110,16 +1240,14 @@ let
         workspaceSwitcher
         "focusedWindow"
       ];
-      # music sits with the clock, as in DMS's own default: in the right
-      # section a playing track pushed it into the centre group.
-      # Odd count with the clock in the middle: in DMS's default "index"
-      # centeringMode that pins the clock to the exact centre of the bar,
-      # whatever its neighbours' widths.
-      center = [
-        "music"
-        "clock"
-        "weather"
-      ];
+      # 2.0's Dynamic Island alone in the centre: its compact face is the
+      # clock and switches to the playing track or a notification, and it
+      # expands in place into the Dash (weather, media, …), so the music,
+      # clock and weather pills it replaces would only duplicate it. Kept
+      # the only entry so DMS's "index" centeringMode pins it to the exact
+      # centre of the bar. It also takes notification popups and OSDs (see
+      # `island` above).
+      center = [ island ];
       # "cpuUsage" is config/dms/BarSystemMonitor.qml (installed over
       # CpuMonitor.qml above): CPU, memory and GPU in one pill, so cpuTemp,
       # memUsage and gpuTemp aren't listed.
@@ -1131,9 +1259,10 @@ let
       ++ [ "privacyIndicator" ]
       ++ dmsPlugins.barWidget "deviceBatteries"
       ++ dmsPlugins.barWidget "batteryPlus"
+      # No notificationButton: the island's notifications group shows the
+      # unread count, and the notification center opens in the island.
       ++ [
         "systemTray"
-        "notificationButton"
         "controlCenterButton"
       ];
       # DankBarWindow.qml reads barConfig.transparency straight into the
@@ -1144,11 +1273,8 @@ let
       barAlpha = 0;
       widgetAlpha = 0.85;
       pLeft = [ workspaceSwitcher ];
-      pCenter = [ "clock" ];
-      pRight = [
-        "notificationButton"
-        "controlCenterButton"
-      ];
+      pCenter = [ island ];
+      pRight = [ "controlCenterButton" ];
     };
   };
 
