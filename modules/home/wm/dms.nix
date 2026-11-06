@@ -960,6 +960,11 @@ let
       # SessionData once auto-location is on.
       useAutoLocation = true;
       weatherEnabled = true;
+      # 2.0's Wellbeing (screen time) logs per-app usage; not wanted.
+      wellbeingEnabled = false;
+      # Events come from dcal (home/max/calendar.nix). "auto" would also probe
+      # for khal, which isn't installed.
+      calendarBackend = "dankcal";
       # Exactly what DMS's "Disable Built-in Wallpapers" toggle writes: no screen
       # renders its own wallpaper layer, so a pick can't stack over awww.
       # dms-wallpaper-bridge forwards picks to awww instead.

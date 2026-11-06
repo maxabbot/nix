@@ -14,6 +14,7 @@
 {
   imports = [
     ../../modules/home/default.nix
+    ./calendar.nix
     ./claude.nix
     ./git.nix
     ./cli.nix
