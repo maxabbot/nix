@@ -196,6 +196,47 @@ let
       ]
       ++ [
         {
+          # Media auto-switch (islandMediaAutoSwitch) fires when media becomes
+          # "available", and a paused player already is (only Stopped isn't),
+          # so pausing and resuming Spotify never switched the island; only a
+          # newly launched player did. Follow playback instead: playing turns
+          # the closed island to the track, pausing turns it back to the
+          # clock (otherwise a paused player left open keeps the track up).
+          # The source also feeds the controller whether anything is playing,
+          # so DMS's own trigger (a player appearing, e.g. the shell starting
+          # or Spotify opening paused) only switches for actual playback.
+          file = "share/quickshell/dms/Modules/DIsland/IslandMediaSource.qml";
+          from = "    Component.onCompleted: controller.updateMediaAvailability(available)\n    onAvailableChanged: controller.updateMediaAvailability(available)\n";
+          to = lib.concatMapStrings (l: "    ${l}\n") [
+            "Component.onCompleted: {"
+            "    controller.mediaPlaying = playing;"
+            "    controller.updateMediaAvailability(available);"
+            "}"
+            "onAvailableChanged: controller.updateMediaAvailability(available)"
+            "onPlayingChanged: {"
+            "    controller.mediaPlaying = playing;"
+            "    if (!controller.mediaAutoSwitch)"
+            "        return;"
+            "    if (playing) {"
+            "        controller.autoSwitchToMedia();"
+            "    } else if (controller.activeActivity === \"media\" && !controller.expanded) {"
+            "        controller.activeActivity = \"home\";"
+            "        controller.mediaPreferred = false;"
+            "    }"
+            "}"
+          ];
+        }
+        {
+          file = "share/quickshell/dms/Modules/DIsland/IslandController.qml";
+          from = "    property bool mediaAutoSwitch: false\n";
+          to = "    property bool mediaAutoSwitch: false\n    property bool mediaPlaying: false\n";
+        }
+        {
+          file = "share/quickshell/dms/Modules/DIsland/IslandController.qml";
+          from = "if (started && mediaAutoSwitch)";
+          to = "if (started && mediaAutoSwitch && mediaPlaying)";
+        }
+        {
           # The panel's floor matches Clight's curves (clight.nix) and the
           # old brightnessctl binding: 3% of the hardware range. DMS's scale
           # is offset (raw = (pct - 1) / 99 * max, measured), so its own
@@ -1023,6 +1064,15 @@ let
     # A new notification bubbles out into the full card (title, body,
     # actions) instead of only swapping the pill to "app · summary".
     islandNotificationExpand = true;
+    # The closed island turns to the playing track when playback starts
+    # (not for music already playing), and back once it stops.
+    islandMediaAutoSwitch = true;
+    # "Size: Compact": less padding between the closed island's groups.
+    islandHomeCompactTight = true;
+    # With its own chrome (the DBarBody.qml patch) the island is placed by
+    # its own edge gap, not the bar's spacing; DMS's 4 sat it 4px above the
+    # other pills. 8 lines its top and bottom up with theirs (measured).
+    islandOuterGap = 8;
     # Critically damped (2·√(stiffness·mass) ≈ 47.3 at DMS's default 560):
     # the stock 37 overshoots and wobbles as it settles. No overshoot, like
     # the Hyprland animations (hyprland.lua).
