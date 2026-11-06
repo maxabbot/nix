@@ -132,7 +132,8 @@ What DMS's bar has no widget for:
 
 - scratchpad count, rebuild and keybinds
 - volume / network / bluetooth — they live behind its control-centre button
-- camera and mic fold into one `privacyIndicator`; recording has no home
+- camera and mic fold into one privacy indicator (now the island's privacy
+  group); recording has no home
 
 Declaring widget lists means per-widget tweaks made in DMS's own GUI are
 overwritten on the next `nixup` — the arrays are replaced, not merged.
@@ -158,8 +159,8 @@ Two more DMS widgets are patched after Noctalia's (a shell tried here earlier): 
 treats every icon as hidden, so the bar shows only DMS's overflow chevron and
 the icons open in its popup (a drawer); and the focused window shows its app
 icon instead of the app name on horizontal bars, falling back to the name when
-the icon can't be resolved. The media pill's album art is upstream's own since
-2.0 (`mediaShowCoverArt`, on by default), as are its lyrics.
+the icon can't be resolved. Media has no pill of its own any more: the
+Dynamic Island (below) shows the playing track.
 
 DMS ships `showWorkspaceIndex = false` — unlabelled dots — so it is declared
 on to number the workspaces. Since 2.0 it is an option on the
@@ -187,6 +188,59 @@ locked 5 min later even though `dms ipc inhibit status` still said enabled. So
 hypridle's lock, blank and suspend listeners are wrapped in `unlessCaffeine`
 (`modules/home/wm/hyprland.nix`): they ask the IPC first and skip while
 caffeine is on.
+
+## Dynamic Island
+
+DMS 2.0's island is the centre of both bars (the `island` entry in `dms.nix`).
+Closed, it shows media · clock · weather · notifications · privacy, compact
+size; while something plays it turns to the track. Clicked, it expands in
+place into the Dash (calendar, weather, media, notifications). It also takes
+notification popups, expanded by default, and the volume/brightness OSDs.
+
+DMS hosts an island in a normal bar as a guest of the bar strip, and almost
+every default there assumed an opaque strip and a compositor that doesn't
+animate layer resizes. Each fix is a `dms.nix` patch or setting, commented at
+the site:
+
+- **See-through.** In a normal bar the island draws "band" chrome, the bar
+  strip's own colour, which is alpha 0 here. Patched to its own chrome
+  (`DBarBody.qml`) at the popout alpha (`IslandBarHost.qml`), so it's blurred
+  like any other panel. Own chrome is placed by its own edge gap, not the
+  bar's spacing: `islandOuterGap = 8` lines it up with the pills.
+- **Flicker.** Opening it moved the whole bar from the Top layer to Overlay
+  and resized its surface, and each blanked the bar for a frame. Patched to
+  stay on Top (`DBarWindow.qml`) and keep the open island's height for good
+  (`DBarBody.qml`, ~690px on a 1440p output). Clicks are unaffected: the
+  input mask is the strip plus the island, not the window. Hyprland
+  animating the resize stretched every pill, hence the `no_anim` layer rule
+  on `dms:bar` in `hyprland.lua`.
+- **Brightness OSD.** DMS shows it for any change, so Clight popped the
+  island every few seconds. Patched to show it only for changes DMS makes
+  (`BrightnessService.qml`); the brightness keys go through
+  `dms ipc call brightness` for that reason. DMS's percentage scale is offset
+  (raw = (pct − 1)/99 × max, so its 1% is a black panel), hence a 4% floor
+  for backlights, which is 3% raw like Clight's curves.
+- **Media auto-switch** fired only when a player appeared; a paused player
+  already counts, so play/pause never switched it. Patched to follow
+  playback (`IslandMediaSource.qml`, `IslandController.qml`): playing shows
+  the track, pausing goes back to the clock.
+- Spring damping 48 (critically damped; DMS's 37 overshoots), and Chrome's
+  "Activate" default-action button relabelled "Open" (`NotificationCard.qml`,
+  `IslandNotificationSource.qml`).
+
+Two settings read backwards: `islandNotificationPopups = false` is what routes
+notifications *into* the island, and `islandSystemOsd = true` gives it the
+OSDs.
+
+**Checking a patch before deploying it.** Every patch above went in after
+being run live: build the host, pick the patched `dux-shell` out of the
+closure, stop `shell-dms` and run `<pkg>/bin/dms run --session` under
+`systemd-run --user` with the session's Wayland/Hyprland env, drive it with
+`dms ipc call island openOn home <output>` / `toggleOn` (plain `close` only
+closes the focused output's island), then restart `shell-dms`. `wf-recorder`
+at 60fps plus a frame diff is what found the flicker and its causes; a
+screenshot shows nothing wrong. A DMS update that changes any patched line
+fails the build (`--replace-fail`), which is the cue to re-check that fix.
 
 ## Wallpaper
 
@@ -236,14 +290,15 @@ plugins still work alongside.
 | `dankscale` | control centre (its bar pill unused) — tap toggles Tailscale, the chevron opens the bar popout as a detail page (patched in), Tailscale | tailscale hosts |
 | `deviceBatteries` | bar — lowest peripheral battery (UPower: Bluetooth mice/headsets; Solaar's library for receiver-only Logitech), hidden when no device reports one; its helper runs on a Python env with Solaar, dbus-python, pygobject and pyudev (patched in for the bare `python3`) | all |
 
-The main bar reads workspaces · focused window | music · clock · weather |
+The main bar reads workspaces · focused window | Dynamic Island |
 system monitor · `dankKDEConnect` (icon patched to `phonelink`) · `claudeUsage`
-(logo + two rings, no percentages) · privacy · device batteries (only with a device) · battery · tray… Dankscale, Nix
-Monitor and the idle inhibitor are Control Center tiles instead. The
-centre has an odd count with the clock in the middle, which DMS's "index"
-centring mode pins to the exact centre. The plugin pills only fit on the right
-once Claude was cut down to icon size; at full size it ran
-that section into the centre group.
+(logo + two rings, no percentages) · device batteries (only with a device) ·
+battery · tray · control centre. Dankscale, Nix Monitor and the idle inhibitor
+are Control Center tiles instead; notifications and privacy live in the
+island. The island is the centre's only entry, which DMS's "index" centring
+mode pins to the exact centre. The plugin pills only fit on the right once
+Claude was cut down to icon size; at full size it ran that section into the
+centre.
 
 A rebuild that changes any plugin clears `~/.cache/quickshell/qmlcache`: Qt
 keys its compiled-QML cache on file path and mtime, and both are unchanged
@@ -307,3 +362,7 @@ but a newly added one still arrives.
 
 `hl.dsp.exit()`, DMS's log-out path. Correct by the API's shape, but verifying
 it costs the session.
+
+The island on home-desktop: the portrait bar's island, and whether one
+notification or OSD pops the islands on both outputs at once (each bar hosts
+its own). Built and evaluated, not yet run there.
