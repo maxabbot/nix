@@ -19,6 +19,21 @@ final: prev: {
   # better PipeWire error handling. Taken from unstable; drop once stable catches up.
   cava = final.unstable.cava;
 
+  # Chrome on Linux takes its UI locale from LANGUAGE/LC_*/LANG only (no
+  # "Display in this language", and --lang is ignored), and <input type=date>
+  # formats by that locale — so with the system's en_US, date boxes read
+  # mm/dd/yyyy whatever the Languages list says. en_NZ resolves to Chrome's
+  # en-GB locale: dd/mm/yyyy (and British UI spelling). Set on Chrome alone so
+  # gettext apps are untouched; --set-default so a LANGUAGE in the environment
+  # still wins. The Languages list itself is the ForcedLanguages policy in
+  # hosts/common/optional/google-chrome.nix. Wrapped here, not at the use site,
+  # so pwas.nix's --app launchers get it too.
+  google-chrome = prev.google-chrome.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      wrapProgram $out/bin/google-chrome-stable --set-default LANGUAGE en_NZ
+    '';
+  });
+
   # Clight (hosts/common/optional/clight.nix) should drive the internal panel
   # only; with DDC, clightd also takes over external monitors and fights the
   # DMS brightness slider, which already drives them over DDC/CI.
