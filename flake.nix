@@ -100,6 +100,8 @@
           permittedInsecurePackages = [
             "electron-39.8.10"
             "electron-40.10.5"
+            # Obsidian is held on Electron 42 (productivity.nix): 43 breaks its renderer.
+            "electron-42.11.18"
           ];
         };
         overlays = [

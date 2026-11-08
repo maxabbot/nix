@@ -238,7 +238,10 @@ in
     masterpdfeditor
     onlyoffice-desktopeditors
     element-desktop
-    obsidian
+    # Held on Electron 42: under 43 Electron's own renderer_init throws
+    # (webFrame "reading 'defineProperty'") and the window stays blank. Drop
+    # the override once nixpkgs' Obsidian opens on its default Electron.
+    (obsidian.override { electron = electron_42; })
     bitwarden-desktop
     vlc
     imv
