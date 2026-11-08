@@ -21,6 +21,5 @@ in
 {
   environment.systemPackages = [ pkgs.android-studio ];
 
-  networking.firewall =
-    if machineType == "laptop" then { interfaces.tailscale0 = ports; } else ports;
+  networking.firewall = if machineType == "laptop" then { interfaces.tailscale0 = ports; } else ports;
 }

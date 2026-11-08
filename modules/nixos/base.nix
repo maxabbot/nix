@@ -77,7 +77,7 @@ in
 
     # ── Locale & timezone ──────────────────────────────────────────────────────
     time.timeZone = cfg.timezone;
-    i18n.defaultLocale = "en_US.UTF-8";
+    i18n.defaultLocale = "en_NZ.UTF-8";
     # Christchurch NZ. Clight's day/night timing (clight.nix) and DMS Night
     # Mode's sunset schedule (modules/home/wm/dms.nix, via osConfig) read this.
     location = {

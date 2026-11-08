@@ -52,6 +52,12 @@ in
           # solid system InactiveCaption colour, so the translucency vanished
           # whenever Zen lost focus.
           "zen.view.grey-out-inactive-windows" = false;
+          # NZ English for sites and dates. Gecko has no en-NZ UI locale, so the
+          # interface stays en-US: an en-GB language pack must match Zen's Gecko
+          # version exactly and would break on every Zen update. Dates and
+          # times follow the system locale (en_NZ, base.nix) instead.
+          "intl.accept_languages" = "en-NZ, en-GB, en";
+          "intl.regional_prefs.use_os_locales" = true;
         };
         # Zen's theme script (ZenGradientGenerator) writes its workspace
         # gradient as inline custom properties on these two elements, which

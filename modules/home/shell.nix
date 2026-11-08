@@ -33,7 +33,7 @@ in
         # can't see when they exec $EDITOR directly.
         EDITOR = "zeditor --wait";
         VISUAL = "zeditor --wait";
-        LANG = "en_US.UTF-8";
+        LANG = "en_NZ.UTF-8";
         MANPAGER = "less -R --use-color -Dd+r -Du+b";
         BAT_PAGER = "less -RF";
         CARGO_HOME = "$HOME/.cargo";
