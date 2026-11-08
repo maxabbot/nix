@@ -223,7 +223,9 @@ the site:
 - **Media auto-switch** fired only when a player appeared; a paused player
   already counts, so play/pause never switched it. Patched to follow
   playback (`IslandMediaSource.qml`, `IslandController.qml`): playing shows
-  the track, pausing goes back to the clock.
+  the track, pausing goes back to the clock. With no player at all, DMS turned
+  the media group into a launcher search icon; it's hidden instead
+  (`HomeCompact.qml`).
 - Spring damping 48 (critically damped; DMS's 37 overshoots), and Chrome's
   "Activate" default-action button relabelled "Open" (`NotificationCard.qml`,
   `IslandNotificationSource.qml`).

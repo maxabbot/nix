@@ -247,6 +247,15 @@ let
           to = "if (started && mediaAutoSwitch && mediaPlaying)";
         }
         {
+          # With no player, DMS turns the closed island's media group into a
+          # search icon that opens the launcher. Hide the group instead, like
+          # weather, notifications and privacy when they've nothing to show;
+          # Super still opens the launcher.
+          file = "share/quickshell/dms/Modules/DIsland/Activities/HomeCompact.qml";
+          from = "    function groupShown(id) {\n        switch (id) {\n";
+          to = "    function groupShown(id) {\n        switch (id) {\n        case \"media\":\n            return root.controller.mediaAvailable;\n";
+        }
+        {
           # The panel's floor matches Clight's curves (clight.nix) and the
           # old brightnessctl binding: 3% of the hardware range. DMS's scale
           # is offset (raw = (pct - 1) / 99 * max, measured), so its own
