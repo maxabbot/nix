@@ -20,6 +20,7 @@
     ./disk-config.nix
     ../../modules/nixos/base.nix
     ../common/optional/development.nix
+    ../common/optional/expo.nix
     ../common/optional/podman.nix
     ../common/optional/libvirt.nix
     ../common/optional/winboat.nix

@@ -30,7 +30,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 |---|---|
 | `development.nix` | Language runtimes, dev tools, nix-ld (sshd configured but disabled; direnv is per-user in `home/max/cli.nix`) |
 | `podman.nix` | Podman + Docker compat |
-| `expo.nix` | Android Studio, and opens Metro's port (8081/tcp) so a phone on the LAN can load an Expo dev build (home-desktop only — Metro serves app source). Toolchains stay in per-project flakes; adb USB access comes from systemd's uaccess rules |
+| `expo.nix` | Android Studio, and opens Metro's port (8081/tcp) so a phone can load an Expo dev build (both hosts; LAN-wide on home-desktop, tailnet-only on framework — Metro serves app source). Toolchains stay in per-project flakes; adb USB access comes from systemd's uaccess rules |
 | `libvirt.nix` | libvirt / QEMU-KVM |
 | `winboat.nix` | WinBoat (Windows 11 guest, apps over RDP) for Power BI Desktop, on Podman — asserts `podman.nix`. `chattr +C` the install folder before first-run setup (framework only) |
 | `db-gui.nix` | DBeaver, Beekeeper, mycli, litecli |

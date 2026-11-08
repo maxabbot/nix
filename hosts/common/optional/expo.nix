@@ -10,13 +10,17 @@
 # and direnv loads it on `cd`. adb needs no config here: systemd ≥ 258
 # grants USB access to adb/fastboot devices through uaccess.
 #
-# Metro serves the app's source to anyone who can reach it, so this is
-# imported on home-desktop only (trusted home LAN). Laptops on other networks
-# can run `adb reverse tcp:8081 tcp:8081` over USB instead, which needs no
-# open port.
-{ pkgs, ... }:
+# Metro serves the app's source to anyone who can reach it, so the port is
+# open on every interface only on the desktop (trusted home LAN). On a laptop
+# it's tailnet-only — a phone on the tailnet can still reach it, or use
+# `adb reverse tcp:8081 tcp:8081` over USB, which needs no open port.
+{ pkgs, machineType, ... }:
+let
+  ports.allowedTCPPorts = [ 8081 ];
+in
 {
   environment.systemPackages = [ pkgs.android-studio ];
 
-  networking.firewall.allowedTCPPorts = [ 8081 ];
+  networking.firewall =
+    if machineType == "laptop" then { interfaces.tailscale0 = ports; } else ports;
 }
