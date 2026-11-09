@@ -1,0 +1,29 @@
+--- a/src/managers/input/Touch.cpp
++++ b/src/managers/input/Touch.cpp
+@@ -110,7 +110,13 @@
+     } else
+         return; // oops, nothing found.
+ 
+-    g_pSeatManager->sendTouchDown(m_touchData.touchFocusSurface.lock(), e.timeMs, e.touchID, local);
++    // A window/layer hit doesn't guarantee a surface (e.g. locked with no lock
++    // surface yet, leaving the previous touch's window focus behind).
++    const auto PSURFACE = m_touchData.touchFocusSurface.lock();
++    if (!PSURFACE)
++        return;
++
++    g_pSeatManager->sendTouchDown(PSURFACE, e.timeMs, e.touchID, local);
+ }
+ 
+ void CInputManager::onTouchUp(ITouch::SUpEvent e) {
+--- a/src/managers/SeatManager.cpp
++++ b/src/managers/SeatManager.cpp
+@@ -371,6 +371,9 @@
+ }
+ 
+ void CSeatManager::sendTouchDown(SP<CWLSurfaceResource> surf, uint32_t timeMs, int32_t id, const Vector2D& local) {
++    if (!surf)
++        return;
++
+     m_listeners.touchSurfaceDestroy.reset();
+ 
+     m_state.touchFocusResource.reset();

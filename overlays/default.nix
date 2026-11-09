@@ -71,4 +71,14 @@ final: prev: {
   # 0.25 falls back to the shared ncspot ID for those requests. Unstable carries
   # 0.25.1, so take it from there. Drop once nixpkgs stable carries >= 0.25.1.
   spotify-player = final.unstable.spotify-player;
+
+  # Hyprland segfaults when a touch lands on a window or layer that has no
+  # surface: onTouchDown passes the empty pointer to sendTouchDown, which calls
+  # surf->client() unchecked. Hit on framework (2026-11-09) by a touchscreen
+  # touch during resume, while the session was locked and the dock's outputs
+  # were going away. Still unguarded on upstream main as of v0.57.1. Drop
+  # once Hyprland checks the surface itself.
+  hyprland = prev.hyprland.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./hyprland-touch-null-surface.patch ];
+  });
 }
