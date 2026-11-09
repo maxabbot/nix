@@ -13,7 +13,9 @@ let
     {
       name = "Teams";
       icon = "teams";
-      url = "https://teams.microsoft.com/v2/";
+      # Teams moved to cloud.microsoft; the old teams.microsoft.com URL only
+      # redirects here, and Chrome site permissions (mic/camera) are per-origin.
+      url = "https://teams.cloud.microsoft/";
     }
     {
       name = "Google Chat";
