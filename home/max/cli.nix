@@ -23,6 +23,10 @@
     "$HOME/bin"
     "$HOME/.cargo/bin"
     "$HOME/go/bin"
+    # adb/fastboot from Android Studio's SDK, not nixpkgs android-tools: Studio
+    # always runs this copy, and two adb versions kill each other's server.
+    # USB access comes from systemd uaccess (no adbusers group).
+    "$HOME/Android/Sdk/platform-tools"
   ];
 
   programs = {
