@@ -124,10 +124,25 @@
   #    btintel_pcie hibernate hook below — so it stays on.
   #  - No NMI watchdog: a debugging aid whose per-CPU timer costs wakeups.
   #  - Dirty pages flushed every 15 s rather than 5, so the NVMe sleeps longer.
+  # (The camera rule at the end is the webcam section's, below.)
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="pci", ATTR{device}!="0xe476", TEST=="power/control", ATTR{power/control}="auto"
+    ACTION=="add", SUBSYSTEM=="video4linux", ATTRS{idVendor}=="32ac", ATTRS{idProduct}=="001c", ENV{ID_V4L_CAPABILITIES}==":capture:", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d $devnode --set-ctrl=sharpness=2,backlight_compensation=2,exposure_dynamic_framerate=0,saturation=50"
   '';
   # (The NMI watchdog and writeback settings are in the boot block below.)
+
+  # ── Webcam (2nd-gen 1080p module, 32ac:001c, uvcvideo) ───────────────────────
+  # UVC controls live on the camera and reset whenever it loses power — and the
+  # privacy switch cuts its power — so they're re-applied on every connect.
+  # Tune live in `cameractrls`, then copy the values here.
+  #  - sharpness 3→2: less edge haloing, which MJPEG compression exaggerates.
+  #  - backlight_compensation 1→2: lifts the face against a bright window.
+  #  - exposure_dynamic_framerate off: hold 30 fps in dim light instead of
+  #    dropping frames to brighten (fix the lighting rather than the framerate).
+  #  - saturation 64→50: tames the module's known pink cast on skin tones
+  #    (community.frame.work/t/57310 — ~50 was the reported sweet spot).
+  # The rule itself sits in the idle-power section's services.udev.extraRules
+  # above (one attribute can't be defined twice in this file).
 
   # ── Fonts ────────────────────────────────────────────────────────────────────
   # Microsoft core fonts (Georgia, Times New Roman, Arial, …) — the CV build's

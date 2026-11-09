@@ -70,6 +70,7 @@ in
     # GUI-only apps — skipped when no compositor is configured
     ++ lib.optionals gui [
       v4l-utils
+      cameractrls-gtk4 # live UVC webcam controls (GTK) — framework persists its picks via udev
       cheese
       spotify
       stremio-linux-shell
