@@ -17,9 +17,28 @@
 { pkgs, machineType, ... }:
 let
   ports.allowedTCPPorts = [ 8081 ];
+
+  # Run Studio as a native Wayland client (its bundled JBR ships WLToolkit).
+  # Under XWayland it takes one global scale from Xft.dpi, which on framework
+  # is the internal panel's 2x, so it came out double-size on the 1x externals;
+  # native, it scales per output like everything else. STUDIO_VM_OPTIONS is
+  # merged over the bundled vmoptions, and replaces the per-user
+  # ~/.config/Google/AndroidStudio*/studio64.vmoptions — put tweaks here
+  # rather than in Help > Edit Custom VM Options.
+  vmOptions = pkgs.writeText "studio64.vmoptions" ''
+    -Dawt.toolkit.name=WLToolkit
+  '';
+  android-studio = pkgs.symlinkJoin {
+    name = "android-studio-wayland-${pkgs.android-studio.version}";
+    paths = [ pkgs.android-studio ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/android-studio --set STUDIO_VM_OPTIONS ${vmOptions}
+    '';
+  };
 in
 {
-  environment.systemPackages = [ pkgs.android-studio ];
+  environment.systemPackages = [ android-studio ];
 
   networking.firewall = if machineType == "laptop" then { interfaces.tailscale0 = ports; } else ports;
 }
