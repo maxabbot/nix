@@ -503,12 +503,13 @@ hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 
 -- Lid while docked: logind ignores it (HandleLidSwitchDocked), so switch the
 -- internal panel off and back on via kanshi's -lid profiles — the office
--- desk's docked pair, else the generic one-external pair (kanshi.nix). A
+-- desk's docked pair, else the TV's pair, else the generic one-external pair
+-- (kanshi.nix). A
 -- switch to a profile that doesn't match the outputs fails, so the first that
 -- fits wins. Undocked, both fail and logind suspends as usual. Hosts without
 -- kanshi or a lid never get here.
-hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("kanshictl switch docked-lid || kanshictl switch external-lid"), { locked = true, description = "Lid closed: internal panel off when docked" })
-hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch external"),         { locked = true, description = "Lid opened: internal panel back on when docked" })
+hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("kanshictl switch docked-lid || kanshictl switch tv-lid || kanshictl switch external-lid"), { locked = true, description = "Lid closed: internal panel off when docked" })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch tv || kanshictl switch external"),         { locked = true, description = "Lid opened: internal panel back on when docked" })
 
 -- Screenshots
 -- `dms screenshot` goes straight to a region grab; the mode picker is the

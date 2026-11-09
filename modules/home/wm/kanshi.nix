@@ -13,6 +13,11 @@
 #                 auto scale, centred above. kanshi prefers the exact profiles,
 #                 and the docked pair is three outputs, so this never shadows it.
 #   external-lid — the same with the internal display off, for the lid binds.
+#   tv / tv-lid  — like external/external-lid, but for one known screen (kanshi.tv)
+#                 that needs a pinned mode/scale: a TV whose preferred mode is
+#                 4K@30 and whose auto scale is 1. Centred directly above the
+#                 internal panel, so the cursor crosses up from anywhere on its
+#                 top edge. Listed before external so kanshi picks it first.
 #
 # Connector names vary by dock/port. Discover them when docked:
 #   wlr-randr        (shows connected outputs and their exact names)
@@ -34,6 +39,32 @@ let
   primary = map lib.strings.trim (lib.splitString "," cfg.monitors.primary);
   fromPrimary =
     n: fallback: if cfg.monitors.primary != null then builtins.elemAt primary n else fallback;
+
+  hasTv = k.tv.criteria != null;
+
+  # Logical width/height of a "WxH@Hz" mode at a scale.
+  logical =
+    mode: scale:
+    let
+      wh = lib.splitString "x" (lib.head (lib.splitString "@" mode));
+    in
+    map (d: builtins.floor (builtins.fromJSON d / scale + 0.5)) wh;
+  internalPos = map lib.toInt (
+    lib.splitString "," (if hasDocked then k.docked.laptopPosition else "0,0")
+  );
+  internalW = lib.head (logical k.internal.mode k.internal.scale);
+  tvSize = logical k.tv.mode k.tv.scale;
+  tvPosition = "${
+    toString (lib.head internalPos + (internalW - lib.head tvSize) / 2)
+  },${toString (lib.last internalPos - lib.last tvSize)}";
+
+  tvOutput = {
+    criteria = k.tv.criteria;
+    status = "enable";
+    mode = k.tv.mode;
+    position = tvPosition;
+    scale = k.tv.scale;
+  };
 
   externals = [
     {
@@ -74,6 +105,22 @@ in
         # + 0.0: monitors strings write integral scales as "2", and the type is float.
         default = builtins.fromJSON (fromPrimary 3 "1") + 0.0;
         defaultText = lib.literalMD "the scale in `custom.hm.monitors.primary`, else `1.0`";
+      };
+    };
+
+    tv = {
+      criteria = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Kanshi criteria (EDID description from `hyprctl monitors`) for a TV/screen that gets its own pinned mode and scale, centred above the internal panel.";
+      };
+      mode = lib.mkOption {
+        type = lib.types.str;
+        default = "3840x2160@60";
+      };
+      scale = lib.mkOption {
+        type = lib.types.float;
+        default = 2.0;
       };
     };
 
@@ -168,6 +215,35 @@ in
                 criteria = k.internal.output;
                 status = "disable";
               }
+            ];
+          };
+        }
+      ]
+      ++ lib.optionals hasTv [
+        {
+          profile = {
+            name = "tv";
+            outputs = [
+              {
+                criteria = k.internal.output;
+                status = "enable";
+                mode = k.internal.mode;
+                position = if hasDocked then k.docked.laptopPosition else "0,0";
+                scale = k.internal.scale;
+              }
+              tvOutput
+            ];
+          };
+        }
+        {
+          profile = {
+            name = "tv-lid";
+            outputs = [
+              {
+                criteria = k.internal.output;
+                status = "disable";
+              }
+              tvOutput
             ];
           };
         }

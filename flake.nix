@@ -316,6 +316,9 @@
                 # (5120 - 1440) / 2 = 1840.
                 laptopPosition = "1840,1440";
               };
+              # The living-room Samsung TV: it prefers 4K@30 and auto scale
+              # gives 1x, so pin 4K@60 at 2x (centred above the panel).
+              tv.criteria = "Samsung Electric Company SAMSUNG 0x01000E00";
             };
             # home-desktop's tailnet IP is pinned — see the home-desktop
             # lanMouse comment for why MagicDNS isn't enough.
