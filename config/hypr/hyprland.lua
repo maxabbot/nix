@@ -236,6 +236,9 @@ hl.layer_rule({ match = { namespace = "dms:.*:background" },      blur = false }
 -- size, so every pill squashes and springs back. DMS animates the island
 -- itself, so the bar needs no compositor animation.
 hl.layer_rule({ match = { namespace = "^dms:bar$" },              no_anim = true })
+-- quickCapture's Print picker (config/dms/QuickCapturePicker.qml) closes just
+-- before grim runs; Hyprland's fade would keep it on screen into the capture.
+hl.layer_rule({ match = { namespace = "^dms:quick-capture-picker" }, no_anim = true })
 
 ---------------------
 ---- WINDOW RULES ---

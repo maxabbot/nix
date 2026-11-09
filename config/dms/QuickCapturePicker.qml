@@ -21,6 +21,10 @@ DankModal {
 
     required property var daemon
 
+    // Its own namespace so hyprland.lua can turn off Hyprland's layer fade
+    // for it (no_anim): that fade outlives the window, and the capture would
+    // catch it.
+    layerNamespace: "dms:quick-capture-picker"
     positioning: "center"
     enableShadow: true
     useOverlayLayer: true
@@ -57,27 +61,12 @@ DankModal {
         readonly property bool blinkRecordDot: Defaults.get(pluginData, "blinkRecordDot")
         readonly property string durationText: recorder ? recorder.formatDuration(recorder.recordingSeconds) : "00:00"
         readonly property alias config: captureConfig
-        readonly property int popoutWidth: 260
-        readonly property int popoutHeight: widgetMode === "video" ? (isRecording ? 320 : 290) : 445 + Math.min((daemon.outputs ?? []).length, 5) * 32
-
-        property var pendingAction: null
+        readonly property int popoutWidth: 280
+        readonly property int popoutHeight: widgetMode === "video" ? (isRecording ? 320 : 310) : 465 + Math.min((daemon.outputs ?? []).length, 5) * 38
 
         CaptureConfig {
             id: captureConfig
             pluginData: host.pluginData
-        }
-
-        // The menu hands a capture over through this so it starts after the
-        // window has gone, as it does after the bar popout closes.
-        Timer {
-            id: closeTimer
-            interval: Math.max(50, Theme.modalAnimationDuration + 50)
-            onTriggered: {
-                const action = host.pendingAction;
-                host.pendingAction = null;
-                if (action)
-                    action();
-            }
         }
 
         function setWidgetMode(mode) {
@@ -88,10 +77,19 @@ DankModal {
             root.close();
         }
 
+        // The menu captures through daemon.captureFromMenu, which calls this
+        // and then shoots on the next tick, so the window has to be gone at
+        // once (without it the daemon fell back to the animated closePopout
+        // and the menu landed in the shot). Hyprland's layer fade is off for
+        // this namespace (hyprland.lua), so nothing lingers after the unmap.
+        function closePopoutImmediately() {
+            root.instantClose();
+            root.shouldBeVisible = false;
+        }
+
         function runAfterPopoutClosed(action) {
-            pendingAction = action;
-            root.close();
-            closeTimer.restart();
+            closePopoutImmediately();
+            Qt.callLater(action);
         }
     }
 
