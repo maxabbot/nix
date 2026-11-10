@@ -14,6 +14,13 @@
 }:
 let
   palette = import ../../config/stylix/palette.nix;
+  guiSessionVars = {
+    QT_QPA_PLATFORM = "wayland;xcb";
+    QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+    GDK_SCALE = "1";
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+    _JAVA_AWT_WM_NONREPARENTING = "1";
+  };
 in
 {
   config = lib.mkIf (config.custom.hm.compositor != "none") {
@@ -65,12 +72,13 @@ in
     '';
 
     # ── Session variables ─────────────────────────────────────────────────────────
-    home.sessionVariables = {
-      QT_QPA_PLATFORM = "wayland;xcb";
-      QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-      GDK_SCALE = "1";
-      ELECTRON_OZONE_PLATFORM_HINT = "auto";
-      _JAVA_AWT_WM_NONREPARENTING = "1";
+    # Also exported to environment.d: apps launched from DMS inherit the
+    # systemd user manager's environment, which never sees hm-session-vars.sh
+    # (zsh-only). XCURSOR_THEME is Stylix's (via home.pointerCursor) and is
+    # mirrored for the same reason.
+    home.sessionVariables = guiSessionVars;
+    systemd.user.sessionVariables = guiSessionVars // {
+      inherit (config.home.sessionVariables) XCURSOR_THEME;
     };
 
     # ── XDG MIME defaults ─────────────────────────────────────────────────────────

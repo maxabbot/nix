@@ -9,6 +9,11 @@
 }:
 let
   cfg = config.custom.hm;
+  # $TERMINAL / $BROWSER for both shells and systemd user units (see config).
+  sessionTools = {
+    TERMINAL = cfg.terminal;
+    BROWSER = cfg.browser;
+  };
   renderTheme = import ../../../config/stylix/palette-subst.nix { inherit lib; };
 
   # The laptop's Intel iGPU gets the hardware cursor plane: a software cursor
@@ -345,14 +350,14 @@ in
   config = lib.mkIf (cfg.compositor == "hyprland") {
 
     # hl.env in env.lua only reaches Hyprland and what it spawns. Under UWSM
-    # the systemd user units (shell-dms.service among them) inherit the login
-    # environment instead, and without $TERMINAL DMS's launcher runs
+    # the systemd user units (shell-dms.service among them) take their
+    # environment from environment.d, and without $TERMINAL DMS's launcher runs
     # Terminal=true entries (spotify-player, yazi) in xterm — not installed,
-    # so they fail silently.
-    home.sessionVariables = {
-      TERMINAL = cfg.terminal;
-      BROWSER = cfg.browser;
-    };
+    # so they fail silently. home.sessionVariables alone isn't enough: it only
+    # lands in hm-session-vars.sh, which zsh sources but the user manager never
+    # sees, so the vars go to both.
+    home.sessionVariables = sessionTools;
+    systemd.user.sessionVariables = sessionTools;
 
     xdg.configFile = {
       # ── Store-symlinked scripts (gaming-toggle, dpms, wallpaper, …) ─────────
