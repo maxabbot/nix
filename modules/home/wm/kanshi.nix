@@ -54,9 +54,9 @@ let
   );
   internalW = lib.head (logical k.internal.mode k.internal.scale);
   tvSize = logical k.tv.mode k.tv.scale;
-  tvPosition = "${
-    toString (lib.head internalPos + (internalW - lib.head tvSize) / 2)
-  },${toString (lib.last internalPos - lib.last tvSize)}";
+  tvPosition = "${toString (lib.head internalPos + (internalW - lib.head tvSize) / 2)},${
+    toString (lib.last internalPos - lib.last tvSize)
+  }";
 
   tvOutput = {
     criteria = k.tv.criteria;
