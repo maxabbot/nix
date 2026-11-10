@@ -247,6 +247,13 @@ hl.layer_rule({ match = { namespace = "^dms:quick-capture-picker" }, no_anim = t
 -- Gaming — allow tearing
 -- Match strings are regexes matched against the WHOLE class, so a bare
 -- "steam_app_" prefix matches nothing — the ".*" is load-bearing.
+-- Honour kitty's xdg-activation requests: clicking "Open" on a desktop
+-- notification it raised (Claude Code's, via OSC 99) asks to be focused, which
+-- Hyprland otherwise downgrades to an urgency hint — no workspace switch.
+-- Scoped to kitty rather than misc.focus_on_activate so other apps can't
+-- yank focus.
+hl.window_rule({ match = { class = "kitty" }, focus_on_activate = true })
+
 hl.window_rule({ match = { class = "steam_app_.*" },                immediate = true })
 hl.window_rule({ match = { class = "Minecraft" },                   immediate = true })
 -- A gamescope-wrapped session (`gamescope -- steam -bigpicture`, run by hand)
