@@ -24,6 +24,19 @@ final: prev: {
   # DMS brightness slider, which already drives them over DDC/CI.
   clightd = prev.clightd.override { enableDdc = false; };
 
+  # VSCode 1.144 moved its bundled ripgrep to the asar's unpacked tree
+  # (@vscode/ripgrep-universal/bin/linux-x64/rg), but nixpkgs' postPatch still
+  # removes the old @vscode/ripgrep/bin/rg path before linking Nix's ripgrep,
+  # so the build fails. Retarget that swap at the new path; drop once nixpkgs'
+  # recipe handles 1.144 (the replaceStrings then matches nothing, harmlessly).
+  vscode = prev.vscode.overrideAttrs (old: {
+    postPatch =
+      builtins.replaceStrings
+        [ "resources/app/node_modules/@vscode/ripgrep/bin/rg" ]
+        [ "resources/app/node_modules.asar.unpacked/@vscode/ripgrep-universal/bin/linux-x64/rg" ]
+        old.postPatch;
+  });
+
   # 26.05 ships DMS 1.4.6; the current plugin registry needs 2.0, which
   # nixpkgs carries as dux-shell (DMS's new name; the binary is still `dms`).
   # Kept under the dms-shell attribute so every consumer here, the greeter

@@ -80,7 +80,7 @@ let
         }
         {
           file = hs;
-          from = "Hyprland.dispatch(`hl.dsp.window.close(\${luaString(selector)})`);";
+          from = "Hyprland.dispatch(`hl.dsp.window.close({ window = \${luaString(selector)} })`);";
           to = "Hyprland.dispatch(`hl.dsp.window.close({ window = hl.get_window(\${luaString(selector)}) })`);";
         }
         {
@@ -93,36 +93,10 @@ let
         # DMS's own monitor-off timeouts call them, and those are 0 (off) —
         # hypridle owns screen blanking here.
       ]
-      # Not a dispatch fix: coffee icons for the idle inhibitor ("caffeine")
-      # instead of upstream's motion sensor. `coffee` (steaming mug) = keeping
-      # awake, `local_cafe` (plain cup) = idle allowed, where DMS shows the
-      # state; the Control Center tile and its button's status icons use a
-      # fixed icon, so they get the mug. --replace-fail swaps every occurrence,
-      # so each file's two call sites are covered.
-      ++
-        map
-          (file: {
-            inherit file;
-            from = ''SessionService.idleInhibited ? "motion_sensor_active" : "motion_sensor_idle"'';
-            to = ''SessionService.idleInhibited ? "coffee" : "local_cafe"'';
-          })
-          [
-            "share/quickshell/dms/Modules/DBar/Widgets/IdleInhibitor.qml"
-            "share/quickshell/dms/Modules/OSD/IdleInhibitorOSD.qml"
-            "share/quickshell/dms/Modules/ControlCenter/Details/IdleInhibitorDetail.qml"
-            "share/quickshell/dms/Modules/DIsland/IslandSystemSource.qml"
-          ]
+      # The idle inhibitor's icon used to be a motion sensor and was patched to
+      # coffee cups here; DMS 2.1 draws `local_cafe` itself (filled while
+      # inhibiting), so those patches are gone.
       ++ [
-        {
-          file = "share/quickshell/dms/Modules/DBar/Widgets/ControlCenterButton.qml";
-          from = ''return "motion_sensor_active";'';
-          to = ''return "coffee";'';
-        }
-        {
-          file = "share/quickshell/dms/Modules/ControlCenter/Widgets/IdleInhibitTile.qml";
-          from = ''iconName: "motion_sensor_active"'';
-          to = ''iconName: "coffee"'';
-        }
         {
           # The Dynamic Island's surface takes the bar strip's alpha, which is
           # 0 here (bars.barAlpha), so the expanded island had no background
@@ -134,14 +108,14 @@ let
           to = "transparency: SettingsData.popupTransparency";
         }
         {
-          # Every bar hosts an island, and each showed its own copy of a
-          # volume or brightness OSD. The island's notifications already
+          # DMS picks one island per screen for volume/brightness OSDs, so
+          # each monitor still showed its own copy. The island's notifications already
           # honour "focused monitor only" (notificationFocusedMonitor, set
           # below); give its OSDs the same check, so one change pops one
           # island, on the output you're working on.
           file = "share/quickshell/dms/Modules/DIsland/IslandBarHost.qml";
-          from = ''enabled: root.setting("islandSystemOsd") && root.barConfig?.visible !== false'';
-          to = ''enabled: root.setting("islandSystemOsd") && root.barConfig?.visible !== false && NotificationService.isFocusedScreen(root.screen)'';
+          from = "enabled: SettingsData.islandSystemOsdHost(root.screen)?.id === root.barId";
+          to = "enabled: SettingsData.islandSystemOsdHost(root.screen)?.id === root.barId && NotificationService.isFocusedScreen(root.screen)";
         }
         {
           # …and it only reads that alpha with its own chrome. In a normal bar
@@ -172,7 +146,7 @@ let
           # tallest island panel). Clicks are unaffected: the input mask
           # (DBarWindow.qml) is the bar strip plus the island, not the window.
           file = "share/quickshell/dms/Modules/DBar/DBarBody.qml";
-          from = "Math.max(barSurfaceThickness, islandSheetOut ? islandHost.hostThickness : 0)";
+          from = "Math.max(barSurfaceThickness, islandSheetOut || islandReservesSheet ? islandHost.hostThickness : 0)";
           to = "Math.max(barSurfaceThickness, islandHost ? islandHost.hostThickness : 0)";
         }
         {
@@ -306,18 +280,6 @@ let
           to = "    // A daytime force hands over to the schedule at sunset, which keeps it\n    // warm through the night: from the user's side it lasts until sunrise.\n    readonly property string _nextSunrise: {\n        let t = Date.parse(NightModeService.gammaSunriseTime) || 0;\n        while (t > 0 && t <= Date.now())\n            t += 86400000;\n        return t > 0 ? Qt.formatTime(new Date(t), SettingsData.use24HourClock ? \"HH:mm\" : \"h:mm AP\") : \"\";\n    }\n    readonly property string _overrideTime: Qt.formatTime(new Date(NightModeService.nightModeOverrideUntil || Date.parse(NightModeService.gammaNextTransition)), SettingsData.use24HourClock ? \"HH:mm\" : \"h:mm AP\")\n\n    iconName: NightModeService.nightModeWarmNow ? \"nightlight\" : \"dark_mode\"\n    title: I18n.tr(\"Night mode\")\n    subtitle: {\n        if (!NightModeService.nightModeEnabled)\n            return I18n.tr(\"Off\");\n        if (!SessionData.nightModeAutoEnabled)\n            return SessionData.nightModeTemperature + \"K\";\n        if (NightModeService.nightModeForced)\n            return _nextSunrise ? \"On until \" + _nextSunrise : I18n.tr(\"On\");\n        if (NightModeService.nightModeSuppressed)\n            return \"Off until \" + _overrideTime;\n        return (NightModeService.gammaIsDay ? \"From \" : \"Until \") + _overrideTime;\n    }\n    active: NightModeService.nightModeWarmNow\n    available: NightModeService.automationAvailable\n\n    onClicked: NightModeService.toggleNightModeNow()\n";
         }
       ]
-      ++
-        map
-          (file: {
-            inherit file;
-            from = ''"icon": "motion_sensor_active",'';
-            to = ''"icon": "coffee",'';
-          })
-          [
-            "share/quickshell/dms/Modules/ControlCenter/Models/WidgetModel.qml"
-            "share/quickshell/dms/Common/BarWidgetCatalog.qml"
-            "share/quickshell/dms/Modules/Settings/BarWidgetOptions/ControlCenterOptions.qml"
-          ]
       # Not a dispatch fix: Noctalia-style hover tooltips on the bar. DMS only
       # has bar tooltips for vertical bars, and only on disk/focused-app. BasePill
       # (every bar widget's base) gains a tooltipText property and an instance
