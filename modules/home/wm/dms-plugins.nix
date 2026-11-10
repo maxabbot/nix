@@ -109,7 +109,10 @@ let
     substituteInPlace $out/ClaudeUsageWidget.qml \
       --replace-fail '    function minutesOld() { return data.minutesOld() }' \
                      '    function minutesOld() { return data.minutesOld() }
-        function refreshUsage() { data.refresh() }' \
+        function refreshUsage() { data.refresh() }
+        // Refetch whenever the popout opens, not only on the 5-min timer
+        // (fetch-usage.sh still serves its <150 s cache).
+        onInteractionActiveChanged: if (interactionActive) data.refresh()' \
       --replace-fail 'popoutHeight: 220' 'popoutHeight: 330' \
       --replace-fail '                    color: mins > root.staleMinutes ? Theme.warning : Theme.surfaceTextMedium
                         font.pixelSize: Theme.fontSizeSmall
