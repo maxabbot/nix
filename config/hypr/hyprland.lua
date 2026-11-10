@@ -109,6 +109,14 @@ end)
 hl.on("monitor.added", dockKick)
 hl.on("monitor.removed", dockKick)
 
+-- An unknown TV gets the fallback rule's preferred mode (often 4K@30) and a
+-- PPI-based auto scale (always 1x on a big panel). tv-fit.sh re-rules it —
+-- best mode at 60 Hz, ~1080p logical — once kanshi has picked its generic
+-- external profile. Does nothing on hosts without kanshi.
+hl.on("monitor.added", function()
+    hl.exec_cmd("bash ~/.config/hypr/scripts/tv-fit.sh")
+end)
+
 --------------------
 ---- SETTINGS ------
 --------------------

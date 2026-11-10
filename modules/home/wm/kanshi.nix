@@ -12,6 +12,9 @@
 #                 catch-all rule (monitors.fallback) gave it — preferred mode,
 #                 auto scale, centred above. kanshi prefers the exact profiles,
 #                 and the docked pair is three outputs, so this never shadows it.
+#                 A TV here gets its mode and scale from tv-fit.sh
+#                 (config/hypr-scripts/) instead: the fallback's preferred mode
+#                 and PPI-based scale suit monitors, not TVs.
 #   external-lid — the same with the internal display off, for the lid binds.
 #   tv / tv-lid  — like external/external-lid, but for one known screen (kanshi.tv)
 #                 that needs a pinned mode/scale: a TV whose preferred mode is
