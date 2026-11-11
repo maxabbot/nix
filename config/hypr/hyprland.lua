@@ -150,6 +150,13 @@ hl.config({
             -- high-resolution touchpad.
             scroll_factor        = 0.4,
         },
+        -- Pin the Framework's touchscreen to its own panel. Unbound ([[Auto]])
+        -- it can map to a dock screen, and 0.55.4 segfaulted twice
+        -- (onTouchDown / onTouchMove) on a touch while undocking pulled
+        -- that screen away. No-op on hosts without a touchscreen.
+        touchdevice = {
+            output = "eDP-1",
+        },
     },
 
     general = {
