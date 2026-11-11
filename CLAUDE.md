@@ -69,7 +69,7 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 - Shared args (git name/email) live in `sharedHmArgs` in `flake.nix`; per-host args override via `sharedHmArgs // hmArgs`.
 - `home/max/` is split into feature files: `default.nix` (entry), `calendar.nix` (dcal, DMS's calendar daemon, as a user service; accounts are per-machine — `dcal account add caldav` for the homelab's Radicale, `dcal account add microsoft` for work), `claude.nix` (Claude Code: the package + `sox` for voice mode, and its theme + status line, merged into `~/.claude/settings.json` on activation — Claude Code rewrites that file, so it isn't a symlink, and an in-app `/theme` change reverts on rebuild; plus `claude-account` (`pkgs/claude-account/`), which saves logins (`.credentials.json` + `~/.claude.json`'s `oauthAccount`) under `~/.claude/accounts/` and swaps between them with settings/memory shared — the claudeUsage widget's popout drives it), `git.nix`, `cli.nix`, `desktop.nix`, `lan-mouse.nix`, `libreoffice.nix`, `packages.nix`, `terminal-toys.nix`, `tui-themes.nix` (palette themes for TUIs with no Stylix target — currently VisiData, via kitty's ANSI slots).
 - Setting `compositor = "none"` skips Hyprland and the DMS shell entirely via `mkIf`.
-- The desktop shell is DMS (DankMaterialShell, 2.0 — nixpkgs' `dux-shell`): `modules/home/wm/dms.nix` (package patches, declared settings/bars, `shell-dms.service`) and `modules/home/wm/dms-plugins.nix`; design notes in `docs/SHELLS.md`.
+- The desktop shell is DMS (DankMaterialShell, 2.1 — nixpkgs' `dux-shell`): `modules/home/wm/dms.nix` (package patches, declared settings/bars, `shell-dms.service`) and `modules/home/wm/dms-plugins.nix`; design notes in `docs/SHELLS.md`.
 
 ### Rebuild
 

@@ -48,10 +48,11 @@ final: prev: {
 
   # 26.05 ships DMS 1.4.6; the current plugin registry needs 2.0, which
   # nixpkgs carries as dux-shell (DMS's new name; the binary is still `dms`).
-  # Kept under the dms-shell attribute so every consumer here, the greeter
-  # included, gets this build. Unstable's recipe, built against this set's
-  # Qt/KDE libraries (quickshell here is stable's, and QML plugins have to
-  # match the Qt that loads them). The Go toolchain stays unstable's: 2.0
+  # Kept under the dms-shell attribute so every consumer here (the shell in
+  # modules/home/wm/dms.nix, the flake check) gets this build; the greeter
+  # is a separate binary since 2.1 (productivity.nix). Unstable's recipe,
+  # built against this set's Qt/KDE libraries (quickshell here is stable's,
+  # and QML plugins have to match the Qt that loads them). The Go toolchain stays unstable's: 2.0
   # needs Go 1.27, and the Go side doesn't link Qt.
   #
   # DMS bakes its QML into the binary (`withshell`) and extracts it at run
