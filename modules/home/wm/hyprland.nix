@@ -355,9 +355,9 @@ in
     # Terminal=true entries (spotify-player, yazi) in xterm — not installed,
     # so they fail silently. home.sessionVariables alone isn't enough: it only
     # lands in hm-session-vars.sh, which zsh sources but the user manager never
-    # sees, so the vars go to both.
+    # sees, so the vars go to both (systemd.user.sessionVariables is set in the
+    # systemd.user block below).
     home.sessionVariables = sessionTools;
-    systemd.user.sessionVariables = sessionTools;
 
     xdg.configFile = {
       # ── Store-symlinked scripts (gaming-toggle, dpms, wallpaper, …) ─────────
@@ -439,56 +439,60 @@ in
     # syncthingtray's default command already passes --wait.
     xsession.preferStatusNotifierItems = true; # nm-applet --indicator (SNI)
 
-    # Polkit authentication agent — GUI privilege prompts (gparted, virt-manager,
-    # flatpak system installs). polkit_gnome's binary lives in libexec (never on
-    # PATH), so it must be referenced by store path. DMS's built-in agent is
-    # switched off (DMS_DISABLE_POLKIT in dms.nix) so this one is the only
-    # agent, and it outlives a DMS stopped for gaming mode. Without an agent,
-    # auth prompts silently never appear.
-    systemd.user.services.polkit-gnome-agent = {
-      Unit = {
-        Description = "polkit-gnome authentication agent";
-        After = [ "graphical-session.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-      Service = {
-        ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-        Restart = "on-failure";
-        RestartSec = 2;
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
+    systemd.user = {
+      sessionVariables = sessionTools;
 
-    # Solaar tray — Logitech Unifying/Bolt device manager (MX Ergo S). Only on
-    # hosts importing hosts/common/optional/logitech.nix; elsewhere the mkIf
-    # discards the definition unevaluated, so solaar stays out of their closure.
-    #
-    # It has to be resident, not launched on demand: Solaar re-applies its stored
-    # per-device settings (button remaps, pointer speed, rules) each time a device
-    # wakes or re-pairs, and does nothing at all while it isn't running. `-w hide`
-    # starts it into the tray rather than popping the window open at every login,
-    # so it needs tray.target the same way the applets below do.
-    #
-    # --restart-on-wake-up: this box suspends on the 900s hypridle timer, and
-    # Solaar routinely loses the receiver across a resume — after which it stops
-    # re-applying anything, silently. Upstream still labels the flag experimental;
-    # if it turns out to restart in a loop, this is the first thing to drop.
-    systemd.user.services.solaar = lib.mkIf osConfig.hardware.logitech.wireless.enableGraphical {
-      Unit = {
-        Description = "Solaar Logitech device manager (tray)";
-        Requires = [ "tray.target" ];
-        After = [
-          "graphical-session.target"
-          "tray.target"
-        ];
-        PartOf = [ "graphical-session.target" ];
+      # Polkit authentication agent — GUI privilege prompts (gparted, virt-manager,
+      # flatpak system installs). polkit_gnome's binary lives in libexec (never on
+      # PATH), so it must be referenced by store path. DMS's built-in agent is
+      # switched off (DMS_DISABLE_POLKIT in dms.nix) so this one is the only
+      # agent, and it outlives a DMS stopped for gaming mode. Without an agent,
+      # auth prompts silently never appear.
+      services.polkit-gnome-agent = {
+        Unit = {
+          Description = "polkit-gnome authentication agent";
+          After = [ "graphical-session.target" ];
+          PartOf = [ "graphical-session.target" ];
+        };
+        Service = {
+          ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
       };
-      Service = {
-        ExecStart = "${pkgs.solaar}/bin/solaar --window=hide --restart-on-wake-up";
-        Restart = "on-failure";
-        RestartSec = 2;
+
+      # Solaar tray — Logitech Unifying/Bolt device manager (MX Ergo S). Only on
+      # hosts importing hosts/common/optional/logitech.nix; elsewhere the mkIf
+      # discards the definition unevaluated, so solaar stays out of their closure.
+      #
+      # It has to be resident, not launched on demand: Solaar re-applies its stored
+      # per-device settings (button remaps, pointer speed, rules) each time a device
+      # wakes or re-pairs, and does nothing at all while it isn't running. `-w hide`
+      # starts it into the tray rather than popping the window open at every login,
+      # so it needs tray.target the same way the applets below do.
+      #
+      # --restart-on-wake-up: this box suspends on the 900s hypridle timer, and
+      # Solaar routinely loses the receiver across a resume — after which it stops
+      # re-applying anything, silently. Upstream still labels the flag experimental;
+      # if it turns out to restart in a loop, this is the first thing to drop.
+      services.solaar = lib.mkIf osConfig.hardware.logitech.wireless.enableGraphical {
+        Unit = {
+          Description = "Solaar Logitech device manager (tray)";
+          Requires = [ "tray.target" ];
+          After = [
+            "graphical-session.target"
+            "tray.target"
+          ];
+          PartOf = [ "graphical-session.target" ];
+        };
+        Service = {
+          ExecStart = "${pkgs.solaar}/bin/solaar --window=hide --restart-on-wake-up";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
       };
-      Install.WantedBy = [ "graphical-session.target" ];
     };
 
     # Solaar rule engine — see the file header for the diversion step each rule

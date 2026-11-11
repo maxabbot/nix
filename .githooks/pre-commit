@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Pre-commit: the fast CI jobs (nixfmt, statix, deadnix, shellcheck) against
+# the staged snapshot, so a commit that would fail them never leaves the box.
+# `nix flake check` stays CI-only — it evaluates both hosts and is too slow to
+# run on every commit.
+#
+# Enabled per clone with `git config core.hooksPath .githooks` (the devShell
+# does it on entry). Skip once with `git commit --no-verify`.
+set -euo pipefail
+
+# Tools come from the flake's devShell; re-enter it when they're missing.
+if ! command -v statix >/dev/null || ! command -v shellcheck >/dev/null; then
+  exec nix develop --quiet --command "$0" "$@"
+fi
+
+# Check what is being committed, not the working tree: export the index.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+git checkout-index --all --prefix="$tmp/"
+cd "$tmp"
+
+fail=0
+run() {
+  local name=$1
+  shift
+  if ! "$@"; then
+    echo "pre-commit: $name failed" >&2
+    fail=1
+  fi
+}
+
+run nixfmt treefmt --ci --tree-root "$tmp" --quiet
+run statix statix check .
+run deadnix deadnix --fail .
+# Same file set as the CI shellcheck job.
+mapfile -t scripts < <(git -C "$OLDPWD" ls-files '*.sh' 'config/scripts/*')
+if ((${#scripts[@]})); then
+  run shellcheck shellcheck "${scripts[@]}"
+fi
+
+if ((fail)); then
+  echo "pre-commit: fix the above (nix fmt formats), or commit with --no-verify" >&2
+  exit 1
+fi

@@ -227,7 +227,13 @@
           nil
           sops
           age
+          shellcheck
         ];
+        # Point git at the tracked hooks (.githooks/pre-commit runs the fast CI
+        # checks on the staged tree).
+        shellHook = ''
+          git config core.hooksPath .githooks
+        '';
       };
 
       nixosConfigurations = {

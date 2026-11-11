@@ -79,6 +79,10 @@ nixup   # nh os switch /etc/nixos  (auto-detects host by hostname)
 sudo nixos-rebuild switch --flake /etc/nixos#<host>
 ```
 
+### Pre-commit hook
+
+`.githooks/pre-commit` runs CI's fast jobs (nixfmt, statix, deadnix, shellcheck) on the staged tree in a few seconds. `nix flake check` stays CI-only. Turn it on once per clone with `git config core.hooksPath .githooks` (entering `nix develop` also does it). Skip it with `--no-verify`.
+
 ### Shell scripts
 
 All `*.sh` linted with shellcheck; quote properly. Use `bash` and prefer `set -euo pipefail` for new scripts (long-running event loops in `config/hypr-scripts/` intentionally omit it so one failed poll doesn't kill the loop).
