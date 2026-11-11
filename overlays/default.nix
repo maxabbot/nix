@@ -24,6 +24,15 @@ final: prev: {
   # DMS brightness slider, which already drives them over DDC/CI.
   clightd = prev.clightd.override { enableDdc = false; };
 
+  # vitetris aborts ("buffer overflow detected") the moment a game starts:
+  # options.c uses the struct hack — strcpy into `char tp_key[4]` at the end
+  # of a struct malloc'd large enough for the whole key — and fortify only
+  # sees the declared 4 bytes. A false positive at any fortify level, so
+  # fortify is off for this package alone.
+  vitetris = prev.vitetris.overrideAttrs (old: {
+    hardeningDisable = (old.hardeningDisable or [ ]) ++ [ "fortify" ];
+  });
+
   # VSCode 1.144 moved its bundled ripgrep to the asar's unpacked tree
   # (@vscode/ripgrep-universal/bin/linux-x64/rg), but nixpkgs' postPatch still
   # removes the old @vscode/ripgrep/bin/rg path before linking Nix's ripgrep,
