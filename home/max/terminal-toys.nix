@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   palette = import ../../config/stylix/palette.nix;
 in
@@ -28,18 +28,70 @@ in
 
   # spotify-player ships no .desktop file; this puts it in the DMS launcher,
   # which opens Terminal=true entries in a terminal.
-  xdg.desktopEntries.spotify-player = {
-    name = "Spotify Player";
-    genericName = "Spotify TUI";
-    exec = "spotify_player";
-    icon = "spotify";
-    terminal = true;
-    categories = [
-      "Audio"
-      "Music"
-      "Player"
-    ];
-  };
+  # The terminal games ship no .desktop files either; these put them in the
+  # launcher too (Terminal=true, so DMS opens them in kitty).
+  xdg.desktopEntries =
+    lib.mapAttrs
+      (_: g: {
+        inherit (g) name exec icon;
+        terminal = true;
+        categories = [
+          "Game"
+          g.category
+        ];
+      })
+      {
+        tty-solitaire = {
+          name = "Solitaire";
+          exec = "ttysolitaire";
+          icon = "kpat";
+          category = "CardGame";
+        };
+        freesweep = {
+          name = "Minesweeper";
+          exec = "freesweep";
+          icon = "gnome-mines";
+          category = "LogicGame";
+        };
+        chess-tui = {
+          name = "Chess";
+          exec = "chess-tui";
+          icon = "gnome-chess";
+          category = "BoardGame";
+        };
+        "2048-in-terminal" = {
+          name = "2048";
+          exec = "2048-in-terminal";
+          icon = "gnome-2048";
+          category = "LogicGame";
+        };
+        nudoku = {
+          name = "Sudoku";
+          exec = "nudoku";
+          icon = "gnome-sudoku";
+          category = "LogicGame";
+        };
+        vitetris = {
+          name = "Tetris";
+          exec = "vitetris";
+          icon = "quadrapassel";
+          category = "BlocksGame";
+        };
+      }
+    // {
+      spotify-player = {
+        name = "Spotify Player";
+        genericName = "Spotify TUI";
+        exec = "spotify_player";
+        icon = "spotify";
+        terminal = true;
+        categories = [
+          "Audio"
+          "Music"
+          "Player"
+        ];
+      };
+    };
 
   xdg.configFile = {
     # cava — Gruvbox Material Dark gradient

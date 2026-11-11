@@ -19,22 +19,46 @@ in
   };
   programs.nix-index-database.comma.enable = true;
 
-  # GE-Proton as a Lutris wine version — nixpkgs' proton-ge-bin, the build
-  # Steam gets from gaming.nix. Lutris lists any directory under
-  # ~/.local/share/lutris/runners/wine/ that holds a `proton` script and runs
-  # it through umu (umu-launcher, gaming.nix). Replaces wine-ge-custom, whose
-  # GE-Proton8-26 was the last Wine-GE release before it was discontinued.
-  xdg.dataFile."lutris/runners/wine/${protonGe.version}" = lib.mkIf gaming {
-    source = protonGe.steamcompattool;
-  };
+  xdg = {
+    # Dwarf Fortress and Pinball ship no .desktop files
+    desktopEntries = lib.mkIf gui {
+      dwarf-fortress = {
+        name = "Dwarf Fortress";
+        exec = "dwarf-fortress";
+        icon = "package_games_strategy";
+        categories = [
+          "Game"
+          "StrategyGame"
+        ];
+      };
+      pinball = {
+        name = "Emilia Pinball";
+        exec = "pinball";
+        icon = "pinball";
+        categories = [
+          "Game"
+          "ArcadeGame"
+        ];
+      };
+    };
 
-  # Steam's Linux client downloads slowly over HTTP/2 and under-opens connections;
-  # these dev-cfg flags (read at startup, needs a full Steam restart) fix both.
-  xdg.dataFile."Steam/steam_dev.cfg" = lib.mkIf gaming {
-    text = ''
-      @nClientDownloadEnableHTTP2PlatformLinux 0
-      @fDownloadRateImprovementToAddAnotherConnection 1.0
-    '';
+    # GE-Proton as a Lutris wine version — nixpkgs' proton-ge-bin, the build
+    # Steam gets from gaming.nix. Lutris lists any directory under
+    # ~/.local/share/lutris/runners/wine/ that holds a `proton` script and runs
+    # it through umu (umu-launcher, gaming.nix). Replaces wine-ge-custom, whose
+    # GE-Proton8-26 was the last Wine-GE release before it was discontinued.
+    dataFile."lutris/runners/wine/${protonGe.version}" = lib.mkIf gaming {
+      source = protonGe.steamcompattool;
+    };
+
+    # Steam's Linux client downloads slowly over HTTP/2 and under-opens connections;
+    # these dev-cfg flags (read at startup, needs a full Steam restart) fix both.
+    dataFile."Steam/steam_dev.cfg" = lib.mkIf gaming {
+      text = ''
+        @nClientDownloadEnableHTTP2PlatformLinux 0
+        @fDownloadRateImprovementToAddAnotherConnection 1.0
+      '';
+    };
   };
 
   home.packages =
