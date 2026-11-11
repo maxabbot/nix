@@ -75,6 +75,14 @@ in
       spotify
       stremio-linux-shell
       qbittorrent
+      # Games — the terminal ones live in terminal-toys.nix
+      pinball # Emilia Pinball (SDL)
+      cataclysm-dda # zombie roguelike, tiles build (`cataclysm-tiles`); the curses one isn't cached
+      dwarf-fortress # DF 53 (the graphical Steam-era release)
+      openttd # Transport Tycoon Deluxe remake (fetches OpenGFX/OpenSFX in-game)
+      shattered-pixel-dungeon # roguelike
+      widelands # Settlers II-style economy/strategy
+      superTuxKart # kart racer
       # `autoclick` — hold g → 100 CPS left-click via theclicker (productivity.nix)
       (pkgs.writeShellScriptBin "autoclick" (builtins.readFile ../../config/scripts/autoclick))
     ];

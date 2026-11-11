@@ -17,7 +17,10 @@ in
     # ── Toys / games ─────────────────────────────────────────────────────────────
     _2048-in-terminal
     nudoku # sudoku
+    tty-solitaire # klondike — `ttysolitaire`
     vitetris # tetris
+    freesweep # minesweeper
+    chess-tui # chess vs. a UCI engine or a local opponent
 
     # ── Data TUI ─────────────────────────────────────────────────────────────────
     harlequin # SQL IDE in the terminal (DuckDB/SQLite/Postgres/…)
