@@ -212,7 +212,7 @@
           dms-shell = lib.findFirst (
             p: lib.getName p == "dux-shell"
           ) (throw "checks: no dms-shell in framework's home.packages") hm.home.packages;
-          dms-greeter = fw.services.displayManager.dms-greeter.package;
+          dux-greeter = fw.services.displayManager.dux-greeter.package;
         }
         // lib.mapAttrs' (
           name: file: lib.nameValuePair "dms-plugin-${baseNameOf name}" file.source

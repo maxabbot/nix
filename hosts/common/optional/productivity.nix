@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   machineType,
   ...
 }:
@@ -9,8 +10,20 @@ let
   inherit (config.custom.base) username;
   hostSecrets = ../../../secrets/${config.networking.hostName}.yaml;
   hasIdentity = builtins.pathExists hostSecrets;
+  duxGreeterModule = "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dux-greeter.nix";
 in
 {
+  # DMS 2.1 split the greeter out of the shell into its own binary
+  # (dux-greeter), so 26.05's dms-greeter module, which runs a script from
+  # the shell's tree (Modules/Greetd/assets/dms-greeter), finds nothing and
+  # greetd gives up after five instant exits. Swap in unstable's dux-greeter
+  # module, minus its meta (it names lib.teams.duxlabs, which stable's lib
+  # lacks). Drop both lines once nixpkgs stable carries dux-greeter.
+  disabledModules = [ "services/display-managers/dms-greeter.nix" ];
+  imports = [
+    ({ pkgs, ... }@args: removeAttrs (import duxGreeterModule (args // { inherit pkgs; })) [ "meta" ])
+  ];
+
   # Password PAM service for the DMS lock screen. DMS uses /etc/pam.d/dankshell
   # when it exists; without it, it writes its own copy of the login stack into
   # ~/.local/state on first lock, which would drift from the system's.
@@ -60,24 +73,23 @@ in
 
   services = {
     # ── Display manager (DMS greeter on greetd) ────────────────────────────────
-    # nixpkgs' dms-greeter module: greetd runs the DMS greeter UI inside its own
-    # short-lived Hyprland as the dms-greeter user. Before each start greetd
-    # copies the user's DMS settings.json (so the Gruvbox custom theme, which
-    # it also copies) and session.json into /var/lib/dms-greeter. The
-    # greeter's background is the settings' lockScreenWallpaperPath, so it
-    # matches the DMS lock (the lockWallpaper hmArg).
+    # unstable's dux-greeter module (imported above; the user, cache dir and
+    # log tag keep the dms-greeter name): greetd runs the DMS greeter UI
+    # inside its own short-lived Hyprland as the dms-greeter user. Before
+    # each start greetd copies the user's DMS settings.json (so the Gruvbox
+    # custom theme, which it also copies) and session.json into
+    # /var/lib/dms-greeter. The greeter's background is the settings'
+    # lockScreenWallpaperPath, so it matches the DMS lock (the lockWallpaper
+    # hmArg).
     #
-    # 26.05's module predates DMS 2.0: its configHome reads the old
-    # DankMaterialShell dirs, so the files are listed at their 2.0 paths
-    # instead (missing ones are skipped). package is the overlay's 2.0 build.
-    displayManager.dms-greeter = {
+    # dux-greeter is pure Go with the QML baked in; it runs quickshell from
+    # PATH, so it takes stable's quickshell like the shell does (the module's
+    # default would read programs.dux-shell, which stable lacks).
+    displayManager.dux-greeter = {
       enable = true;
-      package = pkgs.dms-shell;
-      configFiles = [
-        "/home/${username}/.config/dms/settings.json"
-        "/home/${username}/.local/state/dms/session.json"
-        "/home/${username}/.cache/dms/dms-colors.json"
-      ];
+      package = pkgs.unstable.dux-greeter;
+      quickshell.package = pkgs.quickshell;
+      configHome = "/home/${username}";
       compositor = {
         name = "hyprland";
         # Lua (Hyprland 0.55): the launcher spots `hl.` and appends the start

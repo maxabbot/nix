@@ -98,7 +98,7 @@
   # ── Login greeter: DP-3 only ─────────────────────────────────────────────────
   # The greeter's Hyprland would otherwise light the rotated 4K monitor too and
   # centre the login there. Appended to productivity.nix's greeter config.
-  services.displayManager.dms-greeter.compositor.customConfig = ''
+  services.displayManager.dux-greeter.compositor.customConfig = ''
     hl.monitor({ output = "DP-2", disabled = true })
   '';
 

@@ -69,8 +69,22 @@ greetd starts the session only once the greeter has exited. The launcher stops
 its Hyprland with a dispatch; under 1.x that was `hyprctl dispatch exit`,
 which Hyprland on Lua rejects, and `productivity.nix` patched it. DMS 2.0's
 launcher sends `hl.dsp.exit()` itself when the greeter config is Lua (it spots
-`hl.` in `compositor.customConfig`), so the patch is gone. If a login hangs
-again, check `Modules/Greetd/assets/dms-greeter` still takes its Lua branch.
+`hl.` in `compositor.customConfig`), so the patch is gone. Since DMS 2.1 the
+launcher is the standalone `dux-greeter` binary (`dms-greeter`), not a script
+in the shell's tree. If a login hangs again, check it still takes its Lua
+branch: `strings $(which dms-greeter) | grep 'hl.dsp.exit'`.
+
+### Greeter never appears; greetd "start-limit-hit"
+
+`greeter exited without creating a session` five times in a second means the
+launcher itself died before Hyprland came up — e.g. after the DMS 2.1 update
+the 26.05 module still ran the removed `Modules/Greetd/assets/dms-greeter`.
+Find the launcher and check every path it calls exists:
+
+```bash
+toml=$(systemctl cat greetd | grep -o '/nix/store/[^ ]*greetd.toml')
+cat "$(sed -n 's/^command = "\(.*\)"/\1/p' "$toml")"
+```
 
 ## Services
 
