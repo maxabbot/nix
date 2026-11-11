@@ -23,6 +23,7 @@
     ./libreoffice.nix
     ./packages.nix
     ./terminal-toys.nix
+    ./tui-themes.nix
     inputs.nix-index-database.homeModules.nix-index
   ];
 

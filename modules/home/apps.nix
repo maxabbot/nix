@@ -16,11 +16,38 @@ in
 {
   programs = {
     # ── Kitty terminal ─────────────────────────────────────────────────────────────
-    # Colours and font are managed by Stylix; only behaviour settings live here.
+    # Accent colours come from the palette here (Stylix's kitty target is off,
+    # see stylix.nix); the font is fontconfig's monospace default, which Stylix
+    # sets. The 16 ANSI slots are what themes every terminal app that uses named
+    # colours (VisiData via home/max/tui-themes.nix, Claude Code's ANSI theme,
+    # fastfetch…). Background, text and the black/white slots stay kitty's
+    # neutral stock values: Gruvbox's warm greys and beige looked muddy over the
+    # translucent background. Selection and cursor are kitty's defaults too.
+    # Gruvbox Material has no bright accents, so 9–14 repeat 1–6.
     kitty = lib.mkIf gui {
       enable = true;
 
       settings = {
+        foreground = "#dddddd";
+        background = "#000000";
+        url_color = palette.blue;
+        color0 = "#000000";
+        color1 = palette.red;
+        color2 = palette.green;
+        color3 = palette.yellow;
+        color4 = palette.blue;
+        color5 = palette.purple;
+        color6 = palette.aqua;
+        color7 = "#dddddd";
+        color8 = "#767676";
+        color9 = palette.red;
+        color10 = palette.green;
+        color11 = palette.yellow;
+        color12 = palette.blue;
+        color13 = palette.purple;
+        color14 = palette.aqua;
+        color15 = "#ffffff";
+
         window_padding_width = 8;
         hide_window_decorations = "titlebar-only";
         background_opacity = "0.75";
