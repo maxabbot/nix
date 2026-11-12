@@ -35,6 +35,7 @@
     bruno
     pgcli
     snowsql # Snowflake SQL client (unfree; allowUnfree is set flake-wide)
+    snowflake-cli # `snow` — connections live in ~/.snowflake/config.toml (machine-local, 0600)
     # dbt with the Snowflake adapter in one env — a bare dbt-core can't load
     # adapters installed as separate store paths. Profiles live in ~/.dbt/.
     (python3Packages.dbt-core.withAdapters (a: [ a.dbt-snowflake ]))
