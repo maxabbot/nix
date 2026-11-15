@@ -50,7 +50,8 @@ Gruvbox Material Dark · @host@
 | Super + Shift + D | Wake all screens |
 | Super + Shift + G | Toggle gaming mode |
 | **Screenshots** | |
-| Print | Screenshot picker |
+| Print | Screenshot focused window (to clipboard) |
+| Super + Print | Screenshot picker |
 
 ## Tmux
 

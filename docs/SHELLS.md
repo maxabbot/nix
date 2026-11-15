@@ -330,6 +330,8 @@ Left out on purpose: `displaySettings` (eval-disabled outputs need
 (quickCapture records too), `dmsScreenshot` (tried; no editor).
 
 `quickCapture` has no bar pill, only a Control Center tile. Print runs
+`dms ipc call quickCapture screenshot window copy` (focused window to the
+clipboard); Super+Print runs
 `dms ipc call quickCapture showPicker`, a command `dms-plugins.nix` adds to the
 plugin: it shows the plugin's bar menu (capture modes, outputs, recording) as a
 floating, centred window, hosted by `config/dms/QuickCapturePicker.qml`. Its

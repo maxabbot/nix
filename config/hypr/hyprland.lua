@@ -251,7 +251,7 @@ hl.layer_rule({ match = { namespace = "dms:.*:background" },      blur = false }
 -- size, so every pill squashes and springs back. DMS animates the island
 -- itself, so the bar needs no compositor animation.
 hl.layer_rule({ match = { namespace = "^dms:bar$" },              no_anim = true })
--- quickCapture's Print picker (config/dms/QuickCapturePicker.qml) closes just
+-- quickCapture's Super+Print picker (config/dms/QuickCapturePicker.qml) closes just
 -- before grim runs; Hyprland's fade would keep it on screen into the capture.
 hl.layer_rule({ match = { namespace = "^dms:quick-capture-picker" }, no_anim = true })
 
@@ -534,9 +534,12 @@ hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("kanshictl switch docked-lid ||
 hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch tv || kanshictl switch external"),         { locked = true, description = "Lid opened: internal panel back on when docked" })
 
 -- Screenshots
--- `dms screenshot` goes straight to a region grab; the mode picker is the
--- quickCapture plugin's menu, floating (modules/home/wm/dms-plugins.nix).
-hl.bind("Print", hl.dsp.exec_cmd("dms ipc call quickCapture showPicker"), { description = "Screenshot picker" })
+-- Print grabs the focused window straight to the clipboard, through
+-- quickCapture so it gets the same copy handling as the picker's left-click.
+-- Super+Print opens the mode picker: the plugin's menu, floating
+-- (modules/home/wm/dms-plugins.nix).
+hl.bind("Print",       hl.dsp.exec_cmd("dms ipc call quickCapture screenshot window copy"), { description = "Screenshot focused window" })
+hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("dms ipc call quickCapture showPicker"),            { description = "Screenshot picker" })
 
 -- Volume (wpctl applies the change; DMS's OSD reacts passively to it)
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ -l 1.0"), { locked = true, description = "Volume up" })

@@ -269,10 +269,10 @@ let
   # Left-clicking a menu row copies the capture straight to the clipboard
   # (upstream opens the editor); right-click opens the editor instead.
 
-  # Print opens quickCapture's bar menu as a floating, centred window, with no
+  # Super+Print opens quickCapture's bar menu as a floating, centred window, with no
   # bar pill: config/dms/QuickCapturePicker.qml hosts the menu, the daemon gets
   # an instance, and `dms ipc call quickCapture showPicker` toggles it (the
-  # Print bind in config/hypr/hyprland.lua).
+  # Super+Print bind in config/hypr/hyprland.lua).
   quickCapture = pkgs.runCommand "dms-plugin-quickCapture" { } ''
     cp -r ${registry.quickCapture} $out
     chmod -R u+w $out
@@ -436,7 +436,7 @@ let
     }
     {
       # Screenshots with an annotation editor, OCR, QR, scrolling capture and
-      # screen recording. No bar pill, only a Control Center tile: Print opens its
+      # screen recording. No bar pill, only a Control Center tile: Super+Print opens its
       # menu floating (above). Its tools are in home.packages
       # (dms.nix).
       id = "quickCapture";
