@@ -37,6 +37,11 @@ in
       };
     };
 
+    # ── Thunar defaults ──────────────────────────────────────────────────────────
+    # Written into xfconf on activation (needs programs.xfconf, productivity.nix).
+    # New windows open in list view (the default "void" means "last view used").
+    xfconf.settings.thunar."default-view" = "ThunarDetailsView";
+
     # ── Translucent Thunar ───────────────────────────────────────────────────────
     # The window background carries the alpha (0.75, like kitty) and
     # every pane on top of it goes transparent, so the layers don't stack

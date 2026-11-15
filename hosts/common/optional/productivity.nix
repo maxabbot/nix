@@ -38,6 +38,9 @@ in
       withUWSM = true;
       xwayland.enable = true;
     };
+    # Thunar keeps its preferences (view mode, etc.) in xfconf. Without the
+    # daemon nothing persists, and HM's xfconf.settings has nowhere to write.
+    xfconf.enable = true;
   };
 
   # ── KDE Connect and Syncthing ports ──────────────────────────────────────────
