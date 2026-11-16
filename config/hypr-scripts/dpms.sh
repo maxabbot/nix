@@ -122,6 +122,21 @@ missing_outputs() {
     for drm in $(drm_connected); do
         printf '%s\n' "$live" | grep -qx "$drm" || printf '%s\n' "$drm"
     done
+    stranded_internal
+}
+
+# The internal panel, when it is disabled with the lid open. The -lid kanshi
+# profiles disable it on purpose, but only while the lid is shut; open, a
+# disabled panel is stranded. That happened on 2026-11-16: woken docked with the
+# lid shut (docked-lid, panel off), then undocked two seconds later — kanshi's
+# apply of "undocked" was lost mid-hotplug and never retried, so every resume
+# for the next five hours lit nothing. It is still listed in `monitors all`, so
+# the presence check above can't see it. Gaming mode disables outputs on
+# purpose too, so it is left alone while that is on.
+stranded_internal() {
+    [ -f "$GAMING_STATE_FILE" ] && return 0
+    grep -qs open /proc/acpi/button/lid/*/state || return 0
+    hyprctl monitors all -j | jq -r '.[] | select(.disabled and (.name | startswith("eDP"))) | .name'
 }
 
 # Wake, then hand wake-on-input back if the session is fully lit again.

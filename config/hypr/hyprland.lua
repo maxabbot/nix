@@ -528,10 +528,12 @@ hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 -- desk's docked pair, else the TV's pair, else the generic one-external pair
 -- (kanshi.nix). A
 -- switch to a profile that doesn't match the outputs fails, so the first that
--- fits wins. Undocked, both fail and logind suspends as usual. Hosts without
--- kanshi or a lid never get here.
+-- fits wins. Undocked, closing fails through and logind suspends as usual;
+-- opening ends on "undocked", so a panel left disabled by an undock that kanshi
+-- lost mid-hotplug (2026-11-16) comes back with the lid. Hosts without kanshi
+-- or a lid never get here.
 hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("kanshictl switch docked-lid || kanshictl switch tv-lid || kanshictl switch external-lid"), { locked = true, description = "Lid closed: internal panel off when docked" })
-hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch tv || kanshictl switch external"),         { locked = true, description = "Lid opened: internal panel back on when docked" })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch tv || kanshictl switch external || kanshictl switch undocked"), { locked = true, description = "Lid opened: internal panel back on" })
 
 -- Screenshots
 -- Print grabs the focused window straight to the clipboard, through
