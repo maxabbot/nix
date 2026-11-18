@@ -530,10 +530,15 @@ hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/
 -- switch to a profile that doesn't match the outputs fails, so the first that
 -- fits wins. Undocked, closing fails through and logind suspends as usual;
 -- opening ends on "undocked", so a panel left disabled by an undock that kanshi
--- lost mid-hotplug (2026-11-16) comes back with the lid. Hosts without kanshi
--- or a lid never get here.
+-- lost mid-hotplug (2026-11-16) comes back with the lid. That switch can be a
+-- no-op, though: on 2026-11-18 kanshi still held "undocked" as current from the
+-- lost apply and did nothing. So opening also runs `dpms.sh on`, whose
+-- stranded-panel check (a disabled eDP with the lid open) reloads the layout.
+-- The resume path runs that check too, but logind saw the lid open 3s after
+-- the resume, so it read "closed" and found nothing. Hosts without kanshi or a
+-- lid never get here.
 hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("kanshictl switch docked-lid || kanshictl switch tv-lid || kanshictl switch external-lid"), { locked = true, description = "Lid closed: internal panel off when docked" })
-hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch tv || kanshictl switch external || kanshictl switch undocked"), { locked = true, description = "Lid opened: internal panel back on" })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("kanshictl switch docked || kanshictl switch tv || kanshictl switch external || kanshictl switch undocked; bash ~/.config/hypr/scripts/dpms.sh on"), { locked = true, description = "Lid opened: internal panel back on" })
 
 -- Screenshots
 -- Print grabs the focused window straight to the clipboard, through
