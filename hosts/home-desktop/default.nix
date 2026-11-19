@@ -118,14 +118,30 @@
     # ── ITE IT8689E hardware monitor (Gigabyte Z790 UD AX) ─────────────────────
     # Mainline it87 doesn't support this chip; the out-of-tree driver does.
     # Required for fan2go (and pwmconfig) to see the PWM controls.
-    extraModulePackages = [ config.boot.kernelPackages.it87 ];
+    # Pinned past nixpkgs' 2025-12-26 snapshot: upstream PR #128 (merged
+    # 2026-08-24, Intel bridge fix #140 on 2026-10-02) makes manual PWM work on
+    # Gigabyte IT8689E boards. Before it, every header but SYS_FAN2 accepted
+    # pwmN writes and ignored them (the BIOS kept control). MMIO is on by default.
+    # Drop this override once nixpkgs' it87 is newer than 2026-10-02.
+    extraModulePackages = [
+      (config.boot.kernelPackages.it87.overrideAttrs (_: {
+        version = "unstable-2026-10-02";
+        name = "it87-unstable-2026-10-02-${config.boot.kernelPackages.kernel.version}";
+        src = pkgs.fetchFromGitHub {
+          owner = "frankcrawford";
+          repo = "it87";
+          rev = "bd7a566c8a60fe0308d67e26761e16260368191a";
+          hash = "sha256-Xh882j0YK9RF+YqMoP7JydbSLmotxqMTUqF1pjZ6CVE=";
+        };
+      }))
+    ];
     kernelModules = [ "it87" ];
 
     # ── DDR5 SPD temp sensor breaks resume ──────────────────────────────────────
     # spd5118 (per-DIMM DDR5 temperature, kernel ≥6.11) fails its async resume
     # callback ("regmap_read failed: -6" / ENXIO) after suspend, which can stall
     # resume at a black screen. Per-DIMM RAM temps aren't used for anything here
-    # (fan2go reads coretemp + it8628 only), so drop the module.
+    # (fan2go reads coretemp + it8689 only), so drop the module.
     blacklistedKernelModules = [ "spd5118" ];
 
     # ── aarch64 emulation ───────────────────────────────────────────────────────

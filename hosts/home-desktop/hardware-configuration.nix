@@ -28,8 +28,10 @@
       "kvm-intel"
       "it87"
     ];
+    # No force_id: the out-of-tree driver detects the IT8689E itself, and forcing
+    # 0x8628 drove it with the wrong (unbanked) register profile.
     extraModprobeConfig = ''
-      options it87 ignore_resource_conflict=1 force_id=0x8628
+      options it87 ignore_resource_conflict=1
     '';
     extraModulePackages = [ ]; # nvidia_x11 added by hosts/common/optional/nvidia.nix
   };
