@@ -53,6 +53,23 @@ let
                      'root.selectedDevice.isReachable ? "phonelink" : "phonelink_off"'
   '';
 
+  # The toggle goes between the profile and history rows; see the plugin list.
+  batteryPlus = pkgs.runCommand "dms-plugin-batteryPlus" { } ''
+    cp -r ${registry.batteryPlus} $out
+    chmod -R u+w $out
+    cp ${../../../config/dms/ChargeLimitToggle.qml} $out/ChargeLimitToggle.qml
+    substituteInPlace $out/BatteryPlusWidget.qml \
+      --replace-fail '            Item {
+                    id: historyRow' '            ChargeLimitToggle {
+                    width: parent.width
+                }
+
+                Item {
+                    id: historyRow' \
+      --replace-fail 'ccDetailHeight: 540' 'ccDetailHeight: 600' \
+      --replace-fail 'popoutHeight: 560' 'popoutHeight: 620'
+  '';
+
   # Tapping the Control Center tile's icon pauses/resumes Clight (the text still
   # opens the detail view — DMS's CompoundPill splits the two). Upstream wires
   # no ccWidgetToggled handler, so the icon did nothing and Pause was only in
@@ -469,9 +486,14 @@ let
   # (and Control Center tile) adds UPower's charge history, health/drain stats
   # and power profiles. The profile buttons need power-profiles-daemon, so under
   # TLP (framework's powersave entry) they do nothing.
+  #
+  # Patched with a "Charge to 100%" switch above the history chart
+  # (config/dms/ChargeLimitToggle.qml), which flips framework's EC charge
+  # limit between 80% and 100% until reboot; it hides itself where there's
+  # no charge_control_end_threshold.
   ++ lib.optional isLaptop {
     id = "batteryPlus";
-    src = registry.batteryPlus;
+    src = batteryPlus;
   }
   ++ [
     {

@@ -384,21 +384,56 @@
   # limit lives in the EC, written through framework_laptop's
   # charge_control_end_threshold (nixos-hardware loads the kmod). The attribute
   # only appears once both the ACPI battery driver and framework_laptop have
-  # loaded, in whichever order udev gets to them, hence the retry. For a full
-  # charge before a trip, until the next boot:
-  #   echo 100 | sudo tee /sys/class/power_supply/BAT1/charge_control_end_threshold
-  systemd.services.battery-charge-limit = {
-    description = "Cap battery charge at 80%";
-    wantedBy = [ "multi-user.target" ];
-    startLimitBurst = 10;
-    startLimitIntervalSec = 60;
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.runtimeShell} -c 'echo 80 > /sys/class/power_supply/BAT1/charge_control_end_threshold'";
-      Restart = "on-failure";
-      RestartSec = 3;
+  # loaded, in whichever order udev gets to them, hence the retry.
+  #
+  # For a full charge before a trip, the battery popout's "Charge to 100%"
+  # toggle (config/dms/ChargeLimitToggle.qml) starts battery-charge-full, and
+  # switching it off starts battery-charge-limit again, which Conflicts= it
+  # away. Nothing pulls battery-charge-full in at boot, so a reboot always
+  # comes back at 80%. Polkit lets the desktop user start/stop just these two
+  # units without a password. By hand:
+  #   systemctl start battery-charge-full    # 100% until reboot
+  #   systemctl start battery-charge-limit   # back to 80%
+  systemd.services =
+    let
+      threshold = "/sys/class/power_supply/BAT1/charge_control_end_threshold";
+      write = pct: "${pkgs.runtimeShell} -c 'echo ${toString pct} > ${threshold}'";
+    in
+    {
+      battery-charge-limit = {
+        description = "Cap battery charge at 80%";
+        wantedBy = [ "multi-user.target" ];
+        conflicts = [ "battery-charge-full.service" ];
+        startLimitBurst = 10;
+        startLimitIntervalSec = 60;
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = write 80;
+          Restart = "on-failure";
+          RestartSec = 3;
+        };
+      };
+      battery-charge-full = {
+        description = "Let the battery charge to 100% until reboot";
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = write 100;
+          ExecStop = write 80;
+        };
+      };
     };
-  };
+  security.polkit.extraConfig = ''
+    polkit.addRule(function (action, subject) {
+      var unit = action.lookup("unit");
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          (unit == "battery-charge-full.service" || unit == "battery-charge-limit.service") &&
+          (action.lookup("verb") == "start" || action.lookup("verb") == "stop") &&
+          subject.user == "${config.custom.base.username}" && subject.local && subject.active) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
 
   # ── Networking ───────────────────────────────────────────────────────────────
   # iwd handles roaming between APs noticeably better than wpa_supplicant, which
