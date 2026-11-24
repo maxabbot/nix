@@ -99,6 +99,8 @@ in
       spotify
       stremio-linux-shell
       qbittorrent
+      # Pre-alpha. From unstable: 26.05's snapshot is marked insecure (CVE-2026-58592)
+      pkgs.unstable.ladybird
       # Games — the terminal ones live in terminal-toys.nix
       pinball # Emilia Pinball (SDL)
       cataclysm-dda # zombie roguelike, tiles build (`cataclysm-tiles`); the curses one isn't cached
@@ -106,7 +108,7 @@ in
       openttd # Transport Tycoon Deluxe remake (fetches OpenGFX/OpenSFX in-game)
       shattered-pixel-dungeon # roguelike
       widelands # Settlers II-style economy/strategy
-      superTuxKart # kart racer
+      supertuxkart # kart racer
       # `autoclick` — hold g → 100 CPS left-click via theclicker (productivity.nix)
       (pkgs.writeShellScriptBin "autoclick" (builtins.readFile ../../config/scripts/autoclick))
     ];
