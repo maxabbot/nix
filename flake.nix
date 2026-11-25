@@ -30,6 +30,12 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    # Signed Firefox extensions as packages (modules/home/firefox.nix).
+    firefox-addons = {
+      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Tracks master, with its version check suppressed in stylix.nix. Not
     # release-26.05: that branch's Zen target has no opacity support (master's
     # opacityHex), so its userChrome paints Zen solid and the translucency in
@@ -146,6 +152,11 @@
         # first run, so hosts with an existing profile point at theirs.
         zen = {
           profilePath = "default";
+        };
+        # Firefox (modules/home/firefox.nix), trialled alongside Zen; hosts
+        # opt in until it replaces Zen.
+        firefox = {
+          enable = false;
         };
         # Same idea for Thunderbird (modules/home/thunderbird.nix), whose HM
         # module names the profile directory after the profile.
@@ -290,6 +301,7 @@
           ];
           hmArgs = {
             compositor = "hyprland";
+            firefox.enable = true;
             # 2.8K 120 Hz internal panel at 2x. kanshi's internal output, mode
             # and scale default to this string, so its "undocked" profile
             # matches the static Hyprland declaration and there's no scale flash

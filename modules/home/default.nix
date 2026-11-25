@@ -7,6 +7,7 @@
     ./apps.nix
     ./theme.nix
     ./zen.nix
+    ./firefox.nix
     ./thunderbird.nix
     ./wm/hyprland.nix
     ./wm/kanshi.nix
