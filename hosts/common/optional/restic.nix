@@ -112,160 +112,178 @@ let
       "AF_UNIX"
     ];
   };
+
+  # Off until this host's secrets file has the restic-workstation block. sops
+  # leaves top-level keys in clear text, so this is readable at eval time, and
+  # it keeps a rebuild before setup from failing activation on a missing
+  # secret. Setup step 4 is what turns the backup on.
+  configured =
+    builtins.pathExists hostSecrets
+    && lib.hasInfix "\nrestic-workstation:" ("\n" + builtins.readFile hostSecrets);
 in
-{
-  sops.secrets = {
-    "restic-workstation/repo-password".sopsFile = hostSecrets;
-    "restic-workstation/b2-backup".sopsFile = hostSecrets;
-    "restic-workstation/healthchecks-url".sopsFile = hostSecrets;
-  };
-
-  # Unit restic-backups-home; `sudo restic-home …` is the repository with
-  # its environment set (the module's createWrapper).
-  services.restic.backups.home = {
-    inherit repository;
-    passwordFile = secrets."restic-workstation/repo-password".path;
-    environmentFile = secrets."restic-workstation/b2-backup".path;
-    initialize = true;
-
-    paths = [ home ];
-    extraBackupArgs = [
-      # Skips anything with a CACHEDIR.TAG (Chromium/Electron caches, cargo
-      # targets, …) without listing each one.
-      "--exclude-caches"
-      # Stays on /home's filesystem: the onedriver FUSE mount (onedrive.nix)
-      # would otherwise pull the whole OneDrive down, and podman's btrfs
-      # subvolumes are images, not data.
-      "--one-file-system"
-    ];
-
-    # Re-downloadable, regenerable, or backed up elsewhere. Sized on
-    # home-desktop 2026-11-26: without these the home folder is ~1.5 TB, with
-    # them a few tens of GB.
-    exclude = [
-      "${home}/.cache"
-      "${home}/.local/share/Trash"
-
-      # Steam: 1.4 TB of games. Keep userdata (screenshots, per-game config,
-      # saves for the games without Steam Cloud). Excluding the contents,
-      # not the directory, is what lets the negation reach inside.
-      "${home}/.local/share/Steam/*"
-      "!${home}/.local/share/Steam/userdata"
-      "${home}/Games"
-      "${home}/.wine"
-      "${home}/.local/share/umu"
-      "${home}/.local/share/lutris/runners"
-      "${home}/.local/share/goverlay"
-
-      # Package/toolchain caches and container images.
-      "${home}/.npm"
-      "${home}/.gradle"
-      "${home}/Android"
-      "${home}/.local/share/containers"
-      "${home}/.local/share/flatpak"
-      "${home}/.var/app/*/cache"
-      "${home}/.local/share/rembg"
-      "${home}/.nv"
-      "${home}/.debug"
-      "${home}/.zoom"
-
-      # Build output and dev environments, wherever they are.
-      "node_modules"
-      ".direnv"
-      ".venv"
-      "__pycache__"
-      "result"
-      "result-*"
-
-      # Browser caches inside profiles (most carry no CACHEDIR.TAG).
-      "Cache"
-      "Code Cache"
-      "GPUCache"
-      "CacheStorage"
-      "ScriptCache"
-
-      # VM disks (WinBoat's guest lives wherever it was installed) and
-      # install media.
-      "*.qcow2"
-      "*.vhdx"
-      "*.iso"
-
-      # Synced to the homelab, which backs it up from /mnt/data/syncthing.
-      "${home}/SyncDrive"
-
-      # Has another copy (asked 2026-11-26).
-      "${home}/Old PC backup"
-    ];
-
-    # Daily, catching up after boot/resume (the module's default is daily +
-    # Persistent; this adds the jitter).
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
-      RandomizedDelaySec = "1h";
+lib.mkMerge [
+  {
+    warnings = lib.optional (!configured) (
+      "restic.nix: secrets/${host}.yaml has no restic-workstation block, so the "
+      + "home backup is off. See the setup steps at the top of hosts/common/optional/restic.nix."
+    );
+  }
+  (lib.mkIf configured {
+    sops.secrets = {
+      "restic-workstation/repo-password".sopsFile = hostSecrets;
+      "restic-workstation/b2-backup".sopsFile = hostSecrets;
+      "restic-workstation/healthchecks-url".sopsFile = hostSecrets;
     };
 
-    backupPrepareCommand = ''
-      ${waitForB2}
-      ${ping "/start"}
-    '';
-    # ExecStopPost: runs on failure too, with systemd's $SERVICE_RESULT.
-    backupCleanupCommand = ''
-      if [ "$SERVICE_RESULT" = success ]; then
-        ${ping ""}
-      else
-        ${ping "/fail"}
-      fi
-    '';
-  };
+    # Unit restic-backups-home; `sudo restic-home …` is the repository with
+    # its environment set (the module's createWrapper).
+    services.restic.backups.home = {
+      inherit repository;
+      passwordFile = secrets."restic-workstation/repo-password".path;
+      environmentFile = secrets."restic-workstation/b2-backup".path;
+      initialize = true;
 
-  systemd.services.restic-backups-home.serviceConfig = quiet;
+      paths = [ home ];
+      extraBackupArgs = [
+        # Skips anything with a CACHEDIR.TAG (Chromium/Electron caches, cargo
+        # targets, …) without listing each one.
+        "--exclude-caches"
+        # Stays on /home's filesystem: the onedriver FUSE mount (onedrive.nix)
+        # would otherwise pull the whole OneDrive down, and podman's btrfs
+        # subvolumes are images, not data.
+        "--one-file-system"
+      ];
 
-  # Monthly: apply retention, then read back 5% of the data. A failure pings
-  # /fail on the backup's check; success pings nothing, so a working prune can
-  # never mask a broken backup.
-  systemd.services.restic-home-maintenance = {
-    description = "restic: prune and check this workstation's repository";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    environment = {
-      RESTIC_REPOSITORY = repository;
-      RESTIC_PASSWORD_FILE = secrets."restic-workstation/repo-password".path;
-      RESTIC_CACHE_DIR = "/var/cache/restic-backups-home";
-    };
-    serviceConfig = quiet // {
-      Type = "oneshot";
-      User = "root";
-      EnvironmentFile = secrets."restic-workstation/b2-backup".path;
-      CacheDirectory = "restic-backups-home";
-      CacheDirectoryMode = "0700";
-      PrivateTmp = true;
-    };
-    script = ''
-      set -uo pipefail
-      ${waitForB2}
-      restic=${pkgs.restic}/bin/restic
-      # A backup cut off by suspend leaves a stale lock, which blocks prune's
-      # exclusive one. unlock removes only stale locks.
-      if $restic unlock \
-        && $restic forget --prune --retry-lock=30m \
-          --keep-daily=7 --keep-weekly=4 --keep-monthly=6 \
-        && $restic check --retry-lock=30m --read-data-subset=5%; then
-        exit 0
-      else
-        rc=$?
-        ${ping "/fail"}
-        exit "$rc"
-      fi
-    '';
-  };
+      # Re-downloadable, regenerable, or backed up elsewhere. Sized on
+      # home-desktop 2026-11-26: without these the home folder is ~1.5 TB, with
+      # them a few tens of GB.
+      exclude = [
+        "${home}/.cache"
+        "${home}/.local/share/Trash"
 
-  systemd.timers.restic-home-maintenance = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "monthly";
-      Persistent = true;
-      RandomizedDelaySec = "1h";
+        # Steam: 1.4 TB of games. Keep userdata (screenshots, per-game config,
+        # saves for the games without Steam Cloud). Excluding the contents,
+        # not the directory, is what lets the negation reach inside.
+        "${home}/.local/share/Steam/*"
+        "!${home}/.local/share/Steam/userdata"
+        "${home}/Games"
+        "${home}/.wine"
+        "${home}/.local/share/umu"
+        "${home}/.local/share/lutris/runners"
+        "${home}/.local/share/goverlay"
+
+        # Package/toolchain caches and container images.
+        "${home}/.npm"
+        "${home}/.gradle"
+        "${home}/Android"
+        "${home}/.local/share/containers"
+        "${home}/.local/share/flatpak"
+        "${home}/.var/app/*/cache"
+        "${home}/.local/share/rembg"
+        "${home}/.nv"
+        "${home}/.debug"
+        "${home}/.zoom"
+
+        # Build output and dev environments, wherever they are.
+        "node_modules"
+        ".direnv"
+        ".venv"
+        "__pycache__"
+        "result"
+        "result-*"
+
+        # Browser caches inside profiles (most carry no CACHEDIR.TAG).
+        "Cache"
+        "Code Cache"
+        "GPUCache"
+        "CacheStorage"
+        "ScriptCache"
+
+        # VM disks (WinBoat's guest lives wherever it was installed) and
+        # install media.
+        "*.qcow2"
+        "*.vhdx"
+        "*.iso"
+
+        # Synced to the homelab, which backs it up from /mnt/data/syncthing.
+        "${home}/SyncDrive"
+
+        # Has another copy (asked 2026-11-26).
+        "${home}/Old PC backup"
+      ];
+
+      # Daily, catching up after boot/resume (the module's default is daily +
+      # Persistent; this adds the jitter).
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        RandomizedDelaySec = "1h";
+      };
+
+      backupPrepareCommand = ''
+        ${waitForB2}
+        ${ping "/start"}
+      '';
+      # ExecStopPost: runs on failure too, with systemd's $SERVICE_RESULT.
+      backupCleanupCommand = ''
+        if [ "$SERVICE_RESULT" = success ]; then
+          ${ping ""}
+        else
+          ${ping "/fail"}
+        fi
+      '';
     };
-  };
-}
+
+    systemd = {
+      services.restic-backups-home.serviceConfig = quiet;
+
+      # Monthly: apply retention, then read back 5% of the data. A failure pings
+      # /fail on the backup's check; success pings nothing, so a working prune can
+      # never mask a broken backup.
+      services.restic-home-maintenance = {
+        description = "restic: prune and check this workstation's repository";
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        environment = {
+          RESTIC_REPOSITORY = repository;
+          RESTIC_PASSWORD_FILE = secrets."restic-workstation/repo-password".path;
+          RESTIC_CACHE_DIR = "/var/cache/restic-backups-home";
+        };
+        serviceConfig = quiet // {
+          Type = "oneshot";
+          User = "root";
+          EnvironmentFile = secrets."restic-workstation/b2-backup".path;
+          CacheDirectory = "restic-backups-home";
+          CacheDirectoryMode = "0700";
+          PrivateTmp = true;
+        };
+        script = ''
+          set -uo pipefail
+          ${waitForB2}
+          restic=${pkgs.restic}/bin/restic
+          # A backup cut off by suspend leaves a stale lock, which blocks prune's
+          # exclusive one. unlock removes only stale locks.
+          if $restic unlock \
+            && $restic forget --prune --retry-lock=30m \
+              --keep-daily=7 --keep-weekly=4 --keep-monthly=6 \
+            && $restic check --retry-lock=30m --read-data-subset=5%; then
+            exit 0
+          else
+            rc=$?
+            ${ping "/fail"}
+            exit "$rc"
+          fi
+        '';
+      };
+
+      timers.restic-home-maintenance = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "monthly";
+          Persistent = true;
+          RandomizedDelaySec = "1h";
+        };
+      };
+    };
+  })
+]

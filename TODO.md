@@ -75,13 +75,13 @@ nix run github:nix-community/nixos-anywhere -- \
 - [x] **Cursor sharing with the framework (lan-mouse)** — working over the tailnet (confirmed 2026-11-10)
 - [x] **Fix game mode** — the side screen stayed dark after leaving gaming mode; the exit path now kicks the outputs it parked with a DPMS off/on (2026-11-26)
 - [x] **Fix `Super+Q` closing every instance** — should close only the focused window
-- [ ] **Backblaze B2 backups** of home-desktop and framework (see Backups below)
+- [ ] **Backblaze B2 backups** of home-desktop and framework — `hosts/common/optional/restic.nix` landed 2026-11-26, off until set up: create the bucket, per-host keys and healthchecks checks, add the `restic-workstation` sops block (steps in the file header), rebuild, then test a restore on each host
 - [ ] **Framework dbx updates are manual.** Setup Mode ("Erase all Secure Boot Settings") wiped the dbx; it was rebuilt from LVFS's `DBXUpdate-20260707-x64.cab` (291 hashes), but fwupd reads its version as `None` and so never offers dbx updates. For a new one: take the `.bin` from the LVFS cab (`gcab -x`), prefix the attributes `67 00 00 00` (signed for append — `27` is refused), `sudo dd` it to `/sys/firmware/efi/efivars/dbx-d719b2cb-3d3a-4596-a3bc-dad00e67656f` in one write, reboot, then re-enrol the TPM (`--wipe-slot=tpm2`): PCR 7 changes
 
 ## Future improvements
 
 - [x] **Secrets management** — sops-nix (2026-09-28); key install + password rotation still pending, see Secrets above
 - [ ] **GPG commit signing** — `programs.gpg` in HM + `signingkey` in flake
-- [ ] **Backups** — `restic` → Backblaze B2 (home-desktop + framework); BTRFS snapshots don't cover disk failure. B2 credentials want secrets management first
+- [ ] **Backups** — `restic` → Backblaze B2 (home-desktop + framework); module in place, setup pending (see Up next)
 - [ ] **Pin Stylix** — tracking `master` while nixpkgs/HM are on 26.05. `release-26.05` exists now, but its Zen target lacks master's `opacityHex`, so it paints Zen solid (checked 2026-10-27; rechecked 2026-11-26: the branch has had no commits since 2026-10-09 and no open PR backports it — see `flake.nix`). Once a release branch carries it, pin that and drop the two `enableReleaseChecks = false` lines plus the kmscon/regreet `disabledModules` workaround in `hosts/common/optional/stylix.nix`
 - [x] **Decide what `plymouth.nix` is for** — imported on both hosts, themed by Stylix instead of the adi1090x "spin" theme.

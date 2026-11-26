@@ -61,6 +61,8 @@ custom.base.{enable, username, timezone, powerManagement, firewall, hashedPasswo
 | `plymouth.nix` | Boot splash (both hosts) — Gruvbox bg + spinning snowflake; also themes the framework LUKS prompt. Own script theme (`config/plymouth/`, Stylix's plymouth target disabled): it re-centres every frame, since the displays change mid-splash (simpledrm → real KMS driver) |
 | `limine.nix` | Limine boot manager, Gruvbox-themed menu + wallpaper (both hosts; replaces systemd-boot — for Secure Boot use `boot.loader.limine.secureBoot`) |
 | `btrfs.nix` | The btrfs-with-`@nix` disko layout (both hosts): systemd-initrd retry for `initrd-find-nixos-closure` across btrfs's first-mount window, plus a monthly `autoScrub` |
+| `restic.nix` | Nightly restic backup of the home folder to B2 (both hosts): bucket `maxabbot-workstation-backup`, one repo per host at `/<hostname>` with its own password, B2 key and healthchecks.io check, all under `restic-workstation/` in `secrets/<hostname>.yaml`. Off (with an eval warning) until that block exists — the setup steps are in the file header. Excludes Steam (bar `userdata`), caches, toolchains, VM images, `~/SyncDrive` (the homelab backs it up) and `~/Old PC backup`. Each host prunes its own repo monthly (`restic-home-maintenance`); `sudo restic-home …` is the repo with its environment set |
+| `restic-maintenance.nix` | Weekly `restic check` and monthly `forget --prune` of the *homelab's* B2 repo (home-desktop only; backs nothing up). Repo and password must match nixos-homelab's; `sudo restic-repo …` |
 
 ### Home Manager
 
