@@ -56,8 +56,7 @@ Key aliases: `nixup` (rebuild), `gcclean` (garbage collect), `d`/`p` (podman), `
 | Element | Matrix chat |
 | Obsidian | Notes |
 | Bitwarden | Passwords |
-| LibreOffice | Office suite |
-| OnlyOffice | MS Office-compatible editing |
+| OnlyOffice | Office suite (MS Office-compatible) |
 | Zathura | PDF viewer (vim keybinds, Gruvbox) |
 | mpv | Video player (vim keybinds, hardware decode) |
 | VLC | Media fallback |

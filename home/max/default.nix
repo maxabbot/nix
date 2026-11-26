@@ -20,7 +20,6 @@
     ./cli.nix
     ./desktop.nix
     ./lan-mouse.nix
-    ./libreoffice.nix
     ./packages.nix
     ./terminal-toys.nix
     ./tui-themes.nix

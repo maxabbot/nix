@@ -20,6 +20,39 @@ let
     "framework"
   ];
   duxGreeterModule = "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dux-greeter.nix";
+
+  # OnlyOffice runs on XWayland (nixpkgs forces QT_QPA_PLATFORM=xcb), and its
+  # message boxes ("Save changes?") and file chooser are always native GTK3.
+  # Under force_zero_scaling, Xft.dpi carries the scale (192 on framework's 2x
+  # panel; see hyprland.nix), but the session's GDK_SCALE=1 left GTK drawing
+  # 2x text inside 1x padding, icons and buttons: oversized and cramped. Match
+  # GDK_SCALE to Xft.dpi at launch, halving GDK_DPI_SCALE so text isn't scaled
+  # twice. It does nothing on a 1x host, and nothing at a fractional dpi, since
+  # GDK_SCALE only takes whole numbers. The Qt editor window does its own
+  # scaling and ignores both variables.
+  onlyoffice =
+    let
+      pkg = pkgs.onlyoffice-desktopeditors;
+    in
+    pkgs.symlinkJoin {
+      name = "onlyoffice-desktopeditors-gtk-scaled";
+      paths = [ pkg ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/onlyoffice-desktopeditors --run '
+          dpi=$(${lib.getExe pkgs.xrdb} -query 2>/dev/null | ${lib.getExe pkgs.gnused} -n "s/^Xft\.dpi:\s*//p")
+          if [[ $dpi =~ ^[0-9]+$ ]] && (( dpi > 96 && dpi % 96 == 0 )); then
+            export GDK_SCALE=$(( dpi / 96 ))
+            export GDK_DPI_SCALE=$(${lib.getExe pkgs.gawk} "BEGIN { print 1 / $GDK_SCALE }")
+          fi
+        '
+        # The desktop entries Exec the unwrapped binary by store path.
+        for f in ${pkg}/share/applications/*.desktop; do
+          rm "$out/share/applications/$(basename "$f")"
+          sed "s|${pkg}/bin/|$out/bin/|g" "$f" > "$out/share/applications/$(basename "$f")"
+        done
+      '';
+    };
 in
 {
   # DMS 2.1 split the greeter out of the shell into its own binary
@@ -273,13 +306,12 @@ in
     thunar
     thunar-archive-plugin
     file-roller
-    libreoffice-fresh
     rnote
     # mpv + zathura come from Home Manager (programs.mpv / programs.zathura)
     calibre
     pdfarranger
     masterpdfeditor
-    onlyoffice-desktopeditors
+    onlyoffice # GTK-scaled wrapper, above
     element-desktop
     # Held on Electron 42: under 43 Electron's own renderer_init throws
     # (webFrame "reading 'defineProperty'") and the window stays blank. Drop
@@ -307,4 +339,10 @@ in
     theclicker # autoclicker CLI (x11/wayland, evdev/uinput); wrapped as `autoclick`
   ];
 
+  # Metric-compatible Calibri/Cambria replacements, so .docx files from Office
+  # keep their layout in OnlyOffice. Merges with base.nix's fonts.packages.
+  fonts.packages = with pkgs; [
+    carlito
+    caladea
+  ];
 }

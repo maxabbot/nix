@@ -332,6 +332,10 @@ hl.window_rule({ match = { class = "pavucontrol" },        float = true })
 hl.window_rule({ match = { class = "nm-connection-editor" }, float = true })
 hl.window_rule({ match = { class = "blueman-manager" },    float = true })
 hl.window_rule({ match = { title = "Picture-in-Picture" }, float = true })
+-- OnlyOffice's GTK message boxes ("Save changes?") and file chooser carry
+-- class DesktopEditors (the editor itself is ONLYOFFICE) and are created
+-- without a parent, so they'd open at the monitor's top-left under the bar.
+hl.window_rule({ match = { class = "DesktopEditors" }, float = true, center = true })
 
 -- DMS Settings as a dropdown: pinned under the bar at the top right, sliding
 -- down out of it. The QML half (no drag/maximise, close once focus leaves DMS)
