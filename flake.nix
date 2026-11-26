@@ -39,8 +39,8 @@
     # Tracks master, with its version check suppressed in stylix.nix. Not
     # release-26.05: that branch's Zen target has no opacity support (master's
     # opacityHex), so its userChrome paints Zen solid and the translucency in
-    # modules/home/zen.nix is lost (checked 2026-10-27). Re-check when the next
-    # release branch is cut.
+    # modules/home/zen.nix is lost (checked 2026-10-27, still true 2026-11-26).
+    # Re-check when the next release branch is cut.
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
