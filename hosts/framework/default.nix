@@ -47,6 +47,7 @@
     ../common/optional/limine.nix
     ../common/optional/plymouth.nix
     ../common/optional/sops.nix
+    ../common/optional/restic.nix
     ../common/optional/btrfs.nix
   ];
 

@@ -35,6 +35,7 @@
     ../common/optional/sops.nix
     ../common/optional/btrfs.nix
     ../common/optional/restic-maintenance.nix
+    ../common/optional/restic.nix
   ];
 
   # ── Base ─────────────────────────────────────────────────────────────────────

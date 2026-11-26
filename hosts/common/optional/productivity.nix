@@ -10,6 +10,9 @@ let
   inherit (config.custom.base) username;
   hostSecrets = ../../../secrets/${config.networking.hostName}.yaml;
   hasIdentity = builtins.pathExists hostSecrets;
+  # Hosts sharing the Obsidian vault over Syncthing. framework joins once its
+  # vault is confirmed current (see folders.obsidian below).
+  obsidianHosts = [ "home-desktop" ];
   duxGreeterModule = "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dux-greeter.nix";
 in
 {
@@ -194,6 +197,26 @@ in
             "homelab"
             "home-desktop"
             "framework"
+          ];
+        };
+        # The Obsidian vault, replacing Obsidian Sync (nixos-homelab Plan.md
+        # §12). A star with the homelab as hub: each device shares this folder
+        # with the homelab only, never with another workstation. Hosts join
+        # one at a time (obsidianHosts) — a vault that has drifted would come
+        # in as sync-conflict files. Keep Obsidian Sync on until every device
+        # that edits the vault is here, then switch it off on all of them at
+        # once.
+        folders.obsidian = lib.mkIf (lib.elem config.networking.hostName obsidianHosts) {
+          path = "/home/${username}/Obsidian";
+          devices = [ "homelab" ];
+          # Same list as the homelab's. Patterns are per device, so this is
+          # what keeps .git and the workspace files from leaving this host.
+          ignorePatterns = [
+            "// Per-device UI state, rewritten on every click: the main conflict source"
+            "/.obsidian/workspace.json"
+            "/.obsidian/workspace-mobile.json"
+            "// The vault's local git history. Syncing .git between machines corrupts it"
+            "/.git"
           ];
         };
       };
