@@ -20,9 +20,9 @@ cp /mnt/etc/nixos/hardware-configuration.nix hosts/<name>/hardware-configuration
 ### Secrets
 
 - Finish the sops move (config landed 2026-09-28, `hosts/common/optional/sops.nix`):
-  - Install each host's age key from `.bootstrap/<host>/key.txt` (gitignored) *before* that host's next rebuild: `sudo install -Dm600 key.txt /var/lib/sops-nix/key.txt`, then delete the staged copy
+  - ~~Install each host's age key~~ — done: both hosts have `/var/lib/sops-nix/key.txt` (framework's confirmed against `.sops.yaml` 2026-11-26) and the staged `.bootstrap/` copies are deleted
   - Rotate the password (the old hash is in git history): `passwd` on each machine, then store the new hash so fresh installs get it — `sops set secrets/common.yaml '["max-password-hash"]' "\"$(mkpasswd -m yescrypt)\""` (`secrets/common.yaml` already holds a real yescrypt hash, checked 2026-10-29; make sure it's the rotated one)
-  - Back up the admin key (`~/.config/sops/age/keys.txt`, shared with homelab) outside both repos
+  - ~~Back up the admin key~~ — done 2026-11-26: the admin key and both workstations' restic repo passwords are in the password manager
 - Populate `sshKeys` in `custom.base` before enabling `services.openssh` for remote login
 - GPG commit signing: add a `signingkey` hmArg in `flake.nix` and consume it in `home/max/git.nix` (the old empty stub was removed as dead code)
 
