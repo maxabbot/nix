@@ -4,12 +4,11 @@
 #
 # Native vertical tabs that expand on hover, a nav bar that stays collapsed
 # until hovered or focused (Ctrl+L), and Gruvbox Material chrome from the
-# palette, translucent like Zen/kitty so Hyprland's blur shows through.
-# Stylix's target supplies fonts and reader mode only: its colour theme is
-# the Firefox Color extension, whose opaque colours would cover the
-# translucency, so the colours live in userChrome instead (as thunderbird.nix
-# does). Page content stays opaque (browser.tabs.allow_transparent_browser
-# is left off); blank and new-tab pages get the palette's background.
+# palette. Stylix's target supplies fonts and reader mode only; the colours
+# live in userChrome (as thunderbird.nix does). The chrome is opaque, unlike
+# Zen/kitty: Firefox forces the hover-expanded sidebar opaque because it
+# animates over the page, and a translucent window made that animation leave
+# stale frames. Blank and new-tab pages get the palette's background.
 #
 # HM names the profile directory after the profile, so unlike Zen there's no
 # per-host path. Extensions come from the firefox-addons flake; their own
@@ -26,9 +25,6 @@ let
   profile = "default";
   palette = import ../../config/stylix/palette.nix;
   addons = inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system};
-  # Same 0.75 as kitty and Zen's toolbars, as a CSS alpha byte ("C0").
-  alpha = lib.toHexString (builtins.ceil (0.75 * 255));
-  translucent = colour: "${colour}${alpha}";
 in
 {
   config = lib.mkIf gui {
@@ -142,28 +138,23 @@ in
           "browser.display.background_color.dark" = palette.bg0;
           "browser.display.foreground_color.dark" = palette.fg;
           "ui.systemUsesDarkTheme" = 1;
-          # Translucent chrome: an RGBA toplevel, and (as for Zen) no
-          # Wayland opaque-region hint, or Hyprland renders it solid.
-          "widget.transparent-windows" = true;
-          "widget.wayland.opaque-region.enabled" = false;
         };
 
         # Firefox 159's "Nova" design-token names (the older --toolbar-bgcolor
         # / --lwt-* names are gone). The toolbox colour paints both the top
-        # strip and the vertical-tab sidebar; toolbar and sidebar are cleared
-        # so it's the only translucent layer, not stacked ones.
+        # strip and the vertical-tab sidebar.
         userChrome = with palette; ''
           /* ── Gruvbox Material chrome ─────────────────────────────────── */
           :root {
-            --toolbox-background-color: ${translucent bg0} !important;
+            --toolbox-background-color: ${bg0} !important;
             --toolbox-text-color: ${fg} !important;
-            --toolbar-background-color: transparent !important;
+            --toolbar-background-color: ${bg0} !important;
             --toolbar-text-color: ${fg} !important;
             --toolbar-field-background-color: ${bgAlt} !important;
             --toolbar-field-text-color: ${fg} !important;
             --toolbar-field-background-color-focus: ${bg1} !important;
             --toolbar-field-border-color-focus: ${blue} !important;
-            --sidebar-background-color: transparent !important;
+            --sidebar-background-color: ${bg0} !important;
             --sidebar-text-color: ${fg} !important;
             --tab-background-color-selected: ${bg2} !important;
             --tab-text-color-selected: ${fgBrighter} !important;
@@ -173,37 +164,42 @@ in
             --focus-outline-color: ${blue} !important;
           }
 
-          /* The two opaque layers under the chrome: the window itself, and
-             the sidebar's container (found by elimination; clearing every
-             other #browser child changed nothing). */
-          #main-window,
-          #sidebar-container {
-            background-color: transparent !important;
-          }
-
           /* ── Auto-hiding nav bar ─────────────────────────────────────── */
-          /* Collapsed to a thin strip at the top; hover, keyboard focus
-             (Ctrl+L, F6) or an open panel (extension popup, menu) brings it
-             back. It pushes the page down rather than overlaying it. */
-          #navigator-toolbox {
-            padding-bottom: 4px !important;
-            border-bottom: none !important;
-          }
-          #nav-bar {
-            max-height: 0 !important;
-            min-height: 0 !important;
-            overflow: clip !important;
-            opacity: 0;
-            transition:
-              max-height 150ms ease,
-              opacity 150ms ease !important;
-          }
-          #navigator-toolbox:hover #nav-bar,
-          #navigator-toolbox:focus-within #nav-bar,
-          #nav-bar:has([open]) {
-            max-height: 48px !important;
-            overflow: visible !important;
-            opacity: 1;
+          /* A 4px strip at the top; hover, keyboard focus (Ctrl+L, F6) or an
+             open panel (extension popup, menu) slides the bar down over the
+             page. It overlays rather than pushing the page down: resizing
+             the page on every reveal made it jump. A short delay on show and a longer one
+             on hide stop it popping when the mouse only passes through.
+             Lifted above Firefox's browser-area layers (tabbox 2, expanded
+             sidebar 4), or it's drawn under the page. Off in fullscreen,
+             where Firefox runs its own auto-hide and the two fought. */
+          :root:not([inFullscreen]) {
+            #navigator-toolbox {
+              position: relative !important;
+              z-index: 10 !important;
+              min-height: 4px !important;
+              border-bottom: none !important;
+              overflow: visible !important;
+            }
+            #nav-bar {
+              position: absolute !important;
+              inset-inline: 0 !important;
+              top: 0 !important;
+              z-index: 10 !important;
+              background-color: ${bg0} !important;
+              transform: translateY(-100%);
+              opacity: 0;
+              transition:
+                transform 150ms ease 250ms,
+                opacity 150ms ease 250ms !important;
+            }
+            #navigator-toolbox:hover #nav-bar,
+            #navigator-toolbox:focus-within #nav-bar,
+            #nav-bar:has([open]) {
+              transform: none;
+              opacity: 1;
+              transition-delay: 100ms !important;
+            }
           }
         '';
 
