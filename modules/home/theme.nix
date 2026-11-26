@@ -91,7 +91,7 @@ in
       enable = true;
       defaultApplications = {
         "text/plain" = [ "dev.zed.Zed.desktop" ];
-        "text/html" = [ "zen-beta.desktop" ];
+        "text/html" = [ "firefox.desktop" ];
         "application/pdf" = [ "org.pwmt.zathura.desktop" ];
         "image/png" = [ "imv.desktop" ];
         "image/jpeg" = [ "imv.desktop" ];
@@ -103,8 +103,8 @@ in
         "audio/mpeg" = [ "mpv.desktop" ];
         "audio/flac" = [ "mpv.desktop" ];
         "inode/directory" = [ "thunar.desktop" ];
-        "x-scheme-handler/http" = [ "zen-beta.desktop" ];
-        "x-scheme-handler/https" = [ "zen-beta.desktop" ];
+        "x-scheme-handler/http" = [ "firefox.desktop" ];
+        "x-scheme-handler/https" = [ "firefox.desktop" ];
       };
     };
   };

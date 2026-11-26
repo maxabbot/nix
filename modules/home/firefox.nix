@@ -1,6 +1,6 @@
-# modules/home/firefox.nix — Firefox, trialled alongside Zen (hosts opt in
-# with the `firefox.enable` hmArg; Zen stays the default browser until this
-# replaces it).
+# modules/home/firefox.nix — Firefox, the default browser (links, Super+B,
+# $BROWSER — set in theme.nix and wm/hyprland.nix). Zen (zen.nix) is still
+# installed alongside it.
 #
 # Native vertical tabs that expand on hover, a nav bar that stays collapsed
 # until hovered or focused (Ctrl+L), and Gruvbox Material chrome from the
@@ -9,7 +9,7 @@
 # the Firefox Color extension, whose opaque colours would cover the
 # translucency, so the colours live in userChrome instead (as thunderbird.nix
 # does). Page content stays opaque (browser.tabs.allow_transparent_browser
-# is left off).
+# is left off); blank and new-tab pages get the palette's background.
 #
 # HM names the profile directory after the profile, so unlike Zen there's no
 # per-host path. Extensions come from the firefox-addons flake; their own
@@ -19,7 +19,6 @@
   config,
   pkgs,
   inputs,
-  firefox,
   ...
 }:
 let
@@ -32,7 +31,7 @@ let
   translucent = colour: "${colour}${alpha}";
 in
 {
-  config = lib.mkIf (gui && firefox.enable) {
+  config = lib.mkIf gui {
     programs.firefox = {
       enable = true;
       # The XDG path (HM's default from stateVersion 26.05 on); set
@@ -138,6 +137,10 @@ in
 
           # ── Theme ──────────────────────────────────────────────────────
           "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+          # Page background in dark mode where a page sets none: about:blank,
+          # the flash before a page paints, and unstyled pages.
+          "browser.display.background_color.dark" = palette.bg0;
+          "browser.display.foreground_color.dark" = palette.fg;
           "ui.systemUsesDarkTheme" = 1;
           # Translucent chrome: an RGBA toplevel, and (as for Zen) no
           # Wayland opaque-region hint, or Hyprland renders it solid.
@@ -201,6 +204,20 @@ in
             max-height: 48px !important;
             overflow: visible !important;
             opacity: 1;
+          }
+        '';
+
+        # New tab / home / private-browsing pages: Firefox's own canvas
+        # colours swapped for the palette (activity-stream.css's tokens).
+        userContent = with palette; ''
+          @-moz-document url("about:newtab"), url("about:home"),
+            url("about:privatebrowsing") {
+            :root {
+              --newtab-background-color: ${bg0} !important;
+              --newtab-background-color-secondary: ${bg1} !important;
+              --newtab-text-primary-color: ${fg} !important;
+              --newtab-primary-action-background: ${blue} !important;
+            }
           }
         '';
       };

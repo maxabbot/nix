@@ -302,7 +302,7 @@ in
 
     browser = lib.mkOption {
       type = lib.types.str;
-      default = "zen-beta";
+      default = "firefox";
       description = "Browser command — used by the Super+B bind and exported as $BROWSER.";
     };
 

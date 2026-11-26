@@ -153,11 +153,6 @@
         zen = {
           profilePath = "default";
         };
-        # Firefox (modules/home/firefox.nix), trialled alongside Zen; hosts
-        # opt in until it replaces Zen.
-        firefox = {
-          enable = false;
-        };
         # Same idea for Thunderbird (modules/home/thunderbird.nix), whose HM
         # module names the profile directory after the profile.
         thunderbird = {
@@ -301,7 +296,6 @@
           ];
           hmArgs = {
             compositor = "hyprland";
-            firefox.enable = true;
             # 2.8K 120 Hz internal panel at 2x. kanshi's internal output, mode
             # and scale default to this string, so its "undocked" profile
             # matches the static Hyprland declaration and there's no scale flash
