@@ -199,10 +199,11 @@ lib.mkMerge [
         "CacheStorage"
         "ScriptCache"
 
-        # VM disks (WinBoat's guest lives wherever it was installed) and
-        # install media.
+        # VM disks (WinBoat's guest lives wherever it was installed — on
+        # framework that's ~/winboat/data.img, a raw image) and install media.
         "*.qcow2"
         "*.vhdx"
+        "${home}/winboat/data.img"
         "*.iso"
 
         # Synced to the homelab, which backs it up from /mnt/data/syncthing.
