@@ -2,8 +2,8 @@
 # $BROWSER — set in theme.nix and wm/hyprland.nix). Zen (zen.nix) is still
 # installed alongside it.
 #
-# Native vertical tabs that expand on hover, a nav bar that stays collapsed
-# until hovered or focused (Ctrl+L), and Gruvbox Material chrome from the
+# Native vertical tabs that expand on hover below Firefox's stock, always-shown
+# nav bar, and Gruvbox Material chrome from the
 # palette. Stylix's target supplies fonts and reader mode only; the colours
 # live in userChrome (as thunderbird.nix does). The chrome is opaque, unlike
 # Zen/kitty: Firefox forces the hover-expanded sidebar opaque because it
@@ -70,6 +70,9 @@ in
           "sidebar.verticalTabs" = true;
           # Collapsed to icons; expands over the page on hover.
           "sidebar.visibility" = "expand-on-hover";
+          # The hover slide defaults to 400ms, double the 200ms click toggle;
+          # stretched that long, any dropped frame reads as judder.
+          "sidebar.animation.expand-on-hover.duration-ms" = 200;
           # No client-side titlebar or window buttons (Hyprland tiles it).
           "browser.tabs.inTitlebar" = 0;
           "browser.toolbars.bookmarks.visibility" = "never";
@@ -162,44 +165,6 @@ in
             --panel-text-color: ${fg} !important;
             --panel-border-color: ${bg2} !important;
             --focus-outline-color: ${blue} !important;
-          }
-
-          /* ── Auto-hiding nav bar ─────────────────────────────────────── */
-          /* A 4px strip at the top; hover, keyboard focus (Ctrl+L, F6) or an
-             open panel (extension popup, menu) slides the bar down over the
-             page. It overlays rather than pushing the page down: resizing
-             the page on every reveal made it jump. A short delay on show and a longer one
-             on hide stop it popping when the mouse only passes through.
-             Lifted above Firefox's browser-area layers (tabbox 2, expanded
-             sidebar 4), or it's drawn under the page. Off in fullscreen,
-             where Firefox runs its own auto-hide and the two fought. */
-          :root:not([inFullscreen]) {
-            #navigator-toolbox {
-              position: relative !important;
-              z-index: 10 !important;
-              min-height: 4px !important;
-              border-bottom: none !important;
-              overflow: visible !important;
-            }
-            #nav-bar {
-              position: absolute !important;
-              inset-inline: 0 !important;
-              top: 0 !important;
-              z-index: 10 !important;
-              background-color: ${bg0} !important;
-              transform: translateY(-100%);
-              opacity: 0;
-              transition:
-                transform 150ms ease 250ms,
-                opacity 150ms ease 250ms !important;
-            }
-            #navigator-toolbox:hover #nav-bar,
-            #navigator-toolbox:focus-within #nav-bar,
-            #nav-bar:has([open]) {
-              transform: none;
-              opacity: 1;
-              transition-delay: 100ms !important;
-            }
           }
         '';
 
