@@ -73,7 +73,7 @@ nix run github:nix-community/nixos-anywhere -- \
 - [x] **DMS Settings as a drop-down** instead of a window — started in 2ba26d8, still needs fixing
 - [x] **Fix DMS display settings**
 - [x] **Cursor sharing with the framework (lan-mouse)** — working over the tailnet (confirmed 2026-11-10)
-- [ ] **Fix game mode**
+- [x] **Fix game mode** — the side screen stayed dark after leaving gaming mode; the exit path now kicks the outputs it parked with a DPMS off/on (2026-11-26)
 - [x] **Fix `Super+Q` closing every instance** — should close only the focused window
 - [ ] **Backblaze B2 backups** of home-desktop and framework (see Backups below)
 - [ ] **Framework dbx updates are manual.** Setup Mode ("Erase all Secure Boot Settings") wiped the dbx; it was rebuilt from LVFS's `DBXUpdate-20260707-x64.cab` (291 hashes), but fwupd reads its version as `None` and so never offers dbx updates. For a new one: take the `.bin` from the LVFS cab (`gcab -x`), prefix the attributes `67 00 00 00` (signed for append — `27` is refused), `sudo dd` it to `/sys/firmware/efi/efivars/dbx-d719b2cb-3d3a-4596-a3bc-dad00e67656f` in one write, reboot, then re-enrol the TPM (`--wipe-slot=tpm2`): PCR 7 changes

@@ -48,7 +48,8 @@ absent_outputs() {
 }
 
 if [ -f "$GAMING_STATE_FILE" ]; then
-    # Exit gaming mode
+    # Exit gaming mode. The state file lists the outputs entering disabled.
+    mapfile -t parked < "$GAMING_STATE_FILE"
     rm "$GAMING_STATE_FILE"
 
     # Bring the other outputs back with a reload rather than by re-sending each
@@ -66,6 +67,22 @@ if [ -f "$GAMING_STATE_FILE" ]; then
         sleep 0.7
         [ -z "$(absent_outputs)" ] && break
         hyprctl reload >/dev/null
+    done
+
+    # Re-attached is not the same as lit. The reload modesets the output and
+    # Hyprland reports it enabled with DPMS on, yet the screen can stay dark
+    # (seen 2026-11-26 on home-desktop's DP-2, the portrait 4K: no signal
+    # until a DPMS off/on cycle — the same stale-CRTC symptom dock-kick.sh
+    # handles on the framework's dock). Nothing can tell lit from dark, so
+    # kick every output this script parked. hl.dsp.dpms toggles whatever
+    # state it is given (see dpms.sh), so act on the reported status.
+    for m in "${parked[@]}"; do
+        [ -n "$m" ] || continue
+        status=$(hyprctl monitors -j | jq -r --arg n "$m" '.[] | select(.name == $n) | .dpmsStatus')
+        [ "$status" = "true" ] || continue
+        hyprctl dispatch "hl.dsp.dpms{monitor=\"$m\", state=\"toggle\"}" >/dev/null 2>&1
+        sleep 1
+        hyprctl dispatch "hl.dsp.dpms{monitor=\"$m\", state=\"toggle\"}" >/dev/null 2>&1
     done
 
     # Restore compositor effects. `hyprctl keyword` doesn't work with the Lua
@@ -121,6 +138,9 @@ else
 
     mapfile -t other_mons < <(hyprctl monitors -j | jq -r --arg t "$target" \
         '.[] | select(.name != $t) | .name')
+
+    # Recorded so the exit path knows which outputs to wake (see there).
+    printf '%s\n' "${other_mons[@]}" > "$GAMING_STATE_FILE"
 
     for m in "${other_mons[@]}"; do
         # Un-fullscreen first. Disabling an output migrates its windows to the
