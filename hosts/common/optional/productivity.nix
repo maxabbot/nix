@@ -10,9 +10,15 @@ let
   inherit (config.custom.base) username;
   hostSecrets = ../../../secrets/${config.networking.hostName}.yaml;
   hasIdentity = builtins.pathExists hostSecrets;
-  # Hosts sharing the Obsidian vault over Syncthing. framework joins once its
-  # vault is confirmed current (see folders.obsidian below).
-  obsidianHosts = [ "home-desktop" ];
+  # Hosts sharing the Obsidian vault over Syncthing (see folders.obsidian).
+  # A host joins with an EMPTY ~/Obsidian — move any existing vault aside
+  # first (`mv ~/Obsidian ~/Obsidian.old-sync`) so Syncthing fills it from the
+  # homelab. Joining with an existing copy that has drifted turns every
+  # differing file into a sync-conflict file.
+  obsidianHosts = [
+    "home-desktop"
+    "framework"
+  ];
   duxGreeterModule = "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dux-greeter.nix";
 in
 {
@@ -201,9 +207,8 @@ in
         };
         # The Obsidian vault, replacing Obsidian Sync (nixos-homelab Plan.md
         # §12). A star with the homelab as hub: each device shares this folder
-        # with the homelab only, never with another workstation. Hosts join
-        # one at a time (obsidianHosts) — a vault that has drifted would come
-        # in as sync-conflict files. Keep Obsidian Sync on until every device
+        # with the homelab only, never with another workstation. A host joins
+        # through obsidianHosts, with its vault moved aside first (see there). Keep Obsidian Sync on until every device
         # that edits the vault is here, then switch it off on all of them at
         # once.
         folders.obsidian = lib.mkIf (lib.elem config.networking.hostName obsidianHosts) {
