@@ -1,6 +1,11 @@
-# Repository Audit — 2026-11-05
+# Repository Audit — 2026-11-05 (security pass 2026-11-27)
 
-Scope: the whole repo on `main`, plus the running framework system. The
+**2026-11-27:** a security-only pass over both hosts, read from the running
+framework system and `nix eval` of both configurations (the live firewall and
+`/etc/shadow` need root and were not read). Its fixes are the S6–S9 rows in §1;
+S1 is restated and S10–S11 are new in §3. S4 is fixed.
+
+Scope of the 2026-11-05 audit: the whole repo on `main`, plus the running framework system. The
 2026-07-07 audit is in git history; its open items (secrets, xorg warnings) are
 carried forward below where they still apply. During this audit work-laptop
 (51b1c7e) and the vm host (20cb6c0) were removed, so two hosts remain:
@@ -52,7 +57,11 @@ Severity key: 🔴 fix soon · 🟡 worth fixing · 🔵 suggestion / cleanup
 | 091eabe | S3: Apollo (pinned 0.4.7-alpha.1, its latest release) had CVE-2026-32253, a client-certificate validation bypass that let an untrusted client pass as paired. Apollo merged the fix to master but never released it; `gaming-streaming.nix` now applies it as a patch |
 | 14f28ff | S5: Syncthing's port is tailnet-only on the laptop (open on home-desktop's LAN), the workstations dial each other by tailnet name, and global/local discovery, relays and UPnP router forwarding are off |
 | 731ca18 | Style: `gaming-toggle.sh` runs with `set -uo pipefail` (not `-e`, on purpose — see its header), tested on both paths against stub tools. Zed's `claude-haiku-4-5` is the newest Haiku Zed offers, so no change |
-| this commit | S2: `.claude/settings.json` (public repo) no longer pre-approves `git *`, `nix *`, `python3 *`, `curl *` or `gh api *`; read-only `git`, `nix` and `gh run` subcommands replace them. The broad rules live in the gitignored `.claude/settings.local.json` on machines that want them |
+| (2026-11-05) | S2: `.claude/settings.json` (public repo) no longer pre-approves `git *`, `nix *`, `python3 *`, `curl *` or `gh api *`; read-only `git`, `nix` and `gh run` subcommands replace them. The broad rules live in the gitignored `.claude/settings.local.json` on machines that want them |
+| 2026-11-27 | S6 (with S4): the user was in three groups that each bypassed sudo's password. `podman` owns `/run/podman/podman.sock`, the rootful socket (`-v /:/host` → root); every container here is rootless, WinBoat's included, and the rootful store was empty. `libvirtd` is full `qemu:///system`, which can attach the raw disk to a VM; virt-manager now asks polkit for the admin password. `input` (S4) read every keystroke on every keyboard regardless of focus. All three are gone from `base.nix`, plus `kvm` (`/dev/kvm` is 0666). The NuPhy configurator's hidraw rule is uaccess now (`keyboards.nix`, a `59-nuphy.rules` package like Vial's), and `autoclick` runs theclicker through sudo |
+| 2026-11-27 | S7: the Chrome Cast rule (`google-chrome.nix`) accepted UDP by *source* port 1900/5353 from any private address to **any** port, ahead of the final reject. A sender picks its own source port, so on any café/office network framework's tailnet-only UDP services (KDE Connect 1716, Syncthing 22000, lan-mouse 4242, LLMNR 5355) were reachable. Now limited to `--dport 32768:60999`, Chrome's ephemeral range |
+| 2026-11-27 | S8: systemd-resolved answered and queried LLMNR on every link (spoofable on public wifi, Responder-style); `LLMNR = false` in `tailscale.nix`. MagicDNS and avahi cover name resolution |
+| 2026-11-27 | S9: `.claude/settings.json` pre-approved `hyprctl *`, and `hyprctl dispatch exec` runs any command, skipping the permission prompt entirely. Narrowed to read-only subcommands (`monitors`, `clients`, `devices`, `getoption`, …, with and without `-j`); `nh os *` (switch to any flake) narrowed to `nh os build *`. `nixup *` stays — it switches this repo only and still needs sudo |
 
 ## 2. Verified on hardware — not bugs
 
@@ -70,17 +79,35 @@ confirmed all three work:
 ## 3. Open — security
 
 ### 🔴 S1 — Dead recipients and an unrotated password
-`secrets/common.yaml` is still encrypted to the removed vm key and to the old
-work-laptop key (`age16yfh…`), so either private key decrypts the current
-password hash. The hash that used to be inline is in public git history, and
-the rotation in TODO.md is unconfirmed. On home-desktop, where the admin key
-lives: `sops updatekeys secrets/common.yaml`, then `passwd` and `sops set` the
-new hash.
+Still open on 2026-11-27. `.sops.yaml` is clean, but `secrets/common.yaml`
+hasn't been touched since 2026-09-28: it is still encrypted to the removed vm
+key (`age1l4gy…`) and the old work-laptop key (`age16yfh…`), so either private
+key decrypts the password hash, and that hash is therefore not a rotated one.
+The old inline hash (`$y$j9T$2U13…`) is in the history of a **public** GitHub
+repo, open to offline cracking. On home-desktop, where the admin key lives:
+`sops updatekeys secrets/common.yaml`, `passwd` on both machines, then
+`sops set` the new hash (command in TODO.md). With S6 fixed, the password is
+again what stands between a user-level compromise and root.
 
-### 🔵 S4 — `input` group
-The user is in `input` (`base.nix`), so any process they run can read raw
-keystrokes. Only `autoclick` (theclicker) needs it; a uaccess udev rule for
-the NuPhy's event node would do instead. Undecided.
+### 🟡 S10 — home-desktop has no disk encryption or Secure Boot
+It holds the most valuable keys in either repo: the admin age key
+(`~/.config/sops/age/keys.txt`, which decrypts every secret here *and* in
+nixos-homelab), the homelab's B2 prune key (`restic-maintenance.nix`), both
+restic passwords and its Syncthing identity — all readable by anyone who boots
+the machine from USB or takes the disk. Options: LUKS + TPM2 + Secure Boot like
+framework at the next reinstall (disko can't add LUKS in place), or move the
+admin key onto a hardware token now (age-plugin-yubikey), which also keeps it
+away from user-level processes.
+
+### 🟡 S11 — B2 versioning may not stop a key holder
+Both restic files rely on "a delete is a hide that lives 30 days". That holds
+for restic's own deletes, which name no version. But a B2 key with
+`deleteFiles` can delete a *specific version* (S3 `DeleteObject` with
+`versionId`), which is permanent, and that is what an attacker with the key
+would do. Unverified against B2 — test on a scratch bucket. If it holds, the
+real guard is Object Lock with a default retention period; the comments'
+claim that Object Lock "breaks restic outright" is worth re-testing, since a
+delete without a version ID on a locked bucket only adds a hide marker.
 
 ## 4. Open — bugs
 
@@ -88,9 +115,11 @@ None known.
 
 ## 5. Open — design
 
-- 🟡 **No backups or snapshots.** The biggest operational gap. The btrfs
-  `@home` subvolume makes btrbk or snapper cheap; restic to B2 can keep its
-  credentials in sops now.
+- ~~🟡 **No backups or snapshots.**~~ restic to B2 is live on both hosts
+  (2026-11-26, `restic.nix`); local btrfs snapshots are still absent.
+- 🔵 framework sends nearby wifi BSSIDs to BeaconDB every 10 minutes
+  (`geoclue-iwd.nix`). Intended, and a privacy trade rather than a security
+  hole.
 
 ## 6. Open — style
 
@@ -108,6 +137,11 @@ Both hosts evaluate and lint clean, and CI builds the patched DMS packages
 whenever something they're built from changes. The layering is consistent: import composition for features, one option
 module, and Home Manager gated on the compositor. Nearly every host-specific
 workaround carries a comment explaining why. Secrets are on sops-nix, Secure
-Boot and TPM unlock are on for framework, and inputs are fresh; `apollo-flake`
-tracks Apollo's last release, patched for its one known CVE. The confirmed bugs were all small; the larger risks are
-operational: backups, the password rotation, and the dead sops recipients.
+Boot and TPM unlock (with a PIN) are on for framework, sshd is off on both
+hosts, framework's peer services are tailnet-only, `trusted-users` is root
+alone, CUPS and the Syncthing GUI listen on localhost only, and the restic
+units are sandboxed. The only secret ever committed in plaintext is the one
+password hash (S1). Inputs are fresh; `apollo-flake`
+tracks Apollo's last release, patched for its one known CVE. The confirmed bugs were all small; the larger risks left are
+operational: the password rotation and dead sops recipients (S1), and an
+unencrypted home-desktop holding the admin key (S10).

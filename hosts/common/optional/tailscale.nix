@@ -24,7 +24,12 @@
   # tailscaled registers split DNS on tailscale0 and NM feeds it the LAN servers.
   services.resolved = {
     enable = true;
-    # mDNS is avahi's job (base.nix); don't run a second responder.
-    settings.Resolve.MulticastDNS = false;
+    settings.Resolve = {
+      # mDNS is avahi's job (base.nix); don't run a second responder.
+      MulticastDNS = false;
+      # LLMNR is Windows' bare-name fallback and trivially spoofed by anyone on
+      # the same network (Responder). Names resolve through MagicDNS and avahi.
+      LLMNR = false;
+    };
   };
 }

@@ -278,9 +278,10 @@ in
   # services.syncthing.settings.folders). Created here so it exists on every host.
   systemd.tmpfiles.rules = [ "d /home/${username}/SyncDrive 0755 ${username} users -" ];
 
-  # /dev/uinput for synthetic input (theclicker autoclicker emits clicks through a
-  # virtual device). TAG+="uaccess" grants the active-session user access; the
-  # primary user is also in the "input" group (base.nix) to read the keyboard.
+  # /dev/uinput for synthetic input (Solaar's diverted keys; theclicker emits
+  # clicks through a virtual device). TAG+="uaccess" grants the active-session
+  # user access. theclicker also reads the keyboard's evdev node, which takes
+  # root, so `autoclick` runs it through sudo (see base.nix on "input").
   hardware.uinput.enable = true;
 
   # ── Wayland session variables ─────────────────────────────────────────────────

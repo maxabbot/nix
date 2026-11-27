@@ -13,6 +13,10 @@
 # The `g` key is NOT grabbed, so it still types/acts normally while held. Clicks
 # land wherever the real cursor is — position the pointer first, then hold g.
 # Ctrl+C to quit.
+#
+# Runs as root via sudo: reading a keyboard's evdev node is root-only, because
+# the "input" group that used to grant it lets any process log every keystroke
+# (see base.nix).
 set -euo pipefail
 device="${1:-/dev/input/by-id/usb-NuPhy_Air75_V3_NuPhy_Keybord_0720-if01-event-kbd}"
-exec theclicker run -d "$device" -l 34 -H -c 10
+exec sudo "$(command -v theclicker)" run -d "$device" -l 34 -H -c 10

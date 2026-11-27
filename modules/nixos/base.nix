@@ -148,20 +148,25 @@ in
     # ── Primary user ───────────────────────────────────────────────────────────
     users.users.${cfg.username} = {
       isNormalUser = true;
+      # No group here may be root-equivalent, or sudo's password guards
+      # nothing — any process running as this user could take root silently:
+      #   - podman: the group owns /run/podman/podman.sock, the *rootful*
+      #     socket (`docker -H unix:///run/podman/podman.sock run -v /:/h`).
+      #     Containers here are rootless (WinBoat included) and never use it.
+      #   - libvirtd: full qemu:///system, which can hand a VM the raw disk.
+      #     Without the group, virt-manager asks polkit for the admin password.
+      #   - input: raw evdev, i.e. every keystroke on every keyboard, whatever
+      #     window has focus. The NuPhy configurator gets uaccess instead
+      #     (keyboards.nix) and `autoclick` runs theclicker through sudo.
+      # kvm isn't needed either: /dev/kvm is 0666 (systemd's default).
       extraGroups = [
         "wheel"
         "networkmanager"
         "audio"
         "video"
         "render"
-        "input"
         "lp"
       ]
-      ++ lib.optionals config.virtualisation.libvirtd.enable [
-        "libvirtd"
-        "kvm"
-      ]
-      ++ lib.optionals config.virtualisation.podman.enable [ "podman" ]
       ++ lib.optionals config.programs.steam.enable [ "gamemode" ];
       shell = pkgs.zsh;
       inherit (cfg) hashedPassword hashedPasswordFile initialPassword;

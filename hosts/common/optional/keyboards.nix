@@ -6,22 +6,24 @@
   # QMK udev rules (bootloader/DFU access for flashing the Sofle).
   hardware.keyboard.qmk.enable = true;
 
+  # Both rules use TAG+="uaccess" (access for whoever holds the active seat),
+  # not a group: the "input" group would also expose every keyboard's evdev
+  # node (base.nix). uaccess can't live in extraRules — that lands in
+  # 99-local.rules, after 73-seat-late.rules has processed the tag — so each
+  # ships as a package whose filename sorts before it.
   services.udev = {
-    # NuPhy Air75 V3 — grants userspace hidraw access for nuphy.io configurator.
-    # 0660 + input group instead of world-writable 0666; the primary user is in
-    # "input" (base.nix). TAG+="uaccess" won't work here: extraRules lands in
-    # 99-local.rules, after 73-seat-late.rules has already processed the tag.
-    extraRules = ''
-      KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", GROUP="input"
-    '';
-
-    # Vial (splitkb Aurora Sofle v2, 8d1d:ec32) — hidraw access for the
-    # vial.rocks WebHID configurator. Unlike the NuPhy rule above this needs
-    # TAG+="uaccess", so it can't live in extraRules (99-local.rules runs too
-    # late); ship it as a package so the filename sorts before
-    # 73-seat-late.rules. The serial match is Vial's magic prefix, common to
-    # every Vial-enabled board, so this covers future ones too.
     packages = [
+      # NuPhy Air75 V3 — hidraw access for the nuphy.io configurator.
+      (pkgs.writeTextFile {
+        name = "nuphy-udev-rules";
+        destination = "/etc/udev/rules.d/59-nuphy.rules";
+        text = ''
+          KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0660", TAG+="uaccess"
+        '';
+      })
+      # Vial (splitkb Aurora Sofle v2, 8d1d:ec32) — hidraw access for the
+      # vial.rocks WebHID configurator. The serial match is Vial's magic
+      # prefix, common to every Vial-enabled board, so this covers future ones.
       (pkgs.writeTextFile {
         name = "vial-udev-rules";
         destination = "/etc/udev/rules.d/59-vial.rules";

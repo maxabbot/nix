@@ -20,8 +20,13 @@
   # to a multicast query, so the firewall drops it and no TV shows up. Accept
   # just those replies — source port 1900/5353 from a private LAN address —
   # rather than the usual blanket 32768-60999 opening (matters on the laptop).
+  # The destination is pinned to that ephemeral range too: a source port is
+  # whatever the sender says it is, so without --dport anyone on the network
+  # could reach *every* UDP port (KDE Connect, Syncthing, lan-mouse — all
+  # tailnet-only on the laptop) just by sending from port 5353. mDNS replies
+  # to Chrome's port-5353 socket don't need this rule: Avahi opens 5353.
   networking.firewall.extraCommands = ''
-    iptables -A nixos-fw -p udp -m multiport --sports 1900,5353 \
+    iptables -A nixos-fw -p udp -m multiport --sports 1900,5353 --dport 32768:60999 \
       -s 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 -j nixos-fw-accept
   '';
 }
