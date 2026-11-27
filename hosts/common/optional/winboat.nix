@@ -19,5 +19,7 @@
     }
   ];
 
-  environment.systemPackages = [ pkgs.winboat ];
+  # From unstable: 26.05's WinBoat 0.9.0 pins Electron 40, which is EOL;
+  # 0.9.2 builds on Electron 43 (checked 2026-11-27).
+  environment.systemPackages = [ pkgs.unstable.winboat ];
 }

@@ -421,10 +421,10 @@ hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }),
 hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }),  { description = "Move window down" })
 
 -- Resize window
-hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -50, y = 0 }),   { description = "Resize left" })
-hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = 50,  y = 0 }),   { description = "Resize right" })
-hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -50 }), { description = "Resize up" })
-hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 50 }),  { description = "Resize down" })
+hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -50, y = 0, relative = true }),   { description = "Resize left" })
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = 50,  y = 0, relative = true }),   { description = "Resize right" })
+hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -50, relative = true }), { description = "Resize up" })
+hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 50, relative = true }),  { description = "Resize down" })
 
 -- Workspaces 1–10. Written so DMS's keybind overlay (Super+/) can read them:
 -- it parses this file statically, follows a loop only when the key is the

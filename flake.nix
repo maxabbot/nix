@@ -100,12 +100,11 @@
         inherit system;
         config = {
           allowUnfree = true;
-          # Several Electron desktop apps in 26.05 (Slack/Discord/Obsidian/Element/…)
-          # still bundle Electron 39, which is EOL and flagged insecure. Allow it.
-          # WinBoat 0.9.0 (winboat.nix, framework only) pins Electron 40, likewise EOL.
+          # EOL Electrons nixpkgs flags as insecure. Keep this list empty where
+          # possible: an EOL Electron is an unpatched Chromium. Slack, Discord
+          # and WinBoat come from unstable for this reason (comms.nix,
+          # winboat.nix).
           permittedInsecurePackages = [
-            "electron-39.8.10"
-            "electron-40.10.5"
             # Obsidian is held on Electron 42 (productivity.nix): 43 breaks its renderer.
             "electron-42.11.18"
           ];
