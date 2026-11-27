@@ -211,6 +211,27 @@ in
             --panel-border-color: ${bg2} !important;
             --focus-outline-color: ${blue} !important;
           }
+
+          /* ── Menus and popups ────────────────────────────────────────── */
+          /* Right-click menus, dropdowns and non-arrow panels reset the panel
+             colours to GTK's Menu/MenuText, and highlight with GTK's menu
+             hover colours, so the :root values above don't reach them. */
+          :is(menupopup, panel):where(:not([type="arrow"])) {
+            --panel-background-color: ${bg0} !important;
+            --panel-text-color: ${fg} !important;
+            --panel-border-color: ${bg2} !important;
+            --panel-separator-color: ${bg2} !important;
+          }
+          :is(menu, menuitem)[_moz-menuactive]:not([disabled]) {
+            background-color: ${bg2} !important;
+            color: ${fgBrighter} !important;
+          }
+          :is(menu, menuitem)[_moz-menuactive][disabled] {
+            background-color: transparent !important;
+          }
+          :is(menu, menuitem)[disabled] {
+            color: ${gray} !important;
+          }
         '';
 
         # New tab / home / private-browsing pages: Firefox's own canvas
