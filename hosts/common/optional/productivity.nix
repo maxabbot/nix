@@ -314,10 +314,11 @@ in
     masterpdfeditor
     onlyoffice # GTK-scaled wrapper, above
     element-desktop
-    # Held on Electron 42: under 43 Electron's own renderer_init throws
-    # (webFrame "reading 'defineProperty'") and the window stays blank. Drop
-    # the override once nixpkgs' Obsidian opens on its default Electron.
-    (obsidian.override { electron = electron_42; })
+    # From unstable: 26.05's 1.13.7 left the window blank on Electron 43
+    # (renderer_init: webFrame "reading 'defineProperty'"), so it was held on
+    # EOL Electron 42. Unstable's 1.15.0 renders on its default Electron 43
+    # (tested 2026-11-27). Back to stable once a release ships 1.15+.
+    unstable.obsidian
     bitwarden-desktop
     vlc
     imv

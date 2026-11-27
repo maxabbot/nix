@@ -100,14 +100,11 @@
         inherit system;
         config = {
           allowUnfree = true;
-          # EOL Electrons nixpkgs flags as insecure. Keep this list empty where
-          # possible: an EOL Electron is an unpatched Chromium. Slack, Discord
-          # and WinBoat come from unstable for this reason (comms.nix,
-          # winboat.nix).
-          permittedInsecurePackages = [
-            # Obsidian is held on Electron 42 (productivity.nix): 43 breaks its renderer.
-            "electron-42.11.18"
-          ];
+          # EOL Electrons nixpkgs flags as insecure. Keep this list empty: an
+          # EOL Electron is an unpatched Chromium. Slack, Discord, WinBoat and
+          # Obsidian come from unstable for this reason (comms.nix,
+          # winboat.nix, productivity.nix).
+          permittedInsecurePackages = [ ];
         };
         overlays = [
           (import ./overlays)
