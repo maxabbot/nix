@@ -99,15 +99,44 @@ framework at the next reinstall (disko can't add LUKS in place), or move the
 admin key onto a hardware token now (age-plugin-yubikey), which also keeps it
 away from user-level processes.
 
-### 🟡 S11 — B2 versioning may not stop a key holder
-Both restic files rely on "a delete is a hide that lives 30 days". That holds
-for restic's own deletes, which name no version. But a B2 key with
-`deleteFiles` can delete a *specific version* (S3 `DeleteObject` with
-`versionId`), which is permanent, and that is what an attacker with the key
-would do. Unverified against B2 — test on a scratch bucket. If it holds, the
-real guard is Object Lock with a default retention period; the comments'
-claim that Object Lock "breaks restic outright" is worth re-testing, since a
-delete without a version ID on a locked bucket only adds a hide marker.
+### 🟡 S11 — B2 versioning doesn't stop a key holder
+**Confirmed from Backblaze's docs (2026-11-27).** Both restic files rely on "a
+delete is a hide that lives 30 days". That holds for restic's own deletes,
+which name no version. But B2's S3 `DeleteObject` *with* a `versionId`
+"permanently deletes" that version, and native `b2_delete_file_version` needs
+only `deleteFiles` — which every key here has (restic must delete its lock
+files). So a stolen workstation key can list and erase every version of that
+host's repository, and home-desktop's `restic/b2-prune` key the whole homelab
+bucket. Bucket versioning plus the lifecycle rule doesn't help.
+
+**Likely fix: Object Lock with a default retention period** (~30 days, mode
+Governance, and no key gets `bypassGovernance`; Compliance can't be bypassed
+even by the account owner). Enabling Object Lock alone locks nothing — the
+default retention is what locks each new upload. Locked versions refuse a
+permanent delete, but a delete without a version ID still adds a hide marker,
+which recent write-ups report is all restic's S3 backend (0.13+) does: backup,
+`forget` and `prune` succeed, the hidden versions stay stored (and billed)
+until retention ends, then the lifecycle rule removes them. That would make
+the "Object Lock breaks restic outright" comments in `restic.nix` and
+`restic-maintenance.nix` stale — but nothing official confirms it, and older
+restic-forum reports (0.12) say otherwise.
+
+**Next: run `docs/b2-object-lock-test.sh`** against a scratch bucket (Object
+Lock, Governance, 1 day) with a read/write key lacking `bypassGovernance`. It
+checks restic init/backup/forget --prune/check, that prune left hide markers,
+and that versionId deletes — with and without the governance bypass — are
+refused. If it passes: enable Object Lock + default retention on
+`maxabbot-workstation-backup` and (in nixos-homelab) the homelab bucket, and
+fix those comments. Lock can be enabled on an existing bucket but never
+disabled, and covers only objects written afterwards, so old packs stay
+unprotected until pruned or aged out. It doesn't cover a compromised B2
+*account* — keep 2FA on it.
+
+Sources: [B2 S3 DeleteObject](https://www.backblaze.com/apidocs/s3-delete-object),
+[b2_delete_file_version](https://www.backblaze.com/b2/docs/b2_delete_file_version.html),
+[B2 Object Lock](https://www.backblaze.com/docs/en/cloud-storage-object-lock),
+[restic + B2 Object Lock guide](https://wardio.net/guides/restic-b2-object-lock/),
+[restic forum, 2021](https://forum.restic.net/t/anyone-using-restic-with-b2-backblaze-and-object-locks/4277).
 
 ## 4. Open — bugs
 
