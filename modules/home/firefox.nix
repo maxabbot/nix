@@ -65,6 +65,44 @@ in
           "intl.accept_languages" = "en-NZ, en-GB, en";
           "intl.regional_prefs.use_os_locales" = true;
 
+          # ── Startup ────────────────────────────────────────────────────
+          # Reopen the last session's windows and tabs.
+          "browser.startup.page" = 3;
+
+          # ── Security ───────────────────────────────────────────────────
+          # Upgrade every load to HTTPS; a plain-HTTP-only site gets a
+          # one-click interstitial instead of silently loading.
+          "dom.security.https_only_mode" = true;
+
+          # ── Telemetry and studies ──────────────────────────────────────
+          "datareporting.healthreport.uploadEnabled" = false;
+          "datareporting.policy.dataSubmissionEnabled" = false;
+          "datareporting.usage.uploadEnabled" = false;
+          "toolkit.telemetry.unified" = false;
+          "toolkit.telemetry.archive.enabled" = false;
+          "toolkit.telemetry.bhrPing.enabled" = false;
+          "toolkit.telemetry.newProfilePing.enabled" = false;
+          "toolkit.telemetry.firstShutdownPing.enabled" = false;
+          "toolkit.telemetry.shutdownPingSender.enabled" = false;
+          "app.shield.optoutstudies.enabled" = false;
+          "app.normandy.enabled" = false;
+          # Extension/feature recommendations in about:addons.
+          "browser.discovery.enabled" = false;
+
+          # ── AI features ────────────────────────────────────────────────
+          # browser.ml.enable gates the local ML engine (smart tab groups,
+          # link previews, PDF alt-text); translations use their own engine
+          # and keep working.
+          "browser.ml.enable" = false;
+          "browser.ml.chat.enabled" = false;
+          "browser.ml.chat.sidebar" = false;
+          "browser.ml.chat.shortcuts" = false;
+          "browser.ml.chat.page" = false;
+          "browser.ml.linkPreview.enabled" = false;
+          "browser.tabs.groups.smart.enabled" = false;
+          "browser.smartwindow.enabled" = false;
+          "extensions.ml.enabled" = false;
+
           # ── Layout: out of the way ─────────────────────────────────────
           "sidebar.revamp" = true;
           "sidebar.verticalTabs" = true;
@@ -78,6 +116,13 @@ in
           "browser.toolbars.bookmarks.visibility" = "never";
           "browser.newtabpage.activity-stream.showSponsored" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
+          # New tab is search + your shortcuts only: no story feed, weather
+          # or widgets. URL bar: no sponsored or trending suggestions.
+          "browser.newtabpage.activity-stream.feeds.section.topstories" = false;
+          "browser.newtabpage.activity-stream.showWeather" = false;
+          "browser.newtabpage.activity-stream.widgets.enabled" = false;
+          "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+          "browser.urlbar.suggest.trending" = false;
           "browser.aboutConfig.showWarning" = false;
           # Toolbar layout, reapplied from user.js on every start, so it lives
           # here and in-browser rearranging reverts on restart. Firefox's own
